@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "client",
+    "name": "Boame",
     "slug": "client",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,7 +8,7 @@
     "userInterfaceStyle": "automatic",
     "scheme": "boame",
     "splash": {
-      "image": "./assets/boame_logo.png",
+      "image": "./assets/splash-icon.png",
       "backgroundColor": "#FDFAF6",
       "resizeMode": "contain"
     },
@@ -18,7 +18,7 @@
     "android": {
       "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#FDFAF6",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -42,14 +42,22 @@
           ]
         }
       ],
-      "expo-splash-screen",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FDFAF6",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 220,
+          "resizeMode": "contain"
+        }
+      ],
       "@react-native-community/datetimepicker",
       [
         "expo-location",
-      {
-        "locationWhenInUsePermission": "Allow Boame to use your location to set service locations."
-      }
-    ]
+        {
+          "locationWhenInUsePermission": "Allow Boame to use your location to set service locations."
+        }
+      ]
     ],
     "extra": {
       "eas": {
