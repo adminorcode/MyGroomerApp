@@ -7,16 +7,14 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "scheme": "boame",
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "backgroundColor": "#FDFAF6",
-      "resizeMode": "contain"
-    },
     "ios": {
       "supportsTablet": true
     },
     "android": {
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#FDFAF6",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -57,7 +55,9 @@
         {
           "locationWhenInUsePermission": "Allow Boame to use your location to set service locations."
         }
-      ]
+      ],
+      "expo-web-browser",
+      "expo-status-bar"
     ],
     "extra": {
       "eas": {
