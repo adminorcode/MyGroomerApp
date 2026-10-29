@@ -1,8 +1,6 @@
 import { useMutation } from "@tanstack/react-query"
-import { loginUser, registerUser, verifyEmail } from "../services/auth.service"
+import { forgotPassword, loginUser, registerUser, RegisterRequest, resetPassword, verifyEmail } from "../services/auth.service"
 import { useAuthStore } from "../store/authStore"
-import { registerSchema } from "../validators/auth.validator"
-import z from "zod"
 import { useNavigation } from "@react-navigation/native"
 import { AuthStackParamList } from "../navigation/types"
 import { StackNavigationProp } from "@react-navigation/stack"
@@ -20,9 +18,9 @@ export const useLoginMutation = () => {
 }
 
 export const useRegisterMutation = () => {
-    const navigation = useNavigation<StackNavigationProp<AuthStackParamList, 'Register'>>()
+    const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>()
     return useMutation({
-        mutationFn: (data: z.infer<typeof registerSchema>) => registerUser(data),
+        mutationFn: (data: RegisterRequest) => registerUser(data),
         onSuccess: (data) => {
             if (data.requires_verification === false) {
                 navigation.navigate('Login')
@@ -33,6 +31,24 @@ export const useRegisterMutation = () => {
         onError: (error) => {
             console.log(error)
         },
+    })
+}
+
+export const useForgotPasswordMutation = () => {
+    const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>()
+    return useMutation({
+        mutationFn: (email: string) => forgotPassword(email),
+        onSuccess: (data) => {
+            if (data.reset_token) {
+                navigation.navigate('ResetPassword', { token: data.reset_token })
+            }
+        },
+    })
+}
+
+export const useResetPasswordMutation = () => {
+    return useMutation({
+        mutationFn: ({ token, password }: { token: string, password: string }) => resetPassword(token, password),
     })
 }
 

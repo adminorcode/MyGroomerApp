@@ -22,7 +22,7 @@ function fieldBorder(colors: { border: string; error: string; focus: string }, e
     return colors.border
 }
 
-export function BoamePhoneInput({label, error, onChangeFormattedText, ...props}: BoamePhoneInputProps) {
+export function BoamePhoneInput({label, error, onChangeFormattedText, textInputProps, ...props}: BoamePhoneInputProps) {
     const { colors } = useTheme();
     const [focused, setFocused] = useState(false);
     return (
@@ -39,8 +39,10 @@ export function BoamePhoneInput({label, error, onChangeFormattedText, ...props}:
                 textInputStyle={{...styles.phoneTextInput, color: colors.text}}
                 codeTextStyle={{...styles.phoneCodeText, color: colors.text}}
                 textInputProps={{
-                    onFocus: () => setFocused(true),
-                    onBlur: () => setFocused(false),
+                    accessibilityLabel: label,
+                    ...textInputProps,
+                    onFocus: (event) => { setFocused(true); textInputProps?.onFocus?.(event) },
+                    onBlur: (event) => { setFocused(false); textInputProps?.onBlur?.(event) },
                 }}
                 flagButtonStyle={styles.flagHidden}
             />

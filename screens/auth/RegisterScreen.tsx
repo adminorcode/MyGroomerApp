@@ -27,11 +27,6 @@ type Props = {
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
-const roleOptions = [
-    { label: "Tutor", value: Role.CUSTOMER },
-    { label: "Groomer", value: Role.PROVIDER },
-] as const;
-
 const payoutOptions = [
     { label: "Dinheiro móvel", value: PayoutMethod.MOBILE_MONEY },
     { label: "Banco", value: PayoutMethod.BANK },
@@ -89,10 +84,10 @@ function OptionSelector<T extends string>({ label, options, value, onChange, err
 }
 
 export default function RegisterScreen({ navigation }: Props) {
-    const { control, handleSubmit, setValue, watch, formState: { errors } } = useForm<RegisterFormValues>({
+    const { control, handleSubmit, watch, formState: { errors } } = useForm<RegisterFormValues>({
         resolver: zodResolver(registerSchema),
         defaultValues: {
-            role: Role.CUSTOMER,
+            role: Role.PROVIDER,
             payout_method: PayoutMethod.MOBILE_MONEY,
             momo_number: "",
             momo_provider: undefined,
@@ -104,7 +99,6 @@ export default function RegisterScreen({ navigation }: Props) {
     const { mutate, isPending, error } = useRegisterMutation();
     const runtime = useRuntime()
     const { mutate: signInWithGoogle, isPending: isGooglePending, error: googleError } = useGoogleSignInMutation();
-    const selectedRole = watch("role");
     const payoutMethod = watch("payout_method");
     const { colors } = useTheme();
 
@@ -119,7 +113,10 @@ export default function RegisterScreen({ navigation }: Props) {
             extraScrollHeight={20}
             enableOnAndroid
         >
-            <Text style={[styles.title, { color: colors.brand }]}>Criar conta</Text>
+            <Text style={[styles.backLink, { color: colors.primary }]} onPress={() => navigation.navigate("Welcome")}>
+                Voltar
+            </Text>
+            <Text style={[styles.title, { color: colors.brand }]}>Cadastro profissional</Text>
             <View style={styles.form}>
                 <Controller
                     control={control}
@@ -192,38 +189,6 @@ export default function RegisterScreen({ navigation }: Props) {
                     )}
                 />
 
-                <View style={styles.selectorGroup}>
-                    <Text style={[styles.selectorLabel, { color: colors.primary }]}>Eu sou</Text>
-                    <View style={styles.selectorRow}>
-                        {roleOptions.map(({ label, value }) => (
-                            <Pressable
-                                key={value}
-                                accessibilityRole="button"
-                                onPress={() => setValue("role", value, { shouldValidate: true })}
-                                style={[
-                                    styles.roleOption,
-                                    { borderColor: colors.border },
-                                    selectedRole === value && { borderColor: colors.selection, backgroundColor: colors.selection },
-                                ]}
-                            >
-                                <Text
-                                    style={[
-                                        {...styles.roleOptionText, color: colors.text},
-                                        selectedRole === value && {color: colors.onSelection},
-                                    ]}
-                                >
-                                    {label}
-                                </Text>
-                            </Pressable>
-                        ))}
-                    </View>
-                    {errors.role?.message && (
-                        <Text style={[styles.error, { color: colors.error }]}>{errors.role.message}</Text>
-                    )}
-                </View>
-
-                {selectedRole === Role.PROVIDER && (
-                    <>
                         <Controller
                             control={control}
                             name="payout_method"
@@ -324,8 +289,6 @@ export default function RegisterScreen({ navigation }: Props) {
                                 />
                             )}
                         />
-                    </>
-                )}
 
                 <BoameBtn
                     title="Cadastrar"
@@ -355,6 +318,13 @@ const styles = StyleSheet.create({
         paddingHorizontal: 24,
         paddingTop: 96,
         paddingBottom: 100,
+    },
+    backLink: {
+        alignSelf: "flex-start",
+        width: "100%",
+        maxWidth: 448,
+        fontFamily: fonts.regular,
+        marginBottom: spacing.sm,
     },
     title: {
         fontSize: typography.sizes.xxl,
