@@ -1,9 +1,9 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { AuthStackParamList } from "../../navigation/types";
 import { borderRadius, fonts, spacing, typography } from "../../constants/theme";
-import BoameInput, { BoamePhoneInput, ToggleInput } from "../../components/shared/Input";
-import BoameBtn from "../../components/shared/BoameBtn";
+import { BoamePhoneInput, ToggleInput } from "../../components/shared/Input";
+import { MGButton, MGText, MGTextField } from "../../design-system/components";
 import { tutorRegisterSchema } from "../../validators/auth.validator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
@@ -53,13 +53,16 @@ export default function TutorRegisterScreen({ navigation }: Props) {
             extraScrollHeight={20}
             enableOnAndroid
         >
-            <Text style={[styles.title, { color: colors.brand }]}>Criar conta</Text>
+            <View style={styles.content}>
+            <MGText variant="heading1" color="brand" style={[styles.title, { fontFamily: fonts.logo }]}>
+                Criar conta
+            </MGText>
             <View style={styles.form}>
                 <Controller
                     control={control}
                     name="name"
                     render={({ field: { onChange, onBlur, value } }) => (
-                        <BoameInput
+                        <MGTextField
                             label="Nome completo"
                             placeholder="Digite seu nome"
                             onChangeText={onChange}
@@ -76,7 +79,7 @@ export default function TutorRegisterScreen({ navigation }: Props) {
                     control={control}
                     name="email"
                     render={({ field: { onChange, onBlur, value } }) => (
-                        <BoameInput
+                        <MGTextField
                             label="E-mail"
                             placeholder="Digite seu e-mail"
                             onChangeText={onChange}
@@ -137,20 +140,26 @@ export default function TutorRegisterScreen({ navigation }: Props) {
                                         value && { backgroundColor: colors.primary, borderColor: colors.primary },
                                     ]}
                                 >
-                                    {value ? <Text style={[styles.consentMark, { color: colors.onPrimary }]}>✓</Text> : null}
+                                    {value ? (
+                                        <MGText style={[styles.consentMark, { color: colors.onPrimary }]}>✓</MGText>
+                                    ) : null}
                                 </View>
-                                <Text style={[styles.consentText, { color: colors.text }]}>
+                                <MGText variant="bodySmall" style={styles.consentText}>
                                     Aceito os termos e a política de privacidade
-                                </Text>
+                                </MGText>
                             </Pressable>
                             {errors.accepted_terms?.message && (
-                                <Text style={[styles.error, { color: colors.error }]}>{errors.accepted_terms.message}</Text>
+                                <MGText color="error" style={styles.error}>{errors.accepted_terms.message}</MGText>
                             )}
                         </View>
                     )}
                 />
-                <BoameBtn title="Criar conta" loading={isPending} onPress={handleSubmit(handleRegister)} />
-                {error && <Text accessibilityRole="alert" style={[styles.error, { color: colors.error }]}>{getErrorMessage(error)}</Text>}
+                <MGButton label="Criar conta" loading={isPending} onPress={handleSubmit(handleRegister)} />
+                {error && (
+                    <MGText accessibilityRole="alert" color="error" style={styles.error}>
+                        {getErrorMessage(error)}
+                    </MGText>
+                )}
                 {runtime.googleAuthEnabled && <>
                     <AuthDivider />
                     <GoogleSignInBtn
@@ -160,11 +169,16 @@ export default function TutorRegisterScreen({ navigation }: Props) {
                         onPress={() => signInWithGoogle()}
                     />
                 </>}
-                {googleError && <Text accessibilityRole="alert" style={[styles.error, { color: colors.error }]}>{googleError.message}</Text>}
+                {googleError && (
+                    <MGText accessibilityRole="alert" color="error" style={styles.error}>
+                        {googleError.message}
+                    </MGText>
+                )}
             </View>
-            <Text style={[styles.loginLink, { color: colors.primary }]} onPress={() => navigation.navigate("Login")}>
+            <MGText color="brand" style={styles.loginLink} onPress={() => navigation.navigate("Login")}>
                 Já tem uma conta? Entrar
-            </Text>
+            </MGText>
+            </View>
         </KeyboardAwareScrollView>
     );
 }
@@ -174,17 +188,18 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         alignItems: "center",
         paddingHorizontal: spacing.xl,
-        paddingTop: spacing.huge,
-        paddingBottom: 100,
+        paddingTop: spacing.xxxl,
+        paddingBottom: spacing.huge,
+    },
+    content: {
+        width: "100%",
+        maxWidth: 448,
     },
     title: {
-        fontSize: typography.sizes.xxl,
-        fontFamily: fonts.logo,
         marginBottom: spacing.lg,
     },
     form: {
         width: "100%",
-        maxWidth: 448,
         gap: spacing.sm,
     },
     consentRow: {
@@ -207,17 +222,13 @@ const styles = StyleSheet.create({
     },
     consentText: {
         flex: 1,
-        fontFamily: fonts.regular,
-        fontSize: typography.sizes.sm,
     },
     error: {
         fontSize: typography.sizes.sm,
-        fontFamily: fonts.regular,
         marginTop: spacing.xs,
     },
     loginLink: {
         marginTop: spacing.lg,
-        fontFamily: fonts.regular,
-        paddingBottom: 100,
+        marginBottom: spacing.xl,
     },
 });

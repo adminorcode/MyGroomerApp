@@ -49,6 +49,7 @@ export type ProfileStackParamList = {
     BecomeAProvider:undefined
     Pets: undefined
     PetForm: { petId?: string, providerServiceId?: string }
+    DesignSystemShowcase: undefined
 }
 
 export type MessagesStackParamList = {

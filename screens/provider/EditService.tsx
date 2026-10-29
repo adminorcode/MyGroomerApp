@@ -2,22 +2,20 @@ import { AppAlert } from '../../utils/alert'
 import { useState } from 'react'
 import {
     View,
-    Text,
     StyleSheet,
-    TextInput,
-    Alert,
     KeyboardAvoidingView,
     Platform,
 } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
 import { ProviderServicesStackParamList } from '../../navigation/types'
-import { useTheme } from '../../context/ThemeContext'
 import { useUpdateProviderService } from '../../hooks/useProviders'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
-import BoameBtn from '../../components/shared/BoameBtn'
-import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
+import { MGButton, MGTextField } from '../../design-system/components'
+import { ServiceEditorCard } from '../../design-system/patterns'
+import { spacing } from '../../constants/theme'
+import { formatMoney } from '../../utils/formatMoney'
 
 type EditServiceNavigationProp = StackNavigationProp<ProviderServicesStackParamList, 'EditService'>
 type EditServiceRouteProp = RouteProp<ProviderServicesStackParamList, 'EditService'>
@@ -28,11 +26,15 @@ type Props = {
 }
 
 export default function EditService({ navigation, route }: Props) {
-    const { colors } = useTheme()
     const { providerServiceId, serviceName, price: initialPrice } = route.params
     const { mutateAsync: updateProviderService, isPending } = useUpdateProviderService()
 
     const [price, setPrice] = useState(initialPrice != null ? String(initialPrice) : '')
+
+    const parsedPreview = Number(price)
+    const previewPrice = !price.trim() || isNaN(parsedPreview) || parsedPreview <= 0
+        ? (initialPrice != null ? formatMoney(initialPrice) : undefined)
+        : formatMoney(parsedPreview)
 
     const handleSave = async () => {
         const parsedPrice = Number(price)
@@ -62,27 +64,25 @@ export default function EditService({ navigation, route }: Props) {
                 style={styles.flex}
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             >
-                {serviceName && (
-                    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                        <Text style={[styles.serviceName, { color: colors.text }]}>{serviceName}</Text>
+                {serviceName ? (
+                    <View style={styles.preview}>
+                        <ServiceEditorCard
+                            name={serviceName}
+                            prices={previewPrice ? { medium: previewPrice } : undefined}
+                        />
                     </View>
-                )}
+                ) : null}
 
-                <Text style={[styles.label, { color: colors.text }]}>Preço (R$)</Text>
-                <TextInput
+                <MGTextField
+                    label="Preço (R$)"
                     value={price}
                     onChangeText={setPrice}
-                    placeholder='ex.: 150'
-                    placeholderTextColor={colors.textSecondary}
-                    keyboardType='numeric'
-                    style={[
-                        styles.input,
-                        { borderColor: colors.border, backgroundColor: colors.background, color: colors.text },
-                    ]}
+                    placeholder="ex.: 150"
+                    keyboardType="numeric"
                 />
 
-                <BoameBtn
-                    title='Salvar alterações'
+                <MGButton
+                    label="Salvar alterações"
                     onPress={handleSave}
                     loading={isPending}
                     disabled={isPending}
@@ -96,29 +96,7 @@ const styles = StyleSheet.create({
     flex: {
         flex: 1,
     },
-    card: {
-        padding: spacing.md,
-        borderRadius: borderRadius.lg,
-        borderWidth: 1,
-        marginBottom: spacing.lg,
-    },
-    serviceName: {
-        fontSize: typography.sizes.lg,
-        fontFamily: fonts.semibold,
-    },
-    label: {
-        fontSize: typography.sizes.md,
-        fontFamily: fonts.medium,
-        marginBottom: spacing.sm,
-    },
-    input: {
-        borderWidth: 1,
-        borderRadius: borderRadius.lg,
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm + 4,
-        fontFamily: fonts.regular,
-        fontSize: typography.sizes.md,
+    preview: {
         marginBottom: spacing.lg,
     },
 })
-

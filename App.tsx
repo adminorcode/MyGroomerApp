@@ -15,7 +15,7 @@ import { useAuthStore } from './store/authStore'
 SplashScreen.preventAutoHideAsync()
 
 function SessionApp() {
-  const { isDark, colors } = useTheme()
+  const { colors } = useTheme()
   const { token, user, hasHydrated } = useAuthStore()
   // Each session owns its cache. Old requests cannot populate the next account.
   const queryClient = useMemo(() => new QueryClient({ defaultOptions: { queries: { retry: 1 } } }), [token, user?.id, user?.role])
@@ -23,7 +23,7 @@ function SessionApp() {
   if (!hasHydrated) return <View style={{ flex: 1, justifyContent: 'center' }}><ActivityIndicator /></View>
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+      <StatusBar barStyle="dark-content" />
       <QueryClientProvider client={queryClient}>
         <RuntimeProvider>
           <SocketProvider><RootNavigator /></SocketProvider>

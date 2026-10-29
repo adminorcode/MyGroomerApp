@@ -2,17 +2,12 @@ import { AppAlert } from '../../utils/alert'
 import { useState, useEffect } from 'react'
 import {
   View,
-  Text,
-  TextInput,
-  Pressable,
   ActivityIndicator,
   StyleSheet,
   Platform,
-  Alert,
   ScrollView,
   KeyboardAvoidingView,
 } from 'react-native'
-import { CalendarClock, MapPin, Star } from 'lucide-react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
 import { HomeStackParamList } from '../../navigation/types'
@@ -21,9 +16,11 @@ import { useCreateBooking } from '../../hooks/useBooking'
 import { usePets } from '../../hooks/usePets'
 import PetPicker from '../../components/customer/PetPicker'
 import { useTheme } from '../../context/ThemeContext'
-import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
-import { borderRadius, fonts, layout, spacing, typography } from '../../constants/theme'
+import ScreenContainer from '../../components/shared/ScreenContainer'
+import { MGButton, MGErrorState, MGTextField } from '../../design-system/components'
+import { BookingSummary, TimeSlotPicker } from '../../design-system/patterns'
+import { layout, spacing } from '../../constants/theme'
 import DateTimePicker from '../../components/shared/ServiceDateTimePicker'
 import * as WebBrowser from 'expo-web-browser'
 import { findBookingById } from '../../services/booking.service'
@@ -53,8 +50,6 @@ export default function BookServiceScreen({ navigation, route }: Props) {
   const [location, setLocation] = useState('')
   const [selectedPetId, setSelectedPetId] = useState<string | undefined>(requestedPetId)
   const [petError, setPetError] = useState('')
-  // const [latitude, setLatitude] = useState<number | undefined>(undefined)
-  // const [longitude, setLongitude] = useState<number | undefined>(undefined)
   const [showPicker, setShowPicker] = useState(false)
   const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date')
   const queryClient = useQueryClient()
@@ -124,8 +119,6 @@ export default function BookServiceScreen({ navigation, route }: Props) {
           provider_service_id: providerServiceId,
           scheduled_at: scheduledAt,
           customer_location: location.trim(),
-          // customer_latitude: latitude,
-          // customer_longitude: longitude
         }
       )
       
@@ -138,8 +131,6 @@ export default function BookServiceScreen({ navigation, route }: Props) {
       const authUrl = bookedResponse.data.authorization_url
       if (!authUrl) throw new Error('O pagamento não está disponível')
       await WebBrowser.openAuthSessionAsync(authUrl)
-      
-      // TODO: Show a loading page after webview before moving home
 
       const confirmed = await verifyBooking({bookingId})
 
@@ -171,11 +162,7 @@ export default function BookServiceScreen({ navigation, route }: Props) {
     return (
       <ScreenContainer>
         <ScreenHeader title="Agendar serviço" showBackButton onBack={() => navigation.goBack()} />
-        <View style={styles.centered}>
-          <Text style={[styles.message, { color: colors.error }]}>
-            Não foi possível carregar este serviço. Tente novamente.
-          </Text>
-        </View>
+        <MGErrorState message="Não foi possível carregar este serviço. Tente novamente." />
       </ScreenContainer>
     )
   }
@@ -187,6 +174,15 @@ export default function BookServiceScreen({ navigation, route }: Props) {
     hour: '2-digit',
     minute: '2-digit',
   })
+
+  const selectedPet = pets.data?.find((pet) => pet.id === selectedPetId)
+  const summaryRows = [
+    selectedPet?.name ? { label: 'Pet', value: selectedPet.name } : null,
+    data.service_name ? { label: 'Serviço', value: data.service_name } : null,
+    data.provider_name ? { label: 'Groomer', value: data.provider_name } : null,
+    location.trim() ? { label: 'Local', value: location.trim() } : null,
+    { label: 'Data', value: formattedSchedule },
+  ].filter((row): row is { label: string; value: string } => Boolean(row))
 
   return (
     <KeyboardAvoidingView behavior='padding' style={{backgroundColor: colors.background, flex:1}}>
@@ -204,38 +200,15 @@ export default function BookServiceScreen({ navigation, route }: Props) {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Service details */}
-          <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Text style={[styles.serviceName, { color: colors.text }]}>{data.service_name}</Text>
-            <Text style={[styles.providerName, { color: colors.textSecondary }]}>
-              por {data.provider_name}
-            </Text>
-
-            <View style={styles.metaRow}>
-              {data.average_rating != null && (
-                <View style={styles.metaItem}>
-                  <Star size={16} color={colors.warning} fill={colors.warning} />
-                  <Text style={[styles.metaText, { color: colors.textSecondary }]}>
-                    {data.average_rating}
-                    {data.review_count != null ? ` (${data.review_count})` : ''}
-                  </Text>
-                </View>
-              )}
-              {data.service_area && (
-                <View style={styles.metaItem}>
-                  <MapPin size={16} color={colors.textSecondary} />
-                  <Text style={[styles.metaText, { color: colors.textSecondary }]}>
-                    {data.service_area}
-                  </Text>
-                </View>
-              )}
+          {summaryRows.length > 0 ? (
+            <View style={styles.summaryBlock}>
+              <BookingSummary
+                rows={summaryRows}
+                totalLabel={data.price != null ? 'Preço' : undefined}
+                totalValue={data.price != null ? formatMoney(data.price) : undefined}
+              />
             </View>
-
-            <View style={[styles.priceRow, { borderTopColor: colors.border }]}>
-              <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>Preço</Text>
-              <Text style={[styles.price, { color: colors.primary }]}>{formatMoney(data.price)}</Text>
-            </View>
-          </View>
+          ) : null}
 
           <PetPicker
             pets={pets.data}
@@ -251,28 +224,20 @@ export default function BookServiceScreen({ navigation, route }: Props) {
             onRetry={() => { void pets.refetch() }}
           />
 
-          {/* Date & time */}
-          <Text style={[styles.label, { color: colors.text }]}>Quando</Text>
-          <Pressable
-            onPress={openPicker}
-            style={[styles.field, { backgroundColor: colors.surface, borderColor: colors.border }]}
-          >
-            <CalendarClock size={20} color={colors.primary} />
-            <Text style={[styles.fieldText, { color: colors.text }]}>{formattedSchedule}</Text>
-          </Pressable>
-
-          {/* Location */}
-          <Text style={[styles.label, { color: colors.text }]}>Local</Text>
-          <View style={[styles.field, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <MapPin size={20} color={colors.primary} />
-            <TextInput
-              value={location}
-              onChangeText={setLocation}
-              placeholder="Digite seu endereço"
-              placeholderTextColor={colors.textSecondary}
-              style={[styles.input, { color: colors.text }]}
+          <View style={styles.slotBlock}>
+            <TimeSlotPicker
+              dateTimeLabel={formattedSchedule}
+              onPressDateTime={openPicker}
             />
           </View>
+
+          <MGTextField
+            label="Local"
+            value={location}
+            onChangeText={setLocation}
+            placeholder="Digite seu endereço"
+            autoCapitalize="words"
+          />
 
           {showPicker && (
             <DateTimePicker
@@ -285,28 +250,12 @@ export default function BookServiceScreen({ navigation, route }: Props) {
           )}
         </ScrollView>
 
-        {/* Book & Pay */}
-        <Pressable
+        <MGButton
+          label={runtime.localTest ? 'Criar agendamento de teste' : 'Agendar e pagar'}
           onPress={handleBook}
-          accessibilityRole="button"
-          disabled={isPending || isSubmitting || pets.isLoading}
-          style={({ pressed }) => [
-            styles.bookButton,
-            {
-              backgroundColor: isPending || isSubmitting || pets.isLoading
-                ? colors.disabled
-                : pressed
-                  ? colors.primaryPressed
-                  : colors.primary,
-            },
-          ]}
-        >
-          {isPending || isSubmitting ? (
-            <ActivityIndicator color={colors.onDisabled} />
-          ) : (
-            <Text style={[styles.bookButtonText, { color: isPending || isSubmitting || pets.isLoading ? colors.onDisabled : colors.onPrimary }]}>{runtime.localTest ? 'Criar agendamento de teste' : 'Agendar e pagar'}</Text>
-          )}
-        </Pressable>
+          loading={isPending || isSubmitting}
+          disabled={pets.isLoading}
+        />
       </View>
     </KeyboardAvoidingView>
   )
@@ -326,93 +275,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
   },
-  message: {
-    fontSize: typography.sizes.md,
-    fontFamily: fonts.regular,
-    textAlign: 'center',
-  },
-  card: {
-    padding: spacing.md,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
+  summaryBlock: {
     marginBottom: spacing.lg,
   },
-  serviceName: {
-    fontSize: typography.sizes.lg,
-    fontFamily: fonts.semibold,
-  },
-  providerName: {
-    fontSize: typography.sizes.sm,
-    fontFamily: fonts.regular,
-    marginTop: spacing.xs,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    marginTop: spacing.sm,
-  },
-  metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  metaText: {
-    fontSize: typography.sizes.sm,
-    fontFamily: fonts.medium,
-  },
-  priceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderTopWidth: 1,
-    marginTop: spacing.md,
-    paddingTop: spacing.md,
-  },
-  priceLabel: {
-    fontSize: typography.sizes.md,
-    fontFamily: fonts.regular,
-  },
-  price: {
-    fontSize: typography.sizes.lg,
-    fontFamily: fonts.semibold,
-  },
-  label: {
-    fontSize: typography.sizes.md,
-    fontFamily: fonts.medium,
-    marginBottom: spacing.sm,
-  },
-  field: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+  slotBlock: {
     marginBottom: spacing.lg,
-  },
-  fieldText: {
-    fontSize: typography.sizes.md,
-    fontFamily: fonts.regular,
-  },
-  input: {
-    flex: 1,
-    fontSize: typography.sizes.md,
-    fontFamily: fonts.regular,
-    padding: 0,
-  },
-  bookButton: {
-    borderRadius: borderRadius.md,
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: spacing.sm,
-    marginBottom: spacing.md,
-  },
-  bookButtonText: {
-    fontSize: typography.sizes.md,
-    fontFamily: fonts.semibold,
   },
 })
-

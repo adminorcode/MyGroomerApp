@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react'
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native'
+import { View, StyleSheet, ActivityIndicator } from 'react-native'
 import { useRoute } from '@react-navigation/native'
 import { useTheme } from '../../context/ThemeContext'
-import { fonts, typography, spacing } from '../../constants/theme'
-import BoameBtn from '../../components/shared/BoameBtn'
+import { spacing } from '../../constants/theme'
+import { MGEmptyState, MGErrorState, MGText } from '../../design-system/components'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { AuthStackParamList } from '../../navigation/types'
 import { useVerifyEmailMutation } from '../../hooks/useAuth'
@@ -45,7 +45,7 @@ export default function VerifyEmailScreen({ navigation }: Props) {
         return (
             <View style={[styles.container, { backgroundColor: colors.background }]}>
                 <ActivityIndicator size="large" color={colors.primary} />
-                <Text style={[styles.message, {color:colors.textSecondary}]}>Verificando seu e-mail...</Text>
+                <MGText color="secondary" style={styles.message}>Verificando seu e-mail...</MGText>
             </View>
         )
     }
@@ -53,12 +53,10 @@ export default function VerifyEmailScreen({ navigation }: Props) {
     if (isSuccess) {
         return (
             <View style={[styles.container, { backgroundColor: colors.background}]}>
-                <Text style={[styles.title, {color:colors.text}]}>E-mail verificado!</Text>
-                <Text style={[styles.message, {color:colors.textSecondary}]}>Sua conta está pronta. Você já pode entrar.</Text>
-                {/* <BoameBtn
-                    title="Go to Login"
-                    onPress={() => navigation.navigate('Login')}
-                /> */}
+                <MGEmptyState
+                    title="E-mail verificado!"
+                    description="Sua conta está pronta. Você já pode entrar."
+                />
             </View>
         )
     }
@@ -66,11 +64,10 @@ export default function VerifyEmailScreen({ navigation }: Props) {
     if (isError) {
         return (
             <View style={[styles.container, { backgroundColor: colors.background }]}>
-                <Text style={[styles.title, {color:colors.text}]}>Falha na verificação</Text>
-                <Text style={[styles.message, {color:colors.textSecondary}]}>{error ? getErrorMessage(error) : 'O link pode ter expirado.'}</Text>
-                <BoameBtn
-                    title="Voltar ao login"
-                    onPress={() => navigation.navigate('Login')}
+                <MGErrorState
+                    message={error ? getErrorMessage(error) : 'O link pode ter expirado.'}
+                    onRetry={() => navigation.navigate('Login')}
+                    retryLabel="Voltar ao login"
                 />
             </View>
         )
@@ -79,14 +76,10 @@ export default function VerifyEmailScreen({ navigation }: Props) {
     // no token in URL
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
-            <Text style={[styles.title, { color: colors.primary }]}>Confira seu e-mail</Text>
-            <Text style={[styles.message, { color: colors.textSecondary }]}>
-                Enviamos um link de verificação para o seu e-mail. Toque nele para confirmar a conta.
-            </Text>
-            {/* <BoameBtn
-                title="Back to Login"
-                onPress={() => navigation.navigate('Login')}
-            /> */}
+            <MGEmptyState
+                title="Confira seu e-mail"
+                description="Enviamos um link de verificação para o seu e-mail. Toque nele para confirmar a conta."
+            />
         </View>
     )
 }
@@ -99,14 +92,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.lg,
         gap: spacing.md,
     },
-    title: {
-        fontSize: typography.sizes.xl,
-        fontFamily: fonts.logo,
-        textAlign: 'center',
-    },
     message: {
-        fontSize: typography.sizes.md,
-        fontFamily: fonts.regular,
         textAlign: 'center',
     },
 })

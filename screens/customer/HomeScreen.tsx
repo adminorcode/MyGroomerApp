@@ -3,7 +3,7 @@ import { useFetchCategories } from '../../hooks/useCategory'
 import { useTheme } from '../../context/ThemeContext'
 import { HomeStackParamList } from '../../navigation/types'
 import { StackNavigationProp } from '@react-navigation/stack'
-import BoameBtn from '../../components/shared/BoameBtn'
+import { MGErrorState } from '../../design-system/components'
 import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
 import { SearchIcon } from 'lucide-react-native'
 import CategoryTile from '../../components/shared/CategoryTile'
@@ -36,10 +36,10 @@ export default function HomeScreen({navigation}: Props) {
         {isLoading ? (
             <ActivityIndicator accessibilityLabel="Carregando categorias" size="large" color={colors.primary} />
         ) : isError ? (
-            <View style={styles.categoryStatus}>
-                <Text style={[styles.categoryMessage, {color: colors.error}]}>Não foi possível carregar as categorias.</Text>
-                <BoameBtn title="Tentar novamente" onPress={() => refetch()} fullWidth={false} />
-            </View>
+            <MGErrorState
+                message="Não foi possível carregar as categorias."
+                onRetry={() => refetch()}
+            />
         ) : (
             <FlatList
                 data={data}
@@ -76,14 +76,5 @@ const styles = StyleSheet.create({
     minHeight: 52,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-  },
-  categoryMessage: {
-    fontSize: typography.sizes.md,
-    fontFamily: fonts.regular,
-    textAlign: 'center',
-  },
-  categoryStatus: {
-    alignItems: 'flex-start',
-    gap: spacing.md,
   },
 })

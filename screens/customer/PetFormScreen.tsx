@@ -16,8 +16,7 @@ import { PET_SIZES, PET_SPECIES, PetSize, PetSpecies } from '../../types/pet.typ
 import { useTheme } from '../../context/ThemeContext'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
-import BoameInput from '../../components/shared/Input'
-import BoameBtn from '../../components/shared/BoameBtn'
+import { MGButton, MGErrorState, MGTextField } from '../../design-system/components'
 import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
 import { getErrorMessage } from '../../utils/error'
 
@@ -103,7 +102,7 @@ export default function PetFormScreen({ navigation, route }: Props) {
         return (
             <ScreenContainer>
                 <ScreenHeader title="Editar pet" showBackButton onBack={() => navigation.goBack()} />
-                <Text style={[styles.message, { color: colors.error }]}>Não foi possível carregar este pet.</Text>
+                <MGErrorState message="Não foi possível carregar este pet." />
             </ScreenContainer>
         )
     }
@@ -131,7 +130,7 @@ export default function PetFormScreen({ navigation, route }: Props) {
                     control={control}
                     name="name"
                     render={({ field: { onChange, onBlur, value } }) => (
-                        <BoameInput
+                        <MGTextField
                             label="Nome"
                             accessibilityLabel="Nome"
                             placeholder="Nome do pet"
@@ -154,7 +153,7 @@ export default function PetFormScreen({ navigation, route }: Props) {
                     control={control}
                     name="breed"
                     render={({ field: { onChange, onBlur, value } }) => (
-                        <BoameInput
+                        <MGTextField
                             label="Raça"
                             accessibilityLabel="Raça"
                             placeholder="Raça ou SRD"
@@ -176,7 +175,7 @@ export default function PetFormScreen({ navigation, route }: Props) {
                     control={control}
                     name="age_years"
                     render={({ field: { onChange, onBlur, value } }) => (
-                        <BoameInput
+                        <MGTextField
                             label="Idade (anos)"
                             accessibilityLabel="Idade (anos)"
                             placeholder="0"
@@ -192,7 +191,7 @@ export default function PetFormScreen({ navigation, route }: Props) {
                     control={control}
                     name="notes"
                     render={({ field: { onChange, onBlur, value } }) => (
-                        <BoameInput
+                        <MGTextField
                             label="Observações"
                             accessibilityLabel="Observações"
                             placeholder="Comportamento, saúde ou cuidados"
@@ -204,8 +203,8 @@ export default function PetFormScreen({ navigation, route }: Props) {
                         />
                     )}
                 />
-                <BoameBtn
-                    title={petId ? 'Salvar' : 'Salvar e continuar'}
+                <MGButton
+                    label={petId ? 'Salvar' : 'Salvar e continuar'}
                     loading={isPending}
                     onPress={handleSubmit(onSubmit)}
                 />
@@ -276,10 +275,6 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-    },
-    message: {
-        fontSize: typography.sizes.md,
-        fontFamily: fonts.regular,
     },
     photo: {
         width: 72,

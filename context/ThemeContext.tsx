@@ -1,9 +1,9 @@
 import React, { createContext, useContext } from 'react'
-import { useColorScheme } from 'react-native'
-import { lightColors, darkColors, AppColors, fonts, typography, spacing, borderRadius } from '../constants/theme'
+import { lightColors, AppColors } from '../constants/theme'
 
 type ThemeContextType = {
     colors: AppColors
+    /** Always false — the product ships light-only; OS dark mode is ignored. */
     isDark: boolean
 }
 
@@ -13,12 +13,8 @@ const ThemeContext = createContext<ThemeContextType>({
 })
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-    const scheme = useColorScheme()
-    const isDark = scheme === 'dark'
-    const colors = isDark ? darkColors : lightColors
-
     return (
-        <ThemeContext.Provider value={{ colors, isDark }}>
+        <ThemeContext.Provider value={{ colors: lightColors, isDark: false }}>
             {children}
         </ThemeContext.Provider>
     )

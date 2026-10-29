@@ -1,4 +1,4 @@
-import { View, Text, ActivityIndicator, FlatList, StyleSheet } from 'react-native'
+import { View, ActivityIndicator, FlatList, StyleSheet } from 'react-native'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
 import { HomeStackParamList } from '../../navigation/types'
@@ -7,7 +7,8 @@ import { RouteProp } from '@react-navigation/core'
 import { useGetAllServices } from '../../hooks/useServices'
 import { useTheme } from '../../context/ThemeContext'
 import ListCard from '../../components/shared/ListCard'
-import { fonts, spacing, typography } from '../../constants/theme'
+import { MGEmptyState, MGErrorState } from '../../design-system/components'
+import { spacing } from '../../constants/theme'
 
 
 type ServiceScreenNavigationProp = StackNavigationProp<HomeStackParamList, 'Services'>
@@ -38,9 +39,7 @@ export default function ServiceScreen({navigation, route}: Props) {
         </View>
       ) : isError ? (
         <View style={styles.centered}>
-          <Text style={[styles.message, { color: colors.error }]}>
-            Não foi possível carregar os serviços.
-          </Text>
+          <MGErrorState message="Não foi possível carregar os serviços." />
         </View>
       ) : (
         <FlatList
@@ -61,11 +60,10 @@ export default function ServiceScreen({navigation, route}: Props) {
             />
           )}
           ListEmptyComponent={
-            <View style={styles.centered}>
-              <Text style={[styles.message, { color: colors.textSecondary }]}>
-                Nenhum serviço nesta categoria ainda
-              </Text>
-            </View>
+            <MGEmptyState
+              title="Nenhum serviço"
+              description="Nenhum serviço nesta categoria ainda"
+            />
           }
           keyExtractor={(item) => item.id}
         />
@@ -88,10 +86,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
-  },
-  message: {
-    fontSize: typography.sizes.md,
-    fontFamily: fonts.regular,
-    textAlign: 'center',
   },
 })

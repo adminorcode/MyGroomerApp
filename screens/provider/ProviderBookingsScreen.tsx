@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import { View, Text, StyleSheet, ActivityIndicator, FlatList } from 'react-native'
-import { fonts, spacing, typography } from '../../constants/theme'
+import { View, StyleSheet, ActivityIndicator, FlatList } from 'react-native'
+import { spacing } from '../../constants/theme'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
 import { useTheme } from '../../context/ThemeContext'
 import { useGetProviderBookings } from '../../hooks/useBooking'
-import { BookingCard } from '../../components/shared/BookingCard'
 import BookingStatusFilter from '../../components/shared/BookingStatusFilter'
+import { MGEmptyState, MGErrorState } from '../../design-system/components'
+import { AgendaAppointmentCard } from '../../design-system/patterns'
 import { BookingStatus } from '../../types/booking.types'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { ProviderBookingsStackParamList } from '../../navigation/types'
@@ -37,9 +38,7 @@ export default function ProviderBookingsScreen({navigation}:Props) {
                 </View>
             ) : isError ? (
                 <View style={styles.centered}>
-                <Text style={[styles.message, { color: colors.error }]}>
-                    Não foi possível carregar os agendamentos.
-                </Text>
+                <MGErrorState message="Não foi possível carregar os agendamentos." />
                 </View>
             ) : (
                 <FlatList
@@ -48,7 +47,7 @@ export default function ProviderBookingsScreen({navigation}:Props) {
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => (
-                    <BookingCard
+                    <AgendaAppointmentCard
                     service_name={item.service_name}
                     provider_name={item.provider_name}
                     price={item.price}
@@ -65,9 +64,14 @@ export default function ProviderBookingsScreen({navigation}:Props) {
                 )}
                 ListEmptyComponent={
                     <View style={styles.centered}>
-                    <Text style={[styles.message, { color: colors.textSecondary }]}>
-                        {statusFilter ? 'Nenhum agendamento com este filtro' : 'Nenhum agendamento de tutores ainda.'}
-                    </Text>
+                    <MGEmptyState
+                        title={statusFilter ? 'Nenhum resultado' : 'Nenhum agendamento'}
+                        description={
+                            statusFilter
+                                ? 'Nenhum agendamento com este filtro'
+                                : 'Nenhum agendamento de tutores ainda.'
+                        }
+                    />
                     </View>
                 }
                 keyExtractor={(item) => item.id}
@@ -90,10 +94,5 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       justifyContent: 'center',
       paddingHorizontal: spacing.lg,
-    },
-    message: {
-      fontSize: typography.sizes.md,
-      fontFamily: fonts.regular,
-      textAlign: 'center',
     },
   })

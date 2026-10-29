@@ -4,6 +4,7 @@ import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
 import TransactionStatusBadge from '../../components/shared/TransactionStatusBadge'
+import { MGEmptyState, MGErrorState } from '../../design-system/components'
 import { useTheme } from '../../context/ThemeContext'
 import { useGetProviderEarnings } from '../../hooks/useProviders'
 import { ProviderTransaction } from '../../types/transaction.types'
@@ -80,9 +81,7 @@ export default function Earnings() {
         </View>
       ) : isError ? (
         <View style={styles.centered}>
-          <Text style={[styles.message, { color: colors.error }]}>
-            Não foi possível carregar os rendimentos.
-          </Text>
+          <MGErrorState message="Não foi possível carregar os rendimentos." />
         </View>
       ) : (
         <>
@@ -96,9 +95,10 @@ export default function Earnings() {
             renderItem={renderTransaction}
             ListEmptyComponent={
               <View style={styles.centered}>
-                <Text style={[styles.message, { color: colors.textSecondary }]}>
-                  Nenhum repasse ainda. Atendimentos concluídos aparecem aqui.
-                </Text>
+                <MGEmptyState
+                  title="Nenhum repasse"
+                  description="Nenhum repasse ainda. Atendimentos concluídos aparecem aqui."
+                />
               </View>
             }
             keyExtractor={(item) => item.id}
@@ -187,10 +187,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.xl,
-  },
-  message: {
-    fontSize: typography.sizes.md,
-    fontFamily: fonts.regular,
-    textAlign: 'center',
   },
 })

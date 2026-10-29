@@ -1,10 +1,17 @@
-import { ViewStyle } from 'react-native'
+import { Platform, ViewStyle } from 'react-native'
 import { palette } from './colors'
 
 // My Groomer Design System v1.0 — seção 5.4.
-// O guia nomeia os níveis e não fixa opacidade. Estes valores são o mapa React Native.
+// Native uses shadow* + elevation; web uses boxShadow (shadow* is deprecated there).
 
 function shadow(opacity: number, radius: number, elevation: number, height: number): ViewStyle {
+  if (Platform.OS === 'web') {
+    return {
+      // RN Web accepts boxShadow; cast keeps ViewStyle happy across platforms.
+      boxShadow: `0px ${height}px ${radius}px rgba(37, 61, 66, ${opacity})`,
+    } as ViewStyle
+  }
+
   return {
     shadowColor: palette.brand.ink,
     shadowOpacity: opacity,
