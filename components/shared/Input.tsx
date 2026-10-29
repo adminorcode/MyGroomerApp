@@ -4,6 +4,7 @@ import { borderRadius, fonts, spacing, textStyles } from "../../constants/theme"
 import {Eye, EyeClosed} from 'lucide-react-native'
 import PhoneInput, { PhoneInputProps } from "react-native-phone-number-input";
 import { useTheme } from "../../context/ThemeContext";
+import MGTextField from "../../design-system/components/MGTextField";
 
 export type InputProps = TextInputProps & {
     label: string
@@ -34,12 +35,13 @@ export function BoamePhoneInput({label, error, onChangeFormattedText, textInputP
                 layout="first"
                 placeholder="Digite seu telefone"
                 onChangeFormattedText={onChangeFormattedText}
-                containerStyle={{...styles.phoneContainer, borderColor: fieldBorder(colors, error, focused)}}
-                textContainerStyle={{...styles.phoneTextContainer, backgroundColor: colors.background}}
-                textInputStyle={{...styles.phoneTextInput, color: colors.text}}
+                containerStyle={{...styles.phoneContainer, borderColor: fieldBorder(colors, error, focused), backgroundColor: colors.surface}}
+                textContainerStyle={{...styles.phoneTextContainer, backgroundColor: colors.surface}}
+                textInputStyle={{...styles.phoneTextInput, color: colors.text, backgroundColor: colors.surface}}
                 codeTextStyle={{...styles.phoneCodeText, color: colors.text}}
                 textInputProps={{
                     accessibilityLabel: label,
+                    placeholderTextColor: colors.textSecondary,
                     ...textInputProps,
                     onFocus: (event) => { setFocused(true); textInputProps?.onFocus?.(event) },
                     onBlur: (event) => { setFocused(false); textInputProps?.onBlur?.(event) },
@@ -51,36 +53,26 @@ export function BoamePhoneInput({label, error, onChangeFormattedText, textInputP
     )
 }
 
-export default function BoameInput({label, error, style, ...props}: InputProps) {
-    const { colors } = useTheme();
-    const [focused, setFocused] = useState(false);
-    return (
-        <View style={styles.fieldGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
-            <TextInput
-                {...props}
-                onFocus={(event) => { setFocused(true); props.onFocus?.(event) }}
-                onBlur={(event) => { setFocused(false); props.onBlur?.(event) }}
-                style={[styles.input, style, { borderColor: fieldBorder(colors, error, focused), backgroundColor: colors.background, color: colors.text }]}
-            />
-            {error && <Text style={[styles.error, { color: colors.error }]}>{error}</Text>}
-        </View>
-    )
+/** @deprecated Prefer MGTextField from design-system/components for new UI. */
+export default function BoameInput({ label, error, style, ...props }: InputProps) {
+    return <MGTextField label={label} error={error} style={style} {...props} />
 }
 
-export function ToggleInput({label, error, style, ...props}: InputProps) {
+export function ToggleInput({label, error, style, value, ...props}: InputProps) {
     const [showPassword, setShowPassword] = useState(false);
     const [focused, setFocused] = useState(false);
     const { colors } = useTheme();
     return (
         <View style={styles.fieldGroup}>
             <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
-            <View style={[styles.passwordRow, { borderColor: fieldBorder(colors, error, focused) }]}>
+            <View style={[styles.passwordRow, { borderColor: fieldBorder(colors, error, focused), backgroundColor: colors.surface }]}>
                 <TextInput
                     {...props}
+                    value={value ?? ''}
+                    placeholderTextColor={colors.textSecondary}
                     onFocus={(event) => { setFocused(true); props.onFocus?.(event) }}
                     onBlur={(event) => { setFocused(false); props.onBlur?.(event) }}
-                    style={[styles.passwordInput, style, { color: colors.text }]}
+                    style={[styles.passwordInput, style, { color: colors.text, backgroundColor: colors.surface }]}
                     secureTextEntry={!showPassword}
                 />
                 <TouchableOpacity

@@ -1,17 +1,17 @@
 import { AppAlert } from '../../utils/alert'
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
 import { ProviderBookingsStackParamList } from '../../navigation/types'
 import { useChangeBookingStatus, useGetBookingById } from '../../hooks/useBooking'
-import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
+import { borderRadius, spacing } from '../../constants/theme'
 import { useTheme } from '../../context/ThemeContext'
-import StatusBadge from '../../components/shared/StatusBadge'
 import { CalendarClock, Hash, MapPin, Clock, User } from 'lucide-react-native'
 import { DetailRow } from '../../components/shared/DetailRow'
-import BoameBtn from '../../components/shared/BoameBtn'
+import { MGButton, MGErrorState, MGText } from '../../design-system/components'
+import { BookingStatusBadge } from '../../design-system/patterns'
 import { BookingStatus } from '../../types/booking.types'
 import { formatDateTime } from '../../utils/formatDate'
 import { formatMoney } from '../../utils/formatMoney'
@@ -72,9 +72,7 @@ const ProviderBookingDetailScreen = ({ navigation, route }: Props) => {
         return (
             <ScreenContainer>
                 <View style={styles.centered}>
-                    <Text style={[styles.message, { color: colors.error }]}>
-                        Não foi possível carregar este agendamento.
-                    </Text>
+                    <MGErrorState message="Não foi possível carregar este agendamento." />
                 </View>
             </ScreenContainer>
         )
@@ -125,18 +123,18 @@ const ProviderBookingDetailScreen = ({ navigation, route }: Props) => {
                 {/* Header: service name + status */}
                 <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                     <View style={styles.headerRow}>
-                        <Text style={[styles.serviceName, { color: colors.text }]}>
+                        <MGText variant="title" style={{ flex: 1 }}>
                             {data.service_name}
-                        </Text>
-                        <StatusBadge status={data.booking_status} />
+                        </MGText>
+                        <BookingStatusBadge status={data.booking_status} />
                     </View>
-                    <Text style={[styles.customerName, { color: colors.textSecondary }]}>
+                    <MGText variant="bodySmall" color="secondary" style={{ marginTop: spacing.xs }}>
                         para {data.customer_name}
-                    </Text>
+                    </MGText>
 
                     <View style={[styles.priceRow, { borderTopColor: colors.border }]}>
-                        <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>Preço</Text>
-                        <Text style={[styles.price, { color: colors.primary }]}>{formatMoney(data.price)}</Text>
+                        <MGText variant="body" color="secondary">Preço</MGText>
+                        <MGText variant="title" color="brand">{formatMoney(data.price)}</MGText>
                     </View>
                 </View>
 
@@ -173,8 +171,8 @@ const ProviderBookingDetailScreen = ({ navigation, route }: Props) => {
                 {/* Action Button */}
                 {nextAction && (
                     <View style={styles.actionContainer}>
-                        <BoameBtn
-                            title={nextAction.label}
+                        <MGButton
+                            label={nextAction.label}
                             onPress={handleAction}
                             loading={isPending}
                             disabled={isPending}
@@ -200,11 +198,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingHorizontal: spacing.lg,
     },
-    message: {
-        fontSize: typography.sizes.md,
-        fontFamily: fonts.regular,
-        textAlign: 'center',
-    },
     card: {
         padding: spacing.md,
         borderRadius: borderRadius.lg,
@@ -217,16 +210,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         gap: spacing.sm,
     },
-    serviceName: {
-        flex: 1,
-        fontSize: typography.sizes.lg,
-        fontFamily: fonts.semibold,
-    },
-    customerName: {
-        fontSize: typography.sizes.sm,
-        fontFamily: fonts.regular,
-        marginTop: spacing.xs,
-    },
     priceRow: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -235,18 +218,9 @@ const styles = StyleSheet.create({
         marginTop: spacing.md,
         paddingTop: spacing.md,
     },
-    priceLabel: {
-        fontSize: typography.sizes.md,
-        fontFamily: fonts.regular,
-    },
-    price: {
-        fontSize: typography.sizes.lg,
-        fontFamily: fonts.semibold,
-    },
     actionContainer: {
         width: '100%',
     },
 })
 
 export default ProviderBookingDetailScreen
-

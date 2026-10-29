@@ -9,10 +9,22 @@ export type InputProps = TextInputProps & { label: string; error?: string }
 export type BoamePhoneInputProps = PhoneInputProps & { label: string; error?: string; onChangeFormattedText: (text: string) => void }
 
 export function BoamePhoneInput({ label, error, value, defaultValue, onChangeFormattedText }: BoamePhoneInputProps) {
-  return <BoameInput label={label} error={error} value={value} defaultValue={defaultValue} onChangeText={onChangeFormattedText} keyboardType="phone-pad" placeholder="+5511999999999" />
+  return (
+    <BoameInput
+      label={label}
+      error={error}
+      value={value}
+      defaultValue={defaultValue}
+      onChangeText={onChangeFormattedText}
+      keyboardType="phone-pad"
+      placeholder="Digite seu telefone"
+      autoComplete="tel"
+      textContentType="telephoneNumber"
+    />
+  )
 }
 
-export default function BoameInput({ label, error, style, ...props }: InputProps) {
+export default function BoameInput({ label, error, style, value, ...props }: InputProps) {
   const { colors } = useTheme()
   const [focused, setFocused] = useState(false)
   const borderColor = error ? colors.error : focused ? colors.focus : colors.border
@@ -22,16 +34,18 @@ export default function BoameInput({ label, error, style, ...props }: InputProps
       <TextInput
         accessibilityLabel={label}
         {...props}
+        value={value ?? ''}
+        placeholderTextColor={colors.textSecondary}
         onFocus={(event) => { setFocused(true); props.onFocus?.(event) }}
         onBlur={(event) => { setFocused(false); props.onBlur?.(event) }}
-        style={[styles.input, { borderColor, backgroundColor: colors.background, color: colors.text }, style]}
+        style={[styles.input, { borderColor, backgroundColor: colors.surface, color: colors.text }, style]}
       />
       {error && <Text style={{ color: colors.error }}>{error}</Text>}
     </View>
   )
 }
 
-export function ToggleInput({ label, error, style, ...props }: InputProps) {
+export function ToggleInput({ label, error, style, value, ...props }: InputProps) {
   const [visible, setVisible] = useState(false)
   const [focused, setFocused] = useState(false)
   const { colors } = useTheme()
@@ -39,14 +53,16 @@ export function ToggleInput({ label, error, style, ...props }: InputProps) {
   return (
     <View style={styles.field}>
       <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
-      <View style={[styles.passwordRow, { borderColor }]}>
+      <View style={[styles.passwordRow, { borderColor, backgroundColor: colors.surface }]}>
         <TextInput
           accessibilityLabel={label}
           {...props}
+          value={value ?? ''}
+          placeholderTextColor={colors.textSecondary}
           onFocus={(event) => { setFocused(true); props.onFocus?.(event) }}
           onBlur={(event) => { setFocused(false); props.onBlur?.(event) }}
           secureTextEntry={!visible}
-          style={[styles.passwordInput, { color: colors.text, backgroundColor: colors.background }, style]}
+          style={[styles.passwordInput, { color: colors.text, backgroundColor: colors.surface }, style]}
         />
         <TouchableOpacity accessibilityRole="button" accessibilityLabel={visible ? 'Ocultar senha' : 'Mostrar senha'} onPress={() => setVisible(!visible)} style={{ padding: spacing.md }}>
           {visible ? <EyeClosed color={colors.primary} /> : <Eye color={colors.primary} />}

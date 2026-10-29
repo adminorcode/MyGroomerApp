@@ -1,5 +1,5 @@
 import { AppAlert } from '../../utils/alert'
-import { View, Text, Alert, Pressable, StyleSheet } from 'react-native'
+import { View, Text, Pressable, StyleSheet } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import ScreenHeader from '../../components/shared/ScreenHeader'
 import { StackNavigationProp } from '@react-navigation/stack'
@@ -10,8 +10,8 @@ import { providerSchema } from '../../validators/provider.validator'
 import { useTheme } from '../../context/ThemeContext'
 import { MomoProvider, PayoutMethod } from '../../types/provider.types'
 import { useRegisterAsProvider } from '../../hooks/useProviders'
-import BoameInput, { BoamePhoneInput } from '../../components/shared/Input'
-import BoameBtn from '../../components/shared/BoameBtn'
+import { BoamePhoneInput } from '../../components/shared/Input'
+import { MGButton, MGTextField } from '../../design-system/components'
 import { borderRadius, fonts, layout, spacing, typography } from '../../constants/theme'
 import z from 'zod'
 
@@ -170,7 +170,7 @@ const BecomeAProvider = ({ navigation }: Props) => {
                             control={control}
                             name='bank_account_number'
                             render={({ field: { onChange, onBlur, value } }) => (
-                                <BoameInput
+                                <MGTextField
                                     label='Número da conta'
                                     placeholder='Digite o número da conta'
                                     onChangeText={onChange}
@@ -186,7 +186,7 @@ const BecomeAProvider = ({ navigation }: Props) => {
                             control={control}
                             name='bank_account_name'
                             render={({ field: { onChange, onBlur, value } }) => (
-                                <BoameInput
+                                <MGTextField
                                     label='Nome do titular'
                                     placeholder='Digite o nome do titular'
                                     onChangeText={onChange}
@@ -201,7 +201,7 @@ const BecomeAProvider = ({ navigation }: Props) => {
                             control={control}
                             name="bank_code"
                             render={({ field: { onChange, onBlur, value } }) => (
-                                <BoameInput label="Código do banco" placeholder="Código do banco" onChangeText={onChange} onBlur={onBlur} value={value} error={errors.bank_code?.message} />
+                                <MGTextField label="Código do banco" placeholder="Código do banco" onChangeText={onChange} onBlur={onBlur} value={value} error={errors.bank_code?.message} />
                             )}
                         />
                     </>
@@ -211,7 +211,7 @@ const BecomeAProvider = ({ navigation }: Props) => {
                     control={control}
                     name='service_area'
                     render={({ field: { onChange, onBlur, value } }) => (
-                        <BoameInput
+                        <MGTextField
                             label='Área de atendimento'
                             placeholder='ex.: São Paulo, Pinheiros'
                             onChangeText={onChange}
@@ -222,8 +222,8 @@ const BecomeAProvider = ({ navigation }: Props) => {
                     )}
                 />
 
-                <BoameBtn
-                    title='Cadastrar como groomer'
+                <MGButton
+                    label='Cadastrar como groomer'
                     loading={isPending}
                     onPress={handleSubmit(onSubmit)}
                 />
@@ -273,4 +273,3 @@ const styles = StyleSheet.create({
 })
 
 export default BecomeAProvider
-

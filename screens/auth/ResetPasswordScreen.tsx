@@ -1,10 +1,10 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { AuthStackParamList } from "../../navigation/types";
 import { fonts, spacing, typography } from "../../constants/theme";
 import { ToggleInput } from "../../components/shared/Input";
-import BoameBtn from "../../components/shared/BoameBtn";
+import { MGButton, MGText } from "../../design-system/components";
 import { resetPasswordSchema } from "../../validators/auth.validator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
@@ -41,13 +41,15 @@ export default function ResetPasswordScreen({ navigation, route }: Props) {
             extraScrollHeight={20}
             enableOnAndroid
         >
-            <Text style={[styles.title, { color: colors.brand }]}>Nova senha</Text>
+            <MGText variant="heading1" color="brand" style={[styles.title, { fontFamily: fonts.logo }]}>
+                Nova senha
+            </MGText>
             {isSuccess ? (
                 <View style={styles.form}>
-                    <Text accessibilityRole="alert" style={[styles.help, { color: colors.text }]}>
+                    <MGText accessibilityRole="alert" style={styles.help}>
                         Senha redefinida com sucesso
-                    </Text>
-                    <BoameBtn title="Entrar" onPress={() => navigation.navigate("Login")} />
+                    </MGText>
+                    <MGButton label="Entrar" onPress={() => navigation.navigate("Login")} />
                 </View>
             ) : (
                 <View style={styles.form}>
@@ -68,8 +70,12 @@ export default function ResetPasswordScreen({ navigation, route }: Props) {
                             />
                         )}
                     />
-                    <BoameBtn title="Redefinir senha" loading={isPending} onPress={handleSubmit(handleReset)} />
-                    {error && <Text accessibilityRole="alert" style={[styles.error, { color: colors.error }]}>{getErrorMessage(error)}</Text>}
+                    <MGButton label="Redefinir senha" loading={isPending} onPress={handleSubmit(handleReset)} />
+                    {error && (
+                        <MGText accessibilityRole="alert" color="error" style={styles.error}>
+                            {getErrorMessage(error)}
+                        </MGText>
+                    )}
                 </View>
             )}
         </KeyboardAwareScrollView>
@@ -85,12 +91,9 @@ const styles = StyleSheet.create({
         paddingBottom: 100,
     },
     title: {
-        fontSize: typography.sizes.xxl,
-        fontFamily: fonts.logo,
         marginBottom: spacing.lg,
     },
     help: {
-        fontFamily: fonts.regular,
         fontSize: typography.sizes.md,
         marginBottom: spacing.lg,
     },
@@ -101,7 +104,6 @@ const styles = StyleSheet.create({
     },
     error: {
         fontSize: typography.sizes.sm,
-        fontFamily: fonts.regular,
         marginTop: spacing.xs,
     },
 });

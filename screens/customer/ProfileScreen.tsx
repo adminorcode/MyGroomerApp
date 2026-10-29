@@ -97,6 +97,27 @@ export default function ProfileScreen({ navigation }: Props) {
         </Pressable>
       )}
 
+      {__DEV__ ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Design System"
+          onPress={() => navigation.navigate('DesignSystemShowcase')}
+          style={({ pressed }) => [
+            styles.actionRow,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+            pressed && styles.pressed,
+          ]}
+        >
+          <View style={styles.actionTextWrapper}>
+            <Text style={[styles.actionTitle, { color: colors.text }]}>Design System</Text>
+            <Text style={[styles.actionSubtitle, { color: colors.textSecondary }]}>
+              Showcase de componentes (somente desenvolvimento)
+            </Text>
+          </View>
+          <ChevronRight size={20} color={colors.textSecondary} />
+        </Pressable>
+      ) : null}
+
       <View style={styles.spacer} />
 
       <Pressable

@@ -2,13 +2,10 @@ import { AppAlert } from '../../utils/alert'
 import { useMemo, useState } from 'react'
 import {
     View,
-    Text,
     ActivityIndicator,
     FlatList,
     StyleSheet,
     Pressable,
-    TextInput,
-    Alert,
     KeyboardAvoidingView,
 } from 'react-native'
 import { Check } from 'lucide-react-native'
@@ -19,8 +16,8 @@ import { useGetAllServices } from '../../hooks/useServices'
 import { useCreateProviderService, useGetProviderServices } from '../../hooks/useProviders'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
-import BoameBtn from '../../components/shared/BoameBtn'
-import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
+import { MGButton, MGEmptyState, MGErrorState, MGText, MGTextField } from '../../design-system/components'
+import { borderRadius, spacing } from '../../constants/theme'
 import { Service } from '../../types/service.types'
 
 type AddServiceNavigationProp = StackNavigationProp<ProviderServicesStackParamList, 'AddService'>
@@ -79,9 +76,7 @@ export default function AddService({ navigation }: Props) {
                 </View>
             ) : isError ? (
                 <View style={styles.centered}>
-                    <Text style={[styles.message, { color: colors.error }]}>
-                        Não foi possível carregar os serviços.
-                    </Text>
+                    <MGErrorState message="Não foi possível carregar os serviços." />
                 </View>
             ) : (
                 <KeyboardAvoidingView
@@ -107,15 +102,16 @@ export default function AddService({ navigation }: Props) {
                                     ]}
                                 >
                                     <View style={styles.serviceInfo}>
-                                        <Text style={[styles.serviceName, { color: colors.text }]}>{item.name}</Text>
-                                        {item.description && (
-                                            <Text
-                                                style={[styles.serviceDesc, { color: colors.textSecondary }]}
+                                        <MGText variant="title">{item.name}</MGText>
+                                        {item.description ? (
+                                            <MGText
+                                                variant="bodySmall"
+                                                color="secondary"
                                                 numberOfLines={1}
                                             >
                                                 {item.description}
-                                            </Text>
-                                        )}
+                                            </MGText>
+                                        ) : null}
                                     </View>
                                     {isSelected && <Check size={20} color={colors.primary} />}
                                 </Pressable>
@@ -123,29 +119,25 @@ export default function AddService({ navigation }: Props) {
                         }}
                         ListEmptyComponent={
                             <View style={styles.centered}>
-                                <Text style={[styles.message, { color: colors.textSecondary }]}>
-                                    Você já oferece todos os serviços disponíveis.
-                                </Text>
+                                <MGEmptyState
+                                    title="Nada disponível"
+                                    description="Você já oferece todos os serviços disponíveis."
+                                />
                             </View>
                         }
                         keyExtractor={(item) => item.id ?? item.name}
                     />
 
                     <View style={styles.footer}>
-                        <Text style={[styles.label, { color: colors.text }]}>Preço (R$)</Text>
-                        <TextInput
+                        <MGTextField
+                            label="Preço (R$)"
                             value={price}
                             onChangeText={setPrice}
-                            placeholder='ex.: 150'
-                            placeholderTextColor={colors.textSecondary}
-                            keyboardType='numeric'
-                            style={[
-                                styles.input,
-                                { borderColor: colors.border, backgroundColor: colors.background, color: colors.text },
-                            ]}
+                            placeholder="ex.: 150"
+                            keyboardType="numeric"
                         />
-                        <BoameBtn
-                            title='Adicionar serviço'
+                        <MGButton
+                            label="Adicionar serviço"
                             onPress={handleAdd}
                             loading={isPending}
                             disabled={isPending}
@@ -181,31 +173,10 @@ const styles = StyleSheet.create({
         flex: 1,
         gap: spacing.xs,
     },
-    serviceName: {
-        fontSize: typography.sizes.md,
-        fontFamily: fonts.semibold,
-    },
-    serviceDesc: {
-        fontSize: typography.sizes.sm,
-        fontFamily: fonts.regular,
-    },
     footer: {
         paddingTop: spacing.md,
         paddingBottom: spacing.md,
         gap: spacing.sm,
-    },
-    label: {
-        fontSize: typography.sizes.md,
-        fontFamily: fonts.medium,
-    },
-    input: {
-        borderWidth: 1,
-        borderRadius: borderRadius.lg,
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm + 4,
-        fontFamily: fonts.regular,
-        fontSize: typography.sizes.md,
-        marginBottom: spacing.sm,
     },
     centered: {
         flex: 1,
@@ -213,10 +184,4 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingHorizontal: spacing.lg,
     },
-    message: {
-        fontSize: typography.sizes.md,
-        fontFamily: fonts.regular,
-        textAlign: 'center',
-    },
 })
-

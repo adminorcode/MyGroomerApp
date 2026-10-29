@@ -1,13 +1,15 @@
 import { AppAlert } from '../../utils/alert'
-import { View, Text, ActivityIndicator, FlatList, StyleSheet, Pressable, Alert } from 'react-native'
+import { View, ActivityIndicator, FlatList, StyleSheet, Pressable } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
-import { Plus, Pencil, Trash2 } from 'lucide-react-native'
+import { Plus } from 'lucide-react-native'
 import { ProviderServicesStackParamList } from '../../navigation/types'
 import { useTheme } from '../../context/ThemeContext'
 import { useGetProviderServices, useDeleteProviderService } from '../../hooks/useProviders'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
-import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
+import { MGButton, MGEmptyState, MGErrorState, MGText } from '../../design-system/components'
+import { ServiceEditorCard } from '../../design-system/patterns'
+import { borderRadius, spacing } from '../../constants/theme'
 import { ProviderServiceDetailed } from '../../types/provider.types'
 import { getErrorMessage } from '../../utils/error'
 import { formatMoney } from '../../utils/formatMoney'
@@ -56,16 +58,18 @@ export default function MyServices({ navigation }: Props) {
                 </Pressable>
             </View>
 
-            {deleteError && <Text accessibilityRole="alert" style={{ color: colors.error }}>{getErrorMessage(deleteError)}</Text>}
+            {deleteError ? (
+                <MGText variant="bodySmall" color="error" accessibilityRole="alert">
+                    {getErrorMessage(deleteError)}
+                </MGText>
+            ) : null}
             {isLoading ? (
                 <View style={styles.centered}>
                     <ActivityIndicator size='large' color={colors.primary} />
                 </View>
             ) : isError ? (
                 <View style={styles.centered}>
-                    <Text style={[styles.message, { color: colors.error }]}>
-                        Não foi possível carregar os serviços.
-                    </Text>
+                    <MGErrorState message="Não foi possível carregar os serviços." />
                 </View>
             ) : (
                 <FlatList
@@ -74,43 +78,31 @@ export default function MyServices({ navigation }: Props) {
                     contentContainerStyle={styles.listContent}
                     showsVerticalScrollIndicator={false}
                     renderItem={({ item }) => (
-                        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                            <View style={styles.cardContent}>
-                                <Text style={[styles.serviceName, { color: colors.text }]} numberOfLines={1}>
-                                    {item.service_name}
-                                </Text>
-                                <Text style={[styles.price, { color: colors.primary }]}>{formatMoney(item.price)}</Text>
-                            </View>
-                            <View style={styles.actions}>
-                                <Pressable
-                                    onPress={() => navigation.navigate('EditService', {
-                                        providerServiceId: item.id,
-                                        serviceName: item.service_name,
-                                        price: item.price,
-                                    })}
-                                    style={styles.iconButton}
-                                    accessibilityRole='button'
-                                    accessibilityLabel='Editar preço'
-                                >
-                                    <Pencil size={18} color={colors.textSecondary} />
-                                </Pressable>
-                                <Pressable
-                                    onPress={() => handleDelete(item)}
-                                    disabled={isDeleting}
-                                    style={styles.iconButton}
-                                    accessibilityRole='button'
-                                    accessibilityLabel='Remover serviço'
-                                >
-                                    <Trash2 size={18} color={colors.error} />
-                                </Pressable>
-                            </View>
+                        <View style={styles.cardWrap}>
+                            <ServiceEditorCard
+                                name={item.service_name}
+                                prices={{ medium: formatMoney(item.price) }}
+                                onEdit={() => navigation.navigate('EditService', {
+                                    providerServiceId: item.id,
+                                    serviceName: item.service_name,
+                                    price: item.price,
+                                })}
+                            />
+                            <MGButton
+                                label="Remover"
+                                variant="destructive"
+                                onPress={() => handleDelete(item)}
+                                disabled={isDeleting}
+                                loading={isDeleting}
+                            />
                         </View>
                     )}
                     ListEmptyComponent={
                         <View style={styles.centered}>
-                            <Text style={[styles.message, { color: colors.textSecondary }]}>
-                                Você ainda não adicionou serviços. Toque em + para incluir um.
-                            </Text>
+                            <MGEmptyState
+                                title="Nenhum serviço"
+                                description="Você ainda não adicionou serviços. Toque em + para incluir um."
+                            />
                         </View>
                     }
                     keyExtractor={(item) => item.id}
@@ -142,34 +134,10 @@ const styles = StyleSheet.create({
     listContent: {
         flexGrow: 1,
         paddingBottom: spacing.xl,
+        gap: spacing.md,
     },
-    card: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: spacing.md,
-        borderRadius: borderRadius.lg,
-        borderWidth: 1,
-        marginBottom: spacing.sm,
-    },
-    cardContent: {
-        flex: 1,
-        gap: spacing.xs,
-    },
-    serviceName: {
-        fontSize: typography.sizes.lg,
-        fontFamily: fonts.semibold,
-    },
-    price: {
-        fontSize: typography.sizes.md,
-        fontFamily: fonts.medium,
-    },
-    actions: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.xs,
-    },
-    iconButton: {
-        padding: spacing.sm,
+    cardWrap: {
+        gap: spacing.sm,
     },
     centered: {
         flex: 1,
@@ -177,10 +145,4 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingHorizontal: spacing.lg,
     },
-    message: {
-        fontSize: typography.sizes.md,
-        fontFamily: fonts.regular,
-        textAlign: 'center',
-    },
 })
-

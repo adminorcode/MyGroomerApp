@@ -12,9 +12,8 @@ import { CoverageSearchParams } from '../../types/provider.types'
 import { useTheme } from '../../context/ThemeContext'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
-import BoameInput from '../../components/shared/Input'
-import BoameBtn from '../../components/shared/BoameBtn'
-import ListCard from '../../components/shared/ListCard'
+import { MGButton, MGEmptyState, MGErrorState, MGTextField } from '../../design-system/components'
+import { GroomerSearchCard } from '../../design-system/patterns'
 import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
 import { formatMoney } from '../../utils/formatMoney'
 import { formatRating } from '../../utils/formatRating'
@@ -90,7 +89,7 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
                     showBackButton
                     onBack={() => navigation.goBack()}
                 />
-                <BoameInput
+                <MGTextField
                     label="Endereço do atendimento"
                     accessibilityLabel="Endereço do atendimento"
                     placeholder="Avenida Paulista, São Paulo"
@@ -126,60 +125,58 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
                     <Text style={[styles.message, { color: colors.textSecondary }]}>Carregando filtros</Text>
                 ) : null}
                 {(categories.isError || services.isError) ? (
-                    <View style={styles.status}>
-                        <Text style={[styles.message, { color: colors.error }]}>Não foi possível carregar os filtros.</Text>
-                        <BoameBtn
-                            title="Tentar novamente"
-                            onPress={() => {
-                                categories.refetch()
-                                services.refetch()
-                            }}
-                            fullWidth={false}
-                        />
-                    </View>
+                    <MGErrorState
+                        message="Não foi possível carregar os filtros."
+                        onRetry={() => {
+                            categories.refetch()
+                            services.refetch()
+                        }}
+                    />
                 ) : null}
 
-                <BoameBtn title="Buscar" onPress={() => publish(draft)} loading={search.isFetching && !search.data} />
+                <MGButton label="Buscar" onPress={() => publish(draft)} loading={search.isFetching && !search.data} />
 
                 <View style={styles.results}>
                     {query === null ? (
-                        <Text style={[styles.message, { color: colors.textSecondary }]}>
-                            {draft.serviceId || draft.categoryId
-                                ? 'Informe o endereço do atendimento para ver quem atende.'
-                                : 'Informe o endereço e escolha um serviço ou uma modalidade.'}
-                        </Text>
+                        <MGEmptyState
+                            title="Busque quem atende"
+                            description={
+                                draft.serviceId || draft.categoryId
+                                    ? 'Informe o endereço do atendimento para ver quem atende.'
+                                    : 'Informe o endereço e escolha um serviço ou uma modalidade.'
+                            }
+                        />
                     ) : !search.data && search.isPaused ? (
-                        <View style={styles.status}>
-                            <Text style={[styles.message, { color: colors.error }]}>
-                                Não foi possível conectar à API. Verifique o servidor e tente novamente.
-                            </Text>
-                            <BoameBtn title="Tentar novamente" onPress={() => search.refetch()} fullWidth={false} />
-                        </View>
+                        <MGErrorState
+                            message="Não foi possível conectar à API. Verifique o servidor e tente novamente."
+                            onRetry={() => search.refetch()}
+                        />
                     ) : !search.data && !search.isError ? (
                         <View style={styles.status} accessibilityLabel="Buscando groomers">
                             <ActivityIndicator size="large" color={colors.primary} />
                             <Text style={[styles.message, { color: colors.text }]}>Buscando groomers</Text>
                         </View>
                     ) : search.isError && !search.data ? (
-                        <View style={styles.status}>
-                            <Text style={[styles.message, { color: colors.error }]}>{getErrorMessage(search.error)}</Text>
-                            <BoameBtn title="Tentar novamente" onPress={() => search.refetch()} fullWidth={false} />
-                        </View>
+                        <MGErrorState
+                            message={getErrorMessage(search.error)}
+                            onRetry={() => search.refetch()}
+                        />
                     ) : search.data && search.data.providers.length === 0 ? (
-                        <Text style={[styles.message, { color: colors.textSecondary }]}>
-                            Nenhum groomer atende este endereço.
-                        </Text>
+                        <MGEmptyState
+                            title="Nenhum groomer encontrado"
+                            description="Nenhum groomer atende este endereço."
+                        />
                     ) : (
                         search.data?.providers.map(item => {
                             const rating = formatRating(item.average_rating)
                             const price = `A partir de ${formatMoney(item.price)}`
                             return (
-                                <ListCard
+                                <GroomerSearchCard
                                     key={item.id}
-                                    accessibilityRole="button"
-                                    accessibilityLabel={`${item.name}, avaliação ${rating}, ${price}, ${item.service_name}`}
-                                    title={item.name}
-                                    subtitle={`Avaliação ${rating} · ${price} · ${item.service_name}`}
+                                    name={item.name}
+                                    priceLabel={price}
+                                    coverageLabel={item.service_name}
+                                    ratingLabel={rating === 'Sem avaliações' ? undefined : rating}
                                     showChevron
                                     onPress={() => navigation.navigate('GroomerProfile', { providerServiceId: item.id })}
                                 />

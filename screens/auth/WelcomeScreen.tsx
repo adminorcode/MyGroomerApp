@@ -1,8 +1,8 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { AuthStackParamList } from "../../navigation/types";
-import { fonts, spacing, typography } from "../../constants/theme";
-import BoameBtn from "../../components/shared/BoameBtn";
+import { spacing } from "../../constants/theme";
+import { ProfileRoleSelector } from "../../design-system/patterns";
 import { useTheme } from "../../context/ThemeContext";
 
 type WelcomeScreenNavigationProp = StackNavigationProp<AuthStackParamList, "Welcome">;
@@ -16,14 +16,14 @@ export default function WelcomeScreen({ navigation }: Props) {
 
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
-            <Text style={[styles.title, { color: colors.brand }]}>MyGroomer</Text>
-            <Text style={[styles.subtitle, { color: colors.text }]}>
-                Banho e tosa em domicílio
-            </Text>
-            <View style={styles.actions}>
-                <BoameBtn title="Sou tutor" onPress={() => navigation.navigate("Login")} />
-                <BoameBtn title="Sou profissional" onPress={() => navigation.navigate("Register")} />
-            </View>
+            <ProfileRoleSelector
+                title="MyGroomer"
+                subtitle="Banho e tosa em domicílio"
+                tutorLabel="Sou tutor"
+                groomerLabel="Sou profissional"
+                onSelectTutor={() => navigation.navigate("Login")}
+                onSelectGroomer={() => navigation.navigate("Register")}
+            />
         </View>
     );
 }
@@ -32,22 +32,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: "center",
+        alignItems: "center",
         paddingHorizontal: spacing.xl,
         paddingBottom: spacing.huge,
-    },
-    title: {
-        fontSize: typography.sizes.xxl,
-        fontFamily: fonts.logo,
-        marginBottom: spacing.sm,
-    },
-    subtitle: {
-        fontSize: typography.sizes.md,
-        fontFamily: fonts.regular,
-        marginBottom: spacing.xxl,
-    },
-    actions: {
-        width: "100%",
-        maxWidth: 448,
-        gap: spacing.md,
     },
 });

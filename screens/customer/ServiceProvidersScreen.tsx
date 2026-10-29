@@ -1,4 +1,4 @@
-import { View, Text, ActivityIndicator, FlatList, StyleSheet } from 'react-native'
+import { View, ActivityIndicator, FlatList, StyleSheet } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
 import { HomeStackParamList } from '../../navigation/types'
@@ -6,8 +6,9 @@ import { useGetServiceProviders } from '../../hooks/useProviders'
 import { useTheme } from '../../context/ThemeContext'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
-import ListCard from '../../components/shared/ListCard'
-import { fonts, spacing, typography } from '../../constants/theme'
+import { MGEmptyState, MGErrorState } from '../../design-system/components'
+import { GroomerSearchCard } from '../../design-system/patterns'
+import { spacing } from '../../constants/theme'
 import { formatMoney } from '../../utils/formatMoney'
 
 type ServiceProviderScreenNavigationProp = StackNavigationProp<HomeStackParamList, 'ServiceProviders'>
@@ -38,9 +39,7 @@ export default function ServiceProvidersScreen({ navigation, route }: Props) {
         </View>
       ) : isError ? (
         <View style={styles.centered}>
-          <Text style={[styles.message, { color: colors.error }]}>
-            Não foi possível carregar os groomers.
-          </Text>
+          <MGErrorState message="Não foi possível carregar os groomers." />
         </View>
       ) : (
         <FlatList
@@ -49,24 +48,21 @@ export default function ServiceProvidersScreen({ navigation, route }: Props) {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
-            <ListCard
-              title={item.name}
-              subtitle={[
-                item.price != null ? `A partir de ${formatMoney(item.price)}` : null,
-                item.service_area,
-              ].filter(Boolean).join(' · ')}
+            <GroomerSearchCard
+              name={item.name}
+              priceLabel={item.price != null ? `A partir de ${formatMoney(item.price)}` : undefined}
+              coverageLabel={item.service_area}
+              showChevron
               onPress={() => navigation.navigate('BookService', {
                 providerServiceId: item.id,
               })}
-              showChevron={true}
             />
           )}
           ListEmptyComponent={
-            <View style={styles.centered}>
-              <Text style={[styles.message, { color: colors.textSecondary }]}>
-                Nenhum groomer disponível para este serviço ainda
-              </Text>
-            </View>
+            <MGEmptyState
+              title="Nenhum groomer"
+              description="Nenhum groomer disponível para este serviço ainda"
+            />
           }
           keyExtractor={(item) => item.id}
         />
@@ -88,10 +84,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
-  },
-  message: {
-    fontSize: typography.sizes.md,
-    fontFamily: fonts.regular,
-    textAlign: 'center',
   },
 })

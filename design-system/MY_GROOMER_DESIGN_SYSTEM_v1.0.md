@@ -5,7 +5,7 @@
 > **Plataformas:** aplicativo móvel iOS/Android em React Native; preparado para compartilhamento futuro de tokens com web/admin  
 > **Idioma da interface:** português do Brasil (`pt-BR`)  
 > **Identidade:** Pink & Teal  
-> **Status:** especificação inicial para implementação, sujeita a validação visual e funcional  
+> **Status:** especificação v1.0; fases 1–3 do backlog (fundação MG, patterns de domínio e integração das telas existentes) no plano 021 — fase 4 (hardening) pendente  
 > **Versão:** 1.0 — 29/10/2026
 
 ---
@@ -940,7 +940,7 @@ A referência visual foi pensada para celular retrato, mas a implementação pre
 
 ### 18.2. Dark mode
 
-**Fora do escopo normativo de v1.0.** O projeto tem apenas tema claro validado. Estruturar as cores semanticamente para permitir `dark` futuramente, mas não inventar uma paleta escura oficial agora.
+**Fora do produto.** Decisão confirmada: somente tema claro; o aplicativo ignora o night mode do sistema e não oferece toggle. Não inventar paleta escura.
 
 ---
 

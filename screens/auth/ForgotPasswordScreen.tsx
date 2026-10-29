@@ -1,9 +1,8 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { AuthStackParamList } from "../../navigation/types";
 import { fonts, spacing, typography } from "../../constants/theme";
-import BoameInput from "../../components/shared/Input";
-import BoameBtn from "../../components/shared/BoameBtn";
+import { MGButton, MGText, MGTextField } from "../../design-system/components";
 import { forgotPasswordSchema } from "../../validators/auth.validator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
@@ -40,16 +39,18 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
             extraScrollHeight={20}
             enableOnAndroid
         >
-            <Text style={[styles.title, { color: colors.brand }]}>Esqueci minha senha</Text>
-            <Text style={[styles.help, { color: colors.text }]}>
+            <MGText variant="heading1" color="brand" style={[styles.title, { fontFamily: fonts.logo }]}>
+                Esqueci minha senha
+            </MGText>
+            <MGText variant="bodySmall" style={styles.help}>
                 Informe o e-mail da sua conta. Vamos enviar o caminho para criar uma senha nova.
-            </Text>
+            </MGText>
             <View style={styles.form}>
                 <Controller
                     control={control}
                     name="email"
                     render={({ field: { onChange, onBlur, value } }) => (
-                        <BoameInput
+                        <MGTextField
                             label="E-mail"
                             placeholder="Digite seu e-mail"
                             onChangeText={onChange}
@@ -63,17 +64,21 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
                         />
                     )}
                 />
-                <BoameBtn title="Enviar" loading={isPending} onPress={handleSubmit(handleForgot)} />
+                <MGButton label="Enviar" loading={isPending} onPress={handleSubmit(handleForgot)} />
                 {waitingForEmail && (
-                    <Text accessibilityRole="alert" style={[styles.help, { color: colors.text }]}>
+                    <MGText accessibilityRole="alert" variant="bodySmall" style={styles.help}>
                         {data?.message ?? "E-mail de redefinição de senha enviado"}
-                    </Text>
+                    </MGText>
                 )}
-                {error && <Text accessibilityRole="alert" style={[styles.error, { color: colors.error }]}>{getErrorMessage(error)}</Text>}
+                {error && (
+                    <MGText accessibilityRole="alert" color="error" style={styles.error}>
+                        {getErrorMessage(error)}
+                    </MGText>
+                )}
             </View>
-            <Text style={[styles.backLink, { color: colors.primary }]} onPress={() => navigation.navigate("Login")}>
+            <MGText color="brand" style={styles.backLink} onPress={() => navigation.navigate("Login")}>
                 Voltar ao login
-            </Text>
+            </MGText>
         </KeyboardAwareScrollView>
     );
 }
@@ -87,15 +92,11 @@ const styles = StyleSheet.create({
         paddingBottom: 100,
     },
     title: {
-        fontSize: typography.sizes.xxl,
-        fontFamily: fonts.logo,
         marginBottom: spacing.md,
     },
     help: {
         width: "100%",
         maxWidth: 448,
-        fontFamily: fonts.regular,
-        fontSize: typography.sizes.sm,
         marginBottom: spacing.lg,
     },
     form: {
@@ -105,11 +106,9 @@ const styles = StyleSheet.create({
     },
     error: {
         fontSize: typography.sizes.sm,
-        fontFamily: fonts.regular,
         marginTop: spacing.xs,
     },
     backLink: {
         marginTop: spacing.lg,
-        fontFamily: fonts.regular,
     },
 });

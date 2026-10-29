@@ -1,9 +1,9 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { AuthStackParamList } from "../../navigation/types";
 import { fonts, spacing, typography } from "../../constants/theme";
-import BoameInput, { BoamePhoneInput, ToggleInput } from "../../components/shared/Input";
-import BoameBtn from "../../components/shared/BoameBtn";
+import { BoamePhoneInput, ToggleInput } from "../../components/shared/Input";
+import { MGButton, MGText, MGTextField } from "../../design-system/components";
 import { registerSchema } from "../../validators/auth.validator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
@@ -50,7 +50,7 @@ function OptionSelector<T extends string>({ label, options, value, onChange, err
     const { colors } = useTheme();
     return (
         <View style={styles.selectorGroup}>
-            <Text style={[styles.selectorLabel, { color: colors.primary }]}>{label}</Text>
+            <MGText variant="bodySmall" color="brand" style={styles.selectorLabel}>{label}</MGText>
             <View style={styles.selectorRow}>
                 {options.map((option) => {
                     const isSelected = value === option.value;
@@ -65,7 +65,7 @@ function OptionSelector<T extends string>({ label, options, value, onChange, err
                                 isSelected && { borderColor: colors.selection, backgroundColor: colors.selection },
                             ]}
                         >
-                            <Text
+                            <MGText
                                 style={[
                                     styles.roleOptionText,
                                     { color: colors.text },
@@ -73,12 +73,12 @@ function OptionSelector<T extends string>({ label, options, value, onChange, err
                                 ]}
                             >
                                 {option.label}
-                            </Text>
+                            </MGText>
                         </Pressable>
                     );
                 })}
             </View>
-            {error && <Text style={[styles.error, { color: colors.error }]}>{error}</Text>}
+            {error && <MGText color="error" style={styles.error}>{error}</MGText>}
         </View>
     );
 }
@@ -87,12 +87,17 @@ export default function RegisterScreen({ navigation }: Props) {
     const { control, handleSubmit, watch, formState: { errors } } = useForm<RegisterFormValues>({
         resolver: zodResolver(registerSchema),
         defaultValues: {
+            name: "",
+            email: "",
+            password: "",
+            phone_number: "",
             role: Role.PROVIDER,
             payout_method: PayoutMethod.MOBILE_MONEY,
             momo_number: "",
             momo_provider: undefined,
             bank_account_number: "",
             bank_account_name: "",
+            bank_code: "",
             service_area: "",
         },
     });
@@ -113,16 +118,19 @@ export default function RegisterScreen({ navigation }: Props) {
             extraScrollHeight={20}
             enableOnAndroid
         >
-            <Text style={[styles.backLink, { color: colors.primary }]} onPress={() => navigation.navigate("Welcome")}>
+            <View style={styles.content}>
+            <MGText color="brand" style={styles.backLink} onPress={() => navigation.navigate("Welcome")}>
                 Voltar
-            </Text>
-            <Text style={[styles.title, { color: colors.brand }]}>Cadastro profissional</Text>
+            </MGText>
+            <MGText variant="heading1" color="brand" style={[styles.title, { fontFamily: fonts.logo }]}>
+                Cadastro profissional
+            </MGText>
             <View style={styles.form}>
                 <Controller
                     control={control}
                     name="name"
                     render={({ field: { onChange, onBlur, value } }) => (
-                        <BoameInput
+                        <MGTextField
                             label="Nome completo"
                             style={styles.input}
                             placeholder="Digite seu nome"
@@ -141,7 +149,7 @@ export default function RegisterScreen({ navigation }: Props) {
                     control={control}
                     name="email"
                     render={({ field: { onChange, onBlur, value } }) => (
-                        <BoameInput
+                        <MGTextField
                             label="E-mail"
                             style={styles.input}
                             placeholder="Digite seu e-mail"
@@ -238,7 +246,7 @@ export default function RegisterScreen({ navigation }: Props) {
                                     control={control}
                                     name="bank_account_number"
                                     render={({ field: { onChange, onBlur, value } }) => (
-                                        <BoameInput
+                                        <MGTextField
                                             label="Número da conta"
                                             placeholder="Digite o número da conta"
                                             onChangeText={onChange}
@@ -254,7 +262,7 @@ export default function RegisterScreen({ navigation }: Props) {
                                     control={control}
                                     name="bank_account_name"
                                     render={({ field: { onChange, onBlur, value } }) => (
-                                        <BoameInput
+                                        <MGTextField
                                             label="Nome do titular"
                                             placeholder="Digite o nome do titular"
                                             onChangeText={onChange}
@@ -269,7 +277,7 @@ export default function RegisterScreen({ navigation }: Props) {
                                     control={control}
                                     name="bank_code"
                                     render={({ field: { onChange, onBlur, value } }) => (
-                                        <BoameInput label="Código do banco" placeholder="Código do banco" onChangeText={onChange} onBlur={onBlur} value={value} error={errors.bank_code?.message} />
+                                        <MGTextField label="Código do banco" placeholder="Código do banco" onChangeText={onChange} onBlur={onBlur} value={value} error={errors.bank_code?.message} />
                                     )}
                                 />
                             </>
@@ -279,7 +287,7 @@ export default function RegisterScreen({ navigation }: Props) {
                             control={control}
                             name="service_area"
                             render={({ field: { onChange, onBlur, value } }) => (
-                                <BoameInput
+                                <MGTextField
                                     label="Área de atendimento"
                                     placeholder="ex.: São Paulo, Pinheiros"
                                     onChangeText={onChange}
@@ -290,23 +298,32 @@ export default function RegisterScreen({ navigation }: Props) {
                             )}
                         />
 
-                <BoameBtn
-                    title="Cadastrar"
+                <MGButton
+                    label="Cadastrar"
                     loading={isPending}
                     onPress={handleSubmit(handleRegister)}
                 />
-                {error && <Text accessibilityRole="alert" style={[styles.error, { color: colors.error }]}>{getErrorMessage(error)}</Text>}
+                {error && (
+                    <MGText accessibilityRole="alert" color="error" style={styles.error}>
+                        {getErrorMessage(error)}
+                    </MGText>
+                )}
                 {runtime.googleAuthEnabled && <><AuthDivider /><GoogleSignInBtn
                     title="Cadastrar com Google"
                     loading={isGooglePending}
                     disabled={isPending}
                     onPress={() => signInWithGoogle()}
                 /></>}
-                {googleError && <Text style={[styles.error, { color: colors.error }]}>{googleError.message}</Text>}
+                {googleError && (
+                    <MGText color="error" style={styles.error}>
+                        {googleError.message}
+                    </MGText>
+                )}
             </View>
-            <Text style={[styles.loginLink, { color: colors.primary }]} onPress={() => navigation.navigate("Login")}>
+            <MGText color="brand" style={styles.loginLink} onPress={() => navigation.navigate("Login")}>
                 Já tem uma conta? Entrar
-            </Text>
+            </MGText>
+            </View>
         </KeyboardAwareScrollView>
     );
 }
@@ -315,26 +332,24 @@ const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
         alignItems: "center",
-        paddingHorizontal: 24,
-        paddingTop: 96,
-        paddingBottom: 100,
+        paddingHorizontal: spacing.xl,
+        paddingTop: spacing.xxxl,
+        paddingBottom: spacing.huge,
+    },
+    content: {
+        width: "100%",
+        maxWidth: 448,
     },
     backLink: {
         alignSelf: "flex-start",
-        width: "100%",
-        maxWidth: 448,
-        fontFamily: fonts.regular,
-        marginBottom: spacing.sm,
+        marginBottom: spacing.md,
     },
     title: {
-        fontSize: typography.sizes.xxl,
-        fontFamily: fonts.logo,
         marginBottom: spacing.lg,
     },
     form: {
         width: "100%",
-        maxWidth: 448,
-        gap: 10,
+        gap: spacing.sm,
     },
     input: {
         fontFamily: fonts.regular,
@@ -343,8 +358,6 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     selectorLabel: {
-        fontSize: typography.sizes.sm,
-        fontFamily: fonts.regular,
         marginBottom: spacing.sm
     },
     selectorRow: {
@@ -364,12 +377,10 @@ const styles = StyleSheet.create({
     },
     error: {
         fontSize: typography.sizes.sm,
-        fontFamily: fonts.regular,
         marginTop: 4,
     },
     loginLink: {
         marginTop: spacing.lg,
-        fontFamily: fonts.regular,
-        paddingBottom: 100,
+        marginBottom: spacing.xl,
     },
 });

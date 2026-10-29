@@ -1,15 +1,16 @@
 import { useState } from 'react'
-import { View, Text, ActivityIndicator, FlatList, StyleSheet } from 'react-native'
+import { View, ActivityIndicator, FlatList, StyleSheet } from 'react-native'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
 import { BookingsStackParamList } from '../../navigation/types'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { useTheme } from '../../context/ThemeContext'
 import { useGetBookings } from '../../hooks/useBooking'
-import { fonts, spacing, typography } from '../../constants/theme'
+import { spacing } from '../../constants/theme'
 import { BookingCard } from '../../components/shared/BookingCard'
 import BookingStatusFilter from '../../components/shared/BookingStatusFilter'
 import { BookingStatus } from '../../types/booking.types'
+import { MGEmptyState, MGErrorState } from '../../design-system/components'
 
 type MyBookingsScreenNavigationProp = StackNavigationProp<BookingsStackParamList, 'MyBookings'>
 
@@ -38,9 +39,7 @@ export default function MyBookingsScreen({navigation}: Props) {
             </View>
         ) : isError ? (
             <View style={styles.centered}>
-            <Text style={[styles.message, { color: colors.error }]}>
-                Não foi possível carregar os agendamentos.
-            </Text>
+              <MGErrorState message="Não foi possível carregar os agendamentos." />
             </View>
         ) : (
             <FlatList
@@ -63,11 +62,14 @@ export default function MyBookingsScreen({navigation}: Props) {
                 />
             )}
             ListEmptyComponent={
-                <View style={styles.centered}>
-                <Text style={[styles.message, { color: colors.textSecondary }]}>
-                    {statusFilter ? 'Nenhum agendamento com este filtro' : 'Você ainda não agendou um serviço'}
-                </Text>
-                </View>
+                <MGEmptyState
+                  title={statusFilter ? 'Nenhum agendamento' : 'Sem agendamentos'}
+                  description={
+                    statusFilter
+                      ? 'Nenhum agendamento com este filtro'
+                      : 'Você ainda não agendou um serviço'
+                  }
+                />
             }
             keyExtractor={(item) => item.id}
             />
@@ -89,10 +91,5 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       justifyContent: 'center',
       paddingHorizontal: spacing.lg,
-    },
-    message: {
-      fontSize: typography.sizes.md,
-      fontFamily: fonts.regular,
-      textAlign: 'center',
     },
   })

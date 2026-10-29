@@ -6,7 +6,8 @@ import { useGetProviderServiceById } from '../../hooks/useProviders'
 import { useTheme } from '../../context/ThemeContext'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
-import BoameBtn from '../../components/shared/BoameBtn'
+import { MGButton, MGErrorState, MGText } from '../../design-system/components'
+import { GroomerProfileHeader } from '../../design-system/patterns'
 import { fonts, spacing, typography } from '../../constants/theme'
 import { formatMoney } from '../../utils/formatMoney'
 import { formatRating } from '../../utils/formatRating'
@@ -22,6 +23,7 @@ type PublicOffer = {
     price?: number | string
     average_rating?: number | string
     review_count?: number
+    photo_url?: string | null
 }
 
 export default function GroomerPublicProfileScreen({ navigation, route }: Props) {
@@ -45,12 +47,10 @@ export default function GroomerPublicProfileScreen({ navigation, route }: Props)
         return (
             <ScreenContainer>
                 <ScreenHeader title="Perfil do groomer" showBackButton onBack={() => navigation.goBack()} />
-                <View style={styles.centered}>
-                    <Text style={[styles.message, { color: colors.error }]}>
-                        Não foi possível carregar este perfil.
-                    </Text>
-                    <BoameBtn title="Tentar novamente" onPress={() => refetch()} fullWidth={false} />
-                </View>
+                <MGErrorState
+                    message="Não foi possível carregar este perfil."
+                    onRetry={() => refetch()}
+                />
             </ScreenContainer>
         )
     }
@@ -58,6 +58,8 @@ export default function GroomerPublicProfileScreen({ navigation, route }: Props)
     const rating = formatRating(offer.average_rating)
     const reviews = offer.review_count === 1 ? '1 avaliação' : `${offer.review_count ?? 0} avaliações`
     const price = `A partir de ${formatMoney(offer.price)}`
+    const ratingLabel = rating === 'Sem avaliações' ? rating : `${rating} · ${reviews}`
+    const hasHeader = Boolean(offer.provider_name)
 
     return (
         <ScreenContainer>
@@ -67,14 +69,34 @@ export default function GroomerPublicProfileScreen({ navigation, route }: Props)
                 showBackButton
                 onBack={() => navigation.goBack()}
             />
-            <Text style={[styles.label, { color: colors.textSecondary }]}>Avaliação</Text>
-            <Text style={[styles.value, { color: colors.text }]}>{rating === 'Sem avaliações' ? rating : `${rating} · ${reviews}`}</Text>
-            <Text style={[styles.label, { color: colors.textSecondary }]}>Preço indicativo</Text>
-            <Text style={[styles.value, { color: colors.text }]}>{price}</Text>
-            <Text style={[styles.label, { color: colors.textSecondary }]}>Serviço</Text>
-            <Text style={[styles.value, { color: colors.text }]}>{offer.service_name}</Text>
-            <BoameBtn
-                title="Agendar este serviço"
+            {hasHeader ? (
+                <View style={styles.headerBlock}>
+                    <GroomerProfileHeader
+                        name={offer.provider_name!}
+                        photoUrl={offer.photo_url}
+                        ratingLabel={ratingLabel}
+                    />
+                </View>
+            ) : (
+                <>
+                    <Text style={[styles.label, { color: colors.textSecondary }]}>Avaliação</Text>
+                    <Text style={[styles.value, { color: colors.text }]}>{ratingLabel}</Text>
+                </>
+            )}
+            <MGText variant="label" color="secondary" style={styles.label}>
+                Preço indicativo
+            </MGText>
+            <MGText variant="body" style={styles.value}>
+                {price}
+            </MGText>
+            <MGText variant="label" color="secondary" style={styles.label}>
+                Serviço
+            </MGText>
+            <MGText variant="body" style={styles.value}>
+                {offer.service_name}
+            </MGText>
+            <MGButton
+                label="Agendar este serviço"
                 onPress={() => navigation.navigate('BookService', { providerServiceId })}
             />
         </ScreenContainer>
@@ -87,6 +109,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: spacing.md,
+    },
+    headerBlock: {
+        marginBottom: spacing.md,
     },
     label: {
         fontFamily: fonts.semibold,

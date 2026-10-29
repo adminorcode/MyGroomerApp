@@ -1,5 +1,5 @@
 import { createStackNavigator } from '@react-navigation/stack'
-import { DarkTheme, DefaultTheme, NavigationContainer, LinkingOptions } from '@react-navigation/native'
+import { DefaultTheme, NavigationContainer, LinkingOptions } from '@react-navigation/native'
 import { useAuthStore } from '../store/authStore'
 import AuthNavigator from './AuthNavigator'
 import ProviderNavigator from './ProviderNavigator'
@@ -31,11 +31,11 @@ const Stack = createStackNavigator<RootParamList>()
 
 export default function RootNavigator() {
     const { token, user } = useAuthStore()
-    const { colors, isDark } = useTheme()
+    const { colors } = useTheme()
     const navigationTheme = {
-        ...(isDark ? DarkTheme : DefaultTheme),
+        ...DefaultTheme,
         colors: {
-            ...(isDark ? DarkTheme : DefaultTheme).colors,
+            ...DefaultTheme.colors,
             primary: colors.primary,
             background: colors.background,
             card: colors.surface,

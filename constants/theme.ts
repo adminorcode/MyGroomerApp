@@ -43,8 +43,8 @@ export const lightColors = {
     disabledBorder: palette.border.strong,
 }
 
-// Design System v1.0 does not define a dark palette. These values stay from
-// the Pink & Teal theme already in the app until a dark spec exists.
+// Kept for reference only. The app is light-only and ignores OS night mode.
+/** @deprecated Unused — ThemeProvider always serves lightColors. */
 export const darkColors = {
     brand: '#D95786',
     primary: '#F6B5CB',

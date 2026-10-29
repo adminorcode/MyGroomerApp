@@ -1,5 +1,5 @@
 import { AppAlert } from '../../utils/alert'
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
 import { CompositeNavigationProp } from '@react-navigation/native'
@@ -13,7 +13,7 @@ import StatusBadge from '../../components/shared/StatusBadge'
 import { CalendarClock, Hash, MapPin, Clock, PawPrint } from 'lucide-react-native'
 import { petSizeLabel, petSpeciesLabel } from '../../types/pet.types'
 import { DetailRow } from '../../components/shared/DetailRow'
-import BoameBtn from '../../components/shared/BoameBtn'
+import { MGButton, MGErrorState } from '../../design-system/components'
 import { BookingStatus } from '../../types/booking.types'
 import { formatDateTime } from '../../utils/formatDate'
 import { useCreateConversation } from '../../hooks/useConversations'
@@ -37,7 +37,7 @@ const BookingDetail = ({ navigation, route }: Props) => {
     const { colors } = useTheme()
     const runtime = useRuntime()
     const { data, isLoading, isError } = useGetBookingById(bookingId)
-    const {mutateAsync, isPending, isError:statusError} = useChangeBookingStatus()
+    const {mutateAsync, isPending} = useChangeBookingStatus()
     const {mutateAsync: createConvo} = useCreateConversation()
 
 
@@ -60,11 +60,7 @@ const BookingDetail = ({ navigation, route }: Props) => {
     if (isError || !data) {
         return (
             <ScreenContainer>
-                <View style={styles.centered}>
-                    <Text style={[styles.message, { color: colors.error }]}>
-                        Não foi possível carregar este agendamento.
-                    </Text>
-                </View>
+                <MGErrorState message="Não foi possível carregar este agendamento." />
             </ScreenContainer>
         )
     }
@@ -171,17 +167,17 @@ const BookingDetail = ({ navigation, route }: Props) => {
                         {
                             canCancel && (
                                 <>
-                                    <BoameBtn 
-                                    title={`${isPending ? "Cancelando..." : "Cancelar"}`} 
-                                    variant="danger"
+                                    <MGButton
+                                    label={isPending ? 'Cancelando...' : 'Cancelar'}
+                                    variant="destructive"
                                     onPress={handleCancel}
                                     fullWidth={false}
-                                    disabled = {isPending}
+                                    disabled={isPending}
                                     />
 
-                                    <BoameBtn 
-                                    title='Mensagem' 
-                                    variant='outline'
+                                    <MGButton
+                                    label='Mensagem'
+                                    variant='secondary'
                                     onPress={handleMessage}
                                     fullWidth={false}
                                     />
@@ -192,9 +188,9 @@ const BookingDetail = ({ navigation, route }: Props) => {
                         { 
                             canReview && (
                                 <>
-                                    <BoameBtn 
-                                    title='Avaliar' 
-                                    variant='outline'
+                                    <MGButton
+                                    label='Avaliar'
+                                    variant='secondary'
                                     onPress={() => navigation.navigate('ReviewBooking', {
                                         bookingId,
                                         serviceName: data.service_name,
@@ -203,10 +199,9 @@ const BookingDetail = ({ navigation, route }: Props) => {
                                     fullWidth={false}
                                     />
 
-                                    {/* TODO: when user messages provider for the first time this btn changes to view conversation button */}
-                                    <BoameBtn 
-                                    title='Mensagem' 
-                                    variant='outline'
+                                    <MGButton
+                                    label='Mensagem'
+                                    variant='secondary'
                                     onPress={handleMessage}
                                     fullWidth={false}
                                     />
@@ -216,9 +211,9 @@ const BookingDetail = ({ navigation, route }: Props) => {
                         {
                             hasReview && (
                                 <>
-                                    <BoameBtn 
-                                    title='Ver avaliação' 
-                                    variant='outline'
+                                    <MGButton
+                                    label='Ver avaliação'
+                                    variant='secondary'
                                     onPress={() => navigation.navigate('ReviewDetail', {
                                         reviewId: data.review_id!,
                                     })}
@@ -246,11 +241,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: spacing.lg,
-    },
-    message: {
-        fontSize: typography.sizes.md,
-        fontFamily: fonts.regular,
-        textAlign: 'center',
     },
     card: {
         padding: spacing.md,
@@ -301,4 +291,3 @@ const styles = StyleSheet.create({
 })
 
 export default BookingDetail
-

@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { AuthStackParamList } from "../../navigation/types";
 import { useLoginMutation } from "../../hooks/useAuth";
@@ -6,8 +6,8 @@ import { useGoogleSignInMutation } from "../../hooks/useGoogleAuth";
 import GoogleSignInBtn from "../../components/shared/GoogleSignInBtn";
 import AuthDivider from "../../components/shared/AuthDivider";
 import { fonts, spacing, typography } from "../../constants/theme";
-import BoameInput, { ToggleInput } from "../../components/shared/Input";
-import BoameBtn from "../../components/shared/BoameBtn";
+import { ToggleInput } from "../../components/shared/Input";
+import { MGButton, MGText, MGTextField } from "../../design-system/components";
 import { loginSchema } from "../../validators/auth.validator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
@@ -26,6 +26,10 @@ type Props = {
 export default function LoginScreen({navigation}: Props) {
     const {control, handleSubmit, formState: {errors}} = useForm<z.infer<typeof loginSchema>>({
         resolver: zodResolver(loginSchema),
+        defaultValues: {
+            email: '',
+            password: '',
+        },
     })
     const { mutate, isPending, error} = useLoginMutation()
     const { mutate: signInWithGoogle, isPending: isGooglePending, error: googleError } = useGoogleSignInMutation()
@@ -42,13 +46,16 @@ export default function LoginScreen({navigation}: Props) {
             extraScrollHeight={20}
             enableOnAndroid={true}
         >
-            <Text style={[styles.title, { color: colors.brand }]}>Acesse sua conta</Text>
+            <View style={styles.content}>
+            <MGText variant="heading1" color="brand" style={[styles.title, { fontFamily: fonts.logo }]}>
+                Acesse sua conta
+            </MGText>
             <View style={styles.form}>
                 <Controller
                     control={control}
                     name="email"
                     render={({field: {onChange, onBlur, value}}) => (
-                        <BoameInput
+                        <MGTextField
                             label="E-mail"
                             style={styles.input}
                             placeholder="Digite seu e-mail"
@@ -82,26 +89,43 @@ export default function LoginScreen({navigation}: Props) {
                         />
                     )}
                 />
-                <Text style={[styles.forgotLink, { color: colors.primary }]} onPress={() => navigation.navigate("ForgotPassword")}>
+                <MGText
+                    color="brand"
+                    style={styles.forgotLink}
+                    onPress={() => navigation.navigate("ForgotPassword")}
+                >
                     Esqueci minha senha
-                </Text>
-                <BoameBtn
-                    title="Entrar"
+                </MGText>
+                <MGButton
+                    label="Entrar"
                     loading={isPending}
                     onPress={handleSubmit(handleLogin)}
                 />
-                {error && <Text accessibilityRole="alert" style={[styles.error, { color: colors.error }]}>{getErrorMessage(error)}</Text>}
+                {error && (
+                    <MGText accessibilityRole="alert" color="error" style={styles.error}>
+                        {getErrorMessage(error)}
+                    </MGText>
+                )}
                 {runtime.googleAuthEnabled && <><AuthDivider /><GoogleSignInBtn
                     title="Entrar com Google"
                     loading={isGooglePending}
                     disabled={isPending}
                     onPress={() => signInWithGoogle()}
                 /></>}
-                {googleError && <Text style={[styles.error, { color: colors.error }]}>{googleError.message}</Text>}
+                {googleError && (
+                    <MGText color="error" style={styles.error}>
+                        {googleError.message}
+                    </MGText>
+                )}
             </View>
-            <Text style={[styles.registerLink, { color: colors.primary }]} onPress={() => navigation.navigate("TutorRegister")}>
+            <MGText
+                color="brand"
+                style={styles.registerLink}
+                onPress={() => navigation.navigate("TutorRegister")}
+            >
                 Não tem uma conta? Cadastre-se
-            </Text>
+            </MGText>
+            </View>
         </KeyboardAwareScrollView>
     )
 }
@@ -110,34 +134,32 @@ const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
         alignItems: 'center',
-        paddingHorizontal: 24,
-        paddingTop: 96,
-        paddingBottom: 100,
+        paddingHorizontal: spacing.xl,
+        paddingTop: spacing.xxxl,
+        paddingBottom: spacing.huge,
+    },
+    content: {
+        width: '100%',
+        maxWidth: 448,
     },
     title: {
-        fontSize: typography.sizes.xxl,
-        fontFamily: fonts.logo,
         marginBottom: spacing.lg,
     },
     form: {
         width: '100%',
-        maxWidth: 448,
-        gap: 10,
+        gap: spacing.sm,
     },
     input: {
         fontFamily: fonts.regular,
     },
     error: {
         fontSize: typography.sizes.sm,
-        fontFamily: fonts.regular,
         marginTop: 4,
     },
     forgotLink: {
-        fontFamily: fonts.regular,
         marginBottom: spacing.sm,
     },
     registerLink: {
         marginTop: 24,
-        fontFamily: fonts.regular,
     },
 });

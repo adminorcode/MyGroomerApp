@@ -1,13 +1,13 @@
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { ProfileStackParamList } from '../../navigation/types'
 import { usePets } from '../../hooks/usePets'
 import { useTheme } from '../../context/ThemeContext'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
-import BoameBtn from '../../components/shared/BoameBtn'
+import { MGButton, MGEmptyState, MGErrorState } from '../../design-system/components'
 import PetCard from '../../components/customer/PetCard'
-import { fonts, spacing, typography } from '../../constants/theme'
+import { spacing } from '../../constants/theme'
 
 type Props = {
     navigation: StackNavigationProp<ProfileStackParamList, 'Pets'>
@@ -15,7 +15,7 @@ type Props = {
 
 export default function PetsScreen({ navigation }: Props) {
     const { colors } = useTheme()
-    const { data, isLoading, isError, refetch, isRefetching } = usePets()
+    const { data, isLoading, isError, refetch } = usePets()
 
     return (
         <ScreenContainer>
@@ -31,8 +31,10 @@ export default function PetsScreen({ navigation }: Props) {
                 </View>
             ) : isError ? (
                 <View style={styles.centered}>
-                    <Text style={[styles.message, { color: colors.error }]}>Não foi possível carregar os pets.</Text>
-                    <BoameBtn title="Tentar novamente" loading={isRefetching} onPress={() => refetch()} />
+                    <MGErrorState
+                        message="Não foi possível carregar os pets."
+                        onRetry={() => { void refetch() }}
+                    />
                 </View>
             ) : (
                 <FlatList
@@ -46,14 +48,19 @@ export default function PetsScreen({ navigation }: Props) {
                         />
                     )}
                     ListEmptyComponent={
-                        <Text style={[styles.message, { color: colors.textSecondary }]}>
-                            Você ainda não cadastrou um pet.
-                        </Text>
+                        <MGEmptyState
+                            title="Nenhum pet cadastrado"
+                            description="Você ainda não cadastrou um pet."
+                            actionLabel="Cadastrar pet"
+                            onAction={() => navigation.navigate('PetForm', {})}
+                        />
                     }
                     ListFooterComponent={
-                        <View style={styles.footer}>
-                            <BoameBtn title="Cadastrar pet" onPress={() => navigation.navigate('PetForm', {})} />
-                        </View>
+                        data && data.length > 0 ? (
+                            <View style={styles.footer}>
+                                <MGButton label="Cadastrar pet" onPress={() => navigation.navigate('PetForm', {})} />
+                            </View>
+                        ) : null
                     }
                 />
             )}
@@ -73,9 +80,5 @@ const styles = StyleSheet.create({
     },
     footer: {
         marginTop: spacing.md,
-    },
-    message: {
-        fontSize: typography.sizes.md,
-        fontFamily: fonts.regular,
     },
 })
