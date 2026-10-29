@@ -1,7 +1,11 @@
 export type AuthStackParamList = {
+    Welcome: undefined
     Login: undefined
     Register: undefined
+    TutorRegister: undefined
     VerifyEmail: {email: string}
+    ForgotPassword: undefined
+    ResetPassword: {token: string}
 }
 
 export type ChatParams = {

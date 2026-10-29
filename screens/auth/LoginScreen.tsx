@@ -42,7 +42,7 @@ export default function LoginScreen({navigation}: Props) {
             extraScrollHeight={20}
             enableOnAndroid={true}
         >
-            <Text style={[styles.title, { color: colors.brand }]}>Boa me</Text>
+            <Text style={[styles.title, { color: colors.brand }]}>Acesse sua conta</Text>
             <View style={styles.form}>
                 <Controller
                     control={control}
@@ -82,6 +82,9 @@ export default function LoginScreen({navigation}: Props) {
                         />
                     )}
                 />
+                <Text style={[styles.forgotLink, { color: colors.primary }]} onPress={() => navigation.navigate("ForgotPassword")}>
+                    Esqueci minha senha
+                </Text>
                 <BoameBtn
                     title="Entrar"
                     loading={isPending}
@@ -96,7 +99,7 @@ export default function LoginScreen({navigation}: Props) {
                 /></>}
                 {googleError && <Text style={[styles.error, { color: colors.error }]}>{googleError.message}</Text>}
             </View>
-            <Text style={[styles.registerLink, { color: colors.primary }]} onPress={() => navigation.navigate("Register")}>
+            <Text style={[styles.registerLink, { color: colors.primary }]} onPress={() => navigation.navigate("TutorRegister")}>
                 Não tem uma conta? Cadastre-se
             </Text>
         </KeyboardAwareScrollView>
@@ -128,6 +131,10 @@ const styles = StyleSheet.create({
         fontSize: typography.sizes.sm,
         fontFamily: fonts.regular,
         marginTop: 4,
+    },
+    forgotLink: {
+        fontFamily: fonts.regular,
+        marginBottom: spacing.sm,
     },
     registerLink: {
         marginTop: 24,

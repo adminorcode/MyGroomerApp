@@ -30,7 +30,9 @@ function dateOk(value) {
 
 async function openLogin(page) {
   await page.goto(base, { waitUntil: 'domcontentloaded' })
-  await page.getByText('Entrar', { exact: true }).waitFor({ timeout: 90000 })
+  await page.getByText('Sou tutor', { exact: true }).waitFor({ timeout: 90000 })
+  await page.getByText('Sou tutor', { exact: true }).click()
+  await page.getByText('Entrar', { exact: true }).waitFor({ timeout: 20000 })
 }
 
 async function signIn(page, account) {
@@ -63,11 +65,11 @@ async function run() {
   check('AC-01 erro de API no login', true)
 
   await page.getByText('Não tem uma conta? Cadastre-se').click()
-  await page.getByText('Criar conta').waitFor()
+  await page.getByRole('button', { name: 'Criar conta' }).waitFor()
   const phone = page.getByRole('textbox', { name: 'Telefone' })
   const placeholder = await phone.getAttribute('placeholder')
   body = await textOf(page)
-  check('AC-01 cadastro em português', body.includes('Eu sou') && body.includes('Tutor') && body.includes('Groomer') && body.includes('Cadastrar'))
+  check('AC-01 cadastro em português', body.includes('Nome completo') && body.includes('Telefone') && body.includes('Aceito os termos e a política de privacidade') && body.includes('Criar conta'))
   check('AC-03 telefone nasce em +55', Boolean(placeholder?.includes('+55')))
   check('AC-03 telefone não abre em Gana', !/Ghana|\+233|\bGH\b/.test(body) && !/Ghana|\+233/.test(placeholder ?? ''))
 
@@ -124,7 +126,7 @@ async function run() {
   })
   await page.getByLabel('Abrir perfil').click()
   await page.getByText('Sair', { exact: true }).click()
-  await page.getByText('Entrar', { exact: true }).waitFor({ timeout: 15000 })
+  await page.getByText('Sou tutor', { exact: true }).waitFor({ timeout: 15000 })
 
   await signIn(page, groomer)
   await page.getByText('Rendimentos', { exact: true }).click()

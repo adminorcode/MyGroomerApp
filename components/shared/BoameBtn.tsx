@@ -66,6 +66,7 @@ export default function BoameBtn({
         <Pressable
             accessibilityRole="button"
             accessibilityState={{ disabled: isDisabled, busy: loading }}
+            aria-busy={loading}
             disabled={isDisabled}
             style={({ pressed }) => [
                 styles.base,

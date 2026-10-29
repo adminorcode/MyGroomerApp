@@ -63,3 +63,35 @@ export const registerSchema = z.object({
         ctx.addIssue({ code: 'custom', path: ['service_area'], message: 'A área de atendimento é obrigatória' })
     }
 })
+
+const passwordSchema = z.string({ error: 'A senha deve ter pelo menos 8 caracteres' })
+    .min(8, "A senha deve ter pelo menos 8 caracteres")
+    .regex(/[A-Z]/, "A senha deve ter pelo menos uma letra maiúscula")
+    .regex(/[a-z]/, "A senha deve ter pelo menos uma letra minúscula")
+    .regex(/[0-9]/, "A senha deve ter pelo menos um número")
+    .regex(/[^a-zA-Z0-9]/, "A senha deve ter pelo menos um caractere especial")
+
+export const tutorRegisterSchema = z.object({
+    name: z.string({ error: 'O nome é obrigatório' }).min(1, 'O nome é obrigatório'),
+    email: z.email({ error: 'Informe um e-mail válido' }),
+    password: passwordSchema,
+    phone_number: z.string({ error: 'O telefone é obrigatório' })
+        .min(1, "O telefone é obrigatório")
+        .refine((val) => /^\+[1-9]\d{6,14}$/.test(val), {
+            message: "Informe um telefone válido",
+        })
+        .refine((val) => !val.replace(/^\+\d{1,3}/, "").startsWith("0"), {
+            message: "O telefone não pode começar com 0 depois do código do país",
+        }),
+    accepted_terms: z.boolean().refine((value) => value === true, {
+        message: 'Aceite os termos e a política de privacidade',
+    }),
+})
+
+export const forgotPasswordSchema = z.object({
+    email: z.email({ error: 'Informe um e-mail válido' }),
+})
+
+export const resetPasswordSchema = z.object({
+    password: passwordSchema,
+})
