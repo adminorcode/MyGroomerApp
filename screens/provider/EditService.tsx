@@ -1,3 +1,4 @@
+import { AppAlert } from '../../utils/alert'
 import { useState } from 'react'
 import {
     View,
@@ -36,7 +37,7 @@ export default function EditService({ navigation, route }: Props) {
     const handleSave = async () => {
         const parsedPrice = Number(price)
         if (!price.trim() || isNaN(parsedPrice) || parsedPrice <= 0) {
-            Alert.alert('Invalid price', 'Please enter a valid price greater than 0.')
+            AppAlert.alert('Invalid price', 'Please enter a valid price greater than 0.')
             return
         }
 
@@ -44,7 +45,7 @@ export default function EditService({ navigation, route }: Props) {
             await updateProviderService({ providerServiceId, price: parsedPrice })
             navigation.goBack()
         } catch (error) {
-            Alert.alert('Could not update price', 'Something went wrong. Please try again.')
+            AppAlert.alert('Could not update price', 'Something went wrong. Please try again.')
         }
     }
 
@@ -120,3 +121,4 @@ const styles = StyleSheet.create({
         marginBottom: spacing.lg,
     },
 })
+

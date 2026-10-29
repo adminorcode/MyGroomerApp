@@ -1,3 +1,4 @@
+import { AppAlert } from '../../utils/alert'
 import { View, Text, Alert, Pressable, StyleSheet } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import ScreenHeader from '../../components/shared/ScreenHeader'
@@ -57,14 +58,14 @@ function OptionSelector<T extends string>({ label, options, value, onChange, err
                             style={[
                                 styles.option,
                                 { borderColor: colors.border },
-                                isSelected && { borderColor: colors.primary, backgroundColor: colors.primary },
+                                isSelected && { borderColor: colors.selection, backgroundColor: colors.selection },
                             ]}
                         >
                             <Text
                                 style={[
                                     styles.optionText,
                                     { color: colors.text },
-                                    isSelected && { color: colors.background },
+                                    isSelected && { color: colors.onSelection },
                                 ]}
                             >
                                 {option.label}
@@ -98,9 +99,9 @@ const BecomeAProvider = ({ navigation }: Props) => {
     const onSubmit: SubmitHandler<ProviderFormValues> = async (data) => {
         try {
             await mutateAsync(data)
-            Alert.alert('Welcome!', "You're now a provider.")
+            AppAlert.alert('Welcome!', "You're now a provider.")
         } catch (error) {
-            Alert.alert('Registration failed', 'Could not register as a provider. Please try again.')
+            AppAlert.alert('Registration failed', 'Could not register as a provider. Please try again.')
         }
     }
 
@@ -196,6 +197,13 @@ const BecomeAProvider = ({ navigation }: Props) => {
                                 />
                             )}
                         />
+                        <Controller
+                            control={control}
+                            name="bank_code"
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <BoameInput label="Bank code" placeholder="Bank code" onChangeText={onChange} onBlur={onBlur} value={value} error={errors.bank_code?.message} />
+                            )}
+                        />
                     </>
                 )}
 
@@ -265,3 +273,4 @@ const styles = StyleSheet.create({
 })
 
 export default BecomeAProvider
+

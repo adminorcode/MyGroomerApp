@@ -1,3 +1,4 @@
+import { AppAlert } from '../../utils/alert'
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
@@ -15,6 +16,8 @@ import BoameBtn from '../../components/shared/BoameBtn'
 import { BookingStatus } from '../../types/booking.types'
 import { formatDateTime } from '../../utils/formatDate'
 import { useCreateConversation } from '../../hooks/useConversations'
+import { useRuntime } from '../../context/RuntimeContext'
+import { getErrorMessage } from '../../utils/error'
 
 type BookingDetailNavigationProp = CompositeNavigationProp<
     StackNavigationProp<BookingsStackParamList, 'BookingDetail'>,
@@ -30,6 +33,7 @@ type Props = {
 const BookingDetail = ({ navigation, route }: Props) => {
     const { bookingId } = route.params
     const { colors } = useTheme()
+    const runtime = useRuntime()
     const { data, isLoading, isError } = useGetBookingById(bookingId)
     const {mutateAsync, isPending, isError:statusError} = useChangeBookingStatus()
     const {mutateAsync: createConvo} = useCreateConversation()
@@ -68,20 +72,26 @@ const BookingDetail = ({ navigation, route }: Props) => {
     const hasReview = data.booking_status === BookingStatus.COMPLETED && !!data.review_id
 
     const handleCancel = () => {
-        Alert.alert(
+        AppAlert.alert(
             'Cancel booking?',
-            'You may be refunded minus a cancellation fee depending on timing.',
+            runtime.localTest ? 'Cancelar esta reserva de teste? Nenhuma cobrança ou reembolso será realizado.' : 'You may be refunded minus a cancellation fee depending on timing.',
             [
                 { text: 'Keep booking', style: 'cancel' },
-                { text: 'Cancel booking', style: 'destructive', onPress: () => mutateAsync({ bookingId, booking_status: BookingStatus.CANCELLED }) },
+                { text: 'Cancel booking', style: 'destructive', onPress: () => {
+                    void mutateAsync({ bookingId, booking_status: BookingStatus.CANCELLED }).catch(error => AppAlert.alert('Could not cancel', getErrorMessage(error)))
+                } },
             ]
         )
     }
 
     const handleMessage = async () => {
-        const res = await createConvo({booking_id: data.id, provider_id:data.provider_user_id})
-        const conversation = res.data
-        navigation.navigate('Chat', {conversationId:conversation.id, otherName:data.provider_name})
+        try {
+            const res = await createConvo({booking_id: data.id, provider_id:data.provider_user_id})
+            const conversation = res.data
+            navigation.navigate('Chat', {conversationId:conversation.id, otherName:data.provider_name})
+        } catch (error) {
+            AppAlert.alert('Could not open conversation', getErrorMessage(error))
+        }
     }
 
     return (
@@ -149,7 +159,7 @@ const BookingDetail = ({ navigation, route }: Props) => {
                                 <>
                                     <BoameBtn 
                                     title={`${isPending ? "Canceling..." : "Cancel"}`} 
-                                    style={[{backgroundColor:colors.error}]}
+                                    variant="danger"
                                     onPress={handleCancel}
                                     fullWidth={false}
                                     disabled = {isPending}
@@ -277,3 +287,4 @@ const styles = StyleSheet.create({
 })
 
 export default BookingDetail
+

@@ -24,7 +24,7 @@ export default function ChatHeader({ name, avatarUri, status, onBack, onCall, on
             {avatarUri ? (
                 <Image source={{ uri: avatarUri }} style={styles.avatar} />
             ) : (
-                <View style={[styles.avatar, styles.avatarFallback, { backgroundColor: colors.primary + '20' }]}>
+                <View style={[styles.avatar, styles.avatarFallback, { backgroundColor: colors.selectionSoft }]}>
                     <Text style={[styles.avatarInitial, { color: colors.primary }]}>
                         {name.charAt(0).toUpperCase()}
                     </Text>

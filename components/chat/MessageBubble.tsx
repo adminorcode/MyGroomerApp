@@ -23,8 +23,8 @@ export default function MessageBubble({ content, timestamp, isOwn, isSeen, isEdi
     const { colors } = useTheme()
 
     const bubbleColor = isOwn ? colors.primary : colors.surface
-    const textColor = isOwn ? colors.background : colors.text
-    const metaColor = isOwn ? colors.background + 'CC' : colors.textSecondary
+    const textColor = isOwn ? colors.onPrimary : colors.text
+    const metaColor = isOwn ? colors.onPrimary : colors.textSecondary
 
     return (
         <View style={[styles.row, isOwn ? styles.rowOwn : styles.rowOther]}>
@@ -49,7 +49,7 @@ export default function MessageBubble({ content, timestamp, isOwn, isSeen, isEdi
                         isPending ? (
                             <Check size={14} color={metaColor} />
                         ) : isSeen ? (
-                            <CheckCheck size={14} color={colors.primaryLight} />
+                            <CheckCheck size={14} color={metaColor} />
                         ) : (
                             <CheckCheck size={14} color={metaColor} />
                         )

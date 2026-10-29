@@ -1,3 +1,4 @@
+import { AppAlert } from '../../utils/alert'
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
@@ -13,6 +14,7 @@ import { DetailRow } from '../../components/shared/DetailRow'
 import BoameBtn from '../../components/shared/BoameBtn'
 import { BookingStatus } from '../../types/booking.types'
 import { formatDateTime } from '../../utils/formatDate'
+import { useRuntime } from '../../context/RuntimeContext'
 
 type ProviderBookingDetailNavigationProp = StackNavigationProp<ProviderBookingsStackParamList, 'ProviderBookingDetail'>
 type ProviderBookingDetailRouteProp = RouteProp<ProviderBookingsStackParamList, 'ProviderBookingDetail'>
@@ -51,6 +53,7 @@ const nextActionByStatus: Partial<Record<BookingStatus, NextAction>> = {
 const ProviderBookingDetailScreen = ({ navigation, route }: Props) => {
     const { bookingId } = route.params
     const { colors } = useTheme()
+    const runtime = useRuntime()
     const { data, isLoading, isError } = useGetBookingById(bookingId)
     const { mutateAsync, isPending } = useChangeBookingStatus()
 
@@ -82,7 +85,7 @@ const ProviderBookingDetailScreen = ({ navigation, route }: Props) => {
       try {
           await mutateAsync({ bookingId, booking_status: next })
       } catch (e) {
-          Alert.alert('Could not update', 'Something went wrong updating this booking. Please try again.')
+          AppAlert.alert('Could not update', 'Something went wrong updating this booking. Please try again.')
       }
     }
 
@@ -90,9 +93,9 @@ const ProviderBookingDetailScreen = ({ navigation, route }: Props) => {
         if (!nextAction) return
 
         if (nextAction.confirm) {
-            Alert.alert(
+            AppAlert.alert(
                 nextAction.confirm.title,
-                nextAction.confirm.message,
+                runtime.localTest ? 'Concluir o atendimento de teste? Nenhum repasse será realizado.' : nextAction.confirm.message,
                 [
                     { text: 'Cancel', style: 'cancel' },
                     { text: nextAction.confirm.cta, style: 'default', onPress: () => runTransition(nextAction.next) },
@@ -245,3 +248,4 @@ const styles = StyleSheet.create({
 })
 
 export default ProviderBookingDetailScreen
+

@@ -1,5 +1,23 @@
 # Boame Client
 
+## Teste local MyGroomer
+
+Com a API do workspace já iniciada em `http://localhost:3000` no modo local e o seed aplicado:
+
+```powershell
+npm ci
+Copy-Item .env.example .env
+npm run web -- --localhost --port 8081
+```
+
+Abra `http://localhost:8081`. A configuração de exemplo aponta REST e Socket.io para esta máquina. Contas fictícias: `tutor@mygroomer.test` e `groomer@mygroomer.test`, ambas com senha `LocalTest#2026`.
+
+O aviso de teste é exibido a partir da configuração da API. Nesse modo, reservas não abrem checkout, cadastro dispensa e-mail real e Google fica oculto. Use apenas dados fictícios. Os valores/telas legados do Boame ainda não representam políticas financeiras do MyGroomer.
+
+`localhost` no celular representa o próprio aparelho; para acesso físico é necessário configurar URLs alcançáveis e a interface de escuta da API. A validação deste lote cobre navegador e exportações de bundle Android/iOS, sem equivaler a teste em dispositivo.
+
+Checagem de tipos: `node node_modules/typescript/bin/tsc --noEmit`. Builds exportados ficam em `dist-*`, ignorados pelo Git e excluídos da checagem de fontes.
+
 React Native (Expo) mobile app for **Boame** — a service marketplace that connects customers to registered providers for domestic and commercial services, starting with car wash and home cleaning.
 
 Built by **Asante** as a full-stack portfolio project. Pairs with the [Boame API](https://github.com/littlegod20/boa_me).

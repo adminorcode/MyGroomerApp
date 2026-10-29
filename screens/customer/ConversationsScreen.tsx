@@ -54,7 +54,7 @@ export default function ConversationsScreen({ navigation }: Props) {
         {otherProfile ? (
           <Image source={{ uri: otherProfile }} style={styles.avatar} />
         ) : (
-          <View style={[styles.avatar, styles.avatarFallback, { backgroundColor: colors.primary + '20' }]}>
+          <View style={[styles.avatar, styles.avatarFallback, { backgroundColor: colors.selectionSoft }]}>
             <Text style={[styles.avatarInitial, { color: colors.primary }]}>
               {otherName.charAt(0).toUpperCase()}
             </Text>

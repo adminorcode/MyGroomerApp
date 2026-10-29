@@ -16,7 +16,7 @@ export const registerSchema = z.object({
     .regex(/[a-z]/, "Password must contain at least one lowercase letter")
     .regex(/[0-9]/, "Password must contain at least one number")
     .regex(/[^a-zA-Z0-9]/, "Password must contain at least one special character"),
-    role: z.enum(Object.values(Role) as [string, ...string[]]),
+    role: z.enum([Role.CUSTOMER, Role.PROVIDER]),
     phone_number: z.string()
     .min(1, "Phone number is required")
     .refine((val) => /^\+[1-9]\d{6,14}$/.test(val), {
@@ -38,6 +38,7 @@ export const registerSchema = z.object({
     momo_provider: z.enum(Object.values(MomoProvider)).optional(),
     bank_account_number: z.string().optional(),
     bank_account_name: z.string().optional(),
+    bank_code: z.string().optional(),
     service_area: z.string().optional(),
 }).superRefine((data, ctx) => {
     if (data.role !== Role.PROVIDER) return
@@ -55,6 +56,7 @@ export const registerSchema = z.object({
     if (data.payout_method === PayoutMethod.BANK) {
         if (!data.bank_account_number) ctx.addIssue({ code: 'custom', path: ['bank_account_number'], message: 'Account number required' })
         if (!data.bank_account_name) ctx.addIssue({ code: 'custom', path: ['bank_account_name'], message: 'Account name required' })
+        if (!data.bank_code) ctx.addIssue({ code: 'custom', path: ['bank_code'], message: 'Bank code required' })
     }
 
     if (!data.service_area) {

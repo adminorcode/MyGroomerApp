@@ -33,7 +33,7 @@ export default function ProfileHeaderButton({ avatarUri, size = 44, style, onPre
                         styles.initial,
                         {
                             color: colors.primary,
-                            backgroundColor: colors.primary + '20',
+                            backgroundColor: colors.selectionSoft,
                             fontSize: Math.round(size * 0.4),
                             lineHeight: size,
                         },

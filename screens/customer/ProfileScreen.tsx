@@ -1,3 +1,4 @@
+import { AppAlert } from '../../utils/alert'
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native'
 import { ChevronRight, LogOut, Store } from 'lucide-react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
@@ -19,7 +20,7 @@ export default function ProfileScreen({ navigation }: Props) {
   const { logout, user } = useAuthStore()
 
   const handleLogout = () => {
-    Alert.alert(
+    AppAlert.alert(
       'Log out',
       'Are you sure you want to log out?',
       [
@@ -36,7 +37,7 @@ export default function ProfileScreen({ navigation }: Props) {
       <ScreenHeader title='Profile' description='Manage your account' />
 
       <View style={styles.profileSection}>
-        <View style={[styles.avatar, { backgroundColor: colors.primary + '20' }]}>
+        <View style={[styles.avatar, { backgroundColor: colors.selectionSoft }]}>
           <Text style={[styles.avatarText, { color: colors.primary }]}>{initial}</Text>
         </View>
 
@@ -59,7 +60,7 @@ export default function ProfileScreen({ navigation }: Props) {
             pressed && styles.pressed,
           ]}
         >
-          <View style={[styles.actionIcon, { backgroundColor: colors.primary + '20' }]}>
+          <View style={[styles.actionIcon, { backgroundColor: colors.selectionSoft }]}>
             <Store size={20} color={colors.primary} />
           </View>
           <View style={styles.actionTextWrapper}>
@@ -177,3 +178,4 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
 })
+

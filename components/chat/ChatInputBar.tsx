@@ -22,6 +22,7 @@ export default function ChatInputBar({ value, onChangeText, onSend, disabled }: 
                 </Pressable>
 
                 <TextInput
+                    accessibilityLabel="Message"
                     style={[styles.input, { color: colors.text }]}
                     placeholder="Message"
                     placeholderTextColor={colors.textSecondary}
@@ -36,14 +37,25 @@ export default function ChatInputBar({ value, onChangeText, onSend, disabled }: 
             </View>
 
             <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Send message"
                 onPress={hasText ? onSend : undefined}
                 disabled={disabled}
-                style={[styles.sendBtn, { backgroundColor: colors.primary }]}
+                style={({ pressed }) => [
+                    styles.sendBtn,
+                    {
+                        backgroundColor: disabled
+                            ? colors.disabled
+                            : pressed
+                              ? colors.primaryPressed
+                              : colors.primary,
+                    },
+                ]}
             >
                 {hasText ? (
-                    <SendHorizontal size={22} color={colors.background} />
+                    <SendHorizontal size={22} color={disabled ? colors.onDisabled : colors.onPrimary} />
                 ) : (
-                    <Mic size={22} color={colors.background} />
+                    <Mic size={22} color={disabled ? colors.onDisabled : colors.onPrimary} />
                 )}
             </Pressable>
         </View>

@@ -16,34 +16,51 @@ export type BoamePhoneInputProps = PhoneInputProps & {
     onChangeFormattedText: (text: string) => void
 }
 
+function fieldBorder(colors: { border: string; error: string; focus: string }, error: string | undefined, focused: boolean) {
+    if (error) return colors.error
+    if (focused) return colors.focus
+    return colors.border
+}
+
 export function BoamePhoneInput({label, error, onChangeFormattedText, ...props}: BoamePhoneInputProps) {
     const { colors } = useTheme();
+    const [focused, setFocused] = useState(false);
     return (
         <View style={styles.fieldGroup}>
             <Text style={[styles.label, { color: colors.primary }]}>{label}</Text>
             <PhoneInput
+                {...props}
                 defaultCode="GH"
                 layout="first"
                 placeholder="Enter your phone number"
                 onChangeFormattedText={onChangeFormattedText}
-                containerStyle={{...styles.phoneContainer, borderColor: colors.border}}
+                containerStyle={{...styles.phoneContainer, borderColor: fieldBorder(colors, error, focused)}}
                 textContainerStyle={{...styles.phoneTextContainer, backgroundColor: colors.background}}
                 textInputStyle={{...styles.phoneTextInput, color: colors.text}}
                 codeTextStyle={{...styles.phoneCodeText, color: colors.text}}
+                textInputProps={{
+                    onFocus: () => setFocused(true),
+                    onBlur: () => setFocused(false),
+                }}
                 flagButtonStyle={styles.flagHidden}
-                {...props}
             />
-            {error && <Text style={styles.error}>{error}</Text>}
+            {error && <Text style={[styles.error, { color: colors.error }]}>{error}</Text>}
         </View>
     )
 }
 
 export default function BoameInput({label, error, style, ...props}: InputProps) {
     const { colors } = useTheme();
+    const [focused, setFocused] = useState(false);
     return (
         <View style={styles.fieldGroup}>
             <Text style={[styles.label, { color: colors.primary }]}>{label}</Text>
-            <TextInput {...props} style={[styles.input, style, { borderColor: colors.border, backgroundColor: colors.background, color: colors.text }]} />
+            <TextInput
+                {...props}
+                onFocus={(event) => { setFocused(true); props.onFocus?.(event) }}
+                onBlur={(event) => { setFocused(false); props.onBlur?.(event) }}
+                style={[styles.input, style, { borderColor: fieldBorder(colors, error, focused), backgroundColor: colors.background, color: colors.text }]}
+            />
             {error && <Text style={[styles.error, { color: colors.error }]}>{error}</Text>}
         </View>
     )
@@ -51,13 +68,16 @@ export default function BoameInput({label, error, style, ...props}: InputProps) 
 
 export function ToggleInput({label, error, style, ...props}: InputProps) {
     const [showPassword, setShowPassword] = useState(false);
+    const [focused, setFocused] = useState(false);
     const { colors } = useTheme();
     return (
         <View style={styles.fieldGroup}>
             <Text style={[styles.label, { color: colors.primary }]}>{label}</Text>
-            <View style={[styles.passwordRow, { borderColor: colors.border }]}>
+            <View style={[styles.passwordRow, { borderColor: fieldBorder(colors, error, focused) }]}>
                 <TextInput
                     {...props}
+                    onFocus={(event) => { setFocused(true); props.onFocus?.(event) }}
+                    onBlur={(event) => { setFocused(false); props.onBlur?.(event) }}
                     style={[styles.passwordInput, style, { color: colors.text }]}
                     secureTextEntry={!showPassword}
                 />

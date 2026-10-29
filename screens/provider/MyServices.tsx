@@ -1,3 +1,4 @@
+import { AppAlert } from '../../utils/alert'
 import { View, Text, ActivityIndicator, FlatList, StyleSheet, Pressable, Alert } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { Plus, Pencil, Trash2 } from 'lucide-react-native'
@@ -8,6 +9,7 @@ import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
 import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
 import { ProviderServiceDetailed } from '../../types/provider.types'
+import { getErrorMessage } from '../../utils/error'
 
 type MyServicesNavigationProp = StackNavigationProp<ProviderServicesStackParamList, 'MyServices'>
 
@@ -18,10 +20,10 @@ type Props = {
 export default function MyServices({ navigation }: Props) {
     const { colors } = useTheme()
     const { data: services, isLoading, isError } = useGetProviderServices()
-    const { mutate: deleteService, isPending: isDeleting } = useDeleteProviderService()
+    const { mutate: deleteService, isPending: isDeleting, error: deleteError } = useDeleteProviderService()
 
     const handleDelete = (item: ProviderServiceDetailed) => {
-        Alert.alert(
+        AppAlert.alert(
             'Remove service?',
             `"${item.service_name}" will no longer be available for customers to book.`,
             [
@@ -42,14 +44,18 @@ export default function MyServices({ navigation }: Props) {
                 </View>
                 <Pressable
                     onPress={() => navigation.navigate('AddService')}
-                    style={[styles.addButton, { backgroundColor: colors.primary }]}
+                    style={({ pressed }) => [
+                        styles.addButton,
+                        { backgroundColor: pressed ? colors.primaryPressed : colors.primary },
+                    ]}
                     accessibilityRole='button'
                     accessibilityLabel='Add service'
                 >
-                    <Plus size={22} color={colors.background} />
+                    <Plus size={22} color={colors.onPrimary} />
                 </Pressable>
             </View>
 
+            {deleteError && <Text accessibilityRole="alert" style={{ color: colors.error }}>{getErrorMessage(deleteError)}</Text>}
             {isLoading ? (
                 <View style={styles.centered}>
                     <ActivityIndicator size='large' color={colors.primary} />
@@ -176,3 +182,4 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
 })
+

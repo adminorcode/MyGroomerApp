@@ -1,3 +1,4 @@
+import { AppAlert } from '../../utils/alert'
 import { useState } from 'react'
 import {
   View,
@@ -21,11 +22,12 @@ import { useTheme } from '../../context/ThemeContext'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
 import { borderRadius, fonts, layout, spacing, typography } from '../../constants/theme'
-import DateTimePicker from '@react-native-community/datetimepicker'
+import DateTimePicker from '../../components/shared/ServiceDateTimePicker'
 import * as WebBrowser from 'expo-web-browser'
 import { findBookingById } from '../../services/booking.service'
 import { BookingStatus } from '../../types/booking.types'
 import { useQueryClient } from '@tanstack/react-query'
+import { useRuntime } from '../../context/RuntimeContext'
 
 type BookServiceScreenNavigationProp = StackNavigationProp<HomeStackParamList, 'BookService'>
 type BookServiceScreenRouteProp = RouteProp<HomeStackParamList, 'BookService'>
@@ -37,11 +39,13 @@ type Props = {
 
 export default function BookServiceScreen({ navigation, route }: Props) {
   const { colors } = useTheme()
+  const runtime = useRuntime()
   const { providerServiceId } = route.params
   const { data, isLoading, isError } = useGetProviderServiceById(providerServiceId)
   const { mutateAsync: createBooking, isPending } = useCreateBooking()
 
   const [scheduledAt, setScheduledAt] = useState<Date>(new Date())
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [location, setLocation] = useState('')
   // const [latitude, setLatitude] = useState<number | undefined>(undefined)
   // const [longitude, setLongitude] = useState<number | undefined>(undefined)
@@ -87,15 +91,16 @@ export default function BookServiceScreen({ navigation, route }: Props) {
 
   const handleBook = async() => {
     if (!location.trim()) {
-      Alert.alert('Location required', 'Please enter where the service should take place.')
+      AppAlert.alert('Location required', 'Please enter where the service should take place.')
       return
     }
     if (scheduledAt.getTime() < Date.now()) {
-      Alert.alert('Invalid time', 'Please choose a date and time in the future.')
+      AppAlert.alert('Invalid time', 'Please choose a date and time in the future.')
       return
     }
 
     try {
+      setIsSubmitting(true)
       const bookedResponse = await createBooking(
         {
           provider_service_id: providerServiceId,
@@ -106,11 +111,17 @@ export default function BookServiceScreen({ navigation, route }: Props) {
         }
       )
       
+      const bookingId = bookedResponse.data.booking.id
+      if (bookedResponse.data.payment_mode === 'disabled') {
+        queryClient.invalidateQueries({ queryKey: ['bookings'] })
+        navigation.getParent()?.navigate('BookingsTab', { screen: 'BookingDetail', params: { bookingId } })
+        return
+      }
       const authUrl = bookedResponse.data.authorization_url
+      if (!authUrl) throw new Error('Checkout is unavailable')
       await WebBrowser.openAuthSessionAsync(authUrl)
       
       // TODO: Show a loading page after webview before moving home
-      const bookingId = bookedResponse.data.booking.id
 
       const confirmed = await verifyBooking({bookingId})
 
@@ -118,11 +129,13 @@ export default function BookServiceScreen({ navigation, route }: Props) {
         queryClient.invalidateQueries({queryKey:['bookings']})
         navigation.navigate('Home')
       } else {
-        Alert.alert('Payment processing', "We'll update your booking shortly.")
+        AppAlert.alert('Payment processing', "We'll update your booking shortly.")
       }
     } catch (error) {
-      Alert.alert('Booking failed', 'Something went wrong. Please try again.')
+      AppAlert.alert('Booking failed', 'Something went wrong. Please try again.')
       console.error(error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -243,13 +256,23 @@ export default function BookServiceScreen({ navigation, route }: Props) {
         {/* Book & Pay */}
         <Pressable
           onPress={handleBook}
-          disabled={isPending}
-          style={[styles.bookButton, { backgroundColor: colors.primary, opacity: isPending ? 0.6 : 1 }]}
+          accessibilityRole="button"
+          disabled={isPending || isSubmitting}
+          style={({ pressed }) => [
+            styles.bookButton,
+            {
+              backgroundColor: isPending || isSubmitting
+                ? colors.disabled
+                : pressed
+                  ? colors.primaryPressed
+                  : colors.primary,
+            },
+          ]}
         >
-          {isPending ? (
-            <ActivityIndicator color={colors.background} />
+          {isPending || isSubmitting ? (
+            <ActivityIndicator color={colors.onDisabled} />
           ) : (
-            <Text style={[styles.bookButtonText, { color: colors.background }]}>Book & Pay</Text>
+            <Text style={[styles.bookButtonText, { color: colors.onPrimary }]}>{runtime.localTest ? 'Create test booking' : 'Book & Pay'}</Text>
           )}
         </Pressable>
       </View>
@@ -360,3 +383,4 @@ const styles = StyleSheet.create({
     fontFamily: fonts.semibold,
   },
 })
+

@@ -45,9 +45,14 @@ export default function GoogleSignInBtn({ title, loading = false, disabled = fal
             onPress={onPress}
             style={({ pressed }) => [
                 styles.base,
-                { borderColor: colors.border, backgroundColor: colors.background },
-                isDisabled && styles.disabled,
-                pressed && !isDisabled && styles.pressed,
+                {
+                    borderColor: isDisabled ? colors.disabledBorder : colors.border,
+                    backgroundColor: isDisabled
+                        ? colors.disabled
+                        : pressed
+                          ? colors.pressedSurface
+                          : colors.background,
+                },
             ]}
         >
             {loading ? (
@@ -55,7 +60,7 @@ export default function GoogleSignInBtn({ title, loading = false, disabled = fal
             ) : (
                 <View style={styles.content}>
                     <GoogleIcon />
-                    <Text style={[styles.label, { color: colors.text }]}>{title}</Text>
+                    <Text style={[styles.label, { color: isDisabled ? colors.onDisabled : colors.text }]}>{title}</Text>
                 </View>
             )}
         </Pressable>
@@ -81,11 +86,5 @@ const styles = StyleSheet.create({
     label: {
         fontSize: typography.sizes.md,
         fontFamily: fonts.semibold,
-    },
-    pressed: {
-        opacity: 0.85,
-    },
-    disabled: {
-        opacity: 0.5,
     },
 })

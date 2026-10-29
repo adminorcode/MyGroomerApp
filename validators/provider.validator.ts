@@ -7,6 +7,7 @@ export const providerSchema = z.object({
     momo_provider: z.enum(Object.values(MomoProvider)).optional(),
     bank_account_number: z.string().optional(),
     bank_account_name: z.string().optional(),
+    bank_code: z.string().optional(),
     service_area: z.string().min(1, 'Service area is required'),
 }).superRefine((data, ctx) => {
     if (data.payout_method === 'mobile_money') {
@@ -16,5 +17,6 @@ export const providerSchema = z.object({
     if (data.payout_method === 'bank') {
         if (!data.bank_account_number) ctx.addIssue({ code: 'custom', path: ['bank_account_number'], message: 'Account number required' })
         if (!data.bank_account_name) ctx.addIssue({ code: 'custom', path: ['bank_account_name'], message: 'Account name required' })
+        if (!data.bank_code) ctx.addIssue({ code: 'custom', path: ['bank_code'], message: 'Bank code required' })
     }
 })

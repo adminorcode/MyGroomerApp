@@ -1,3 +1,4 @@
+import { AppAlert } from '../../utils/alert'
 import { useMemo, useState } from 'react'
 import {
     View,
@@ -46,12 +47,12 @@ export default function AddService({ navigation }: Props) {
 
     const handleAdd = async () => {
         if (!selectedServiceId) {
-            Alert.alert('Select a service', 'Please choose a service to offer.')
+            AppAlert.alert('Select a service', 'Please choose a service to offer.')
             return
         }
         const parsedPrice = Number(price)
         if (!price.trim() || isNaN(parsedPrice) || parsedPrice <= 0) {
-            Alert.alert('Invalid price', 'Please enter a valid price greater than 0.')
+            AppAlert.alert('Invalid price', 'Please enter a valid price greater than 0.')
             return
         }
 
@@ -59,7 +60,7 @@ export default function AddService({ navigation }: Props) {
             await createProviderService({ serviceId: selectedServiceId, price: parsedPrice })
             navigation.goBack()
         } catch (error) {
-            Alert.alert('Could not add service', 'Something went wrong. Please try again.')
+            AppAlert.alert('Could not add service', 'Something went wrong. Please try again.')
         }
     }
 
@@ -100,8 +101,8 @@ export default function AddService({ navigation }: Props) {
                                     style={[
                                         styles.serviceRow,
                                         {
-                                            backgroundColor: colors.surface,
-                                            borderColor: isSelected ? colors.primary : colors.border,
+                                            backgroundColor: isSelected ? colors.selectionSoft : colors.surface,
+                                            borderColor: isSelected ? colors.selection : colors.border,
                                         },
                                     ]}
                                 >
@@ -218,3 +219,4 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
 })
+

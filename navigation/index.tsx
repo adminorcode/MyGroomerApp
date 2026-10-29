@@ -1,5 +1,5 @@
 import { createStackNavigator } from '@react-navigation/stack'
-import { NavigationContainer, LinkingOptions } from '@react-navigation/native'
+import { DarkTheme, DefaultTheme, NavigationContainer, LinkingOptions } from '@react-navigation/native'
 import { useAuthStore } from '../store/authStore'
 import AuthNavigator from './AuthNavigator'
 import ProviderNavigator from './ProviderNavigator'
@@ -7,6 +7,7 @@ import CustomerNavigator from './CustomerNavigator'
 import ChatScreen from '../screens/customer/ChatScreen'
 import * as Linking from 'expo-linking'
 import { useSyncUnreadFromConversations, useUnreadMessagesListener } from '../hooks/useUnreadMessages'
+import { useTheme } from '../context/ThemeContext'
 import { RootParamList } from './types'
 
 const prefix = Linking.createURL('/')
@@ -30,12 +31,25 @@ const Stack = createStackNavigator<RootParamList>()
 
 export default function RootNavigator() {
     const { token, user } = useAuthStore()
+    const { colors, isDark } = useTheme()
+    const navigationTheme = {
+        ...(isDark ? DarkTheme : DefaultTheme),
+        colors: {
+            ...(isDark ? DarkTheme : DefaultTheme).colors,
+            primary: colors.primary,
+            background: colors.background,
+            card: colors.surface,
+            text: colors.text,
+            border: colors.border,
+            notification: colors.error,
+        },
+    }
 
     useUnreadMessagesListener()
     useSyncUnreadFromConversations()
 
     return (
-        <NavigationContainer linking={linking}>
+        <NavigationContainer linking={linking} theme={navigationTheme}>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
                 {!token ? (
                     <Stack.Screen name="Auth" component={AuthNavigator} />

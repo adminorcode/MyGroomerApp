@@ -1,3 +1,4 @@
+import { AppAlert } from '../../utils/alert'
 import { useState } from 'react'
 import {
   View,
@@ -42,11 +43,11 @@ const ReviewScreen = ({ navigation, route }: Props) => {
 
   const handleSubmit = async () => {
     if (rating <= 0) {
-      Alert.alert('Rating required', 'Please tap at least one star to rate your experience.')
+      AppAlert.alert('Rating required', 'Please tap at least one star to rate your experience.')
       return
     }
     if (!comment.trim()) {
-      Alert.alert('Comment required', 'Please share a few words about your experience.')
+      AppAlert.alert('Comment required', 'Please share a few words about your experience.')
       return
     }
 
@@ -54,7 +55,7 @@ const ReviewScreen = ({ navigation, route }: Props) => {
       await mutateAsync({ booking_id: bookingId, rating, comment: comment.trim() })
       navigation.goBack()
     } catch (error) {
-      Alert.alert('Could not submit', 'Something went wrong while submitting your review. Please try again.')
+      AppAlert.alert('Could not submit', 'Something went wrong while submitting your review. Please try again.')
       console.error(error)
     }
   }
@@ -156,3 +157,4 @@ const styles = StyleSheet.create({
 })
 
 export default ReviewScreen
+

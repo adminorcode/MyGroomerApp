@@ -9,7 +9,7 @@ import {
 import { borderRadius, fonts, spacing, typography } from "../../constants/theme";
 import { useTheme } from "../../context/ThemeContext";
 
-type Variant = "primary" | "secondary" | "outline";
+type Variant = "primary" | "secondary" | "outline" | "danger";
 
 export type BoameBtnProps = Omit<PressableProps, "children"> & {
     title: string;
@@ -30,13 +30,37 @@ export default function BoameBtn({
     const isDisabled = disabled || loading;
     const { colors } = useTheme();
 
-    const variantStyle: ViewStyle =
-        variant === "primary" ? { backgroundColor: colors.primary } :
-        variant === "secondary" ? { backgroundColor: colors.secondary } :
-        { backgroundColor: "transparent", borderWidth: 1, borderColor: colors.primary }
+    const contentColor = (pressed: boolean) => {
+        if (isDisabled) return colors.onDisabled;
+        if (variant === "outline") return colors.primary;
+        if (variant === "secondary") return pressed ? colors.onSecondaryPressed : colors.onSecondary;
+        if (variant === "danger") return colors.onError;
+        return colors.onPrimary;
+    };
 
-    const labelColor =
-        variant === "outline" ? colors.primary : colors.background
+    const variantStyle = (pressed: boolean): ViewStyle => {
+        if (isDisabled) {
+            return {
+                backgroundColor: colors.disabled,
+                borderWidth: 1,
+                borderColor: colors.disabledBorder,
+            };
+        }
+        if (variant === "outline") {
+            return {
+                backgroundColor: pressed ? colors.selectionSoft : "transparent",
+                borderWidth: 1,
+                borderColor: colors.primary,
+            };
+        }
+        if (variant === "secondary") {
+            return { backgroundColor: pressed ? colors.secondaryPressed : colors.secondary };
+        }
+        if (variant === "danger") {
+            return { backgroundColor: pressed ? colors.errorPressed : colors.error };
+        }
+        return { backgroundColor: pressed ? colors.primaryPressed : colors.primary };
+    };
 
     return (
         <Pressable
@@ -46,21 +70,18 @@ export default function BoameBtn({
             style={({ pressed }) => [
                 styles.base,
                 fullWidth && styles.fullWidth,
-                variantStyle,
-                isDisabled && styles.disabled,
-                pressed && !isDisabled && styles.pressed,
+                variantStyle(pressed),
                 style as ViewStyle,
             ]}
             {...props}
         >
-            {loading ? (
-                <ActivityIndicator
-                    color={variant === "outline" ? colors.primary : colors.background}
-                    size="small"
-                />
-            ) : (
-                <Text style={[styles.label, { color: labelColor }]}>{title}</Text>
-            )}
+            {({ pressed }) =>
+                loading ? (
+                    <ActivityIndicator color={contentColor(pressed)} size="small" />
+                ) : (
+                    <Text style={[styles.label, { color: contentColor(pressed) }]}>{title}</Text>
+                )
+            }
         </Pressable>
     );
 }
@@ -80,11 +101,5 @@ const styles = StyleSheet.create({
     label: {
         fontSize: typography.sizes.md,
         fontFamily: fonts.semibold,
-    },
-    pressed: {
-        opacity: 0.85,
-    },
-    disabled: {
-        opacity: 0.5,
     },
 });

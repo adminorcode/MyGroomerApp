@@ -1,10 +1,11 @@
 import * as Linking from 'expo-linking'
 import * as WebBrowser from 'expo-web-browser'
+import { API_BASE_URL } from '../constants/api'
 
 const GOOGLE_REDIRECT_URI = 'boame://auth/callback'
 
 export async function signInWithGoogle(): Promise<string> {
-    const authUrl = `https://drinking-omega-answering.ngrok-free.dev/api/v1/auth/google`
+    const authUrl = `${API_BASE_URL.replace(/\/$/, '')}/auth/google`
     
     const result = await WebBrowser.openAuthSessionAsync(authUrl, GOOGLE_REDIRECT_URI)
 

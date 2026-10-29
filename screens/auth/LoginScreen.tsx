@@ -14,6 +14,8 @@ import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import z from "zod";
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view'
 import { useTheme } from "../../context/ThemeContext";
+import { useRuntime } from '../../context/RuntimeContext'
+import { getErrorMessage } from '../../utils/error'
 
 type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>
 
@@ -28,6 +30,7 @@ export default function LoginScreen({navigation}: Props) {
     const { mutate, isPending, error} = useLoginMutation()
     const { mutate: signInWithGoogle, isPending: isGooglePending, error: googleError } = useGoogleSignInMutation()
     const { colors } = useTheme();
+    const runtime = useRuntime()
     const handleLogin: SubmitHandler<z.infer<typeof loginSchema>> = (data) => {
         mutate(data)
     }
@@ -39,7 +42,7 @@ export default function LoginScreen({navigation}: Props) {
             extraScrollHeight={20}
             enableOnAndroid={true}
         >
-            <Text style={[styles.title, { color: colors.primary }]}>Boa me</Text>
+            <Text style={[styles.title, { color: colors.brand }]}>Boa me</Text>
             <View style={styles.form}>
                 <Controller
                     control={control}
@@ -84,14 +87,13 @@ export default function LoginScreen({navigation}: Props) {
                     loading={isPending}
                     onPress={handleSubmit(handleLogin)}
                 />
-                {error && <Text style={[styles.error, { color: colors.error }]}>{error.message}</Text>}
-                <AuthDivider />
-                <GoogleSignInBtn
+                {error && <Text accessibilityRole="alert" style={[styles.error, { color: colors.error }]}>{getErrorMessage(error)}</Text>}
+                {runtime.googleAuthEnabled && <><AuthDivider /><GoogleSignInBtn
                     title="Log in with Google"
                     loading={isGooglePending}
                     disabled={isPending}
                     onPress={() => signInWithGoogle()}
-                />
+                /></>}
                 {googleError && <Text style={[styles.error, { color: colors.error }]}>{googleError.message}</Text>}
             </View>
             <Text style={[styles.registerLink, { color: colors.primary }]} onPress={() => navigation.navigate("Register")}>

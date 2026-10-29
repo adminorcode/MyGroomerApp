@@ -6,16 +6,16 @@ import { TransactionStatus } from "../../types/transaction.types";
 export default function TransactionStatusBadge({ status }: { status: TransactionStatus }) {
     const { colors } = useTheme();
 
-    const statusConfig: Record<TransactionStatus, { label: string; color: string }> = {
-        [TransactionStatus.PENDING]: { label: 'Pending', color: colors.warning },
-        [TransactionStatus.COMPLETED]: { label: 'Completed', color: colors.success },
-        [TransactionStatus.CANCELLED]: { label: 'Cancelled', color: colors.error },
+    const statusConfig: Record<TransactionStatus, { label: string; color: string; background: string }> = {
+        [TransactionStatus.PENDING]: { label: 'Pending', color: colors.warning, background: colors.warningSoft },
+        [TransactionStatus.COMPLETED]: { label: 'Completed', color: colors.success, background: colors.successSoft },
+        [TransactionStatus.CANCELLED]: { label: 'Cancelled', color: colors.error, background: colors.errorSoft },
     }
 
-    const { label, color } = statusConfig[status] ?? { label: status, color: colors.textSecondary }
+    const { label, color, background } = statusConfig[status] ?? { label: status, color: colors.textSecondary, background: colors.surface }
 
     return (
-        <View style={[styles.badge, { backgroundColor: color + '20' }]}>
+        <View style={[styles.badge, { backgroundColor: background }]}>
             <Text style={[styles.badgeText, { color }]}>{label}</Text>
         </View>
     )

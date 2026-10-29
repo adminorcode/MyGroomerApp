@@ -56,7 +56,7 @@ function buildListItems(messages: Message[]): ListItem[] {
 
 const ChatScreen = ({ navigation, route }: Props) => {
   const { colors } = useTheme()
-  const { socket } = useSocket()
+  const { socket, isConnected } = useSocket()
   const currentUserId = useAuthStore((state) => state.user?.id)
   const { otherName, conversationId } = route.params
   
@@ -69,6 +69,8 @@ const ChatScreen = ({ navigation, route }: Props) => {
   const historyMessages = conversationMessages ?? [] // server message history
 
   const [liveMessages, setLiveMessages] = useState<Message[]>([]) // socket messages
+
+  useEffect(() => { setLiveMessages([]); setDraft('') }, [conversationId])
 
   useFocusEffect(
     useCallback(() => {
@@ -108,7 +110,7 @@ const ChatScreen = ({ navigation, route }: Props) => {
 
   const handleSend = () => {
     const content = draft.trim()
-    if (!content || !socket) return
+    if (!content || !socket || !isConnected) return
 
     socket.emit('send_message', { conversation_id: conversationId, content })
     // refetch conversation this message was sent in.
@@ -180,7 +182,8 @@ const ChatScreen = ({ navigation, route }: Props) => {
         )}
 
         <View style={styles.inputWrapper}>
-          <ChatInputBar value={draft} onChangeText={setDraft} onSend={handleSend} />
+          {!isConnected && <Text style={{ color: colors.textSecondary }}>Conectando ao chat...</Text>}
+          <ChatInputBar value={draft} onChangeText={setDraft} onSend={handleSend} disabled={!isConnected} />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

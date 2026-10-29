@@ -14,7 +14,7 @@ export default function CategoryTile({ name, onPress }: Props) {
             onPress={onPress}
             style={[styles.tile, { backgroundColor: colors.surface, borderColor: colors.border }]}
         >
-           <View style={[styles.iconCircle, { backgroundColor: colors.primary + '20' }]}>
+           <View style={[styles.iconCircle, { backgroundColor: colors.selectionSoft }]}>
                 <Text style={{ color: colors.primary, fontFamily: fonts.semibold, fontSize: typography.sizes.lg }}>
                     {name.charAt(0).toUpperCase()}
                 </Text>

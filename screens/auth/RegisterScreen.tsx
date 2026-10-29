@@ -16,6 +16,8 @@ import AuthDivider from "../../components/shared/AuthDivider";
 import { Role } from "../../types/auth.types";
 import { useTheme } from "../../context/ThemeContext";
 import { MomoProvider, PayoutMethod } from "../../types/provider.types";
+import { useRuntime } from '../../context/RuntimeContext'
+import { getErrorMessage } from '../../utils/error'
 
 type RegisterScreenNavigationProp = StackNavigationProp<AuthStackParamList, "Register">;
 
@@ -65,14 +67,14 @@ function OptionSelector<T extends string>({ label, options, value, onChange, err
                             style={[
                                 styles.roleOption,
                                 { borderColor: colors.border },
-                                isSelected && { borderColor: colors.primary, backgroundColor: colors.primary },
+                                isSelected && { borderColor: colors.selection, backgroundColor: colors.selection },
                             ]}
                         >
                             <Text
                                 style={[
                                     styles.roleOptionText,
                                     { color: colors.text },
-                                    isSelected && { color: colors.background },
+                                    isSelected && { color: colors.onSelection },
                                 ]}
                             >
                                 {option.label}
@@ -100,6 +102,7 @@ export default function RegisterScreen({ navigation }: Props) {
         },
     });
     const { mutate, isPending, error } = useRegisterMutation();
+    const runtime = useRuntime()
     const { mutate: signInWithGoogle, isPending: isGooglePending, error: googleError } = useGoogleSignInMutation();
     const selectedRole = watch("role");
     const payoutMethod = watch("payout_method");
@@ -116,7 +119,7 @@ export default function RegisterScreen({ navigation }: Props) {
             extraScrollHeight={20}
             enableOnAndroid
         >
-            <Text style={[styles.title, { color: colors.primary }]}>Create account</Text>
+            <Text style={[styles.title, { color: colors.brand }]}>Create account</Text>
             <View style={styles.form}>
                 <Controller
                     control={control}
@@ -199,14 +202,14 @@ export default function RegisterScreen({ navigation }: Props) {
                                 onPress={() => setValue("role", value, { shouldValidate: true })}
                                 style={[
                                     styles.roleOption,
-                                    selectedRole === value && {borderColor: colors.primary, backgroundColor: colors.primary },
                                     { borderColor: colors.border },
+                                    selectedRole === value && { borderColor: colors.selection, backgroundColor: colors.selection },
                                 ]}
                             >
                                 <Text
                                     style={[
                                         {...styles.roleOptionText, color: colors.text},
-                                        selectedRole === value && {color: colors.background},
+                                        selectedRole === value && {color: colors.onSelection},
                                     ]}
                                 >
                                     {label}
@@ -297,6 +300,13 @@ export default function RegisterScreen({ navigation }: Props) {
                                         />
                                     )}
                                 />
+                                <Controller
+                                    control={control}
+                                    name="bank_code"
+                                    render={({ field: { onChange, onBlur, value } }) => (
+                                        <BoameInput label="Bank code" placeholder="Bank code" onChangeText={onChange} onBlur={onBlur} value={value} error={errors.bank_code?.message} />
+                                    )}
+                                />
                             </>
                         )}
 
@@ -322,14 +332,13 @@ export default function RegisterScreen({ navigation }: Props) {
                     loading={isPending}
                     onPress={handleSubmit(handleRegister)}
                 />
-                {error && <Text style={[styles.error, { color: colors.error }]}>{error.message}</Text>}
-                <AuthDivider />
-                <GoogleSignInBtn
+                {error && <Text accessibilityRole="alert" style={[styles.error, { color: colors.error }]}>{getErrorMessage(error)}</Text>}
+                {runtime.googleAuthEnabled && <><AuthDivider /><GoogleSignInBtn
                     title="Sign up with Google"
                     loading={isGooglePending}
                     disabled={isPending}
                     onPress={() => signInWithGoogle()}
-                />
+                /></>}
                 {googleError && <Text style={[styles.error, { color: colors.error }]}>{googleError.message}</Text>}
             </View>
             <Text style={[styles.loginLink, { color: colors.primary }]} onPress={() => navigation.navigate("Login")}>

@@ -24,6 +24,10 @@ export const useRegisterMutation = () => {
     return useMutation({
         mutationFn: (data: z.infer<typeof registerSchema>) => registerUser(data),
         onSuccess: (data) => {
+            if (data.requires_verification === false) {
+                navigation.navigate('Login')
+                return
+            }
             navigation.navigate('VerifyEmail', { email: data.email })
         },
         onError: (error) => {

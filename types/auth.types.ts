@@ -13,6 +13,8 @@ export type User = {
 
 
 export type AuthStore = {
+    hasHydrated: boolean
+    setHydrated: () => void
     token: string | null
     user: User | null
     setAuth: (token: string, user: User) => void

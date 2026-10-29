@@ -29,7 +29,7 @@ export default function ProviderNavigator() {
             screenOptions={{
                 headerShown: false,
                 tabBarActiveTintColor: colors.primary,
-                tabBarInactiveTintColor: colors.textSecondary,
+                tabBarInactiveTintColor: colors.navInactive,
                 tabBarStyle: {
                     backgroundColor: colors.background,
                     borderTopWidth: 1,

@@ -47,7 +47,7 @@ export default function Earnings() {
 
   const renderTransaction = ({ item }: { item: ProviderTransaction }) => (
     <View style={[styles.txCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      <View style={[styles.txIcon, { backgroundColor: colors.primary + '20' }]}>
+      <View style={[styles.txIcon, { backgroundColor: colors.selectionSoft }]}>
         <ArrowDownLeft size={20} color={colors.primary} />
       </View>
 

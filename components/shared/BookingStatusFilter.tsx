@@ -43,15 +43,15 @@ export default function BookingStatusFilter({ selected, onSelect, options = BOOK
                         style={[
                             styles.chip,
                             {
-                                backgroundColor: isActive ? colors.primary : colors.surface,
-                                borderColor: isActive ? colors.primary : colors.border,
+                                backgroundColor: isActive ? colors.selection : colors.surface,
+                                borderColor: isActive ? colors.selection : colors.border,
                             },
                         ]}
                     >
                         <Text
                             style={[
                                 styles.chipText,
-                                { color: isActive ? colors.background : colors.textSecondary },
+                                { color: isActive ? colors.onSelection : colors.textSecondary },
                             ]}
                         >
                             {option.label}
