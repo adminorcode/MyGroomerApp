@@ -15,7 +15,7 @@ export default function ScreenHeader({ title, description, showBackButton, onBac
   return (
     <View style={styles.container}>
       {showBackButton && (
-        <Pressable onPress={onBack} hitSlop={spacing.sm}>
+        <Pressable onPress={onBack} hitSlop={spacing.sm} accessibilityRole="button" accessibilityLabel="Voltar">
           <ChevronLeft size={24} color={colors.text} />
         </Pressable>
       )}

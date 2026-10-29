@@ -1,6 +1,6 @@
 import { AppAlert } from '../../utils/alert'
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native'
-import { ChevronRight, LogOut, Store } from 'lucide-react-native'
+import { ChevronRight, LogOut, PawPrint, Store } from 'lucide-react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { CustomerTabParamList, ProfileStackParamList } from '../../navigation/types'
 import { useAuthStore } from '../../store/authStore'
@@ -50,6 +50,30 @@ export default function ProfileScreen({ navigation }: Props) {
           </View>
         )}
       </View>
+
+      {user?.role === 'customer' && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Meus pets"
+          onPress={() => navigation.navigate('Pets')}
+          style={({ pressed }) => [
+            styles.actionRow,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+            pressed && styles.pressed,
+          ]}
+        >
+          <View style={[styles.actionIcon, { backgroundColor: colors.selectionSoft }]}>
+            <PawPrint size={20} color={colors.primary} />
+          </View>
+          <View style={styles.actionTextWrapper}>
+            <Text style={[styles.actionTitle, { color: colors.text }]}>Meus pets</Text>
+            <Text style={[styles.actionSubtitle, { color: colors.textSecondary }]}>
+              Cadastre e reutilize os pets nos agendamentos
+            </Text>
+          </View>
+          <ChevronRight size={20} color={colors.textSecondary} />
+        </Pressable>
+      )}
 
       {user?.role !== 'provider' && (
         <Pressable

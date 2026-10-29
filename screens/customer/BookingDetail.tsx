@@ -10,7 +10,8 @@ import { useChangeBookingStatus, useGetBookingById } from '../../hooks/useBookin
 import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
 import { useTheme } from '../../context/ThemeContext'
 import StatusBadge from '../../components/shared/StatusBadge'
-import { CalendarClock, Hash, MapPin, Clock } from 'lucide-react-native'
+import { CalendarClock, Hash, MapPin, Clock, PawPrint } from 'lucide-react-native'
+import { petSizeLabel, petSpeciesLabel } from '../../types/pet.types'
 import { DetailRow } from '../../components/shared/DetailRow'
 import BoameBtn from '../../components/shared/BoameBtn'
 import { BookingStatus } from '../../types/booking.types'
@@ -140,6 +141,18 @@ const BookingDetail = ({ navigation, route }: Props) => {
                             label="Local"
                             value={data.customer_location}
                         />
+                        {data.pet_name ? (
+                            <DetailRow
+                                icon={<PawPrint size={18} color={colors.primary} />}
+                                label="Pet"
+                                value={[
+                                    data.pet_name,
+                                    data.pet_species ? petSpeciesLabel(data.pet_species) : null,
+                                    data.pet_size ? petSizeLabel(data.pet_size) : null,
+                                    data.pet_age_years != null ? `${data.pet_age_years} anos` : null,
+                                ].filter(Boolean).join(' · ')}
+                            />
+                        ) : null}
                         <DetailRow
                             icon={<Hash size={18} color={colors.primary} />}
                             label="Referência"

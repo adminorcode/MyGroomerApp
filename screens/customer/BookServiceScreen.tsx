@@ -1,5 +1,5 @@
 import { AppAlert } from '../../utils/alert'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   View,
   Text,
@@ -18,6 +18,8 @@ import { RouteProp } from '@react-navigation/core'
 import { HomeStackParamList } from '../../navigation/types'
 import { useGetProviderServiceById } from '../../hooks/useProviders'
 import { useCreateBooking } from '../../hooks/useBooking'
+import { usePets } from '../../hooks/usePets'
+import PetPicker from '../../components/customer/PetPicker'
 import { useTheme } from '../../context/ThemeContext'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
@@ -41,18 +43,28 @@ type Props = {
 export default function BookServiceScreen({ navigation, route }: Props) {
   const { colors } = useTheme()
   const runtime = useRuntime()
-  const { providerServiceId } = route.params
+  const { providerServiceId, petId: requestedPetId } = route.params
   const { data, isLoading, isError } = useGetProviderServiceById(providerServiceId)
+  const pets = usePets()
   const { mutateAsync: createBooking, isPending } = useCreateBooking()
 
   const [scheduledAt, setScheduledAt] = useState<Date>(new Date())
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [location, setLocation] = useState('')
+  const [selectedPetId, setSelectedPetId] = useState<string | undefined>(requestedPetId)
+  const [petError, setPetError] = useState('')
   // const [latitude, setLatitude] = useState<number | undefined>(undefined)
   // const [longitude, setLongitude] = useState<number | undefined>(undefined)
   const [showPicker, setShowPicker] = useState(false)
   const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date')
   const queryClient = useQueryClient()
+
+  useEffect(() => {
+    if (requestedPetId) {
+      setSelectedPetId(requestedPetId)
+      setPetError('')
+    }
+  }, [requestedPetId])
 
   const onChangeDate = (event: any, selected?: Date) => {
     if (event.type === 'dismissed') {
@@ -91,6 +103,10 @@ export default function BookServiceScreen({ navigation, route }: Props) {
   }
 
   const handleBook = async() => {
+    if (!selectedPetId) {
+      setPetError('Selecione um pet para o atendimento.')
+      return
+    }
     if (!location.trim()) {
       AppAlert.alert('Local obrigatório', 'Informe onde o atendimento deve acontecer.')
       return
@@ -104,6 +120,7 @@ export default function BookServiceScreen({ navigation, route }: Props) {
       setIsSubmitting(true)
       const bookedResponse = await createBooking(
         {
+          pet_id: selectedPetId,
           provider_service_id: providerServiceId,
           scheduled_at: scheduledAt,
           customer_location: location.trim(),
@@ -220,6 +237,20 @@ export default function BookServiceScreen({ navigation, route }: Props) {
             </View>
           </View>
 
+          <PetPicker
+            pets={pets.data}
+            isLoading={pets.isLoading}
+            isError={pets.isError}
+            selectedPetId={selectedPetId}
+            error={petError}
+            onSelect={(petId) => {
+              setSelectedPetId(petId)
+              setPetError('')
+            }}
+            onCreate={() => navigation.navigate('PetForm', { providerServiceId })}
+            onRetry={() => { void pets.refetch() }}
+          />
+
           {/* Date & time */}
           <Text style={[styles.label, { color: colors.text }]}>Quando</Text>
           <Pressable
@@ -258,11 +289,11 @@ export default function BookServiceScreen({ navigation, route }: Props) {
         <Pressable
           onPress={handleBook}
           accessibilityRole="button"
-          disabled={isPending || isSubmitting}
+          disabled={isPending || isSubmitting || pets.isLoading}
           style={({ pressed }) => [
             styles.bookButton,
             {
-              backgroundColor: isPending || isSubmitting
+              backgroundColor: isPending || isSubmitting || pets.isLoading
                 ? colors.disabled
                 : pressed
                   ? colors.primaryPressed
@@ -273,7 +304,7 @@ export default function BookServiceScreen({ navigation, route }: Props) {
           {isPending || isSubmitting ? (
             <ActivityIndicator color={colors.onDisabled} />
           ) : (
-            <Text style={[styles.bookButtonText, { color: colors.onPrimary }]}>{runtime.localTest ? 'Criar agendamento de teste' : 'Agendar e pagar'}</Text>
+            <Text style={[styles.bookButtonText, { color: isPending || isSubmitting || pets.isLoading ? colors.onDisabled : colors.onPrimary }]}>{runtime.localTest ? 'Criar agendamento de teste' : 'Agendar e pagar'}</Text>
           )}
         </Pressable>
       </View>
