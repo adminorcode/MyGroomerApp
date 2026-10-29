@@ -30,9 +30,9 @@ export function BoamePhoneInput({label, error, onChangeFormattedText, ...props}:
             <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
             <PhoneInput
                 {...props}
-                defaultCode="GH"
+                defaultCode="BR"
                 layout="first"
-                placeholder="Enter your phone number"
+                placeholder="Digite seu telefone"
                 onChangeFormattedText={onChangeFormattedText}
                 containerStyle={{...styles.phoneContainer, borderColor: fieldBorder(colors, error, focused)}}
                 textContainerStyle={{...styles.phoneTextContainer, backgroundColor: colors.background}}

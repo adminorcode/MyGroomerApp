@@ -10,14 +10,14 @@ export async function signInWithGoogle(): Promise<string> {
     const result = await WebBrowser.openAuthSessionAsync(authUrl, GOOGLE_REDIRECT_URI)
 
     if (result.type !== 'success' || !result.url) {
-        throw new Error('Google sign-in was cancelled or failed')
+        throw new Error('O login com Google foi cancelado ou falhou')
     }
 
     const { queryParams } = Linking.parse(result.url)
     const token = queryParams?.token
 
     if (typeof token !== 'string' || !token) {
-        throw new Error('No token received')
+        throw new Error('Nenhum token foi recebido')
     }
 
     return token

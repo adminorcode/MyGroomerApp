@@ -4,11 +4,12 @@ import { BookingCardTypes } from "../../types/booking.types";
 import { useTheme } from "../../context/ThemeContext";
 import { borderRadius, fonts, spacing, typography } from "../../constants/theme";
 import StatusBadge from "./StatusBadge";
+import { formatMoney } from "../../utils/formatMoney";
 
 function formatScheduledAt(value: string) {
     const date = new Date(value);
     if (isNaN(date.getTime())) return value;
-    return date.toLocaleString(undefined, {
+    return date.toLocaleString("pt-BR", {
         weekday: "short",
         month: "short",
         day: "numeric",
@@ -40,8 +41,8 @@ export function BookingCard({ service_name, provider_name, price, scheduled_at,
 
                 <Text style={[styles.provider, { color: colors.textSecondary }]}>
                     {perspective === 'provider'
-                        ? `for ${customer_name} · GHS ${price}`
-                        : `by ${provider_name} · GHS ${price}`}
+                        ? `para ${customer_name} · ${formatMoney(price)}`
+                        : `por ${provider_name} · ${formatMoney(price)}`}
                 </Text>
 
                 <View style={styles.row}>

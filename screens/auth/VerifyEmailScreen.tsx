@@ -7,6 +7,7 @@ import BoameBtn from '../../components/shared/BoameBtn'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { AuthStackParamList } from '../../navigation/types'
 import { useVerifyEmailMutation } from '../../hooks/useAuth'
+import { getErrorMessage } from '../../utils/error'
 
 type Props = {
     navigation: StackNavigationProp<AuthStackParamList, 'VerifyEmail'>
@@ -44,7 +45,7 @@ export default function VerifyEmailScreen({ navigation }: Props) {
         return (
             <View style={[styles.container, { backgroundColor: colors.background }]}>
                 <ActivityIndicator size="large" color={colors.primary} />
-                <Text style={[styles.message, {color:colors.textSecondary}]}>Verifying your email...</Text>
+                <Text style={[styles.message, {color:colors.textSecondary}]}>Verificando seu e-mail...</Text>
             </View>
         )
     }
@@ -52,8 +53,8 @@ export default function VerifyEmailScreen({ navigation }: Props) {
     if (isSuccess) {
         return (
             <View style={[styles.container, { backgroundColor: colors.background}]}>
-                <Text style={[styles.title, {color:colors.text}]}>Email verified!</Text>
-                <Text style={[styles.message, {color:colors.textSecondary}]}>Your account is ready. You can now log in.</Text>
+                <Text style={[styles.title, {color:colors.text}]}>E-mail verificado!</Text>
+                <Text style={[styles.message, {color:colors.textSecondary}]}>Sua conta está pronta. Você já pode entrar.</Text>
                 {/* <BoameBtn
                     title="Go to Login"
                     onPress={() => navigation.navigate('Login')}
@@ -65,10 +66,10 @@ export default function VerifyEmailScreen({ navigation }: Props) {
     if (isError) {
         return (
             <View style={[styles.container, { backgroundColor: colors.background }]}>
-                <Text style={[styles.title, {color:colors.text}]}>Verification failed</Text>
-                <Text style={[styles.message, {color:colors.textSecondary}]}>{error?.message ?? 'The link may have expired.'}</Text>
+                <Text style={[styles.title, {color:colors.text}]}>Falha na verificação</Text>
+                <Text style={[styles.message, {color:colors.textSecondary}]}>{error ? getErrorMessage(error) : 'O link pode ter expirado.'}</Text>
                 <BoameBtn
-                    title="Back to Login"
+                    title="Voltar ao login"
                     onPress={() => navigation.navigate('Login')}
                 />
             </View>
@@ -78,9 +79,9 @@ export default function VerifyEmailScreen({ navigation }: Props) {
     // no token in URL
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
-            <Text style={[styles.title, { color: colors.primary }]}>Check your email</Text>
+            <Text style={[styles.title, { color: colors.primary }]}>Confira seu e-mail</Text>
             <Text style={[styles.message, { color: colors.textSecondary }]}>
-                We sent a verification link to your email. Tap it to verify your account.
+                Enviamos um link de verificação para o seu e-mail. Toque nele para confirmar a conta.
             </Text>
             {/* <BoameBtn
                 title="Back to Login"

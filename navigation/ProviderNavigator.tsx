@@ -48,7 +48,7 @@ export default function ProviderNavigator() {
                 name="BookingsTab"
                 component={ProviderBookingsStackNavigator}
                 options={{
-                    tabBarLabel: 'Dashboard',
+                    tabBarLabel: 'Painel',
                     tabBarIcon: ({ color, size }) => (
                         <LayoutDashboardIcon color={color} size={size} />
                     ),
@@ -59,7 +59,7 @@ export default function ProviderNavigator() {
                 name="ServicesTab"
                 component={ProviderServicesStackNavigator}
                 options={{
-                    tabBarLabel: 'Services',
+                    tabBarLabel: 'Serviços',
                     tabBarIcon: ({ color, size }) => <Wrench color={color} size={size} />,
                 }}
             />
@@ -68,7 +68,7 @@ export default function ProviderNavigator() {
                 name="EarningsTab"
                 component={Earnings}
                 options={{
-                    tabBarLabel: 'Earnings',
+                    tabBarLabel: 'Rendimentos',
                     tabBarIcon: ({ color, size }) => <Wallet color={color} size={size} />,
                 }}
             />
@@ -77,7 +77,7 @@ export default function ProviderNavigator() {
                 name="MessagesTab"
                 component={MessagesStackNavigator}
                 options={{
-                    tabBarLabel: 'Messages',
+                    tabBarLabel: 'Mensagens',
                     tabBarIcon: ({ color, size }) => (
                         <MessageTabIcon color={color} size={size} />
                     ),

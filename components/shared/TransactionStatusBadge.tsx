@@ -7,9 +7,9 @@ export default function TransactionStatusBadge({ status }: { status: Transaction
     const { colors } = useTheme();
 
     const statusConfig: Record<TransactionStatus, { label: string; color: string; background: string }> = {
-        [TransactionStatus.PENDING]: { label: 'Pending', color: colors.warning, background: colors.warningSoft },
-        [TransactionStatus.COMPLETED]: { label: 'Completed', color: colors.success, background: colors.successSoft },
-        [TransactionStatus.CANCELLED]: { label: 'Cancelled', color: colors.error, background: colors.errorSoft },
+        [TransactionStatus.PENDING]: { label: 'Pendente', color: colors.warning, background: colors.warningSoft },
+        [TransactionStatus.COMPLETED]: { label: 'Concluído', color: colors.success, background: colors.successSoft },
+        [TransactionStatus.CANCELLED]: { label: 'Cancelado', color: colors.error, background: colors.errorSoft },
     }
 
     const { label, color, background } = statusConfig[status] ?? { label: status, color: colors.textSecondary, background: colors.surface }

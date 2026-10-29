@@ -22,7 +22,7 @@ export default function ProfileHeaderButton({ avatarUri, size = 44, style, onPre
             onPress={onPress}
             hitSlop={8}
             accessibilityRole="button"
-            accessibilityLabel="Open profile"
+            accessibilityLabel="Abrir perfil"
             style={[styles.base, dimensions, { borderColor: colors.border }, style]}
         >
             {avatarUri ? (

@@ -20,7 +20,7 @@ export default function ServiceDateTimePicker({ value, minimumDate, onChange }: 
   const borderColor = focused ? colors.focus : colors.border
   return createElement('input', {
     type: 'datetime-local',
-    'aria-label': 'Service date and time',
+    'aria-label': 'Data e hora do atendimento',
     value: localDateTime(value),
     min: minimumDate ? localDateTime(minimumDate) : undefined,
     onFocus: () => setFocused(true),

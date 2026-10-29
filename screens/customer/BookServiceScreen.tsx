@@ -28,6 +28,7 @@ import { findBookingById } from '../../services/booking.service'
 import { BookingStatus } from '../../types/booking.types'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRuntime } from '../../context/RuntimeContext'
+import { formatMoney } from '../../utils/formatMoney'
 
 type BookServiceScreenNavigationProp = StackNavigationProp<HomeStackParamList, 'BookService'>
 type BookServiceScreenRouteProp = RouteProp<HomeStackParamList, 'BookService'>
@@ -91,11 +92,11 @@ export default function BookServiceScreen({ navigation, route }: Props) {
 
   const handleBook = async() => {
     if (!location.trim()) {
-      AppAlert.alert('Location required', 'Please enter where the service should take place.')
+      AppAlert.alert('Local obrigatório', 'Informe onde o atendimento deve acontecer.')
       return
     }
     if (scheduledAt.getTime() < Date.now()) {
-      AppAlert.alert('Invalid time', 'Please choose a date and time in the future.')
+      AppAlert.alert('Horário inválido', 'Escolha uma data e hora no futuro.')
       return
     }
 
@@ -118,7 +119,7 @@ export default function BookServiceScreen({ navigation, route }: Props) {
         return
       }
       const authUrl = bookedResponse.data.authorization_url
-      if (!authUrl) throw new Error('Checkout is unavailable')
+      if (!authUrl) throw new Error('O pagamento não está disponível')
       await WebBrowser.openAuthSessionAsync(authUrl)
       
       // TODO: Show a loading page after webview before moving home
@@ -129,10 +130,10 @@ export default function BookServiceScreen({ navigation, route }: Props) {
         queryClient.invalidateQueries({queryKey:['bookings']})
         navigation.navigate('Home')
       } else {
-        AppAlert.alert('Payment processing', "We'll update your booking shortly.")
+        AppAlert.alert('Pagamento em processamento', 'Vamos atualizar seu agendamento em instantes.')
       }
     } catch (error) {
-      AppAlert.alert('Booking failed', 'Something went wrong. Please try again.')
+      AppAlert.alert('Falha no agendamento', 'Algo deu errado. Tente novamente.')
       console.error(error)
     } finally {
       setIsSubmitting(false)
@@ -152,17 +153,17 @@ export default function BookServiceScreen({ navigation, route }: Props) {
   if (isError || !data) {
     return (
       <ScreenContainer>
-        <ScreenHeader title="Book Service" showBackButton onBack={() => navigation.goBack()} />
+        <ScreenHeader title="Agendar serviço" showBackButton onBack={() => navigation.goBack()} />
         <View style={styles.centered}>
           <Text style={[styles.message, { color: colors.error }]}>
-            Could not load this service. Please try again.
+            Não foi possível carregar este serviço. Tente novamente.
           </Text>
         </View>
       </ScreenContainer>
     )
   }
 
-  const formattedSchedule = scheduledAt.toLocaleString(undefined, {
+  const formattedSchedule = scheduledAt.toLocaleString('pt-BR', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -174,8 +175,8 @@ export default function BookServiceScreen({ navigation, route }: Props) {
     <KeyboardAvoidingView behavior='padding' style={{backgroundColor: colors.background, flex:1}}>
       <View style={styles.content}>
         <ScreenHeader
-          title="Book Service"
-          description="Confirm the details and schedule your booking"
+          title="Agendar serviço"
+          description="Confirme os dados e escolha o horário"
           showBackButton
           onBack={() => navigation.goBack()}
         />
@@ -190,7 +191,7 @@ export default function BookServiceScreen({ navigation, route }: Props) {
           <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <Text style={[styles.serviceName, { color: colors.text }]}>{data.service_name}</Text>
             <Text style={[styles.providerName, { color: colors.textSecondary }]}>
-              by {data.provider_name}
+              por {data.provider_name}
             </Text>
 
             <View style={styles.metaRow}>
@@ -214,13 +215,13 @@ export default function BookServiceScreen({ navigation, route }: Props) {
             </View>
 
             <View style={[styles.priceRow, { borderTopColor: colors.border }]}>
-              <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>Price</Text>
-              <Text style={[styles.price, { color: colors.primary }]}>GHS {data.price}</Text>
+              <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>Preço</Text>
+              <Text style={[styles.price, { color: colors.primary }]}>{formatMoney(data.price)}</Text>
             </View>
           </View>
 
           {/* Date & time */}
-          <Text style={[styles.label, { color: colors.text }]}>When</Text>
+          <Text style={[styles.label, { color: colors.text }]}>Quando</Text>
           <Pressable
             onPress={openPicker}
             style={[styles.field, { backgroundColor: colors.surface, borderColor: colors.border }]}
@@ -230,13 +231,13 @@ export default function BookServiceScreen({ navigation, route }: Props) {
           </Pressable>
 
           {/* Location */}
-          <Text style={[styles.label, { color: colors.text }]}>Location</Text>
+          <Text style={[styles.label, { color: colors.text }]}>Local</Text>
           <View style={[styles.field, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <MapPin size={20} color={colors.primary} />
             <TextInput
               value={location}
               onChangeText={setLocation}
-              placeholder="Enter your address"
+              placeholder="Digite seu endereço"
               placeholderTextColor={colors.textSecondary}
               style={[styles.input, { color: colors.text }]}
             />
@@ -272,7 +273,7 @@ export default function BookServiceScreen({ navigation, route }: Props) {
           {isPending || isSubmitting ? (
             <ActivityIndicator color={colors.onDisabled} />
           ) : (
-            <Text style={[styles.bookButtonText, { color: colors.onPrimary }]}>{runtime.localTest ? 'Create test booking' : 'Book & Pay'}</Text>
+            <Text style={[styles.bookButtonText, { color: colors.onPrimary }]}>{runtime.localTest ? 'Criar agendamento de teste' : 'Agendar e pagar'}</Text>
           )}
         </Pressable>
       </View>

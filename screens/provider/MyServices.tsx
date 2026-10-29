@@ -10,6 +10,7 @@ import ScreenHeader from '../../components/shared/ScreenHeader'
 import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
 import { ProviderServiceDetailed } from '../../types/provider.types'
 import { getErrorMessage } from '../../utils/error'
+import { formatMoney } from '../../utils/formatMoney'
 
 type MyServicesNavigationProp = StackNavigationProp<ProviderServicesStackParamList, 'MyServices'>
 
@@ -24,11 +25,11 @@ export default function MyServices({ navigation }: Props) {
 
     const handleDelete = (item: ProviderServiceDetailed) => {
         AppAlert.alert(
-            'Remove service?',
-            `"${item.service_name}" will no longer be available for customers to book.`,
+            'Remover serviço?',
+            `"${item.service_name}" deixará de aparecer para os tutores agendarem.`,
             [
-                { text: 'Keep', style: 'cancel' },
-                { text: 'Remove', style: 'destructive', onPress: () => deleteService(item.id) },
+                { text: 'Manter', style: 'cancel' },
+                { text: 'Remover', style: 'destructive', onPress: () => deleteService(item.id) },
             ]
         )
     }
@@ -38,8 +39,8 @@ export default function MyServices({ navigation }: Props) {
             <View style={styles.headerRow}>
                 <View style={styles.headerText}>
                     <ScreenHeader
-                        title='My Services'
-                        description='Manage the services you offer and their prices'
+                        title='Meus serviços'
+                        description='Gerencie os serviços e os preços que você oferece'
                     />
                 </View>
                 <Pressable
@@ -49,7 +50,7 @@ export default function MyServices({ navigation }: Props) {
                         { backgroundColor: pressed ? colors.primaryPressed : colors.primary },
                     ]}
                     accessibilityRole='button'
-                    accessibilityLabel='Add service'
+                    accessibilityLabel='Adicionar serviço'
                 >
                     <Plus size={22} color={colors.onPrimary} />
                 </Pressable>
@@ -63,7 +64,7 @@ export default function MyServices({ navigation }: Props) {
             ) : isError ? (
                 <View style={styles.centered}>
                     <Text style={[styles.message, { color: colors.error }]}>
-                        Something went wrong while fetching your services
+                        Não foi possível carregar os serviços.
                     </Text>
                 </View>
             ) : (
@@ -78,7 +79,7 @@ export default function MyServices({ navigation }: Props) {
                                 <Text style={[styles.serviceName, { color: colors.text }]} numberOfLines={1}>
                                     {item.service_name}
                                 </Text>
-                                <Text style={[styles.price, { color: colors.primary }]}>GHS {item.price}</Text>
+                                <Text style={[styles.price, { color: colors.primary }]}>{formatMoney(item.price)}</Text>
                             </View>
                             <View style={styles.actions}>
                                 <Pressable
@@ -89,7 +90,7 @@ export default function MyServices({ navigation }: Props) {
                                     })}
                                     style={styles.iconButton}
                                     accessibilityRole='button'
-                                    accessibilityLabel='Edit price'
+                                    accessibilityLabel='Editar preço'
                                 >
                                     <Pencil size={18} color={colors.textSecondary} />
                                 </Pressable>
@@ -98,7 +99,7 @@ export default function MyServices({ navigation }: Props) {
                                     disabled={isDeleting}
                                     style={styles.iconButton}
                                     accessibilityRole='button'
-                                    accessibilityLabel='Remove service'
+                                    accessibilityLabel='Remover serviço'
                                 >
                                     <Trash2 size={18} color={colors.error} />
                                 </Pressable>
@@ -108,7 +109,7 @@ export default function MyServices({ navigation }: Props) {
                     ListEmptyComponent={
                         <View style={styles.centered}>
                             <Text style={[styles.message, { color: colors.textSecondary }]}>
-                                You haven't added any services yet. Tap + to add one.
+                                Você ainda não adicionou serviços. Toque em + para incluir um.
                             </Text>
                         </View>
                     }

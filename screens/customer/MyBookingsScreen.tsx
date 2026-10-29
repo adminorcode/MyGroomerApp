@@ -26,8 +26,8 @@ export default function MyBookingsScreen({navigation}: Props) {
   return (
     <ScreenContainer>
         <ScreenHeader
-        title='My Bookings'
-        description='Track and manage your service bookings'
+        title='Meus agendamentos'
+        description='Acompanhe e gerencie seus atendimentos'
         />
 
         <BookingStatusFilter selected={statusFilter} onSelect={setStatusFilter} />
@@ -39,7 +39,7 @@ export default function MyBookingsScreen({navigation}: Props) {
         ) : isError ? (
             <View style={styles.centered}>
             <Text style={[styles.message, { color: colors.error }]}>
-                Something went wrong while fetching your bookings
+                Não foi possível carregar os agendamentos.
             </Text>
             </View>
         ) : (
@@ -65,7 +65,7 @@ export default function MyBookingsScreen({navigation}: Props) {
             ListEmptyComponent={
                 <View style={styles.centered}>
                 <Text style={[styles.message, { color: colors.textSecondary }]}>
-                    {statusFilter ? 'No bookings match this filter' : "You haven't booked any services yet"}
+                    {statusFilter ? 'Nenhum agendamento com este filtro' : 'Você ainda não agendou um serviço'}
                 </Text>
                 </View>
             }

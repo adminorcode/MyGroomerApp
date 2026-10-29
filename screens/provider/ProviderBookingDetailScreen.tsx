@@ -14,6 +14,7 @@ import { DetailRow } from '../../components/shared/DetailRow'
 import BoameBtn from '../../components/shared/BoameBtn'
 import { BookingStatus } from '../../types/booking.types'
 import { formatDateTime } from '../../utils/formatDate'
+import { formatMoney } from '../../utils/formatMoney'
 import { useRuntime } from '../../context/RuntimeContext'
 
 type ProviderBookingDetailNavigationProp = StackNavigationProp<ProviderBookingsStackParamList, 'ProviderBookingDetail'>
@@ -32,20 +33,20 @@ type NextAction = {
 
 const nextActionByStatus: Partial<Record<BookingStatus, NextAction>> = {
     [BookingStatus.PENDING_CONFIRMATION]: {
-        label: 'Confirm Booking',
+        label: 'Confirmar agendamento',
         next: BookingStatus.CONFIRMED,
     },
     [BookingStatus.CONFIRMED]: {
-        label: 'Start Job',
+        label: 'Iniciar atendimento',
         next: BookingStatus.IN_PROGRESS,
     },
     [BookingStatus.IN_PROGRESS]: {
-        label: 'Mark Complete',
+        label: 'Concluir atendimento',
         next: BookingStatus.COMPLETED,
         confirm: {
-            title: 'Mark job as complete?',
-            message: 'This finalizes the booking and triggers payout. This action cannot be undone.',
-            cta: 'Mark Complete',
+            title: 'Concluir o atendimento?',
+            message: 'Isso encerra o agendamento e dispara o repasse. Esta ação não pode ser desfeita.',
+            cta: 'Concluir atendimento',
         },
     },
 }
@@ -72,7 +73,7 @@ const ProviderBookingDetailScreen = ({ navigation, route }: Props) => {
             <ScreenContainer>
                 <View style={styles.centered}>
                     <Text style={[styles.message, { color: colors.error }]}>
-                        Something went wrong while fetching this booking
+                        Não foi possível carregar este agendamento.
                     </Text>
                 </View>
             </ScreenContainer>
@@ -85,7 +86,7 @@ const ProviderBookingDetailScreen = ({ navigation, route }: Props) => {
       try {
           await mutateAsync({ bookingId, booking_status: next })
       } catch (e) {
-          AppAlert.alert('Could not update', 'Something went wrong updating this booking. Please try again.')
+          AppAlert.alert('Não foi possível atualizar', 'Algo deu errado ao atualizar este agendamento. Tente novamente.')
       }
     }
 
@@ -97,7 +98,7 @@ const ProviderBookingDetailScreen = ({ navigation, route }: Props) => {
                 nextAction.confirm.title,
                 runtime.localTest ? 'Concluir o atendimento de teste? Nenhum repasse será realizado.' : nextAction.confirm.message,
                 [
-                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Cancelar', style: 'cancel' },
                     { text: nextAction.confirm.cta, style: 'default', onPress: () => runTransition(nextAction.next) },
                 ]
             )
@@ -110,8 +111,8 @@ const ProviderBookingDetailScreen = ({ navigation, route }: Props) => {
     return (
         <ScreenContainer>
             <ScreenHeader
-                title='Booking Detail'
-                description='Manage this customer booking'
+                title='Detalhe do agendamento'
+                description='Gerencie o atendimento deste tutor'
                 showBackButton
                 onBack={() => navigation.goBack()}
             />
@@ -130,12 +131,12 @@ const ProviderBookingDetailScreen = ({ navigation, route }: Props) => {
                         <StatusBadge status={data.booking_status} />
                     </View>
                     <Text style={[styles.customerName, { color: colors.textSecondary }]}>
-                        for {data.customer_name}
+                        para {data.customer_name}
                     </Text>
 
                     <View style={[styles.priceRow, { borderTopColor: colors.border }]}>
-                        <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>Price</Text>
-                        <Text style={[styles.price, { color: colors.primary }]}>GHS {data.price}</Text>
+                        <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>Preço</Text>
+                        <Text style={[styles.price, { color: colors.primary }]}>{formatMoney(data.price)}</Text>
                     </View>
                 </View>
 
@@ -143,27 +144,27 @@ const ProviderBookingDetailScreen = ({ navigation, route }: Props) => {
                 <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                     <DetailRow
                         icon={<User size={18} color={colors.primary} />}
-                        label="Customer"
+                        label="Tutor"
                         value={data.customer_name}
                     />
                     <DetailRow
                         icon={<CalendarClock size={18} color={colors.primary} />}
-                        label="Scheduled"
+                        label="Agendado"
                         value={formatDateTime(data.scheduled_at)}
                     />
                     <DetailRow
                         icon={<MapPin size={18} color={colors.primary} />}
-                        label="Location"
+                        label="Local"
                         value={data.customer_location}
                     />
                     <DetailRow
                         icon={<Hash size={18} color={colors.primary} />}
-                        label="Reference"
+                        label="Referência"
                         value={`#${data.id.slice(0, 8).toUpperCase()}`}
                     />
                     <DetailRow
                         icon={<Clock size={18} color={colors.primary} />}
-                        label="Booked on"
+                        label="Solicitado em"
                         value={formatDateTime(data.created_at)}
                         isLast
                     />

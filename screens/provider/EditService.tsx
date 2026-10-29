@@ -37,7 +37,7 @@ export default function EditService({ navigation, route }: Props) {
     const handleSave = async () => {
         const parsedPrice = Number(price)
         if (!price.trim() || isNaN(parsedPrice) || parsedPrice <= 0) {
-            AppAlert.alert('Invalid price', 'Please enter a valid price greater than 0.')
+            AppAlert.alert('Preço inválido', 'Informe um preço maior que zero.')
             return
         }
 
@@ -45,15 +45,15 @@ export default function EditService({ navigation, route }: Props) {
             await updateProviderService({ providerServiceId, price: parsedPrice })
             navigation.goBack()
         } catch (error) {
-            AppAlert.alert('Could not update price', 'Something went wrong. Please try again.')
+            AppAlert.alert('Não foi possível atualizar o preço', 'Algo deu errado. Tente novamente.')
         }
     }
 
     return (
         <ScreenContainer>
             <ScreenHeader
-                title='Edit Service'
-                description={serviceName ? `Update your price for ${serviceName}` : 'Update your price'}
+                title='Editar serviço'
+                description={serviceName ? `Atualize o preço de ${serviceName}` : 'Atualize o preço'}
                 showBackButton
                 onBack={() => navigation.goBack()}
             />
@@ -68,11 +68,11 @@ export default function EditService({ navigation, route }: Props) {
                     </View>
                 )}
 
-                <Text style={[styles.label, { color: colors.text }]}>Price (GHS)</Text>
+                <Text style={[styles.label, { color: colors.text }]}>Preço (R$)</Text>
                 <TextInput
                     value={price}
                     onChangeText={setPrice}
-                    placeholder='e.g. 150'
+                    placeholder='ex.: 150'
                     placeholderTextColor={colors.textSecondary}
                     keyboardType='numeric'
                     style={[
@@ -82,7 +82,7 @@ export default function EditService({ navigation, route }: Props) {
                 />
 
                 <BoameBtn
-                    title='Save Changes'
+                    title='Salvar alterações'
                     onPress={handleSave}
                     loading={isPending}
                     disabled={isPending}

@@ -38,16 +38,16 @@ const ReviewScreen = ({ navigation, route }: Props) => {
   const [comment, setComment] = useState('')
 
   const contextText = serviceName
-    ? `How was your ${serviceName}${providerName ? ` with ${providerName}` : ''}?`
-    : 'How was your experience?'
+    ? `Como foi ${serviceName}${providerName ? ` com ${providerName}` : ''}?`
+    : 'Como foi sua experiência?'
 
   const handleSubmit = async () => {
     if (rating <= 0) {
-      AppAlert.alert('Rating required', 'Please tap at least one star to rate your experience.')
+      AppAlert.alert('Nota obrigatória', 'Toque em pelo menos uma estrela para avaliar.')
       return
     }
     if (!comment.trim()) {
-      AppAlert.alert('Comment required', 'Please share a few words about your experience.')
+      AppAlert.alert('Comentário obrigatório', 'Conte em poucas palavras como foi o atendimento.')
       return
     }
 
@@ -55,7 +55,7 @@ const ReviewScreen = ({ navigation, route }: Props) => {
       await mutateAsync({ booking_id: bookingId, rating, comment: comment.trim() })
       navigation.goBack()
     } catch (error) {
-      AppAlert.alert('Could not submit', 'Something went wrong while submitting your review. Please try again.')
+      AppAlert.alert('Não foi possível enviar', 'Algo deu errado ao enviar a avaliação. Tente novamente.')
       console.error(error)
     }
   }
@@ -67,8 +67,8 @@ const ReviewScreen = ({ navigation, route }: Props) => {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScreenHeader
-          title='Leave a Review'
-          description='Share your experience to help others'
+          title='Avaliar atendimento'
+          description='Conte como foi para ajudar outros tutores'
           showBackButton
           onBack={() => navigation.goBack()}
         />
@@ -88,11 +88,11 @@ const ReviewScreen = ({ navigation, route }: Props) => {
           </View>
 
           {/* Comment */}
-          <Text style={[styles.label, { color: colors.text }]}>Your review</Text>
+          <Text style={[styles.label, { color: colors.text }]}>Sua avaliação</Text>
           <TextInput
             value={comment}
             onChangeText={setComment}
-            placeholder='Tell others what stood out...'
+            placeholder='Conte o que mais chamou atenção...'
             placeholderTextColor={colors.textSecondary}
             multiline
             numberOfLines={5}
@@ -105,7 +105,7 @@ const ReviewScreen = ({ navigation, route }: Props) => {
         </ScrollView>
 
         <BoameBtn
-          title='Submit Review'
+          title='Enviar avaliação'
           onPress={handleSubmit}
           loading={isPending}
           disabled={isPending}

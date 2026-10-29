@@ -25,8 +25,8 @@ export default function ProviderBookingsScreen({navigation}:Props) {
     return (
         <ScreenContainer>
             <ScreenHeader
-            title='Customer Bookings'
-            description='Track and manage your customer bookings'
+            title='Agendamentos'
+            description='Acompanhe os atendimentos dos tutores'
             />
 
             <BookingStatusFilter selected={statusFilter} onSelect={setStatusFilter} />
@@ -38,7 +38,7 @@ export default function ProviderBookingsScreen({navigation}:Props) {
             ) : isError ? (
                 <View style={styles.centered}>
                 <Text style={[styles.message, { color: colors.error }]}>
-                    Something went wrong while fetching your bookings
+                    Não foi possível carregar os agendamentos.
                 </Text>
                 </View>
             ) : (
@@ -66,7 +66,7 @@ export default function ProviderBookingsScreen({navigation}:Props) {
                 ListEmptyComponent={
                     <View style={styles.centered}>
                     <Text style={[styles.message, { color: colors.textSecondary }]}>
-                        {statusFilter ? 'No bookings match this filter' : 'No bookings from customers yet.'}
+                        {statusFilter ? 'Nenhum agendamento com este filtro' : 'Nenhum agendamento de tutores ainda.'}
                     </Text>
                     </View>
                 }

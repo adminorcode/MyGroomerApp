@@ -48,7 +48,7 @@ export function ToggleInput({ label, error, style, ...props }: InputProps) {
           secureTextEntry={!visible}
           style={[styles.passwordInput, { color: colors.text, backgroundColor: colors.background }, style]}
         />
-        <TouchableOpacity accessibilityRole="button" accessibilityLabel={visible ? 'Hide password' : 'Show password'} onPress={() => setVisible(!visible)} style={{ padding: spacing.md }}>
+        <TouchableOpacity accessibilityRole="button" accessibilityLabel={visible ? 'Ocultar senha' : 'Mostrar senha'} onPress={() => setVisible(!visible)} style={{ padding: spacing.md }}>
           {visible ? <EyeClosed color={colors.primary} /> : <Eye color={colors.primary} />}
         </TouchableOpacity>
       </View>

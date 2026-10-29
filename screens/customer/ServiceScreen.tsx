@@ -27,7 +27,7 @@ export default function ServiceScreen({navigation, route}: Props) {
     <ScreenContainer>
       <ScreenHeader
         title={categoryName}
-        description="Choose a service to view available providers"
+        description="Escolha um serviço para ver os groomers"
         showBackButton
         onBack={() => navigation.goBack()}
       />
@@ -39,7 +39,7 @@ export default function ServiceScreen({navigation, route}: Props) {
       ) : isError ? (
         <View style={styles.centered}>
           <Text style={[styles.message, { color: colors.error }]}>
-            Something went wrong while fetching services
+            Não foi possível carregar os serviços.
           </Text>
         </View>
       ) : (
@@ -62,7 +62,7 @@ export default function ServiceScreen({navigation, route}: Props) {
           ListEmptyComponent={
             <View style={styles.centered}>
               <Text style={[styles.message, { color: colors.textSecondary }]}>
-                No services available in this category yet
+                Nenhum serviço nesta categoria ainda
               </Text>
             </View>
           }

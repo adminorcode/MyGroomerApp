@@ -8,6 +8,7 @@ import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
 import ListCard from '../../components/shared/ListCard'
 import { fonts, spacing, typography } from '../../constants/theme'
+import { formatMoney } from '../../utils/formatMoney'
 
 type ServiceProviderScreenNavigationProp = StackNavigationProp<HomeStackParamList, 'ServiceProviders'>
 type ServiceProviderScreenRouteProp = RouteProp<HomeStackParamList, 'ServiceProviders'>
@@ -26,7 +27,7 @@ export default function ServiceProvidersScreen({ navigation, route }: Props) {
     <ScreenContainer>
       <ScreenHeader
         title={serviceName}
-        description="Select a provider to book this service"
+        description="Escolha um groomer para agendar"
         showBackButton
         onBack={() => navigation.goBack()}
       />
@@ -38,7 +39,7 @@ export default function ServiceProvidersScreen({ navigation, route }: Props) {
       ) : isError ? (
         <View style={styles.centered}>
           <Text style={[styles.message, { color: colors.error }]}>
-            Something went wrong while fetching providers
+            Não foi possível carregar os groomers.
           </Text>
         </View>
       ) : (
@@ -51,7 +52,7 @@ export default function ServiceProvidersScreen({ navigation, route }: Props) {
             <ListCard
               title={item.name}
               subtitle={[
-                item.price != null ? `From GHS ${item.price}` : null,
+                item.price != null ? `A partir de ${formatMoney(item.price)}` : null,
                 item.service_area,
               ].filter(Boolean).join(' · ')}
               onPress={() => navigation.navigate('BookService', {
@@ -63,7 +64,7 @@ export default function ServiceProvidersScreen({ navigation, route }: Props) {
           ListEmptyComponent={
             <View style={styles.centered}>
               <Text style={[styles.message, { color: colors.textSecondary }]}>
-                No providers available for this service yet
+                Nenhum groomer disponível para este serviço ainda
               </Text>
             </View>
           }

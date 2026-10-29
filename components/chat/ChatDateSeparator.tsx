@@ -26,10 +26,10 @@ export function formatDateLabel(value?: string) {
     const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
     const dayDiff = Math.round((startOfDay(now) - startOfDay(date)) / 86400000)
 
-    if (dayDiff === 0) return 'Today'
-    if (dayDiff === 1) return 'Yesterday'
-    if (dayDiff < 7) return date.toLocaleDateString(undefined, { weekday: 'long' })
-    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+    if (dayDiff === 0) return 'Hoje'
+    if (dayDiff === 1) return 'Ontem'
+    if (dayDiff < 7) return date.toLocaleDateString('pt-BR', { weekday: 'long' })
+    return date.toLocaleDateString('pt-BR', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 const styles = StyleSheet.create({

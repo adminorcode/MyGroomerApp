@@ -22,9 +22,9 @@ export default function ChatInputBar({ value, onChangeText, onSend, disabled }: 
                 </Pressable>
 
                 <TextInput
-                    accessibilityLabel="Message"
+                    accessibilityLabel="Mensagem"
                     style={[styles.input, { color: colors.text }]}
-                    placeholder="Message"
+                    placeholder="Mensagem"
                     placeholderTextColor={colors.textSecondary}
                     value={value}
                     onChangeText={onChangeText}
@@ -38,7 +38,7 @@ export default function ChatInputBar({ value, onChangeText, onSend, disabled }: 
 
             <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Send message"
+                accessibilityLabel="Enviar mensagem"
                 onPress={hasText ? onSend : undefined}
                 disabled={disabled}
                 style={({ pressed }) => [
