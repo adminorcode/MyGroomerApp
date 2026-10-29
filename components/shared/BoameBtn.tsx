@@ -6,7 +6,7 @@ import {
     Text,
     ViewStyle,
 } from "react-native";
-import { borderRadius, fonts, spacing, typography } from "../../constants/theme";
+import { borderRadius, fonts, spacing, textStyles } from "../../constants/theme";
 import { useTheme } from "../../context/ThemeContext";
 
 type Variant = "primary" | "secondary" | "outline" | "danger";
@@ -91,15 +91,16 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         borderRadius: borderRadius.lg,
-        paddingVertical: spacing.sm + 4,
-        paddingHorizontal: spacing.md,
-        minHeight: 48,
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.base,
+        minHeight: 52,
     },
     fullWidth: {
         width: "100%",
     },
     label: {
-        fontSize: typography.sizes.md,
+        fontSize: textStyles.button.fontSize,
+        lineHeight: textStyles.button.lineHeight,
         fontFamily: fonts.semibold,
     },
 });

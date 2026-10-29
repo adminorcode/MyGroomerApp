@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { StyleSheet, Text, TextInput, TextInputProps, TouchableOpacity, View } from "react-native";
-import { borderRadius, fonts, typography } from "../../constants/theme";
+import { borderRadius, fonts, spacing, textStyles } from "../../constants/theme";
 import {Eye, EyeClosed} from 'lucide-react-native'
 import PhoneInput, { PhoneInputProps } from "react-native-phone-number-input";
 import { useTheme } from "../../context/ThemeContext";
@@ -27,7 +27,7 @@ export function BoamePhoneInput({label, error, onChangeFormattedText, ...props}:
     const [focused, setFocused] = useState(false);
     return (
         <View style={styles.fieldGroup}>
-            <Text style={[styles.label, { color: colors.primary }]}>{label}</Text>
+            <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
             <PhoneInput
                 {...props}
                 defaultCode="GH"
@@ -54,7 +54,7 @@ export default function BoameInput({label, error, style, ...props}: InputProps) 
     const [focused, setFocused] = useState(false);
     return (
         <View style={styles.fieldGroup}>
-            <Text style={[styles.label, { color: colors.primary }]}>{label}</Text>
+            <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
             <TextInput
                 {...props}
                 onFocus={(event) => { setFocused(true); props.onFocus?.(event) }}
@@ -72,7 +72,7 @@ export function ToggleInput({label, error, style, ...props}: InputProps) {
     const { colors } = useTheme();
     return (
         <View style={styles.fieldGroup}>
-            <Text style={[styles.label, { color: colors.primary }]}>{label}</Text>
+            <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
             <View style={[styles.passwordRow, { borderColor: fieldBorder(colors, error, focused) }]}>
                 <TextInput
                     {...props}
@@ -102,27 +102,29 @@ export function ToggleInput({label, error, style, ...props}: InputProps) {
 
 const styles = StyleSheet.create({
     fieldGroup: {
-        marginBottom: 12,
+        marginBottom: spacing.base,
     },
     label: {
-        fontSize: typography.sizes.sm,
-        fontFamily: fonts.regular,
-        marginBottom: 4
+        fontSize: textStyles.label.fontSize,
+        lineHeight: textStyles.label.lineHeight,
+        fontFamily: fonts.semibold,
+        marginBottom: spacing.sm,
     },
     input: {
-        borderWidth: 1,
-        borderRadius: borderRadius.lg,
-        paddingHorizontal: 12,
-        paddingVertical: 8,
+        borderWidth: 2,
+        borderRadius: borderRadius.md,
+        paddingHorizontal: spacing.md,
+        minHeight: 52,
+        fontSize: textStyles.body.fontSize,
         fontFamily: fonts.regular,
     },
     passwordRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        borderWidth: 1,
-        borderRadius: borderRadius.lg,
-        paddingHorizontal: 12,
-        paddingVertical: 8,
+        borderWidth: 2,
+        borderRadius: borderRadius.md,
+        paddingHorizontal: spacing.md,
+        minHeight: 52,
     },
     passwordInput: {
         flex: 1,
@@ -131,30 +133,32 @@ const styles = StyleSheet.create({
         paddingVertical: 0,
     },
     togglePassword: {
-        marginLeft: 8
+        marginLeft: spacing.sm
     },
     error: {
-        fontSize: typography.sizes.xs,
-        marginTop: 4,
+        fontSize: textStyles.caption.fontSize,
+        lineHeight: textStyles.caption.lineHeight,
+        marginTop: spacing.xs,
     },
 
     phoneContainer: {
         width: '100%',
-        borderWidth: 1,
-        borderRadius: borderRadius.lg,
+        borderWidth: 2,
+        borderRadius: borderRadius.md,
+        minHeight: 52,
     },
     phoneTextContainer: {
-        borderRadius: borderRadius.lg,
+        borderRadius: borderRadius.md,
         paddingVertical: 0,
     },
     phoneTextInput: {
         fontFamily: fonts.regular,
-        fontSize: typography.sizes.md,
-        height: 42,
+        fontSize: textStyles.body.fontSize,
+        minHeight: 48,
     },
     phoneCodeText: {
         fontFamily: fonts.regular,
-        fontSize: typography.sizes.md
+        fontSize: textStyles.body.fontSize,
     },
     flagHidden: {
         width: 0,

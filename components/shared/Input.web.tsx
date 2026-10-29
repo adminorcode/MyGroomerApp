@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { StyleSheet, Text, TextInput, TextInputProps, TouchableOpacity, View } from 'react-native'
 import type { PhoneInputProps } from 'react-native-phone-number-input'
 import { Eye, EyeClosed } from 'lucide-react-native'
-import { borderRadius, fonts, typography } from '../../constants/theme'
+import { borderRadius, fonts, spacing, textStyles } from '../../constants/theme'
 import { useTheme } from '../../context/ThemeContext'
 
 export type InputProps = TextInputProps & { label: string; error?: string }
@@ -18,7 +18,7 @@ export default function BoameInput({ label, error, style, ...props }: InputProps
   const borderColor = error ? colors.error : focused ? colors.focus : colors.border
   return (
     <View style={styles.field}>
-      <Text style={[styles.label, { color: colors.primary }]}>{label}</Text>
+      <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
       <TextInput
         accessibilityLabel={label}
         {...props}
@@ -38,7 +38,7 @@ export function ToggleInput({ label, error, style, ...props }: InputProps) {
   const borderColor = error ? colors.error : focused ? colors.focus : colors.border
   return (
     <View style={styles.field}>
-      <Text style={[styles.label, { color: colors.primary }]}>{label}</Text>
+      <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
       <View style={[styles.passwordRow, { borderColor }]}>
         <TextInput
           accessibilityLabel={label}
@@ -48,7 +48,7 @@ export function ToggleInput({ label, error, style, ...props }: InputProps) {
           secureTextEntry={!visible}
           style={[styles.passwordInput, { color: colors.text, backgroundColor: colors.background }, style]}
         />
-        <TouchableOpacity accessibilityRole="button" accessibilityLabel={visible ? 'Hide password' : 'Show password'} onPress={() => setVisible(!visible)} style={{ padding: 12 }}>
+        <TouchableOpacity accessibilityRole="button" accessibilityLabel={visible ? 'Hide password' : 'Show password'} onPress={() => setVisible(!visible)} style={{ padding: spacing.md }}>
           {visible ? <EyeClosed color={colors.primary} /> : <Eye color={colors.primary} />}
         </TouchableOpacity>
       </View>
@@ -58,9 +58,28 @@ export function ToggleInput({ label, error, style, ...props }: InputProps) {
 }
 
 const styles = StyleSheet.create({
-  field: { marginBottom: 12 },
-  label: { fontSize: typography.sizes.sm, fontFamily: fonts.regular, marginBottom: 4 },
-  input: { borderWidth: 1, borderRadius: borderRadius.lg, paddingHorizontal: 12, paddingVertical: 12, fontFamily: fonts.regular },
-  passwordRow: { borderWidth: 1, borderRadius: borderRadius.lg, flexDirection: 'row', alignItems: 'center', overflow: 'hidden' },
-  passwordInput: { flex: 1, minWidth: 0, padding: 12, fontFamily: fonts.regular },
+  field: { marginBottom: spacing.base },
+  label: {
+    fontSize: textStyles.label.fontSize,
+    lineHeight: textStyles.label.lineHeight,
+    fontFamily: fonts.semibold,
+    marginBottom: spacing.sm,
+  },
+  input: {
+    borderWidth: 2,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    minHeight: 52,
+    fontSize: textStyles.body.fontSize,
+    fontFamily: fonts.regular,
+  },
+  passwordRow: {
+    borderWidth: 2,
+    borderRadius: borderRadius.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    overflow: 'hidden',
+    minHeight: 52,
+  },
+  passwordInput: { flex: 1, minWidth: 0, padding: spacing.md, fontFamily: fonts.regular, fontSize: textStyles.body.fontSize },
 })

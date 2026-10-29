@@ -1,47 +1,50 @@
-export const layout = {
-    screenPadding: 20
-}
+import { palette, radius, spacing, textStyles } from '../design-system/tokens'
 
-// Pink & Teal. Brand #D95786 is the signature and is only used for large type.
-// Small text and controls use the roles below. Pairs were checked at 4.5:1 for
-// text and 3:1 for essential control boundaries, on the opaque colors.
+export { palette, radius, spacing, textStyles }
+export { elevation } from '../design-system/tokens'
+
+// Flat names kept for the screens that already call useTheme().colors.
+// Light values come from Design System v1.0. Pressed teal, pressed surface
+// and pressed error are adapters: v1.0 does not name those three roles.
 export const lightColors = {
-    brand: '#D95786',
-    primary: '#B93666',
-    onPrimary: '#FFFFFF',
-    primaryPressed: '#9E2B56',
-    primaryLight: '#F6B5CB',
-    primaryDark: '#9E2B56',
-    secondary: '#167D83',
-    onSecondary: '#FFFFFF',
+    brand: palette.brand.pink,
+    primary: palette.action.primary,
+    onPrimary: palette.text.inverse,
+    primaryPressed: palette.action.primaryPressed,
+    primaryLight: palette.brand.pinkLight,
+    primaryDark: palette.action.primaryPressed,
+    secondary: palette.action.secondary,
+    onSecondary: palette.text.inverse,
     secondaryPressed: '#0B5559',
-    onSecondaryPressed: '#FFFFFF',
-    selection: '#F6B5CB',
-    onSelection: '#253D42',
-    selectionSoft: '#FBE4ED',
-    background: '#F9F8F6',
-    surface: '#FFFFFF',
+    onSecondaryPressed: palette.text.inverse,
+    selection: palette.brand.pinkLight,
+    onSelection: palette.text.primary,
+    selectionSoft: palette.surface.pinkSubtle,
+    background: palette.surface.canvas,
+    surface: palette.surface.default,
     pressedSurface: '#EFEBE6',
-    text: '#253D42',
-    textSecondary: '#4A6266',
-    navInactive: '#253D42',
-    border: '#8E8882',
-    focus: '#167D83',
-    error: '#B42318',
-    onError: '#FFFFFF',
+    text: palette.text.primary,
+    textSecondary: palette.text.secondary,
+    navInactive: palette.text.primary,
+    border: palette.border.default,
+    focus: palette.action.focus,
+    error: palette.feedback.error,
+    onError: palette.text.inverse,
     errorPressed: '#8E1C14',
-    errorSoft: '#F8D7D4',
-    success: '#146C43',
-    successSoft: '#D8F0E4',
-    warning: '#8A5A00',
-    warningSoft: '#F8E8C8',
-    info: '#0F5C61',
-    infoSoft: '#D4EEF0',
-    disabled: '#E4DDD6',
-    onDisabled: '#5C534E',
-    disabledBorder: '#8E8882',
+    errorSoft: palette.feedback.errorSurface,
+    success: palette.feedback.success,
+    successSoft: palette.feedback.successSurface,
+    warning: palette.feedback.warning,
+    warningSoft: palette.feedback.warningSurface,
+    info: palette.feedback.info,
+    infoSoft: palette.surface.tealSubtle,
+    disabled: palette.state.disabledSurface,
+    onDisabled: palette.state.disabledText,
+    disabledBorder: palette.border.strong,
 }
 
+// Design System v1.0 does not define a dark palette. These values stay from
+// the Pink & Teal theme already in the app until a dark spec exists.
 export const darkColors = {
     brand: '#D95786',
     primary: '#F6B5CB',
@@ -79,7 +82,7 @@ export const darkColors = {
     disabledBorder: '#6A868C',
 }
 
-export type AppColors = typeof lightColors
+export type AppColors = { [Key in keyof typeof lightColors]: string }
 
 export const fonts = {
     logo: 'Abres',
@@ -90,33 +93,27 @@ export const fonts = {
 
 export const typography = {
     sizes: {
-        xs: 12,
-        sm: 14,
-        md: 16,
-        lg: 18,
-        xl: 24,
-        xxl: 32,
+        xs: textStyles.caption.fontSize,
+        sm: textStyles.bodySmall.fontSize,
+        md: textStyles.body.fontSize,
+        lg: textStyles.heading3.fontSize,
+        xl: textStyles.numeric.fontSize,
+        xxl: textStyles.display.fontSize,
     },
     weights: {
         regular: '400' as const,
         medium: '500' as const,
         semibold: '600' as const,
         bold: '700' as const,
-    }
-}
-
-export const spacing = {
-    xs: 4,
-    sm: 8,
-    md: 16,
-    lg: 24,
-    xl: 32,
-    xxl: 48,
+    },
 }
 
 export const borderRadius = {
-    sm: 4,
-    md: 8,
-    lg: 12,
-    full: 9999,
+    ...radius,
+    full: radius.pill,
+}
+
+export const layout = {
+    screenPadding: spacing.base,
+    screenPaddingOnboarding: spacing.lg,
 }
