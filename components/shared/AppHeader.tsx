@@ -14,21 +14,21 @@ type Props = {
 export default function AppHeader({ onProfilePress }: Props) {
     const { colors } = useTheme()
     const user = useAuthStore((state) => state.user)
-    const firstName = user?.name?.split(' ')[0] || 'there'
+    const firstName = user?.name?.split(' ')[0]
 
     return (
         <View style={[styles.container, { borderBottomColor: colors.border }]}>
             <View style={styles.left}>
                 <ProfileHeaderButton size={AVATAR_SIZE} onPress={onProfilePress} />
                 <Text style={[styles.greeting, { color: colors.text }]} numberOfLines={1}>
-                    Hello, {firstName}
+                    {firstName ? `Olá, ${firstName}` : 'Olá'}
                 </Text>
             </View>
 
             <Pressable
                 hitSlop={8}
                 accessibilityRole="button"
-                accessibilityLabel="Notifications"
+                accessibilityLabel="Notificações"
                 onPress={() => {}}
                 style={styles.bellButton}
             >

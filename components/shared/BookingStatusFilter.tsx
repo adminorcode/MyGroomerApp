@@ -9,13 +9,13 @@ export type BookingStatusFilterOption = {
 }
 
 export const BOOKING_STATUS_FILTERS: BookingStatusFilterOption[] = [
-    { label: 'All' },
-    { label: 'Pending Payment', value: BookingStatus.PENDING_PAYMENT },
-    { label: 'Awaiting Confirmation', value: BookingStatus.PENDING_CONFIRMATION },
-    { label: 'Confirmed', value: BookingStatus.CONFIRMED },
-    { label: 'In Progress', value: BookingStatus.IN_PROGRESS },
-    { label: 'Completed', value: BookingStatus.COMPLETED },
-    { label: 'Cancelled', value: BookingStatus.CANCELLED },
+    { label: 'Todos' },
+    { label: 'Pagamento pendente', value: BookingStatus.PENDING_PAYMENT },
+    { label: 'Aguardando confirmação', value: BookingStatus.PENDING_CONFIRMATION },
+    { label: 'Confirmado', value: BookingStatus.CONFIRMED },
+    { label: 'Em andamento', value: BookingStatus.IN_PROGRESS },
+    { label: 'Concluído', value: BookingStatus.COMPLETED },
+    { label: 'Cancelado', value: BookingStatus.CANCELLED },
 ]
 
 type Props = {

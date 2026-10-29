@@ -47,12 +47,12 @@ export default function AddService({ navigation }: Props) {
 
     const handleAdd = async () => {
         if (!selectedServiceId) {
-            AppAlert.alert('Select a service', 'Please choose a service to offer.')
+            AppAlert.alert('Selecione um serviço', 'Escolha um serviço para oferecer.')
             return
         }
         const parsedPrice = Number(price)
         if (!price.trim() || isNaN(parsedPrice) || parsedPrice <= 0) {
-            AppAlert.alert('Invalid price', 'Please enter a valid price greater than 0.')
+            AppAlert.alert('Preço inválido', 'Informe um preço maior que zero.')
             return
         }
 
@@ -60,15 +60,15 @@ export default function AddService({ navigation }: Props) {
             await createProviderService({ serviceId: selectedServiceId, price: parsedPrice })
             navigation.goBack()
         } catch (error) {
-            AppAlert.alert('Could not add service', 'Something went wrong. Please try again.')
+            AppAlert.alert('Não foi possível adicionar o serviço', 'Algo deu errado. Tente novamente.')
         }
     }
 
     return (
         <ScreenContainer>
             <ScreenHeader
-                title='Add a Service'
-                description='Choose a service and set your price'
+                title='Adicionar serviço'
+                description='Escolha um serviço e defina o preço'
                 showBackButton
                 onBack={() => navigation.goBack()}
             />
@@ -80,7 +80,7 @@ export default function AddService({ navigation }: Props) {
             ) : isError ? (
                 <View style={styles.centered}>
                     <Text style={[styles.message, { color: colors.error }]}>
-                        Something went wrong while fetching services
+                        Não foi possível carregar os serviços.
                     </Text>
                 </View>
             ) : (
@@ -124,7 +124,7 @@ export default function AddService({ navigation }: Props) {
                         ListEmptyComponent={
                             <View style={styles.centered}>
                                 <Text style={[styles.message, { color: colors.textSecondary }]}>
-                                    You already offer all available services.
+                                    Você já oferece todos os serviços disponíveis.
                                 </Text>
                             </View>
                         }
@@ -132,11 +132,11 @@ export default function AddService({ navigation }: Props) {
                     />
 
                     <View style={styles.footer}>
-                        <Text style={[styles.label, { color: colors.text }]}>Price (GHS)</Text>
+                        <Text style={[styles.label, { color: colors.text }]}>Preço (R$)</Text>
                         <TextInput
                             value={price}
                             onChangeText={setPrice}
-                            placeholder='e.g. 150'
+                            placeholder='ex.: 150'
                             placeholderTextColor={colors.textSecondary}
                             keyboardType='numeric'
                             style={[
@@ -145,7 +145,7 @@ export default function AddService({ navigation }: Props) {
                             ]}
                         />
                         <BoameBtn
-                            title='Add Service'
+                            title='Adicionar serviço'
                             onPress={handleAdd}
                             loading={isPending}
                             disabled={isPending}

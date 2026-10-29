@@ -21,7 +21,7 @@ function formatDate(value?: string | Date) {
   if (!value) return '—'
   const date = new Date(value)
   if (isNaN(date.getTime())) return String(value)
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString('pt-BR', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -37,8 +37,8 @@ const ReviewBookingDetail = ({ navigation, route }: Props) => {
   return (
     <ScreenContainer>
       <ScreenHeader
-        title='Your Review'
-        description='The feedback you left for this booking'
+        title='Sua avaliação'
+        description='O que você registrou neste atendimento'
         showBackButton
         onBack={() => navigation.goBack()}
       />
@@ -50,7 +50,7 @@ const ReviewBookingDetail = ({ navigation, route }: Props) => {
       ) : isError || !data ? (
         <View style={styles.centered}>
           <Text style={[styles.message, { color: colors.error }]}>
-            Something went wrong while fetching this review
+            Não foi possível carregar esta avaliação.
           </Text>
         </View>
       ) : (
@@ -63,7 +63,7 @@ const ReviewBookingDetail = ({ navigation, route }: Props) => {
             <View style={styles.ratingSection}>
               <StarRating rating={data.rating} size={36} readOnly />
               <Text style={[styles.ratingValue, { color: colors.textSecondary }]}>
-                {data.rating} out of 5
+                {data.rating} de 5
               </Text>
             </View>
 
@@ -71,12 +71,12 @@ const ReviewBookingDetail = ({ navigation, route }: Props) => {
               <Text style={[styles.comment, { color: colors.text }]}>{data.comment}</Text>
             ) : (
               <Text style={[styles.comment, { color: colors.textSecondary }]}>
-                No comment was left.
+                Nenhum comentário foi deixado.
               </Text>
             )}
 
             <Text style={[styles.date, { color: colors.textSecondary }]}>
-              Reviewed on {formatDate(data.created_at)}
+              Avaliado em {formatDate(data.created_at)}
             </Text>
           </View>
         </ScrollView>

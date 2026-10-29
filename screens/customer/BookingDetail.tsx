@@ -18,6 +18,7 @@ import { formatDateTime } from '../../utils/formatDate'
 import { useCreateConversation } from '../../hooks/useConversations'
 import { useRuntime } from '../../context/RuntimeContext'
 import { getErrorMessage } from '../../utils/error'
+import { formatMoney } from '../../utils/formatMoney'
 
 type BookingDetailNavigationProp = CompositeNavigationProp<
     StackNavigationProp<BookingsStackParamList, 'BookingDetail'>,
@@ -60,7 +61,7 @@ const BookingDetail = ({ navigation, route }: Props) => {
             <ScreenContainer>
                 <View style={styles.centered}>
                     <Text style={[styles.message, { color: colors.error }]}>
-                        Something went wrong while fetching your bookings
+                        Não foi possível carregar este agendamento.
                     </Text>
                 </View>
             </ScreenContainer>
@@ -73,12 +74,12 @@ const BookingDetail = ({ navigation, route }: Props) => {
 
     const handleCancel = () => {
         AppAlert.alert(
-            'Cancel booking?',
-            runtime.localTest ? 'Cancelar esta reserva de teste? Nenhuma cobrança ou reembolso será realizado.' : 'You may be refunded minus a cancellation fee depending on timing.',
+            'Cancelar agendamento?',
+            runtime.localTest ? 'Cancelar esta reserva de teste? Nenhuma cobrança ou reembolso será realizado.' : 'O reembolso pode ter uma taxa de cancelamento, conforme o horário.',
             [
-                { text: 'Keep booking', style: 'cancel' },
-                { text: 'Cancel booking', style: 'destructive', onPress: () => {
-                    void mutateAsync({ bookingId, booking_status: BookingStatus.CANCELLED }).catch(error => AppAlert.alert('Could not cancel', getErrorMessage(error)))
+                { text: 'Manter agendamento', style: 'cancel' },
+                { text: 'Cancelar agendamento', style: 'destructive', onPress: () => {
+                    void mutateAsync({ bookingId, booking_status: BookingStatus.CANCELLED }).catch(error => AppAlert.alert('Não foi possível cancelar', getErrorMessage(error)))
                 } },
             ]
         )
@@ -90,15 +91,15 @@ const BookingDetail = ({ navigation, route }: Props) => {
             const conversation = res.data
             navigation.navigate('Chat', {conversationId:conversation.id, otherName:data.provider_name})
         } catch (error) {
-            AppAlert.alert('Could not open conversation', getErrorMessage(error))
+            AppAlert.alert('Não foi possível abrir a conversa', getErrorMessage(error))
         }
     }
 
     return (
         <ScreenContainer>
             <ScreenHeader
-                title='Booking Detail'
-                description='Detail for booking'
+                title='Detalhe do agendamento'
+                description='Dados deste atendimento'
                 showBackButton
                 onBack={() => navigation.goBack()}
             />
@@ -118,12 +119,12 @@ const BookingDetail = ({ navigation, route }: Props) => {
                             <StatusBadge status={data.booking_status} />
                         </View>
                         <Text style={[styles.providerName, { color: colors.textSecondary }]}>
-                            by {data.provider_name}
+                            por {data.provider_name}
                         </Text>
 
                         <View style={[styles.priceRow, { borderTopColor: colors.border }]}>
-                            <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>Price</Text>
-                            <Text style={[styles.price, { color: colors.primary }]}>GHS {data.price}</Text>
+                            <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>Preço</Text>
+                            <Text style={[styles.price, { color: colors.primary }]}>{formatMoney(data.price)}</Text>
                         </View>
                     </View>
 
@@ -131,22 +132,22 @@ const BookingDetail = ({ navigation, route }: Props) => {
                     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                         <DetailRow
                             icon={<CalendarClock size={18} color={colors.primary} />}
-                            label="Scheduled"
+                            label="Agendado"
                             value={formatDateTime(data.scheduled_at)}
                         />
                         <DetailRow
                             icon={<MapPin size={18} color={colors.primary} />}
-                            label="Location"
+                            label="Local"
                             value={data.customer_location}
                         />
                         <DetailRow
                             icon={<Hash size={18} color={colors.primary} />}
-                            label="Reference"
+                            label="Referência"
                             value={`#${data.id.slice(0, 8).toUpperCase()}`}
                         />
                         <DetailRow
                             icon={<Clock size={18} color={colors.primary} />}
-                            label="Booked on"
+                            label="Solicitado em"
                             value={formatDateTime(data.created_at)}
                             isLast
                         />
@@ -158,7 +159,7 @@ const BookingDetail = ({ navigation, route }: Props) => {
                             canCancel && (
                                 <>
                                     <BoameBtn 
-                                    title={`${isPending ? "Canceling..." : "Cancel"}`} 
+                                    title={`${isPending ? "Cancelando..." : "Cancelar"}`} 
                                     variant="danger"
                                     onPress={handleCancel}
                                     fullWidth={false}
@@ -166,7 +167,7 @@ const BookingDetail = ({ navigation, route }: Props) => {
                                     />
 
                                     <BoameBtn 
-                                    title='Message' 
+                                    title='Mensagem' 
                                     variant='outline'
                                     onPress={handleMessage}
                                     fullWidth={false}
@@ -179,7 +180,7 @@ const BookingDetail = ({ navigation, route }: Props) => {
                             canReview && (
                                 <>
                                     <BoameBtn 
-                                    title='Review' 
+                                    title='Avaliar' 
                                     variant='outline'
                                     onPress={() => navigation.navigate('ReviewBooking', {
                                         bookingId,
@@ -191,7 +192,7 @@ const BookingDetail = ({ navigation, route }: Props) => {
 
                                     {/* TODO: when user messages provider for the first time this btn changes to view conversation button */}
                                     <BoameBtn 
-                                    title='Message' 
+                                    title='Mensagem' 
                                     variant='outline'
                                     onPress={handleMessage}
                                     fullWidth={false}
@@ -203,7 +204,7 @@ const BookingDetail = ({ navigation, route }: Props) => {
                             hasReview && (
                                 <>
                                     <BoameBtn 
-                                    title='View Review' 
+                                    title='Ver avaliação' 
                                     variant='outline'
                                     onPress={() => navigation.navigate('ReviewDetail', {
                                         reviewId: data.review_id!,

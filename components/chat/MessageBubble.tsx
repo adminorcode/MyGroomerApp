@@ -16,7 +16,7 @@ function formatBubbleTime(value?: string) {
     if (!value) return ''
     const date = new Date(value)
     if (isNaN(date.getTime())) return ''
-    return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+    return date.toLocaleTimeString('pt-BR', { hour: 'numeric', minute: '2-digit' })
 }
 
 export default function MessageBubble({ content, timestamp, isOwn, isSeen, isEdited, isPending }: Props) {
@@ -40,7 +40,7 @@ export default function MessageBubble({ content, timestamp, isOwn, isSeen, isEdi
 
                 <View style={styles.metaRow}>
                     {isEdited && (
-                        <Text style={[styles.meta, { color: metaColor }]}>edited</Text>
+                        <Text style={[styles.meta, { color: metaColor }]}>editada</Text>
                     )}
                     <Text style={[styles.meta, { color: metaColor }]}>
                         {formatBubbleTime(timestamp)}

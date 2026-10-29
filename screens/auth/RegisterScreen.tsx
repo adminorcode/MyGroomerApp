@@ -28,13 +28,13 @@ type Props = {
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 const roleOptions = [
-    { label: "Customer", value: Role.CUSTOMER },
-    { label: "Provider", value: Role.PROVIDER },
+    { label: "Tutor", value: Role.CUSTOMER },
+    { label: "Groomer", value: Role.PROVIDER },
 ] as const;
 
 const payoutOptions = [
-    { label: "Mobile Money", value: PayoutMethod.MOBILE_MONEY },
-    { label: "Bank", value: PayoutMethod.BANK },
+    { label: "Dinheiro móvel", value: PayoutMethod.MOBILE_MONEY },
+    { label: "Banco", value: PayoutMethod.BANK },
 ] as const;
 
 const momoProviderOptions = [
@@ -119,16 +119,16 @@ export default function RegisterScreen({ navigation }: Props) {
             extraScrollHeight={20}
             enableOnAndroid
         >
-            <Text style={[styles.title, { color: colors.brand }]}>Create account</Text>
+            <Text style={[styles.title, { color: colors.brand }]}>Criar conta</Text>
             <View style={styles.form}>
                 <Controller
                     control={control}
                     name="name"
                     render={({ field: { onChange, onBlur, value } }) => (
                         <BoameInput
-                            label="Full name"
+                            label="Nome completo"
                             style={styles.input}
-                            placeholder="Enter your name"
+                            placeholder="Digite seu nome"
                             onChangeText={onChange}
                             onBlur={onBlur}
                             value={value}
@@ -145,9 +145,9 @@ export default function RegisterScreen({ navigation }: Props) {
                     name="email"
                     render={({ field: { onChange, onBlur, value } }) => (
                         <BoameInput
-                            label="Email address"
+                            label="E-mail"
                             style={styles.input}
-                            placeholder="Enter your email"
+                            placeholder="Digite seu e-mail"
                             onChangeText={onChange}
                             onBlur={onBlur}
                             value={value}
@@ -165,9 +165,9 @@ export default function RegisterScreen({ navigation }: Props) {
                     name="password"
                     render={({ field: { onChange, onBlur, value } }) => (
                         <ToggleInput
-                            label="Password"
+                            label="Senha"
                             style={styles.input}
-                            placeholder="Create a password"
+                            placeholder="Crie uma senha"
                             onChangeText={onChange}
                             onBlur={onBlur}
                             value={value}
@@ -184,7 +184,7 @@ export default function RegisterScreen({ navigation }: Props) {
                     name="phone_number"
                     render={({ field: { onChange, value } }) => (
                        <BoamePhoneInput
-                            label="Phone number"
+                            label="Telefone"
                             onChangeFormattedText={onChange}
                             value={value}
                             error={errors.phone_number?.message}
@@ -193,7 +193,7 @@ export default function RegisterScreen({ navigation }: Props) {
                 />
 
                 <View style={styles.selectorGroup}>
-                    <Text style={[styles.selectorLabel, { color: colors.primary }]}>I am a</Text>
+                    <Text style={[styles.selectorLabel, { color: colors.primary }]}>Eu sou</Text>
                     <View style={styles.selectorRow}>
                         {roleOptions.map(({ label, value }) => (
                             <Pressable
@@ -229,7 +229,7 @@ export default function RegisterScreen({ navigation }: Props) {
                             name="payout_method"
                             render={({ field: { onChange, value } }) => (
                                 <OptionSelector
-                                    label="Payout method"
+                                    label="Forma de repasse"
                                     options={payoutOptions}
                                     value={value}
                                     onChange={onChange}
@@ -245,7 +245,7 @@ export default function RegisterScreen({ navigation }: Props) {
                                     name="momo_number"
                                     render={({ field: { onChange, value } }) => (
                                         <BoamePhoneInput
-                                            label="Mobile Money number"
+                                            label="Número do dinheiro móvel"
                                             onChangeFormattedText={onChange}
                                             value={value}
                                             error={errors.momo_number?.message}
@@ -258,7 +258,7 @@ export default function RegisterScreen({ navigation }: Props) {
                                     name="momo_provider"
                                     render={({ field: { onChange, value } }) => (
                                         <OptionSelector
-                                            label="Mobile Money provider"
+                                            label="Operadora"
                                             options={momoProviderOptions}
                                             value={value}
                                             onChange={onChange}
@@ -274,8 +274,8 @@ export default function RegisterScreen({ navigation }: Props) {
                                     name="bank_account_number"
                                     render={({ field: { onChange, onBlur, value } }) => (
                                         <BoameInput
-                                            label="Bank account number"
-                                            placeholder="Enter your account number"
+                                            label="Número da conta"
+                                            placeholder="Digite o número da conta"
                                             onChangeText={onChange}
                                             onBlur={onBlur}
                                             value={value}
@@ -290,8 +290,8 @@ export default function RegisterScreen({ navigation }: Props) {
                                     name="bank_account_name"
                                     render={({ field: { onChange, onBlur, value } }) => (
                                         <BoameInput
-                                            label="Account holder name"
-                                            placeholder="Enter the name on the account"
+                                            label="Nome do titular"
+                                            placeholder="Digite o nome do titular"
                                             onChangeText={onChange}
                                             onBlur={onBlur}
                                             value={value}
@@ -304,7 +304,7 @@ export default function RegisterScreen({ navigation }: Props) {
                                     control={control}
                                     name="bank_code"
                                     render={({ field: { onChange, onBlur, value } }) => (
-                                        <BoameInput label="Bank code" placeholder="Bank code" onChangeText={onChange} onBlur={onBlur} value={value} error={errors.bank_code?.message} />
+                                        <BoameInput label="Código do banco" placeholder="Código do banco" onChangeText={onChange} onBlur={onBlur} value={value} error={errors.bank_code?.message} />
                                     )}
                                 />
                             </>
@@ -315,8 +315,8 @@ export default function RegisterScreen({ navigation }: Props) {
                             name="service_area"
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <BoameInput
-                                    label="Service area"
-                                    placeholder="e.g. Accra, East Legon"
+                                    label="Área de atendimento"
+                                    placeholder="ex.: São Paulo, Pinheiros"
                                     onChangeText={onChange}
                                     onBlur={onBlur}
                                     value={value}
@@ -328,13 +328,13 @@ export default function RegisterScreen({ navigation }: Props) {
                 )}
 
                 <BoameBtn
-                    title="Register"
+                    title="Cadastrar"
                     loading={isPending}
                     onPress={handleSubmit(handleRegister)}
                 />
                 {error && <Text accessibilityRole="alert" style={[styles.error, { color: colors.error }]}>{getErrorMessage(error)}</Text>}
                 {runtime.googleAuthEnabled && <><AuthDivider /><GoogleSignInBtn
-                    title="Sign up with Google"
+                    title="Cadastrar com Google"
                     loading={isGooglePending}
                     disabled={isPending}
                     onPress={() => signInWithGoogle()}
@@ -342,7 +342,7 @@ export default function RegisterScreen({ navigation }: Props) {
                 {googleError && <Text style={[styles.error, { color: colors.error }]}>{googleError.message}</Text>}
             </View>
             <Text style={[styles.loginLink, { color: colors.primary }]} onPress={() => navigation.navigate("Login")}>
-                Already have an account? Login
+                Já tem uma conta? Entrar
             </Text>
         </KeyboardAwareScrollView>
     );

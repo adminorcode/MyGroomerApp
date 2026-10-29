@@ -47,7 +47,7 @@ export default function CustomerNavigator() {
                 name="HomeTab"
                 component={HomeStackNavigator}
                 options={{
-                    tabBarLabel: 'Home',
+                    tabBarLabel: 'Início',
                     tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
                 }}
             />
@@ -55,7 +55,7 @@ export default function CustomerNavigator() {
                 name="BookingsTab"
                 component={BookingsStackNavigator}
                 options={{
-                    tabBarLabel: 'Bookings',
+                    tabBarLabel: 'Agendamentos',
                     tabBarIcon: ({ color, size }) => <BookMinus color={color} size={size} />,
                 }}
             />
@@ -63,7 +63,7 @@ export default function CustomerNavigator() {
                 name="MessagesTab"
                 component={MessagesStackNavigator}
                 options={{
-                    tabBarLabel: 'Messages',
+                    tabBarLabel: 'Mensagens',
                     tabBarIcon: ({ color, size }) => (
                         <MessageTabIcon color={color} size={size} />
                     ),

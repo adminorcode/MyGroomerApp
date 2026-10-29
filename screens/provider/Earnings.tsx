@@ -7,16 +7,13 @@ import TransactionStatusBadge from '../../components/shared/TransactionStatusBad
 import { useTheme } from '../../context/ThemeContext'
 import { useGetProviderEarnings } from '../../hooks/useProviders'
 import { ProviderTransaction } from '../../types/transaction.types'
-
-function formatCurrency(value: number) {
-  const amount = Number(value) || 0
-  return `GHS ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-}
+import { formatMoney } from '../../utils/formatMoney'
 
 function formatDate(value: string) {
   const date = new Date(value)
   if (isNaN(date.getTime())) return value
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString('pt-BR', {
+    weekday: 'short',
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -30,16 +27,16 @@ export default function Earnings() {
   const renderSummary = () => (
     <View style={styles.summaryRow}>
       <View style={[styles.summaryCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Total Earned</Text>
+        <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Total recebido</Text>
         <Text style={[styles.summaryValue, { color: colors.success }]} numberOfLines={1} adjustsFontSizeToFit>
-          {formatCurrency(data?.totalEarned ?? 0)}
+          {formatMoney(data?.totalEarned ?? 0)}
         </Text>
       </View>
 
       <View style={[styles.summaryCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Pending</Text>
+        <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Pendente</Text>
         <Text style={[styles.summaryValue, { color: colors.warning }]} numberOfLines={1} adjustsFontSizeToFit>
-          {formatCurrency(data?.pending ?? 0)}
+          {formatMoney(data?.pending ?? 0)}
         </Text>
       </View>
     </View>
@@ -54,15 +51,15 @@ export default function Earnings() {
       <View style={styles.txContent}>
         <View style={styles.txHeader}>
           <Text style={[styles.txTitle, { color: colors.text }]} numberOfLines={1}>
-            {item.service_name ?? 'Payout'}
+            {item.service_name ?? 'Repasse'}
           </Text>
           <Text style={[styles.txAmount, { color: colors.text }]} numberOfLines={1}>
-            {formatCurrency(item.amount)}
+            {formatMoney(item.amount)}
           </Text>
         </View>
 
         <Text style={[styles.txSubtitle, { color: colors.textSecondary }]} numberOfLines={1}>
-          {item.customer_name ? `From ${item.customer_name}` : 'Customer'} · {formatDate(item.created_at)}
+          {item.customer_name ? `De ${item.customer_name}` : 'Tutor'} · {formatDate(item.created_at)}
         </Text>
 
         <TransactionStatusBadge status={item.transaction_status} />
@@ -73,8 +70,8 @@ export default function Earnings() {
   return (
     <ScreenContainer>
       <ScreenHeader
-        title="Earnings"
-        description="Track your payouts and pending balance"
+        title="Rendimentos"
+        description="Acompanhe repasses e saldo pendente"
       />
 
       {isLoading ? (
@@ -84,13 +81,13 @@ export default function Earnings() {
       ) : isError ? (
         <View style={styles.centered}>
           <Text style={[styles.message, { color: colors.error }]}>
-            Something went wrong while fetching your earnings
+            Não foi possível carregar os rendimentos.
           </Text>
         </View>
       ) : (
         <>
           {renderSummary()}
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Payout History</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Histórico de repasses</Text>
           <FlatList
             data={data?.transactions ?? []}
             style={styles.list}
@@ -100,7 +97,7 @@ export default function Earnings() {
             ListEmptyComponent={
               <View style={styles.centered}>
                 <Text style={[styles.message, { color: colors.textSecondary }]}>
-                  No payouts yet. Completed jobs will show up here.
+                  Nenhum repasse ainda. Atendimentos concluídos aparecem aqui.
                 </Text>
               </View>
             }

@@ -31,9 +31,9 @@ function formatTime(value?: string | null) {
     date.getFullYear() === now.getFullYear()
 
   if (isSameDay) {
-    return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+    return date.toLocaleTimeString('pt-BR', { hour: 'numeric', minute: '2-digit' })
   }
-  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  return date.toLocaleDateString('pt-BR', { weekday: 'short', month: 'short', day: 'numeric' })
 }
 
 export default function ConversationsScreen({ navigation }: Props) {
@@ -43,7 +43,7 @@ export default function ConversationsScreen({ navigation }: Props) {
 
   const renderConversation = ({ item }: { item: ConversationListItem }) => {
     const isCustomer = item.customer_id === user?.id
-    const otherName = (isCustomer ? item.provider_name : item.customer_name) ?? 'Unknown'
+    const otherName = (isCustomer ? item.provider_name : item.customer_name) ?? 'Desconhecido'
     const otherProfile = isCustomer ? item.provider_profile : item.customer_profile
 
     return (
@@ -73,7 +73,7 @@ export default function ConversationsScreen({ navigation }: Props) {
 
           <View style={[styles.previewContainer]}>
             <Text style={[styles.preview, { color: colors.textSecondary }]} numberOfLines={1}>
-              {item.last_message ?? 'No messages yet'}
+              {item.last_message ?? 'Nenhuma mensagem ainda'}
             </Text>
             
               { item.unread_count > 0 &&
@@ -89,7 +89,7 @@ export default function ConversationsScreen({ navigation }: Props) {
 
   return (
     <ScreenContainer>
-      <ScreenHeader title="Messages" description={`Chat with your ${user?.role === 'provider' ? "customers or service providers": 'service providers'}`} />
+      <ScreenHeader title="Mensagens" description={user?.role === 'provider' ? 'Converse com tutores e groomers' : 'Converse com os groomers'} />
 
       {isLoading ? (
         <View style={styles.centered}>
@@ -98,7 +98,7 @@ export default function ConversationsScreen({ navigation }: Props) {
       ) : isError ? (
         <View style={styles.centered}>
           <Text style={[styles.message, { color: colors.error }]}>
-            Something went wrong while fetching your conversations
+            Não foi possível carregar as conversas.
           </Text>
         </View>
       ) : (
@@ -111,7 +111,7 @@ export default function ConversationsScreen({ navigation }: Props) {
           ListEmptyComponent={
             <View style={styles.centered}>
               <Text style={[styles.message, { color: colors.textSecondary }]}>
-                No conversations yet. Start chatting from a booking.
+                Nenhuma conversa ainda. Comece pelo agendamento.
               </Text>
             </View>
           }

@@ -8,7 +8,7 @@ export default function AuthDivider() {
     return (
         <View style={styles.container}>
             <View style={[styles.line, { backgroundColor: colors.border }]} />
-            <Text style={[styles.label, { color: colors.textSecondary }]}>or</Text>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>ou</Text>
             <View style={[styles.line, { backgroundColor: colors.border }]} />
         </View>
     )

@@ -21,11 +21,11 @@ export default function ProfileScreen({ navigation }: Props) {
 
   const handleLogout = () => {
     AppAlert.alert(
-      'Log out',
-      'Are you sure you want to log out?',
+      'Sair',
+      'Tem certeza de que quer sair?',
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Log out', style: 'destructive', onPress: () => logout() },
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Sair', style: 'destructive', onPress: () => logout() },
       ],
     )
   }
@@ -34,19 +34,19 @@ export default function ProfileScreen({ navigation }: Props) {
 
   return (
     <ScreenContainer>
-      <ScreenHeader title='Profile' description='Manage your account' />
+      <ScreenHeader title='Perfil' description='Gerencie sua conta' />
 
       <View style={styles.profileSection}>
         <View style={[styles.avatar, { backgroundColor: colors.selectionSoft }]}>
           <Text style={[styles.avatarText, { color: colors.primary }]}>{initial}</Text>
         </View>
 
-        <Text style={[styles.name, { color: colors.text }]}>{user?.name ?? 'Unknown user'}</Text>
+        <Text style={[styles.name, { color: colors.text }]}>{user?.name ?? 'Usuário desconhecido'}</Text>
         <Text style={[styles.email, { color: colors.textSecondary }]}>{user?.email}</Text>
 
         {user?.role && (
           <View style={[styles.rolePill, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Text style={[styles.roleText, { color: colors.textSecondary }]}>{user.role}</Text>
+            <Text style={[styles.roleText, { color: colors.textSecondary }]}>{user.role === 'provider' ? 'Groomer' : user.role === 'customer' ? 'Tutor' : 'Administrador'}</Text>
           </View>
         )}
       </View>
@@ -64,9 +64,9 @@ export default function ProfileScreen({ navigation }: Props) {
             <Store size={20} color={colors.primary} />
           </View>
           <View style={styles.actionTextWrapper}>
-            <Text style={[styles.actionTitle, { color: colors.text }]}>Become a Provider</Text>
+            <Text style={[styles.actionTitle, { color: colors.text }]}>Quero ser groomer</Text>
             <Text style={[styles.actionSubtitle, { color: colors.textSecondary }]}>
-              Offer your services and start earning
+              Ofereça seus serviços e acompanhe os rendimentos
             </Text>
           </View>
           <ChevronRight size={20} color={colors.textSecondary} />
@@ -84,7 +84,7 @@ export default function ProfileScreen({ navigation }: Props) {
         ]}
       >
         <LogOut size={20} color={colors.error} />
-        <Text style={[styles.logoutText, { color: colors.error }]}>Log out</Text>
+        <Text style={[styles.logoutText, { color: colors.error }]}>Sair</Text>
       </Pressable>
     </ScreenContainer>
   )

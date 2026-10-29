@@ -24,8 +24,8 @@ type Props = {
 type ProviderFormValues = z.infer<typeof providerSchema>
 
 const payoutOptions = [
-    { label: 'Mobile Money', value: PayoutMethod.MOBILE_MONEY },
-    { label: 'Bank', value: PayoutMethod.BANK },
+    { label: 'Dinheiro móvel', value: PayoutMethod.MOBILE_MONEY },
+    { label: 'Banco', value: PayoutMethod.BANK },
 ] as const
 
 const momoProviderOptions = [
@@ -99,9 +99,9 @@ const BecomeAProvider = ({ navigation }: Props) => {
     const onSubmit: SubmitHandler<ProviderFormValues> = async (data) => {
         try {
             await mutateAsync(data)
-            AppAlert.alert('Welcome!', "You're now a provider.")
+            AppAlert.alert('Bem-vindo!', 'Você agora é groomer.')
         } catch (error) {
-            AppAlert.alert('Registration failed', 'Could not register as a provider. Please try again.')
+            AppAlert.alert('Falha no cadastro', 'Não foi possível concluir o cadastro de groomer. Tente novamente.')
         }
     }
 
@@ -114,8 +114,8 @@ const BecomeAProvider = ({ navigation }: Props) => {
             enableOnAndroid
         >
             <ScreenHeader
-                title='Become A Provider'
-                description='Set up how you want to get paid'
+                title='Quero ser groomer'
+                description='Defina como você quer receber'
                 showBackButton
                 onBack={() => navigation.goBack()}
             />
@@ -126,7 +126,7 @@ const BecomeAProvider = ({ navigation }: Props) => {
                     name='payout_method'
                     render={({ field: { onChange, value } }) => (
                         <OptionSelector
-                            label='Payout method'
+                            label='Forma de repasse'
                             options={payoutOptions}
                             value={value}
                             onChange={onChange}
@@ -142,7 +142,7 @@ const BecomeAProvider = ({ navigation }: Props) => {
                             name='momo_number'
                             render={({ field: { onChange, value } }) => (
                                 <BoamePhoneInput
-                                    label='Mobile Money number'
+                                    label='Número do dinheiro móvel'
                                     onChangeFormattedText={onChange}
                                     value={value}
                                     error={errors.momo_number?.message}
@@ -155,7 +155,7 @@ const BecomeAProvider = ({ navigation }: Props) => {
                             name='momo_provider'
                             render={({ field: { onChange, value } }) => (
                                 <OptionSelector
-                                    label='Mobile Money provider'
+                                    label='Operadora'
                                     options={momoProviderOptions}
                                     value={value}
                                     onChange={onChange}
@@ -171,8 +171,8 @@ const BecomeAProvider = ({ navigation }: Props) => {
                             name='bank_account_number'
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <BoameInput
-                                    label='Bank account number'
-                                    placeholder='Enter your account number'
+                                    label='Número da conta'
+                                    placeholder='Digite o número da conta'
                                     onChangeText={onChange}
                                     onBlur={onBlur}
                                     value={value}
@@ -187,8 +187,8 @@ const BecomeAProvider = ({ navigation }: Props) => {
                             name='bank_account_name'
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <BoameInput
-                                    label='Account holder name'
-                                    placeholder='Enter the name on the account'
+                                    label='Nome do titular'
+                                    placeholder='Digite o nome do titular'
                                     onChangeText={onChange}
                                     onBlur={onBlur}
                                     value={value}
@@ -201,7 +201,7 @@ const BecomeAProvider = ({ navigation }: Props) => {
                             control={control}
                             name="bank_code"
                             render={({ field: { onChange, onBlur, value } }) => (
-                                <BoameInput label="Bank code" placeholder="Bank code" onChangeText={onChange} onBlur={onBlur} value={value} error={errors.bank_code?.message} />
+                                <BoameInput label="Código do banco" placeholder="Código do banco" onChangeText={onChange} onBlur={onBlur} value={value} error={errors.bank_code?.message} />
                             )}
                         />
                     </>
@@ -212,8 +212,8 @@ const BecomeAProvider = ({ navigation }: Props) => {
                     name='service_area'
                     render={({ field: { onChange, onBlur, value } }) => (
                         <BoameInput
-                            label='Service area'
-                            placeholder='e.g. Accra, East Legon'
+                            label='Área de atendimento'
+                            placeholder='ex.: São Paulo, Pinheiros'
                             onChangeText={onChange}
                             onBlur={onBlur}
                             value={value}
@@ -223,7 +223,7 @@ const BecomeAProvider = ({ navigation }: Props) => {
                 />
 
                 <BoameBtn
-                    title='Register as Provider'
+                    title='Cadastrar como groomer'
                     loading={isPending}
                     onPress={handleSubmit(onSubmit)}
                 />

@@ -49,9 +49,9 @@ export default function LoginScreen({navigation}: Props) {
                     name="email"
                     render={({field: {onChange, onBlur, value}}) => (
                         <BoameInput
-                            label="Email address"
+                            label="E-mail"
                             style={styles.input}
-                            placeholder="Enter your email"
+                            placeholder="Digite seu e-mail"
                             onChangeText={onChange}
                             onBlur={onBlur}
                             value={value}
@@ -69,9 +69,9 @@ export default function LoginScreen({navigation}: Props) {
                     name="password"
                     render={({field: {onChange, onBlur, value}}) => (
                         <ToggleInput
-                            label="Password"
+                            label="Senha"
                             style={styles.input}
-                            placeholder="Enter your password"
+                            placeholder="Digite sua senha"
                             onChangeText={onChange}
                             onBlur={onBlur}
                             value={value}
@@ -83,13 +83,13 @@ export default function LoginScreen({navigation}: Props) {
                     )}
                 />
                 <BoameBtn
-                    title="Login"
+                    title="Entrar"
                     loading={isPending}
                     onPress={handleSubmit(handleLogin)}
                 />
                 {error && <Text accessibilityRole="alert" style={[styles.error, { color: colors.error }]}>{getErrorMessage(error)}</Text>}
                 {runtime.googleAuthEnabled && <><AuthDivider /><GoogleSignInBtn
-                    title="Log in with Google"
+                    title="Entrar com Google"
                     loading={isGooglePending}
                     disabled={isPending}
                     onPress={() => signInWithGoogle()}
@@ -97,7 +97,7 @@ export default function LoginScreen({navigation}: Props) {
                 {googleError && <Text style={[styles.error, { color: colors.error }]}>{googleError.message}</Text>}
             </View>
             <Text style={[styles.registerLink, { color: colors.primary }]} onPress={() => navigation.navigate("Register")}>
-                Don&apos;t have an account? Register
+                Não tem uma conta? Cadastre-se
             </Text>
         </KeyboardAwareScrollView>
     )

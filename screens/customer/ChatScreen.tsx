@@ -140,7 +140,7 @@ const ChatScreen = ({ navigation, route }: Props) => {
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
       <View style={styles.headerWrapper}>
         <ChatHeader
-          name={otherName ?? 'Chat'}
+          name={otherName ?? 'Conversa'}
           onBack={() => navigation.goBack()}
         />
       </View>
@@ -157,7 +157,7 @@ const ChatScreen = ({ navigation, route }: Props) => {
         ) : isError ? (
           <View style={styles.centered}>
             <Text style={[styles.message, { color: colors.error }]}>
-              Something went wrong while loading this conversation
+              Não foi possível carregar esta conversa.
             </Text>
           </View>
         ) : (
@@ -174,7 +174,7 @@ const ChatScreen = ({ navigation, route }: Props) => {
             ListEmptyComponent={
               <View style={styles.centered}>
                 <Text style={[styles.message, { color: colors.textSecondary }]}>
-                  No messages yet. Say hello!
+                  Nenhuma mensagem ainda. Diga olá!
                 </Text>
               </View>
             }
