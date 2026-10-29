@@ -13,6 +13,7 @@ export default function ListCard({ title, subtitle, showChevron, ...props }: Pro
     const { colors } = useTheme()
     return (
         <Pressable
+            accessibilityRole="button"
             {...props}
             style={[
                 styles.card, 

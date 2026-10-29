@@ -51,10 +51,11 @@ export default function ServiceScreen({navigation, route}: Props) {
           renderItem={({ item }) => (
             <ListCard
               title={item.name}
+              accessibilityLabel={item.name}
               subtitle={item.description}
-              onPress={() => navigation.navigate('ServiceProviders', {
+              onPress={() => navigation.navigate('TutorSearch', {
                 serviceId: item.id,
-                serviceName: item.name,
+                categoryId,
               })}
               showChevron={true}
             />

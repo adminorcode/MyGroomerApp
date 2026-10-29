@@ -55,3 +55,22 @@ export type CreateProviderService = {
     service_id: string
     price?: number
 }
+
+export type CoverageSearchParams = {
+    address: string
+    service_id?: string
+    category_id?: string
+}
+
+export type CoverageProvider = {
+    id: string
+    provider_id: string
+    service_id: string
+    service_name: string
+    name: string
+    price: number | string
+    average_rating: number | string
+    review_count: number
+    distance_km: number
+    radius_km: number
+}
