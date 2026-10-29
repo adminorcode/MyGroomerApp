@@ -42,6 +42,14 @@ async function placeholderColor(page, name) {
   return page.getByRole('textbox', { name }).evaluate((el) => getComputedStyle(el, '::placeholder').color)
 }
 
+async function fontFamily(locator) {
+  return locator.evaluate((el) => getComputedStyle(el).fontFamily || '')
+}
+
+function usesFace(family, face) {
+  return family.includes(face)
+}
+
 async function runTutor(browser) {
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
@@ -52,6 +60,12 @@ async function runTutor(browser) {
 
   await openWelcome(page)
   let body = await textOf(page)
+  const logoFace = await fontFamily(page.getByText('MyGroomer').first())
+  const subtitleFace = await fontFamily(page.getByText('Banho e tosa em domicílio').first())
+  const tutorButtonFace = await fontFamily(page.getByText('Sou tutor', { exact: true }).first())
+  check('AC-14 logotipo permanece em Abres', usesFace(logoFace, 'Abres'), logoFace)
+  check('AC-14 subtítulo em Inter Regular', usesFace(subtitleFace, 'Inter-Regular'), subtitleFace)
+  check('AC-14 botão em Inter SemiBold', usesFace(tutorButtonFace, 'Inter-SemiBold'), tutorButtonFace)
   check(
     'AC-11 boas-vindas com seletor de perfil',
     body.includes('MyGroomer') &&
@@ -179,6 +193,24 @@ async function runTutor(browser) {
         body.includes('Primário') &&
         (body.includes('Luna') || body.includes('Marina Groomer')),
     )
+    const faces = {
+      display: await fontFamily(page.getByText('Display', { exact: true })),
+      heading: await fontFamily(page.getByText('Heading 2', { exact: true })),
+      section: await fontFamily(page.getByText('Tipografia', { exact: true })),
+      body: await fontFamily(page.getByText('Corpo de texto padrão', { exact: true })),
+      label: await fontFamily(page.getByText('Rótulo', { exact: true })),
+      fieldLabel: await fontFamily(page.getByText('Nome do pet', { exact: true })),
+      button: await fontFamily(page.getByText('Primário', { exact: true })),
+      numeric: await fontFamily(page.getByText('R$ 120', { exact: true })),
+      price: await fontFamily(page.getByText('A partir de R$ 89', { exact: true })),
+      total: await fontFamily(page.getByText('R$ 120,00', { exact: true }).first()),
+      input: await fontFamily(page.getByRole('textbox', { name: 'Nome do pet' })),
+    }
+    check('AC-14 título principal em Inter Bold', usesFace(faces.display, 'Inter-Bold') && usesFace(faces.heading, 'Inter-Bold'), JSON.stringify(faces))
+    check('AC-14 seção em Inter SemiBold', usesFace(faces.section, 'Inter-SemiBold'), faces.section)
+    check('AC-14 texto em Inter Regular', usesFace(faces.body, 'Inter-Regular') && usesFace(faces.input, 'Inter-Regular'), `${faces.body} | ${faces.input}`)
+    check('AC-14 label e botão em Inter SemiBold', usesFace(faces.label, 'Inter-SemiBold') && usesFace(faces.fieldLabel, 'Inter-SemiBold') && usesFace(faces.button, 'Inter-SemiBold'), `${faces.label} | ${faces.fieldLabel} | ${faces.button}`)
+    check('AC-14 preço e métrica em Inter Bold', usesFace(faces.numeric, 'Inter-Bold') && usesFace(faces.price, 'Inter-Bold') && usesFace(faces.total, 'Inter-Bold'), `${faces.numeric} | ${faces.price} | ${faces.total}`)
     await visibleButton(page, 'Voltar').first().click()
     await visibleButton(page, 'Design System').first().waitFor({ state: 'visible', timeout: 15000 })
   }

@@ -28,7 +28,7 @@ export default function ServiceEditorCard({
   onEdit,
   onToggleActive,
 }: Props) {
-  const { spacing } = useMGTheme()
+  const { spacing, fonts } = useMGTheme()
   const priceLine = [
     prices?.small ? `Pequeno ${prices.small}` : null,
     prices?.medium ? `Médio ${prices.medium}` : null,
@@ -51,7 +51,7 @@ export default function ServiceEditorCard({
         </MGText>
       ) : null}
       {priceLine ? (
-        <MGText variant="bodySmall" style={{ marginTop: spacing.xs }}>
+        <MGText variant="bodySmall" style={{ marginTop: spacing.xs, fontFamily: fonts.bold }}>
           {priceLine}
         </MGText>
       ) : null}

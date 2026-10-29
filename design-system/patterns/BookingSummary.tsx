@@ -24,7 +24,7 @@ export default function BookingSummary({
   totalValue,
   footnote,
 }: Props) {
-  const { spacing } = useMGTheme()
+  const { spacing, fonts } = useMGTheme()
 
   return (
     <MGCard>
@@ -46,7 +46,7 @@ export default function BookingSummary({
           <MGDivider spacing={spacing.md} />
           <View style={styles.row}>
             <MGText variant="title">{totalLabel}</MGText>
-            <MGText variant="title" color="brand">
+            <MGText variant="title" color="brand" style={{ fontFamily: fonts.bold }}>
               {totalValue}
             </MGText>
           </View>

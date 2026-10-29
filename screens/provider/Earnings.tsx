@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
   },
   summaryValue: {
     fontSize: typography.sizes.xl,
-    fontFamily: fonts.semibold,
+    fontFamily: fonts.bold,
   },
   sectionTitle: {
     fontSize: typography.sizes.lg,
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   },
   txAmount: {
     fontSize: typography.sizes.md,
-    fontFamily: fonts.semibold,
+    fontFamily: fonts.bold,
   },
   txSubtitle: {
     fontSize: typography.sizes.sm,

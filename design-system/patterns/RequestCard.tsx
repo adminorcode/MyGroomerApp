@@ -34,7 +34,7 @@ export default function RequestCard({
   accepting,
   rejecting,
 }: Props) {
-  const { spacing } = useMGTheme()
+  const { spacing, fonts } = useMGTheme()
   const canRespond =
     status === BookingStatus.PENDING_CONFIRMATION || status === BookingStatus.PENDING_PAYMENT
 
@@ -56,7 +56,7 @@ export default function RequestCard({
         {location}
       </MGText>
       {price != null ? (
-        <MGText variant="title" color="brand" style={{ marginTop: spacing.sm }}>
+        <MGText variant="title" color="brand" style={{ marginTop: spacing.sm, fontFamily: fonts.bold }}>
           {formatMoney(price)}
         </MGText>
       ) : null}

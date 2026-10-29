@@ -25,8 +25,9 @@ export default function GroomerSearchCard({
   onPress,
   showChevron = true,
 }: GroomerSearchCardProps) {
-  const { colors, spacing, radius } = useMGTheme()
+  const { colors, spacing, radius, fonts } = useMGTheme()
   const meta = [priceLabel, coverageLabel, ratingLabel].filter(Boolean).join(' · ')
+  const details = [coverageLabel, ratingLabel].filter(Boolean).join(' · ')
 
   return (
     <Pressable
@@ -56,9 +57,14 @@ export default function GroomerSearchCard({
             {subtitle}
           </MGText>
         ) : null}
-        {meta ? (
+        {priceLabel ? (
+          <MGText variant="bodySmall" numberOfLines={1} style={{ marginTop: spacing.xs, fontFamily: fonts.bold }}>
+            {priceLabel}
+          </MGText>
+        ) : null}
+        {details ? (
           <MGText variant="caption" color="secondary" numberOfLines={1} style={{ marginTop: spacing.xs }}>
-            {meta}
+            {details}
           </MGText>
         ) : null}
       </View>

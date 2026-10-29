@@ -1,5 +1,6 @@
-// My Groomer Design System v1.0 — seção 4.2.
-// A família continua Montserrat, já carregada no app. Inter segue em aberto.
+// My Groomer Design System v1.0 — seção 4.
+// Família oficial da interface: Inter. Papéis usam 400, 600 e 700.
+// fonts.medium (Inter Medium 500) cobre ênfase intermediária já existente.
 
 type TypeStyle = {
   fontSize: number

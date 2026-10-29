@@ -86,9 +86,10 @@ export type AppColors = { [Key in keyof typeof lightColors]: string }
 
 export const fonts = {
     logo: 'Abres',
-    regular: 'Montserrat-Regular',
-    medium: 'Montserrat-Medium',
-    semibold: 'Montserrat-SemiBold',
+    regular: 'Inter-Regular',
+    medium: 'Inter-Medium',
+    semibold: 'Inter-SemiBold',
+    bold: 'Inter-Bold',
 }
 
 export const typography = {

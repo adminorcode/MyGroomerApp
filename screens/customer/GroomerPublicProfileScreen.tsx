@@ -86,7 +86,7 @@ export default function GroomerPublicProfileScreen({ navigation, route }: Props)
             <MGText variant="label" color="secondary" style={styles.label}>
                 Preço indicativo
             </MGText>
-            <MGText variant="body" style={styles.value}>
+            <MGText variant="body" style={[styles.value, { fontFamily: fonts.bold }]}>
                 {price}
             </MGText>
             <MGText variant="label" color="secondary" style={styles.label}>

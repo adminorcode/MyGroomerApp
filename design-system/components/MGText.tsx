@@ -45,9 +45,11 @@ export default function MGText({
   }
 
   const family =
-    type.fontWeight === '700' || type.fontWeight === '600'
-      ? fonts.semibold
-      : fonts.regular
+    type.fontWeight === '700'
+      ? fonts.bold
+      : type.fontWeight === '600'
+        ? fonts.semibold
+        : fonts.regular
 
   return (
     <Text

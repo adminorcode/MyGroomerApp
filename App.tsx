@@ -36,9 +36,10 @@ function SessionApp() {
 export default function App() {
   const [fontsLoaded, fontError] = useFonts({
     [fonts.logo]: require('./assets/fonts/Abres.ttf'),
-    [fonts.regular]: require('./assets/fonts/Montserrat-Regular.ttf'),
-    [fonts.medium]: require('./assets/fonts/Montserrat-Medium.ttf'),
-    [fonts.semibold]: require('./assets/fonts/Montserrat-SemiBold.ttf'),
+    [fonts.regular]: require('./assets/fonts/Inter-Regular.ttf'),
+    [fonts.medium]: require('./assets/fonts/Inter-Medium.ttf'),
+    [fonts.semibold]: require('./assets/fonts/Inter-SemiBold.ttf'),
+    [fonts.bold]: require('./assets/fonts/Inter-Bold.ttf'),
   })
   useEffect(() => { if (fontsLoaded || fontError) void SplashScreen.hideAsync() }, [fontsLoaded, fontError])
   if (!fontsLoaded && !fontError) return null

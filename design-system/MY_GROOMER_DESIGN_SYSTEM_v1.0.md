@@ -179,9 +179,20 @@ Uso preferencial em código: `colors.text.primary`, `colors.action.primary`, `co
 
 ### 4.1. Família tipográfica
 
-Os PNGs aprovados não definem uma fonte oficial e não constituem arquivos editáveis de tipografia. **Proposta inicial: Inter** (ou fonte sans-serif próxima e legível), usada **somente se a fonte estiver licenciada e integrada corretamente ao projeto**. Até isso ser confirmado, utilizar a fonte nativa do sistema (SF Pro no iOS, Roboto no Android) e testar diferenças de quebra de linha.
+A família oficial da interface é **Inter** (SIL Open Font License 1.1). Os arquivos estáticos ficam em `React App/assets/fonts/` (`Inter-Regular`, `Inter-Medium`, `Inter-SemiBold`, `Inter-Bold`) e a licença em `Inter-OFL.txt`. O logotipo continua em **Abres**.
 
-Evitar misturar muitas fontes. Não usar fonte ilustrativa no corpo das telas. O logo pode ter tratamento próprio quando a identidade final for definida.
+| Papel | Estilos | Peso |
+|---|---|---|
+| Títulos principais | `display`, `heading1` | Bold 700 |
+| Títulos de seção | `heading2` em Bold 700; `heading3` e `title` em SemiBold 600 | 600 ou 700 |
+| Textos e descrições | `body`, `bodySmall`, `caption` | Regular 400 |
+| Labels de formulário | `label` | SemiBold 600 |
+| Botões | `button` | SemiBold 600 |
+| Preços e métricas | `numeric` e o valor de preço na tela | Bold 700 |
+
+O token `fonts.medium` usa Inter Medium 500 onde a interface já pedia um peso intermediário (navegação, filtros, opções). Os papéis da tabela acima usam 400, 600 e 700. No React Native o peso vem do arquivo da família (`Inter-Bold`, `Inter-SemiBold`, `Inter-Regular`), porque a plataforma não sintetiza o peso com segurança.
+
+Evitar misturar outras famílias no corpo das telas. Não usar fonte ilustrativa fora do logotipo.
 
 ### 4.2. Escala tipográfica proposta (React Native, pontos lógicos)
 
@@ -1024,7 +1035,6 @@ Um ticket de tela só está pronto quando:
 
 | Item | Pergunta pendente | Recomendação inicial |
 |---|---|---|
-| Fontes | Inter, fonte do sistema ou outra? | Sistema primeiro; Inter após aprovação |
 | Stepper profissional | 4 ou 5 passos? Em que ordem? | Cadastro → Serviços → Local → Disponibilidade → Revisão |
 | Confirmação de reserva | Groomer aprova sempre? | Modelo de solicitação pendente até decisão contrária |
 | Pagamento | Antecipado, pós-serviço, dentro ou fora da plataforma? | Não inserir checkout real sem especificação |

@@ -43,11 +43,11 @@ export default function AgendaAppointmentCard({
   showChevron,
   onPress,
 }: AgendaAppointmentCardProps) {
-  const { colors, spacing, radius } = useMGTheme()
+  const { colors, spacing, radius, fonts } = useMGTheme()
   const partyLine =
     perspective === 'provider'
-      ? `para ${customer_name ?? 'tutor'}${price != null ? ` · ${formatMoney(price)}` : ''}`
-      : `por ${provider_name ?? 'groomer'}${price != null ? ` · ${formatMoney(price)}` : ''}`
+      ? `para ${customer_name ?? 'tutor'}`
+      : `por ${provider_name ?? 'groomer'}`
 
   return (
     <Pressable
@@ -76,6 +76,11 @@ export default function AgendaAppointmentCard({
         <MGText variant="bodySmall" color="secondary">
           {partyLine}
         </MGText>
+        {price != null ? (
+          <MGText variant="bodySmall" style={{ fontFamily: fonts.bold }}>
+            {formatMoney(price)}
+          </MGText>
+        ) : null}
         <View style={[styles.row, { gap: spacing.sm }]}>
           <Calendar size={16} color={colors.text.secondary} />
           <MGText variant="bodySmall" numberOfLines={1} style={{ flex: 1 }}>

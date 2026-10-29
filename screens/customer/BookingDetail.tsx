@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
     },
     price: {
         fontSize: typography.sizes.lg,
-        fontFamily: fonts.semibold,
+        fontFamily: fonts.bold,
     },
     actionContainer:{
         display:'flex',

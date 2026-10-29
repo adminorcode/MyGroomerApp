@@ -72,6 +72,8 @@ export default function DesignSystemShowcaseScreen({ navigation }: Props) {
         <MGText variant="display">Display</MGText>
         <MGText variant="heading2">Heading 2</MGText>
         <MGText variant="body">Corpo de texto padrão</MGText>
+        <MGText variant="label">Rótulo</MGText>
+        <MGText variant="numeric">R$ 120</MGText>
         <MGText variant="caption" color="secondary">
           Caption secundário
         </MGText>

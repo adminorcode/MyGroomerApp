@@ -6,7 +6,7 @@ import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
 import { ProviderBookingsStackParamList } from '../../navigation/types'
 import { useChangeBookingStatus, useGetBookingById } from '../../hooks/useBooking'
-import { borderRadius, spacing } from '../../constants/theme'
+import { borderRadius, fonts, spacing } from '../../constants/theme'
 import { useTheme } from '../../context/ThemeContext'
 import { CalendarClock, Hash, MapPin, Clock, User } from 'lucide-react-native'
 import { DetailRow } from '../../components/shared/DetailRow'
@@ -134,7 +134,7 @@ const ProviderBookingDetailScreen = ({ navigation, route }: Props) => {
 
                     <View style={[styles.priceRow, { borderTopColor: colors.border }]}>
                         <MGText variant="body" color="secondary">Preço</MGText>
-                        <MGText variant="title" color="brand">{formatMoney(data.price)}</MGText>
+                        <MGText variant="title" color="brand" style={{ fontFamily: fonts.bold }}>{formatMoney(data.price)}</MGText>
                     </View>
                 </View>
 
