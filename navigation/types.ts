@@ -31,7 +31,8 @@ export type HomeStackParamList = {
     Home: undefined
     Services: {categoryId: string, categoryName: string}
     ServiceProviders: {serviceId: string, serviceName: string}
-    BookService: {providerServiceId: string}
+    BookService: {providerServiceId: string, petId?: string}
+    PetForm: { petId?: string, providerServiceId?: string }
 }
 
 export type BookingsStackParamList = {
@@ -44,6 +45,8 @@ export type BookingsStackParamList = {
 export type ProfileStackParamList = {
     Profile:undefined
     BecomeAProvider:undefined
+    Pets: undefined
+    PetForm: { petId?: string, providerServiceId?: string }
 }
 
 export type MessagesStackParamList = {

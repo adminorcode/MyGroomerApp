@@ -14,6 +14,13 @@ export interface Booking {
     customer_id: string
     provider_user_id:string
     provider_service_id: string
+    pet_id?: string | null
+    pet_name?: string | null
+    pet_species?: string | null
+    pet_breed?: string | null
+    pet_size?: string | null
+    pet_age_years?: number | null
+    pet_notes?: string | null
     scheduled_at: string
     booking_status: BookingStatus
     service_name: string
@@ -29,6 +36,7 @@ export interface Booking {
 }
 
 export type CreateBookingInput = {
+    pet_id: string
     provider_service_id: string
     scheduled_at: Date
     customer_location: string
