@@ -29,8 +29,10 @@ export type CustomerTabParamList = {
 
 export type HomeStackParamList = {
     Home: undefined
+    TutorSearch: { serviceId?: string, categoryId?: string } | undefined
     Services: {categoryId: string, categoryName: string}
     ServiceProviders: {serviceId: string, serviceName: string}
+    GroomerProfile: {providerServiceId: string}
     BookService: {providerServiceId: string, petId?: string}
     PetForm: { petId?: string, providerServiceId?: string }
 }

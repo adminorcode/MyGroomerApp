@@ -3,6 +3,7 @@ import { useFetchCategories } from '../../hooks/useCategory'
 import { useTheme } from '../../context/ThemeContext'
 import { HomeStackParamList } from '../../navigation/types'
 import { StackNavigationProp } from '@react-navigation/stack'
+import BoameBtn from '../../components/shared/BoameBtn'
 import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
 import { SearchIcon } from 'lucide-react-native'
 import CategoryTile from '../../components/shared/CategoryTile'
@@ -16,46 +17,45 @@ type Props = {
 }
 
 export default function HomeScreen({navigation}: Props) {
-  const {data, isLoading, error} = useFetchCategories()
+  const {data, isLoading, isError, refetch} = useFetchCategories()
   const {colors} = useTheme()
-
-  if (isLoading) 
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
-    )
-
-  if (error) return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
-      <Text style={{color: colors.error}}>Não foi possível carregar as categorias.</Text>
-    </View>
-  )
 
   return (
     <ScreenContainer>
-        {/* Search bar */}
-        <Pressable style={[styles.searchContainer, {backgroundColor: colors.selectionSoft, borderColor: colors.border, marginTop:spacing.md}]}>
+        <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Buscar um serviço"
+            onPress={() => navigation.navigate('TutorSearch')}
+            style={[styles.searchContainer, {backgroundColor: colors.selectionSoft, borderColor: colors.border, marginTop:spacing.md}]}
+        >
         <SearchIcon color={colors.primary} size={20} />
         <Text style={[styles.searchText, {color: colors.textSecondary}]}>Buscar um serviço...</Text>
         </Pressable>
 
-        {/* categories */}
         <SectionHeader title="Categorias"/>
-        <FlatList
-            data={data}
-            horizontal
-            style={{flexGrow:0}}
-            contentContainerStyle={{ gap: spacing.md, height:'auto' }}
-            showsHorizontalScrollIndicator={false}
-            renderItem={({item}) =>(
-                <CategoryTile
-                    name={item.name}
-                    onPress={() => navigation.navigate('Services', {categoryId: item.id, categoryName: item.name})}
-                />
-            )}
-            keyExtractor={(item) => item.id}
-        />
+        {isLoading ? (
+            <ActivityIndicator accessibilityLabel="Carregando categorias" size="large" color={colors.primary} />
+        ) : isError ? (
+            <View style={styles.categoryStatus}>
+                <Text style={[styles.categoryMessage, {color: colors.error}]}>Não foi possível carregar as categorias.</Text>
+                <BoameBtn title="Tentar novamente" onPress={() => refetch()} fullWidth={false} />
+            </View>
+        ) : (
+            <FlatList
+                data={data}
+                horizontal
+                style={{flexGrow:0}}
+                contentContainerStyle={{ gap: spacing.md, height:'auto' }}
+                showsHorizontalScrollIndicator={false}
+                renderItem={({item}) =>(
+                    <CategoryTile
+                        name={item.name}
+                        onPress={() => navigation.navigate('Services', {categoryId: item.id, categoryName: item.name})}
+                    />
+                )}
+                keyExtractor={(item) => item.id}
+            />
+        )}
 
     </ScreenContainer>
   )
@@ -73,7 +73,17 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     borderRadius: borderRadius.md,
     borderWidth: 1,
+    minHeight: 52,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-  }
+  },
+  categoryMessage: {
+    fontSize: typography.sizes.md,
+    fontFamily: fonts.regular,
+    textAlign: 'center',
+  },
+  categoryStatus: {
+    alignItems: 'flex-start',
+    gap: spacing.md,
+  },
 })

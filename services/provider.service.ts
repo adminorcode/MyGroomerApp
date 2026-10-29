@@ -1,4 +1,4 @@
-import { CreateProvider } from "../types/provider.types"
+import { CoverageSearchParams, CreateProvider } from "../types/provider.types"
 import api from "./api"
 
 
@@ -58,5 +58,16 @@ export const registerAsProvider = async (providerData: CreateProvider) => {
 
 export const getProviderEarnings = async () => {
     const response = await api.get(`/providers/earnings`)
+    return response.data
+}
+
+export const searchCoverage = async (params: CoverageSearchParams) => {
+    const response = await api.get('/providers/coverage', {
+        params: {
+            address: params.address,
+            service_id: params.service_id,
+            category_id: params.category_id,
+        },
+    })
     return response.data
 }

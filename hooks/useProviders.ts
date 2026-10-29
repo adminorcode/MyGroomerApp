@@ -1,7 +1,7 @@
-import { createProviderService, deleteProviderService, getProviderEarnings, getProviderServiceById, getProviderServices, getServiceProviders, registerAsProvider, updateProviderService } from "../services/provider.service"
+import { createProviderService, deleteProviderService, getProviderEarnings, getProviderServiceById, getProviderServices, getServiceProviders, registerAsProvider, searchCoverage, updateProviderService } from "../services/provider.service"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAuthStore } from "../store/authStore"
-import { CreateProvider, ProviderServiceDetailed } from "../types/provider.types"
+import { CreateProvider, ProviderServiceDetailed, CoverageProvider, CoverageSearchParams } from "../types/provider.types"
 import { ProviderEarnings } from "../types/transaction.types"
 import { parseJwtPayload } from "../utils/jwt"
 
@@ -85,6 +85,22 @@ export const useRegisterAsProvider = () => {
             const token = response.token
             const user = parseJwtPayload(token)
             setAuth(token, user)
+        },
+    })
+}
+
+export const useCoverageSearch = (params: CoverageSearchParams | null) => {
+    return useQuery({
+        queryKey: ['coverage', params],
+        queryFn: () => searchCoverage(params as CoverageSearchParams),
+        enabled: params !== null,
+        retry: false,
+        refetchOnWindowFocus: false,
+        select: (data) => data.data as {
+            address: string
+            latitude: number
+            longitude: number
+            providers: CoverageProvider[]
         },
     })
 }

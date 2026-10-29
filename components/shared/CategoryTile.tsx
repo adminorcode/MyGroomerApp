@@ -11,6 +11,8 @@ export default function CategoryTile({ name, onPress }: Props) {
     const { colors } = useTheme()
     return (
         <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={name}
             onPress={onPress}
             style={[styles.tile, { backgroundColor: colors.surface, borderColor: colors.border }]}
         >
