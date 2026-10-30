@@ -1,5 +1,13 @@
-import { chromium } from 'playwright'
 import { createRequire } from 'node:module'
+import {
+  checkContrast,
+  evidenceFile,
+  launchBrowser,
+  loginProfessional,
+  loginTutor,
+  openPage,
+  startRun,
+} from './harness.mjs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import crypto from 'node:crypto'
@@ -10,25 +18,18 @@ require(path.join(apiRoot, 'node_modules/dotenv')).config({ path: path.join(apiR
 const { Pool } = require(path.join(apiRoot, 'node_modules/pg'))
 const bcrypt = require(path.join(apiRoot, 'node_modules/bcrypt'))
 
-const appUrl = 'http://localhost:8081'
 const api = 'http://127.0.0.1:3000/api/v1'
 const password = 'admin'
-const failures = []
+const session = startRun({
+  command: 'node e2e/services-by-size.mjs',
+  evidence: evidenceFile('011-services-by-size', 'services-by-size.log'),
+})
+const { check } = session
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 const createdTypeIds = []
 let adminUserId
 let groomerToken
 let originalOffers = []
-
-function check(name, condition, detail = '') {
-  if (condition) {
-    console.log(`ok ${name}`)
-    return
-  }
-  const message = `${name}${detail ? ` — ${detail}` : ''}`
-  failures.push(message)
-  console.error(`fail ${message}`)
-}
 
 async function request(route, method = 'GET', body, token) {
   const response = await fetch(api + route, {
@@ -86,32 +87,8 @@ async function openServices(page) {
   else await page.getByRole('button', { name: 'Serviços', exact: true }).click()
 }
 
-async function loginProfessional(page) {
-  await page.goto(appUrl, { waitUntil: 'domcontentloaded' })
-  await page.getByRole('button', { name: 'Sou profissional' }).waitFor({ timeout: 90000 })
-  await page.getByRole('button', { name: 'Sou profissional' }).click()
-  await page.getByText('Já tem uma conta? Entrar').click()
-  await page.getByRole('textbox', { name: 'E-mail' }).fill('groomer@email.com')
-  await page.getByRole('textbox', { name: 'Senha' }).fill(password)
-  await page.getByRole('button', { name: 'Entrar' }).click()
-  await page.getByText('Agendamentos').waitFor({ timeout: 20000 })
-}
-
-async function loginTutor(page) {
-  await page.goto(appUrl, { waitUntil: 'domcontentloaded' })
-  await page.getByRole('button', { name: 'Sou tutor' }).click()
-  await page.getByRole('textbox', { name: 'E-mail' }).fill('tutor@email.com')
-  await page.getByRole('textbox', { name: 'Senha' }).fill(password)
-  await page.getByRole('button', { name: 'Entrar' }).click()
-  await page.getByText(/^Olá/).waitFor({ timeout: 20000 })
-}
-
 async function visibleAgainstBackground(page, text, label) {
-  const target = page.getByText(text, { exact: true }).first()
-  await target.waitFor()
-  const color = await target.evaluate(element => getComputedStyle(element).color)
-  const background = await page.locator('body').evaluate(element => getComputedStyle(element).backgroundColor)
-  check(label, color !== background && color !== 'rgba(0, 0, 0, 0)', `${color} sobre ${background}`)
+  await checkContrast(page, page.getByText(text, { exact: true }).first(), label, check)
 }
 
 async function disabled(locator) {
@@ -145,10 +122,9 @@ async function run() {
   const deactivated = await request(`/professional-types/${inactive.body.data.id}`, 'PATCH', { is_active: false }, admin)
   if (deactivated.status !== 200) throw new Error('não foi possível desativar o tipo')
 
-  const browser = await chromium.launch()
+  const browser = await launchBrowser()
   try {
-    const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: 'light', locale: 'pt-BR' })
-    const page = await mobile.newPage()
+    const page = await openPage(browser, { viewport: 'mobile' })
     let mode = 'fail'
     await page.route('**/api/v1/providers/menu**', async route => {
       if (route.request().method() !== 'GET') return route.continue()
@@ -233,8 +209,7 @@ async function run() {
     await page.getByRole('button', { name: 'Continuar' }).click()
     await page.getByText('Local de atendimento', { exact: true }).waitFor({ timeout: 15000 })
 
-    const tutorContext = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: 'light', locale: 'pt-BR' })
-    const tutor = await tutorContext.newPage()
+    const tutor = await openPage(browser, { viewport: 'mobile' })
     await loginTutor(tutor)
     await tutor.getByRole('button', { name: 'Buscar um serviço' }).click()
     await tutor.getByRole('textbox', { name: 'Endereço do atendimento' }).fill('Avenida Paulista, São Paulo')
@@ -242,10 +217,9 @@ async function run() {
     await tutor.getByRole('button', { name: 'Buscar' }).click()
     await tutor.getByText('Nenhum groomer atende este endereço.').waitFor({ timeout: 15000 })
     check('AC-01 serviço desativado some para o tutor', !(await tutor.locator('body').innerText()).includes('Groomer de Teste'))
-    await tutorContext.close()
+    await tutor.context().close()
 
-    const emptyContext = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: 'light', locale: 'pt-BR' })
-    const empty = await emptyContext.newPage()
+    const empty = await openPage(browser, { viewport: 'mobile' })
     await empty.route('**/api/v1/providers/menu**', route => {
       if (route.request().method() !== 'GET') return route.continue()
       return route.fulfill({
@@ -258,25 +232,17 @@ async function run() {
     await openServices(empty)
     await empty.getByText('Nenhum serviço', { exact: true }).waitFor({ timeout: 15000 })
     check('vazio', await empty.getByRole('button', { name: 'Adicionar serviço' }).count() > 0)
-    await emptyContext.close()
+    await empty.context().close()
   } finally {
     await browser.close()
   }
 }
 
+let browser
 run()
-  .catch(error => {
-    failures.push(error.message)
-    console.error(`fail ${error.message}`)
-  })
+  .catch(error => session.fail(error))
   .finally(async () => {
-    await restore().catch(error => {
-      failures.push(`restauração: ${error.message}`)
-      console.error(`fail restauração: ${error.message}`)
-    })
+    await restore().catch(error => session.fail(error))
     await pool.end()
-    if (failures.length) {
-      console.error(`${failures.length} falha(s)`)
-      process.exitCode = 1
-    }
+    await session.finish(browser)
   })

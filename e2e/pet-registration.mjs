@@ -1,19 +1,12 @@
-import { chromium } from 'playwright'
+import { appUrl as base, evidenceFile, launchBrowser, openPage, startRun } from './harness.mjs'
 
-const base = 'http://localhost:8081'
 const password = 'LocalTest#2026'
 const petName = `Nina ${Date.now()}`
-const failures = []
-
-function check(name, condition, detail = '') {
-  if (condition) {
-    console.log(`ok ${name}`)
-    return
-  }
-  const message = `${name}${detail ? ` — ${detail}` : ''}`
-  failures.push(message)
-  console.error(`fail ${message}`)
-}
+const session = startRun({
+  command: 'node e2e/pet-registration.mjs',
+  evidence: evidenceFile('004-pet-registration', 'pet-registration.log'),
+})
+const { check } = session
 
 async function textOf(page) {
   return page.locator('body').innerText()
@@ -64,12 +57,11 @@ async function petNameVisible(page, label) {
 }
 
 async function run() {
-  const browser = await chromium.launch()
+  const browser = await launchBrowser()
   const email = `pet-${Date.now()}@mygroomer.test`
   let blockPetList = true
 
-  const mobileLight = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: 'light', locale: 'pt-BR' })
-  const page = await mobileLight.newPage()
+  const page = await openPage(browser, { viewport: 'mobile' })
   await page.route('**/api/v1/pets', async (route) => {
     const method = route.request().method()
     if (method === 'GET' && blockPetList) {
@@ -122,8 +114,9 @@ async function run() {
 
   await page.getByRole('textbox', { name: 'Idade (anos)' }).fill('4')
   await page.getByRole('textbox', { name: 'Observações' }).fill('Medo de secador')
-  const busyWait = page.locator('[aria-busy="true"]').first().waitFor({ state: 'attached', timeout: 8000 }).then(() => true).catch(() => false)
-  await page.getByRole('button', { name: 'Salvar e continuar' }).click()
+  const save = page.getByRole('button', { name: 'Salvar e continuar' })
+  const busyWait = page.getByRole('button', { name: 'Salvar e continuar', disabled: true }).waitFor({ timeout: 8000 }).then(() => true).catch(() => false)
+  await save.click()
   const sawBusy = await busyWait
   check('AC-01 carregamento ao salvar', sawBusy)
   await page.getByText(petName, { exact: true }).waitFor({ timeout: 15000 })
@@ -144,40 +137,31 @@ async function run() {
   await page.getByRole('textbox', { name: 'Endereço do atendimento' }).fill('Avenida Paulista, São Paulo')
   await page.getByRole('button', { name: 'Buscar' }).click()
   await page.getByRole('button', { name: /Groomer de Teste/ }).click()
-  await page.getByRole('button', { name: 'Agendar este serviço' }).click()
-  await page.getByText('Agendar serviço', { exact: true }).waitFor()
+  await page.getByRole('radio', { name: /^Banho, A partir de/ }).click()
+  await page.getByRole('button', { name: 'Agendar serviço' }).click()
+  await page.getByText('Data e horário').waitFor({ timeout: 15000 })
   await page.getByRole('radio', { name: new RegExp(petName) }).click()
   body = await textOf(page)
   check(
     'AC-04 pet salvo selecionado sem novo cadastro',
     body.includes('Selecionado') && body.includes(petName) && body.includes('Agendar serviço') && !body.includes('Salvar e continuar'),
   )
-  await mobileLight.close()
+  await page.context().close()
 
-  const desktop = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: 'light', locale: 'pt-BR' })
-  const wide = await desktop.newPage()
+  const wide = await openPage(browser, { viewport: 'desktop' })
   await login(wide, email)
   await petNameVisible(wide, 'desktop claro')
-  await desktop.close()
+  await wide.context().close()
 
-  const mobileDark = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: 'dark', locale: 'pt-BR' })
-  const dark = await mobileDark.newPage()
+  const dark = await openPage(browser, { viewport: 'mobile', colorScheme: 'dark' })
   await login(dark, email)
   await petNameVisible(dark, 'celular escuro')
-  await mobileDark.close()
+  await dark.context().close()
 
-  await browser.close()
-  if (failures.length) {
-    console.error(`failed ${failures.length}`)
-    process.exitCode = 1
-  } else {
-    console.log('passed')
-  }
+  await session.finish(browser)
 }
 
 run().catch(async (error) => {
-  console.error(error)
-  process.exitCode = 1
-}).finally(() => {
-  process.exit(process.exitCode || 0)
+  session.fail(error)
+  await session.finish()
 })

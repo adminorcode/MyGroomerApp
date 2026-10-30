@@ -1,19 +1,12 @@
-import { chromium } from 'playwright'
+import { appUrl as base, evidenceFile, launchBrowser, openPage, startRun } from './harness.mjs'
 
-const base = 'http://localhost:8081'
 const password = 'LocalTest#2026'
 const nextPassword = 'LocalTest#2027'
-const failures = []
-
-function check(name, condition, detail = '') {
-  if (condition) {
-    console.log(`ok ${name}`)
-    return
-  }
-  const message = `${name}${detail ? ` — ${detail}` : ''}`
-  failures.push(message)
-  console.error(`fail ${message}`)
-}
+const session = startRun({
+  command: 'node e2e/tutor-access.mjs',
+  evidence: evidenceFile('003-tutor-access', 'tutor-access.log'),
+})
+const { check } = session
 
 async function textOf(page) {
   return page.locator('body').innerText()
@@ -33,11 +26,10 @@ async function welcomeVisible(page, label) {
 }
 
 async function run() {
-  const browser = await chromium.launch()
+  const browser = await launchBrowser()
   const email = `tutor-access-${Date.now()}@mygroomer.test`
 
-  const mobileLight = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: 'light', locale: 'pt-BR' })
-  const mobile = await mobileLight.newPage()
+  const mobile = await openPage(browser, { viewport: 'mobile' })
   await openWelcome(mobile)
   await welcomeVisible(mobile, 'celular claro')
   await mobile.getByRole('button', { name: 'Sou profissional' }).click()
@@ -53,16 +45,14 @@ async function run() {
   await mobile.getByText('O nome é obrigatório').waitFor()
   body = await textOf(mobile)
   check('AC-03 erro de campo e aceite', body.includes('O nome é obrigatório') && body.includes('Informe um e-mail válido') && body.includes('O telefone é obrigatório') && body.includes('A senha deve ter pelo menos 8 caracteres') && body.includes('Aceito os termos e a política de privacidade') && body.includes('Aceite os termos e a política de privacidade'))
-  await mobileLight.close()
+  await mobile.context().close()
 
-  const mobileDark = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: 'dark', locale: 'pt-BR' })
-  const dark = await mobileDark.newPage()
+  const dark = await openPage(browser, { viewport: 'mobile', colorScheme: 'dark' })
   await openWelcome(dark)
   await welcomeVisible(dark, 'celular escuro')
-  await mobileDark.close()
+  await dark.context().close()
 
-  const desktop = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: 'light', locale: 'pt-BR' })
-  const page = await desktop.newPage()
+  const page = await openPage(browser, { viewport: 'desktop' })
   await openWelcome(page)
   await welcomeVisible(page, 'desktop claro')
   await page.getByRole('button', { name: 'Sou tutor' }).click()
@@ -79,8 +69,9 @@ async function run() {
   await page.getByRole('textbox', { name: 'Telefone' }).fill('+5511987654321')
   await page.getByRole('textbox', { name: 'Senha' }).fill(password)
   await page.getByRole('checkbox', { name: 'Aceito os termos e a política de privacidade' }).click()
-  const busyWait = page.locator('[aria-busy="true"]').first().waitFor({ state: 'attached', timeout: 8000 }).then(() => true).catch(() => false)
-  await page.getByRole('button', { name: 'Criar conta' }).click()
+  const create = page.getByRole('button', { name: 'Criar conta' })
+  const busyWait = page.getByRole('button', { name: 'Criar conta', disabled: true }).waitFor({ timeout: 8000 }).then(() => true).catch(() => false)
+  await create.click()
   const sawBusy = await busyWait
   check('AC-02 carregamento do cadastro', sawBusy)
   const reachedLogin = await page.getByRole('button', { name: 'Entrar' }).waitFor({ timeout: 20000 }).then(() => true).catch(async () => {
@@ -119,15 +110,10 @@ async function run() {
   await page.getByText(/^Olá/).waitFor({ timeout: 20000 })
   check('AC-04 senha redefinida entra e a antiga é recusada', true)
 
-  await browser.close()
-  if (failures.length) {
-    console.error(`failed ${failures.length}`)
-    process.exit(1)
-  }
-  console.log('tutor-access passed')
+  await session.finish(browser)
 }
 
-run().catch((error) => {
-  console.error(error)
-  process.exit(1)
+run().catch(async (error) => {
+  session.fail(error)
+  await session.finish()
 })

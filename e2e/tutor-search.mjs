@@ -1,32 +1,18 @@
-import { chromium } from 'playwright'
+import {
+  checkContrast,
+  evidenceFile,
+  gateRoute,
+  launchBrowser,
+  loginTutor,
+  openPage,
+  startRun,
+} from './harness.mjs'
 
-const base = 'http://localhost:8081'
-const password = 'admin'
-const failures = []
-
-function check(name, condition, detail = '') {
-  if (condition) {
-    console.log(`ok ${name}`)
-    return
-  }
-  const message = `${name}${detail ? ` — ${detail}` : ''}`
-  failures.push(message)
-  console.error(`fail ${message}`)
-}
-
-async function textOf(page) {
-  return page.locator('body').innerText()
-}
-
-async function login(page) {
-  await page.goto(base, { waitUntil: 'domcontentloaded' })
-  await page.getByText('Sou tutor', { exact: true }).waitFor({ timeout: 90000 })
-  await page.getByRole('button', { name: 'Sou tutor' }).click()
-  await page.getByRole('textbox', { name: 'E-mail' }).fill('tutor@email.com')
-  await page.getByRole('textbox', { name: 'Senha' }).fill(password)
-  await page.getByRole('button', { name: 'Entrar' }).click()
-  await page.getByText(/^Olá/).waitFor({ timeout: 20000 })
-}
+const session = startRun({
+  command: 'node e2e/tutor-search.mjs',
+  evidence: evidenceFile('006-tutor-search', 'tutor-search.log'),
+})
+const { check } = session
 
 async function openSearch(page) {
   await page.getByRole('button', { name: 'Buscar um serviço' }).click()
@@ -46,55 +32,41 @@ async function searchAddress(page, address, serviceName) {
   await page.getByRole('button', { name: 'Buscar' }).click()
 }
 
-async function visibleAgainstBackground(page, text, label) {
-  const target = page.getByText(text, { exact: true }).first()
-  await target.waitFor()
-  const color = await target.evaluate((element) => getComputedStyle(element).color)
-  const background = await page.locator('body').evaluate((element) => getComputedStyle(element).backgroundColor)
-  check(label, color !== background && color !== 'rgba(0, 0, 0, 0)')
+async function cardLabel(page) {
+  const card = page.getByRole('button', { name: /Groomer de Teste/ })
+  await card.waitFor({ timeout: 15000 })
+  return card.evaluate((element) => element.getAttribute('aria-label') || element.textContent || '')
 }
 
-async function run() {
-  const browser = await chromium.launch()
-  let failCoverage = false
-  let delayCoverage = false
+async function run(browser) {
+  const gate = { fail: false, delayMs: 0 }
+  const page = await openPage(browser, { viewport: 'mobile' })
+  await gateRoute(page, '**/api/v1/providers/coverage**', gate)
 
-  const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: 'light', locale: 'pt-BR' })
-  const page = await mobile.newPage()
-  await page.route('**/api/v1/providers/coverage**', async (route) => {
-    if (failCoverage) {
-      await route.abort()
-      return
-    }
-    if (delayCoverage) await new Promise((resolve) => setTimeout(resolve, 1200))
-    await route.continue()
-  })
-
-  await login(page)
+  await loginTutor(page)
   await openSearch(page)
-  check('AC-01 busca da home abre a listagem', true)
+  check('AC-01 busca da home abre a listagem', await page.getByRole('button', { name: 'Buscar' }).count() > 0)
 
   await page.getByRole('button', { name: 'Buscar' }).click()
   await page.getByText('Endereço do atendimento obrigatório', { exact: true }).waitFor()
   await page.getByText('Selecione um serviço ou uma modalidade', { exact: true }).waitFor()
   check('AC-02 endereço e filtro são exigidos', true)
 
-  failCoverage = true
+  gate.fail = true
   await searchAddress(page, 'Avenida Paulista, São Paulo', 'Banho')
   await page.getByText('Não foi possível conectar à API. Verifique o servidor e tente novamente.').waitFor({ timeout: 15000 })
   check('AC-05 erro da busca', true)
-  failCoverage = false
+  gate.fail = false
   await page.getByRole('button', { name: 'Tentar novamente' }).click()
-  await page.getByText('Groomer de Teste', { exact: true }).waitFor({ timeout: 15000 })
+  await page.getByRole('button', { name: /Groomer de Teste/ }).waitFor({ timeout: 15000 })
 
-  delayCoverage = true
+  gate.delayMs = 1200
   await page.getByRole('radio', { name: 'Tosa', exact: true }).click()
   await page.getByText('Buscando groomers').waitFor({ timeout: 5000 })
   check('AC-05 carregando', true)
-  delayCoverage = false
-  await page.getByText('100,00').waitFor({ timeout: 15000 })
-  let body = await textOf(page)
-  check('AC-02 filtro de serviço muda o preço', body.includes('Tosa') && body.includes('100,00') && body.includes('5,0'))
+  gate.delayMs = 0
+  const tosaCard = await cardLabel(page)
+  check('AC-02 filtro de serviço muda o preço', tosaCard.includes('Tosa') && tosaCard.includes('100,00') && tosaCard.includes('5,0'), tosaCard)
 
   await page.getByRole('textbox', { name: 'Endereço do atendimento' }).fill('Jabaquara, São Paulo')
   if (await page.getByRole('radio', { name: 'Banho, selecionado' }).count() === 0) {
@@ -110,15 +82,13 @@ async function run() {
   check('AC-05 endereço desconhecido é erro', true)
 
   await searchAddress(page, 'Avenida Paulista, São Paulo', 'Banho')
-  await page.getByText('Groomer de Teste', { exact: true }).waitFor({ timeout: 15000 })
-  body = await textOf(page)
-  check('AC-04 card mostra avaliação e preço', body.includes('5,0') && body.includes('80,00') && body.includes('Banho'))
+  const banhoCard = await cardLabel(page)
+  check('AC-04 card mostra avaliação e preço', banhoCard.includes('5,0') && banhoCard.includes('80,00') && banhoCard.includes('Banho'), banhoCard)
   await page.getByRole('button', { name: /Groomer de Teste/ }).click()
-  await page.getByText('Regras de atendimento').waitFor({ timeout: 15000 })
-  body = await textOf(page)
+  await page.getByLabel('Profissional Groomer de Teste').waitFor({ timeout: 15000 })
   check(
     'AC-04 card abre o perfil',
-    body.includes('Groomer de Teste') && body.includes('Avaliação') && body.includes('80,00') && body.includes('Regras de atendimento'),
+    await page.getByText('Atendimento em domicílio. O tutor precisa estar presente durante o serviço.', { exact: true }).count() > 0,
   )
 
   await page.getByRole('button', { name: 'Voltar' }).click()
@@ -127,29 +97,25 @@ async function run() {
   await page.getByRole('button', { name: 'Banho', exact: true }).click()
   await page.getByText('Informe o endereço do atendimento para ver quem atende.').waitFor()
   await page.getByRole('radio', { name: 'Banho, selecionado' }).waitFor()
-  body = await textOf(page)
-  check('AC-03 categoria também passa pela cobertura', !body.includes('Groomer de Teste'))
+  check('AC-03 categoria também passa pela cobertura', await page.getByRole('button', { name: /Groomer de Teste/ }).count() === 0)
 
-  const desktop = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: 'light', locale: 'pt-BR' })
-  const wide = await desktop.newPage()
-  await login(wide)
+  const wide = await openPage(browser, { viewport: 'desktop' })
+  await loginTutor(wide)
   await openSearch(wide)
-  await visibleAgainstBackground(wide, 'Quem atende', 'AC-01 desktop claro')
+  await checkContrast(wide, wide.getByText('Quem atende', { exact: true }).first(), 'AC-01 desktop claro', check)
 
-  const darkContext = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: 'dark', locale: 'pt-BR' })
-  const dark = await darkContext.newPage()
-  await login(dark)
+  const dark = await openPage(browser, { viewport: 'mobile', colorScheme: 'dark' })
+  await loginTutor(dark)
   await openSearch(dark)
-  await visibleAgainstBackground(dark, 'Quem atende', 'AC-01 celular escuro')
-
-  await browser.close()
-  if (failures.length) {
-    console.error(failures.join('\n'))
-    process.exit(1)
-  }
+  await checkContrast(dark, dark.getByText('Quem atende', { exact: true }).first(), 'AC-01 celular escuro', check)
 }
 
-run().catch((error) => {
-  console.error(error)
-  process.exit(1)
-})
+let browser
+try {
+  browser = await launchBrowser()
+  await run(browser)
+} catch (error) {
+  session.fail(error)
+} finally {
+  await session.finish(browser)
+}

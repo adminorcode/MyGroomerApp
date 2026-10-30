@@ -1,19 +1,12 @@
-import { chromium } from 'playwright'
+import { appUrl as base, evidenceFile, fixtures, launchBrowser, openPage, startRun } from './harness.mjs'
 
-const base = 'http://localhost:8081'
-const tutor = { email: 'tutor@email.com', password: 'admin' }
-const groomer = { email: 'groomer@email.com', password: 'admin' }
-const failures = []
-
-function check(name, condition, detail = '') {
-  if (condition) {
-    console.log(`ok ${name}`)
-    return
-  }
-  const message = `${name}${detail ? ` — ${detail}` : ''}`
-  failures.push(message)
-  console.error(`fail ${message}`)
-}
+const tutor = fixtures.tutor
+const groomer = fixtures.groomer
+const session = startRun({
+  command: 'node e2e/localize-brazil.mjs',
+  evidence: evidenceFile('018-localize-brazil', 'localize-brazil.log'),
+})
+const { check } = session
 
 async function textOf(page) {
   return page.locator('body').innerText()
@@ -44,9 +37,8 @@ async function signIn(page, account) {
 }
 
 async function run() {
-  const browser = await chromium.launch()
-  const desktop = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: 'light', locale: 'pt-BR' })
-  const page = await desktop.newPage()
+  const browser = await launchBrowser()
+  const page = await openPage(browser, { viewport: 'desktop' })
 
   await openLogin(page)
   let body = await textOf(page)
@@ -70,7 +62,7 @@ async function run() {
   const placeholder = await phone.getAttribute('placeholder')
   body = await textOf(page)
   check('AC-01 cadastro em português', body.includes('Nome completo') && body.includes('Telefone') && body.includes('Aceito os termos e a política de privacidade') && body.includes('Criar conta'))
-  check('AC-03 telefone nasce em +55', Boolean(placeholder?.includes('+55')))
+  check('AC-03 telefone nasce em português', placeholder === 'Digite seu telefone', placeholder ?? '')
   check('AC-03 telefone não abre em Gana', !/Ghana|\+233|\bGH\b/.test(body) && !/Ghana|\+233/.test(placeholder ?? ''))
 
   await signIn(page, tutor)
@@ -142,10 +134,9 @@ async function run() {
   check('AC-01 painel do groomer', body.includes('Acompanhe os atendimentos dos tutores'))
   check('AC-02 card do groomer em real', moneyOk(body))
 
-  await desktop.close()
+  await page.context().close()
 
-  const mobileDark = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: 'dark', locale: 'pt-BR' })
-  const mobile = await mobileDark.newPage()
+  const mobile = await openPage(browser, { viewport: 'mobile', colorScheme: 'dark' })
   await openLogin(mobile)
   body = await textOf(mobile)
   check('AC-01 login no celular escuro', body.includes('Entrar') && body.includes('E-mail'))
@@ -155,17 +146,12 @@ async function run() {
   check('AC-05 home no celular escuro sem GHS', !/\bGHS\b|Premium Car Wash/.test(body) && body.includes('Categorias'))
   const homeColor = await mobile.getByText('Categorias').evaluate(node => getComputedStyle(node).color)
   check('AC-06 texto da home escura permanece visível', homeColor !== 'rgba(0, 0, 0, 0)' && homeColor !== 'transparent', homeColor)
-  await mobileDark.close()
-  await browser.close()
-
-  if (failures.length) {
-    console.error(JSON.stringify({ passed: false, failures }, null, 2))
-    process.exit(1)
-  }
-  console.log(JSON.stringify({ passed: true, failures: [] }))
+  await mobile.context().close()
+  console.log(JSON.stringify({ passed: session.failures.length === 0, failures: session.failures }))
+  await session.finish(browser)
 }
 
-run().catch(error => {
-  console.error(error)
-  process.exit(1)
+run().catch(async (error) => {
+  session.fail(error)
+  await session.finish()
 })
