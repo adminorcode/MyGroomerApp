@@ -83,8 +83,10 @@ async function restore() {
 
 async function openServices(page) {
   const tab = page.getByRole('tab', { name: 'Serviços' })
+  const button = page.getByRole('button', { name: 'Serviços', exact: true })
+  await tab.or(button).first().waitFor({ timeout: 20000 })
   if (await tab.count()) await tab.click()
-  else await page.getByRole('button', { name: 'Serviços', exact: true }).click()
+  else await button.click()
 }
 
 async function visibleAgainstBackground(page, text, label) {

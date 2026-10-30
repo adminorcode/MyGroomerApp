@@ -15,10 +15,6 @@ type RegistrationProps = {
   navigation: StackNavigationProp<ProviderServicesStackParamList, 'ProfessionalRegistration'>
 }
 
-type LocationProps = {
-  navigation: StackNavigationProp<ProviderServicesStackParamList, 'ServiceLocation'>
-}
-
 export function ProfessionalRegistrationStepScreen({ navigation }: RegistrationProps) {
   const { spacing } = useMGTheme()
   return (
@@ -31,24 +27,6 @@ export function ProfessionalRegistrationStepScreen({ navigation }: RegistrationP
         <MGText variant="heading2">Cadastro profissional</MGText>
         <MGText variant="body" color="secondary">
           Os dados da conta e os tipos de atuação ficam neste passo.
-        </MGText>
-      </View>
-    </MGScreen>
-  )
-}
-
-export function ServiceLocationStepScreen({ navigation }: LocationProps) {
-  const { spacing } = useMGTheme()
-  return (
-    <MGScreen
-      safeArea={false}
-      footer={<MGButton label="Voltar" variant="secondary" onPress={() => navigation.goBack()} />}
-    >
-      <View style={{ gap: spacing.lg, paddingTop: spacing.md }}>
-        <OnboardingStepper steps={steps} currentStepId="location" />
-        <MGText variant="heading2">Local de atendimento</MGText>
-        <MGText variant="body" color="secondary">
-          O endereço-base, o raio e a taxa de deslocamento ficam neste passo.
         </MGText>
       </View>
     </MGScreen>

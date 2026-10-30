@@ -101,10 +101,6 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
                     error={formError.address}
                     autoCapitalize="words"
                 />
-                <Text style={[styles.hint, { color: colors.textSecondary }]}>
-                    Neste ambiente, a busca reconhece Avenida Paulista, Jabaquara e Copacabana.
-                </Text>
-
                 <Text style={[styles.groupLabel, { color: colors.text }]}>Modalidade</Text>
                 <OptionRow
                     label="Modalidade"
@@ -234,12 +230,6 @@ function OptionRow({ label, options, selectedId, onSelect }: {
 const styles = StyleSheet.create({
     scroll: {
         paddingBottom: spacing.xl,
-    },
-    hint: {
-        fontFamily: fonts.regular,
-        fontSize: typography.sizes.sm,
-        marginTop: -spacing.sm,
-        marginBottom: spacing.md,
     },
     groupLabel: {
         fontFamily: fonts.semibold,

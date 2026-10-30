@@ -1,8 +1,9 @@
-import { createProviderService, deleteProviderService, getProviderEarnings, getProviderMenu, getProviderServiceById, getProviderServices, getPublicProfile, getServiceProviders, registerAsProvider, saveProviderMenu, searchCoverage, updateProviderService } from "../services/provider.service"
+import { createProviderService, deleteProviderService, getProviderEarnings, getProviderMenu, getProviderServiceById, getProviderServices, getPublicProfile, getServiceLocation, getServiceProviders, previewServiceLocation, registerAsProvider, saveProviderMenu, saveServiceLocation, searchCoverage, updateProviderService } from "../services/provider.service"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAuthStore } from "../store/authStore"
 import { CreateProvider, ProviderServiceDetailed, CoverageProvider, CoverageSearchParams, PublicProfile } from "../types/provider.types"
 import { ServiceMenu } from "../screens/provider/serviceMenuModel"
+import { LocatedPoint, ServiceLocation } from "../screens/provider/serviceLocationModel"
 import { ProviderEarnings } from "../types/transaction.types"
 import { parseJwtPayload } from "../utils/jwt"
 
@@ -22,6 +23,37 @@ export const useSaveProviderMenu = () => {
             queryClient.invalidateQueries({ queryKey: ['provider-menu'] })
             queryClient.invalidateQueries({ queryKey: ['coverage'] })
             queryClient.invalidateQueries({ queryKey: ['service-providers'] })
+        },
+    })
+}
+
+export const useGetServiceLocation = () => {
+    return useQuery({
+        queryKey: ['service-location'],
+        queryFn: getServiceLocation,
+        retry: false,
+        select: (data) => data.data as ServiceLocation,
+    })
+}
+
+export const usePreviewServiceLocation = (address: string, postalCode: string, enabled: boolean) => {
+    return useQuery({
+        queryKey: ['service-location-preview', address, postalCode],
+        queryFn: () => previewServiceLocation(address, postalCode),
+        enabled,
+        retry: false,
+        refetchOnWindowFocus: false,
+        select: (data) => data.data as LocatedPoint,
+    })
+}
+
+export const useSaveServiceLocation = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: saveServiceLocation,
+        onSuccess: (response) => {
+            queryClient.setQueryData(['service-location'], response)
+            queryClient.invalidateQueries({ queryKey: ['coverage'] })
         },
     })
 }
