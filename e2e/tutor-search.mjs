@@ -1,7 +1,7 @@
 import { chromium } from 'playwright'
 
 const base = 'http://localhost:8081'
-const password = 'LocalTest#2026'
+const password = 'admin'
 const failures = []
 
 function check(name, condition, detail = '') {
@@ -22,7 +22,7 @@ async function login(page) {
   await page.goto(base, { waitUntil: 'domcontentloaded' })
   await page.getByText('Sou tutor', { exact: true }).waitFor({ timeout: 90000 })
   await page.getByRole('button', { name: 'Sou tutor' }).click()
-  await page.getByRole('textbox', { name: 'E-mail' }).fill('tutor@mygroomer.test')
+  await page.getByRole('textbox', { name: 'E-mail' }).fill('tutor@email.com')
   await page.getByRole('textbox', { name: 'Senha' }).fill(password)
   await page.getByRole('button', { name: 'Entrar' }).click()
   await page.getByText(/^Olá/).waitFor({ timeout: 20000 })

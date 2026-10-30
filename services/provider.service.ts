@@ -71,3 +71,13 @@ export const searchCoverage = async (params: CoverageSearchParams) => {
     })
     return response.data
 }
+
+export const getProviderMenu = async () => {
+    const response = await api.get('/providers/menu')
+    return response.data
+}
+
+export const saveProviderMenu = async (offers: unknown[]) => {
+    const response = await api.put('/providers/menu', { offers })
+    return response.data
+}

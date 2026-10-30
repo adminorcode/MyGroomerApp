@@ -70,7 +70,8 @@ export type ProviderBookingsStackParamList = {
 }
 
 export type ProviderServicesStackParamList = {
-    MyServices: undefined
-    AddService: undefined
-    EditService: { providerServiceId: string, serviceName?: string, price?: number }
+    ProfessionalRegistration: undefined
+    ServiceMenu: undefined
+    ServiceLocation: undefined
+    ServiceOfferEditor: { draftKey: string }
 }

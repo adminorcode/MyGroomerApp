@@ -15,7 +15,10 @@ type Props = {
   name: string
   active?: boolean
   durationLabel?: string
+  typeLabel?: string
   prices?: ServicePriceBySize
+  editLabel?: string
+  toggleLabel?: string
   onEdit?: () => void
   onToggleActive?: () => void
 }
@@ -24,7 +27,10 @@ export default function ServiceEditorCard({
   name,
   active = true,
   durationLabel,
+  typeLabel,
   prices,
+  editLabel,
+  toggleLabel,
   onEdit,
   onToggleActive,
 }: Props) {
@@ -45,6 +51,11 @@ export default function ServiceEditorCard({
         </MGText>
         <MGBadge label={active ? 'Ativo' : 'Inativo'} tone={active ? 'success' : 'neutral'} />
       </View>
+      {typeLabel ? (
+        <MGText variant="bodySmall" color="secondary">
+          {`Tipo: ${typeLabel}`}
+        </MGText>
+      ) : null}
       {durationLabel ? (
         <MGText variant="bodySmall" color="secondary">
           Duração: {durationLabel}
@@ -59,7 +70,7 @@ export default function ServiceEditorCard({
         {onToggleActive ? (
           <View style={styles.action}>
             <MGButton
-              label={active ? 'Desativar' : 'Ativar'}
+              label={toggleLabel ?? (active ? 'Desativar' : 'Ativar')}
               variant="secondary"
               onPress={onToggleActive}
             />
@@ -67,7 +78,7 @@ export default function ServiceEditorCard({
         ) : null}
         {onEdit ? (
           <View style={styles.action}>
-            <MGButton label="Editar" onPress={onEdit} />
+            <MGButton label={editLabel ?? 'Editar'} onPress={onEdit} />
           </View>
         ) : null}
       </View>
