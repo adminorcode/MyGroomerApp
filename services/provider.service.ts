@@ -86,3 +86,54 @@ export const saveProviderMenu = async (offers: unknown[]) => {
     const response = await api.put('/providers/menu', { offers })
     return response.data
 }
+
+export const getServiceLocation = async () => {
+    const response = await api.get('/providers/service-location')
+    return response.data
+}
+
+export const getMapTiles = async () => {
+    const response = await api.get('/providers/service-location/map-tiles')
+    return response.data as { data: { url: string } }
+}
+
+export type AddressSuggestion = {
+    label: string
+    address: string
+    postal_code: string | null
+    latitude: number
+    longitude: number
+}
+
+export const autocompleteServiceLocation = async (text: string) => {
+    const response = await api.get('/providers/service-location/autocomplete', { params: { text } })
+    return response.data as { data: AddressSuggestion[] }
+}
+
+export const lookupServicePostalCode = async (postalCode: string) => {
+    const response = await api.get('/providers/service-location/postal-code', {
+        params: { postal_code: postalCode },
+    })
+    return response.data as { data: { postal_code: string, address: string } }
+}
+
+export const previewServiceLocation = async (address: string, postalCode: string) => {
+    const response = await api.get('/providers/service-location/preview', {
+        params: { address, postal_code: postalCode },
+    })
+    return response.data
+}
+
+export const saveServiceLocation = async (location: {
+    address: string
+    postal_code: string | null
+    complement: string | null
+    radius_km: number
+    travel_fee_mode: string
+    travel_fee_per_km: number | null
+    latitude?: number
+    longitude?: number
+}) => {
+    const response = await api.put('/providers/service-location', location)
+    return response.data
+}

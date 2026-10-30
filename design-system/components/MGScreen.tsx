@@ -40,8 +40,9 @@ export default function MGScreen({
     </View>
   ) : scrollable ? (
     <ScrollView
+      style={{ flex: 1 }}
       contentContainerStyle={[
-        { paddingHorizontal: spacing.base, paddingBottom: spacing.xl, flexGrow: 1 },
+        { paddingHorizontal: spacing.base, paddingBottom: footer ? spacing.xl + spacing.lg : spacing.xl, flexGrow: 1 },
         contentStyle,
       ]}
       keyboardShouldPersistTaps="handled"

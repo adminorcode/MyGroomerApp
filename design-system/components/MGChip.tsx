@@ -4,6 +4,7 @@ import { useMGTheme } from '../theme/useMGTheme'
 
 type Props = {
   label: string
+  accessibilityLabel?: string
   selected?: boolean
   disabled?: boolean
   onPress?: () => void
@@ -12,10 +13,10 @@ type Props = {
 
 export default function MGChip({
   label,
+  accessibilityLabel,
   selected = false,
   disabled = false,
   onPress,
-  variant = 'filter',
 }: Props) {
   const { colors, spacing, radius } = useMGTheme()
 
@@ -40,6 +41,7 @@ export default function MGChip({
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ selected, disabled }}
       disabled={disabled || !onPress}
       onPress={onPress}
@@ -56,7 +58,6 @@ export default function MGChip({
             borderColor,
             opacity: pressed && !disabled ? 0.9 : 1,
           },
-          variant === 'choice' && selected && { backgroundColor: colors.brand.pinkLight },
         ] as ViewStyle[]
       }
     >
