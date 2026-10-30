@@ -1,8 +1,8 @@
 import { chromium } from 'playwright'
 
 const base = 'http://localhost:8081'
-const tutor = { email: 'tutor@mygroomer.test', password: 'LocalTest#2026' }
-const groomer = { email: 'groomer@mygroomer.test', password: 'LocalTest#2026' }
+const tutor = { email: 'tutor@email.com', password: 'admin' }
+const groomer = { email: 'groomer@email.com', password: 'admin' }
 const failures = []
 
 function check(name, condition, detail = '') {
@@ -58,7 +58,7 @@ async function run() {
   body = await textOf(page)
   check('AC-01 validação do login', body.includes('Informe um e-mail válido') && body.includes('A senha é obrigatória'))
 
-  await page.getByRole('textbox', { name: 'E-mail' }).fill('tutor@mygroomer.test')
+  await page.getByRole('textbox', { name: 'E-mail' }).fill('tutor@email.com')
   await page.getByRole('textbox', { name: 'Senha' }).fill('senha-errada')
   await page.getByText('Entrar', { exact: true }).click()
   await page.getByText('E-mail ou senha inválidos').waitFor({ timeout: 15000 })

@@ -10,7 +10,7 @@ Copy-Item .env.example .env
 npm run web -- --localhost --port 8081
 ```
 
-Abra `http://localhost:8081`. A configuração de exemplo aponta REST e Socket.io para esta máquina. Contas fictícias: `tutor@mygroomer.test` e `groomer@mygroomer.test`, ambas com senha `LocalTest#2026`.
+Abra `http://localhost:8081`. A configuração de exemplo aponta REST e Socket.io para esta máquina. Contas fictícias: `tutor@email.com` e `groomer@email.com`, ambas com senha `admin`.
 
 O aviso de teste é exibido a partir da configuração da API. Nesse modo, reservas não abrem checkout, cadastro dispensa e-mail real e Google fica oculto. Use apenas dados fictícios. Os valores/telas legados do Boame ainda não representam políticas financeiras do MyGroomer.
 

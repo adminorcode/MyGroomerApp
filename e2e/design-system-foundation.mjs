@@ -1,8 +1,8 @@
 import { chromium } from 'playwright'
 
 const base = 'http://localhost:8081'
-const tutor = { email: 'tutor@mygroomer.test', password: 'LocalTest#2026' }
-const groomer = { email: 'groomer@mygroomer.test', password: 'LocalTest#2026' }
+const tutor = { email: 'tutor@email.com', password: 'admin' }
+const groomer = { email: 'groomer@email.com', password: 'admin' }
 const failures = []
 
 function check(name, condition, detail = '') {
