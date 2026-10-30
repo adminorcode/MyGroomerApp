@@ -62,6 +62,23 @@ export type CoverageSearchParams = {
     category_id?: string
 }
 
+export type PublicProfileService = {
+    id: string
+    name: string
+    price: number | string
+}
+
+export type PublicProfile = {
+    provider_id: string
+    name: string
+    photo_url?: string | null
+    is_verified?: boolean
+    average_rating?: number | string
+    review_count?: number
+    attendance_rules?: string | null
+    services: PublicProfileService[]
+}
+
 export type CoverageProvider = {
     id: string
     provider_id: string

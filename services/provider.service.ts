@@ -19,6 +19,11 @@ export const getProviderServiceById = async (providerServiceId: string) => {
     return response.data
 }
 
+export const getPublicProfile = async (providerServiceId: string) => {
+    const response = await api.get(`/providers/${providerServiceId}/profile`)
+    return response.data
+}
+
 export const getProviderServices = async (page?: number, limit?: number) => {
     const response = await api.get(`/providers`,
         {

@@ -1,7 +1,7 @@
-import { createProviderService, deleteProviderService, getProviderEarnings, getProviderMenu, getProviderServiceById, getProviderServices, getServiceProviders, registerAsProvider, saveProviderMenu, searchCoverage, updateProviderService } from "../services/provider.service"
+import { createProviderService, deleteProviderService, getProviderEarnings, getProviderMenu, getProviderServiceById, getProviderServices, getPublicProfile, getServiceProviders, registerAsProvider, saveProviderMenu, searchCoverage, updateProviderService } from "../services/provider.service"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAuthStore } from "../store/authStore"
-import { CreateProvider, ProviderServiceDetailed, CoverageProvider, CoverageSearchParams } from "../types/provider.types"
+import { CreateProvider, ProviderServiceDetailed, CoverageProvider, CoverageSearchParams, PublicProfile } from "../types/provider.types"
 import { ServiceMenu } from "../screens/provider/serviceMenuModel"
 import { ProviderEarnings } from "../types/transaction.types"
 import { parseJwtPayload } from "../utils/jwt"
@@ -39,6 +39,14 @@ export const useGetServiceProviders = (serviceId: string, page?: number, limit?:
         queryKey: ['service-providers', serviceId, page, limit],
         queryFn: ()=> getServiceProviders(serviceId, page, limit),
         select: (data) => data.data
+    })
+}
+
+export const useGetPublicProfile = (providerServiceId: string) => {
+    return useQuery({
+        queryKey: ['public-profile', providerServiceId],
+        queryFn: () => getPublicProfile(providerServiceId),
+        select: (data) => data.data as PublicProfile,
     })
 }
 

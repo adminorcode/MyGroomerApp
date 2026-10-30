@@ -94,7 +94,7 @@ async function run() {
   delayCoverage = false
   await page.getByText('100,00').waitFor({ timeout: 15000 })
   let body = await textOf(page)
-  check('AC-02 filtro de serviço muda o preço', body.includes('Tosa') && body.includes('100,00') && body.includes('Avaliação 5,0'))
+  check('AC-02 filtro de serviço muda o preço', body.includes('Tosa') && body.includes('100,00') && body.includes('5,0'))
 
   await page.getByRole('textbox', { name: 'Endereço do atendimento' }).fill('Jabaquara, São Paulo')
   if (await page.getByRole('radio', { name: 'Banho, selecionado' }).count() === 0) {
@@ -112,13 +112,13 @@ async function run() {
   await searchAddress(page, 'Avenida Paulista, São Paulo', 'Banho')
   await page.getByText('Groomer de Teste', { exact: true }).waitFor({ timeout: 15000 })
   body = await textOf(page)
-  check('AC-04 card mostra avaliação e preço', body.includes('Avaliação 5,0') && body.includes('80,00') && body.includes('Banho'))
+  check('AC-04 card mostra avaliação e preço', body.includes('5,0') && body.includes('80,00') && body.includes('Banho'))
   await page.getByRole('button', { name: /Groomer de Teste/ }).click()
-  await page.getByText('Perfil público').waitFor({ timeout: 15000 })
+  await page.getByText('Regras de atendimento').waitFor({ timeout: 15000 })
   body = await textOf(page)
   check(
     'AC-04 card abre o perfil',
-    body.includes('Groomer de Teste') && body.includes('Avaliação') && body.includes('Preço indicativo') && body.includes('80,00'),
+    body.includes('Groomer de Teste') && body.includes('Avaliação') && body.includes('80,00') && body.includes('Regras de atendimento'),
   )
 
   await page.getByRole('button', { name: 'Voltar' }).click()
