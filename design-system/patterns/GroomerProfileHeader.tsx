@@ -24,7 +24,7 @@ export default function GroomerProfileHeader({
   const { spacing } = useMGTheme()
 
   return (
-    <View style={[styles.wrap, { gap: spacing.md }]}>
+    <View accessibilityLabel={`Profissional ${name}`} style={[styles.wrap, { gap: spacing.md }]}>
       <View style={[styles.row, { gap: spacing.md }]}>
         <MGAvatar name={name} uri={photoUrl} kind="person" size={72} />
         <View style={styles.meta}>

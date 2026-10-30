@@ -31,7 +31,7 @@ export default function BookingSummary({
       <MGText variant="heading3">{title}</MGText>
       <View style={{ marginTop: spacing.md, gap: spacing.sm }}>
         {rows.map((row) => (
-          <View key={`${row.label}-${row.value}`} style={styles.row}>
+          <View key={`${row.label}-${row.value}`} accessibilityLabel={`${row.label}: ${row.value}`} style={styles.row}>
             <MGText variant="bodySmall" color="secondary" style={styles.label}>
               {row.label}
             </MGText>

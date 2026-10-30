@@ -1,19 +1,12 @@
-import { chromium } from 'playwright'
+import { appUrl as base, evidenceFile, fixtures, launchBrowser, openPage, startRun } from './harness.mjs'
 
-const base = 'http://localhost:8081'
-const tutor = { email: 'tutor@email.com', password: 'admin' }
-const groomer = { email: 'groomer@email.com', password: 'admin' }
-const failures = []
-
-function check(name, condition, detail = '') {
-  if (condition) {
-    console.log(`ok ${name}`)
-    return
-  }
-  const message = `${name}${detail ? ` — ${detail}` : ''}`
-  failures.push(message)
-  console.error(`fail ${message}`)
-}
+const tutor = fixtures.tutor
+const groomer = fixtures.groomer
+const session = startRun({
+  command: 'node e2e/design-system-foundation.mjs',
+  evidence: evidenceFile('021-design-system-foundation', 'design-system-foundation.log'),
+})
+const { check } = session
 
 async function textOf(page) {
   return page.locator('body').innerText()
@@ -51,12 +44,8 @@ function usesFace(family, face) {
 }
 
 async function runTutor(browser) {
-  const context = await browser.newContext({
-    viewport: { width: 390, height: 844 },
-    colorScheme: 'light',
-    locale: 'pt-BR',
-  })
-  const page = await context.newPage()
+  const page = await openPage(browser, { viewport: 'mobile' })
+
 
   await openWelcome(page)
   let body = await textOf(page)
@@ -240,16 +229,11 @@ async function runTutor(browser) {
     check('AC-12 atalho Meus pets', false, 'botão Meus pets não visível no perfil')
   }
 
-  await context.close()
+  await page.context().close()
 }
 
 async function runGroomer(browser) {
-  const context = await browser.newContext({
-    viewport: { width: 390, height: 844 },
-    colorScheme: 'light',
-    locale: 'pt-BR',
-  })
-  const page = await context.newPage()
+  const page = await openPage(browser, { viewport: 'mobile' })
 
   await openWelcome(page)
   await page.getByRole('button', { name: 'Sou tutor' }).click()
@@ -277,16 +261,11 @@ async function runGroomer(browser) {
     check('AC-13 aba Serviços do groomer', false, 'aba não encontrada')
   }
 
-  await context.close()
+  await page.context().close()
 }
 
 async function runLightOnlyGuard(browser) {
-  const context = await browser.newContext({
-    viewport: { width: 390, height: 844 },
-    colorScheme: 'dark',
-    locale: 'pt-BR',
-  })
-  const page = await context.newPage()
+  const page = await openPage(browser, { viewport: 'mobile', colorScheme: 'dark' })
   await openWelcome(page)
   const background = await page.getByText('MyGroomer').evaluate((el) => {
     let node = el
@@ -302,22 +281,21 @@ async function runLightOnlyGuard(browser) {
   const [r, g, b] = match ? [Number(match[1]), Number(match[2]), Number(match[3])] : [0, 0, 0]
   const isLight = r > 200 && g > 200 && b > 200
   check('tema claro mesmo com colorScheme dark do SO', isLight, background)
-  await context.close()
+  await page.context().close()
 }
 
 async function run() {
-  const browser = await chromium.launch()
+  const browser = await launchBrowser()
   await runLightOnlyGuard(browser)
   await runTutor(browser)
   await runGroomer(browser)
-  await browser.close()
 
-  const summary = { passed: failures.length === 0, failures }
+  const summary = { passed: session.failures.length === 0, failures: session.failures }
   console.log(JSON.stringify(summary))
-  if (failures.length) process.exit(1)
+  await session.finish(browser)
 }
 
-run().catch((error) => {
-  console.error(error)
-  process.exit(1)
+run().catch(async (error) => {
+  session.fail(error)
+  await session.finish()
 })
