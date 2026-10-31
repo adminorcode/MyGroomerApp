@@ -23,8 +23,6 @@ function dateOk(value) {
 
 async function openLogin(page) {
   await page.goto(base, { waitUntil: 'domcontentloaded' })
-  await page.getByText('Sou tutor', { exact: true }).waitFor({ timeout: 90000 })
-  await page.getByText('Sou tutor', { exact: true }).click()
   await page.getByText('Entrar', { exact: true }).waitFor({ timeout: 20000 })
 }
 
@@ -57,6 +55,7 @@ async function run() {
   check('AC-01 erro de API no login', true)
 
   await page.getByText('Não tem uma conta? Cadastre-se').click()
+  await page.getByRole('button', { name: 'Sou tutor' }).click()
   await page.getByRole('button', { name: 'Criar conta' }).waitFor()
   const phone = page.getByRole('textbox', { name: 'Telefone' })
   const placeholder = await phone.getAttribute('placeholder')
@@ -118,7 +117,7 @@ async function run() {
   })
   await page.getByLabel('Abrir perfil').click()
   await page.getByText('Sair', { exact: true }).click()
-  await page.getByText('Sou tutor', { exact: true }).waitFor({ timeout: 15000 })
+  await page.getByRole('button', { name: 'Entrar', exact: true }).waitFor({ timeout: 15000 })
 
   await signIn(page, groomer)
   await page.getByText('Rendimentos', { exact: true }).click()

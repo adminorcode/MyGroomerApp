@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { AuthStore } from '../types/auth.types'
 import { useUnreadStore } from './unreadStore'
+import { useRegistrationNavigation } from './registrationNavigation'
 
 
 
@@ -19,6 +20,7 @@ export const useAuthStore: UseBoundStore<StoreApi<AuthStore>> = create<AuthStore
             user: null,
             setAuth: (token, user) => set({token, user}),
             logout: () => {
+                useRegistrationNavigation.getState().setUserId(null)
                 useUnreadStore.setState({ hasUnreadMessages: false, activeConversationId: null })
                 set({token: null, user: null})
             }

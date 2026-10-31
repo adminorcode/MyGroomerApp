@@ -12,17 +12,30 @@ import ProviderServicesStackNavigator from './ProviderServicesStackNavigator'
 import MessagesStackNavigator from './MessagesStackNavigator'
 import MessageTabIcon from '../components/shared/MessageTabIcon'
 import AppHeader from '../components/shared/AppHeader'
+import { useState } from 'react'
+import { useRegistrationNavigation } from '../store/registrationNavigation'
+import { useAuthStore } from '../store/authStore'
 
 const Tab = createBottomTabNavigator<ProviderTabParamList>()
 
 export default function ProviderNavigator() {
     const { colors } = useTheme()
+    const [initialRoute] = useState<keyof ProviderTabParamList>(() => useRegistrationNavigation.getState().userId === useAuthStore.getState().user?.id ? 'ServicesTab' : 'BookingsTab')
 
     return (
         <Tab.Navigator
+            initialRouteName={initialRoute}
+            screenListeners={({ route }) => ({
+                tabPress: () => {
+                    if (route.name !== 'ServicesTab') useRegistrationNavigation.getState().setUserId(null)
+                },
+            })}
             layout={({ children, navigation }) => (
                 <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top']}>
-                    <AppHeader onProfilePress={() => navigation.navigate('ProfileTab')} />
+                    <AppHeader onProfilePress={() => {
+                        useRegistrationNavigation.getState().setUserId(null)
+                        navigation.navigate('ProfileTab')
+                    }} />
                     <View style={styles.tabs}>{children}</View>
                 </SafeAreaView>
             )}

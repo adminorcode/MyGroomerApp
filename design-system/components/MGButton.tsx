@@ -107,7 +107,7 @@ export default function MGButton({
         ) : (
           <View style={styles.row}>
             {iconLeft}
-            <MGText variant="button" style={{ color: contentColor(pressed) }}>
+            <MGText variant="button" style={{ color: contentColor(pressed), flexShrink: 1, textAlign: 'center' }}>
               {label}
             </MGText>
             {iconRight}
@@ -131,5 +131,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     columnGap: 8,
+    maxWidth: '100%',
+    flexShrink: 1,
   },
 })

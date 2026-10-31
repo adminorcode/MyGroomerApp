@@ -11,6 +11,7 @@ import {
 type DraftContextValue = {
   state: DraftState | null
   load: (menu: ServiceMenu) => void
+  refreshTypes: (types: ServiceMenu['types']) => void
   updateOffer: (key: string, patch: Partial<DraftOffer>) => void
   toggleOffer: (key: string) => void
   removeOffer: (key: string) => void
@@ -25,6 +26,10 @@ export function ServiceMenuDraftProvider({ children }: { children: ReactNode }) 
 
   const load = useCallback((menu: ServiceMenu) => {
     setState(toDraftState(menu))
+  }, [])
+
+  const refreshTypes = useCallback((types: ServiceMenu['types']) => {
+    setState(current => current ? { ...current, types } : current)
   }, [])
 
   const updateOffer = useCallback((key: string, patch: Partial<DraftOffer>) => {
@@ -101,12 +106,13 @@ export function ServiceMenuDraftProvider({ children }: { children: ReactNode }) 
   const value = useMemo(() => ({
     state,
     load,
+    refreshTypes,
     updateOffer,
     toggleOffer,
     removeOffer,
     includeSuggestion,
     addCustom,
-  }), [state, load, updateOffer, toggleOffer, removeOffer, includeSuggestion, addCustom])
+  }), [state, load, refreshTypes, updateOffer, toggleOffer, removeOffer, includeSuggestion, addCustom])
 
   return <DraftContext.Provider value={value}>{children}</DraftContext.Provider>
 }

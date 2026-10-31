@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native'
+import { StyleSheet, View, useWindowDimensions } from 'react-native'
 import MGButton from '../components/MGButton'
 import MGText from '../components/MGText'
 import { useMGTheme } from '../theme/useMGTheme'
@@ -21,6 +21,7 @@ export default function ProfileRoleSelector({
   groomerLabel = 'Sou profissional',
 }: Props) {
   const { colors, spacing, fonts, textStyles } = useMGTheme()
+  const { width } = useWindowDimensions()
 
   return (
     <View style={[styles.wrap, { gap: spacing.md }]}>
@@ -29,7 +30,7 @@ export default function ProfileRoleSelector({
         style={{
           color: colors.brand.pink,
           fontFamily: fonts.logo,
-          fontSize: textStyles.display.fontSize,
+          fontSize: width < 360 ? textStyles.heading1.fontSize : textStyles.display.fontSize,
           textAlign: 'center',
         }}
       >

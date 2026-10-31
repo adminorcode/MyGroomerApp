@@ -16,6 +16,7 @@ import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view'
 import { useTheme } from "../../context/ThemeContext";
 import { useRuntime } from '../../context/RuntimeContext'
 import { getErrorMessage } from '../../utils/error'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>
 
@@ -40,6 +41,7 @@ export default function LoginScreen({navigation}: Props) {
     }
 
     return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
         <KeyboardAwareScrollView 
             contentContainerStyle={[styles.container, { backgroundColor: colors.background }]}
             keyboardShouldPersistTaps="handled"
@@ -47,7 +49,7 @@ export default function LoginScreen({navigation}: Props) {
             enableOnAndroid={true}
         >
             <View style={styles.content}>
-            <MGText variant="heading1" color="brand" style={[styles.title, { fontFamily: fonts.logo }]}>
+            <MGText variant="heading1" color="brand" style={styles.title}>
                 Acesse sua conta
             </MGText>
             <View style={styles.form}>
@@ -89,16 +91,18 @@ export default function LoginScreen({navigation}: Props) {
                         />
                     )}
                 />
-                <MGText
-                    color="brand"
+                <MGButton
+                    label="Esqueci minha senha"
+                    variant="tertiary"
+                    fullWidth={false}
+                    disabled={isPending || isGooglePending}
                     style={styles.forgotLink}
                     onPress={() => navigation.navigate("ForgotPassword")}
-                >
-                    Esqueci minha senha
-                </MGText>
+                />
                 <MGButton
                     label="Entrar"
                     loading={isPending}
+                    disabled={isGooglePending}
                     onPress={handleSubmit(handleLogin)}
                 />
                 {error && (
@@ -118,15 +122,16 @@ export default function LoginScreen({navigation}: Props) {
                     </MGText>
                 )}
             </View>
-            <MGText
-                color="brand"
+            <MGButton
+                label="Não tem uma conta? Cadastre-se"
+                variant="tertiary"
                 style={styles.registerLink}
-                onPress={() => navigation.navigate("TutorRegister")}
-            >
-                Não tem uma conta? Cadastre-se
-            </MGText>
+                disabled={isPending || isGooglePending}
+                onPress={() => navigation.navigate("Welcome")}
+            />
             </View>
         </KeyboardAwareScrollView>
+        </SafeAreaView>
     )
 }
 
@@ -158,8 +163,9 @@ const styles = StyleSheet.create({
     },
     forgotLink: {
         marginBottom: spacing.sm,
+        alignSelf: 'flex-start',
     },
     registerLink: {
-        marginTop: 24,
+        marginTop: spacing.xl,
     },
 });
