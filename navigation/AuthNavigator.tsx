@@ -12,7 +12,7 @@ const Stack = createStackNavigator<AuthStackParamList>()
 
 export default function AuthNavigator() {
     return (
-        <Stack.Navigator screenOptions={{headerShown: false}} initialRouteName="Welcome">
+        <Stack.Navigator screenOptions={{headerShown: false}} initialRouteName="Login">
             <Stack.Screen name="Welcome" component={WelcomeScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="TutorRegister" component={TutorRegisterScreen} />

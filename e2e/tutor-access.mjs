@@ -1,4 +1,16 @@
-import { appUrl as base, evidenceFile, launchBrowser, openPage, startRun } from './harness.mjs'
+import { appUrl as base, evidenceFile, launchBrowser, openPage, openRegistrationWelcome, startRun } from './harness.mjs'
+import { createRequire } from 'node:module'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const require = createRequire(import.meta.url)
+const apiRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../API')
+require(path.join(apiRoot, 'node_modules/dotenv')).config({ path: path.join(apiRoot, '.env'), quiet: true })
+const { Pool } = require(path.join(apiRoot, 'node_modules/pg'))
+const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+const email = `tutor-access-${Date.now()}@mygroomer.test`
+let browser
+let localDatabase = false
 
 const password = 'LocalTest#2026'
 const nextPassword = 'LocalTest#2027'
@@ -13,8 +25,7 @@ async function textOf(page) {
 }
 
 async function openWelcome(page) {
-  await page.goto(base, { waitUntil: 'domcontentloaded' })
-  await page.getByText('Sou tutor', { exact: true }).waitFor({ timeout: 90000 })
+  await openRegistrationWelcome(page)
 }
 
 async function welcomeVisible(page, label) {
@@ -26,20 +37,20 @@ async function welcomeVisible(page, label) {
 }
 
 async function run() {
-  const browser = await launchBrowser()
-  const email = `tutor-access-${Date.now()}@mygroomer.test`
+  const database = new URL(process.env.DATABASE_URL)
+  if (process.env.LOCAL_TEST_MODE !== 'true' || !['localhost', '127.0.0.1', '[::1]'].includes(database.hostname) || database.pathname !== '/mygroomer_dev') throw new Error('Recusando banco fora do ambiente local')
+  localDatabase = true
+  browser = await launchBrowser()
 
   const mobile = await openPage(browser, { viewport: 'mobile' })
   await openWelcome(mobile)
   await welcomeVisible(mobile, 'celular claro')
   await mobile.getByRole('button', { name: 'Sou profissional' }).click()
-  await mobile.getByText('Cadastro profissional').waitFor()
+  await mobile.getByText('Cadastro profissional', { exact: true }).first().waitFor()
   let body = await textOf(mobile)
-  check('AC-01 profissional abre o fluxo do groomer', body.includes('Forma de repasse') && !body.includes('Aceito os termos e a política de privacidade'))
-  await mobile.getByText('Voltar', { exact: true }).click()
+  check('AC-01 profissional abre G02', await mobile.getByRole('textbox', { name: 'CPF / CNPJ', exact: true }).count() === 1 && !body.includes('Forma de repasse'))
+  await mobile.getByRole('button', { name: 'Voltar', exact: true }).click()
   await mobile.getByRole('button', { name: 'Sou tutor' }).click()
-  await mobile.getByText('Acesse sua conta').waitFor()
-  await mobile.getByText('Não tem uma conta? Cadastre-se').click()
   await mobile.getByRole('button', { name: 'Criar conta' }).waitFor()
   await mobile.getByRole('button', { name: 'Criar conta' }).click()
   await mobile.getByText('O nome é obrigatório').waitFor()
@@ -56,8 +67,6 @@ async function run() {
   await openWelcome(page)
   await welcomeVisible(page, 'desktop claro')
   await page.getByRole('button', { name: 'Sou tutor' }).click()
-  await page.getByText('Acesse sua conta').waitFor()
-  await page.getByText('Não tem uma conta? Cadastre-se').click()
   await page.getByRole('button', { name: 'Criar conta' }).waitFor()
 
   await page.route('**/auth/register', async (route) => {
@@ -90,9 +99,7 @@ async function run() {
   page.once('dialog', (dialog) => dialog.accept())
   await page.getByRole('button', { name: 'Abrir perfil' }).click()
   await page.getByText('Sair', { exact: true }).click()
-  await page.getByText('Sou tutor', { exact: true }).waitFor({ timeout: 20000 })
-
-  await page.getByRole('button', { name: 'Sou tutor' }).click()
+  await page.getByRole('button', { name: 'Entrar', exact: true }).waitFor({ timeout: 20000 })
   await page.getByText('Esqueci minha senha', { exact: true }).click()
   await page.getByRole('textbox', { name: 'E-mail' }).fill(email)
   await page.getByRole('button', { name: 'Enviar' }).click()
@@ -110,10 +117,15 @@ async function run() {
   await page.getByText(/^Olá/).waitFor({ timeout: 20000 })
   check('AC-04 senha redefinida entra e a antiga é recusada', true)
 
-  await session.finish(browser)
 }
 
-run().catch(async (error) => {
+run().catch((error) => {
   session.fail(error)
+}).finally(async () => {
+  if (browser) await browser.close()
+  try {
+    if (localDatabase) await pool.query('DELETE FROM users WHERE email=$1', [email])
+  } catch (error) { session.fail(error) }
+  await pool.end()
   await session.finish()
 })

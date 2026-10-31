@@ -4,11 +4,13 @@ import { useAuthStore } from "../store/authStore"
 import { useNavigation } from "@react-navigation/native"
 import { AuthStackParamList } from "../navigation/types"
 import { StackNavigationProp } from "@react-navigation/stack"
+import { useRegistrationNavigation } from '../store/registrationNavigation'
 
 export const useLoginMutation = () => {
     return useMutation({
         mutationFn: ({email, password}: {email: string, password: string}) => loginUser(email, password),
         onSuccess: (data) => {
+            useRegistrationNavigation.getState().setUserId(null)
             useAuthStore.getState().setAuth(data.token, data.user)
         },
         onError: (error) => {

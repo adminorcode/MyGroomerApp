@@ -38,10 +38,19 @@ export async function openPage(browser, { viewport = 'mobile', colorScheme = 'li
   return context.newPage()
 }
 
-export async function loginTutor(page, account = fixtures.tutor) {
+export async function openLogin(page) {
   await page.goto(appUrl, { waitUntil: 'domcontentloaded' })
-  await page.getByText('Sou tutor', { exact: true }).waitFor({ timeout: 90000 })
-  await page.getByRole('button', { name: 'Sou tutor' }).click()
+  await page.getByRole('button', { name: 'Entrar', exact: true }).waitFor({ timeout: 90000 })
+}
+
+export async function openRegistrationWelcome(page) {
+  await openLogin(page)
+  await page.getByRole('button', { name: 'Não tem uma conta? Cadastre-se', exact: true }).click()
+  await page.getByRole('button', { name: 'Sou tutor', exact: true }).waitFor()
+}
+
+export async function loginTutor(page, account = fixtures.tutor) {
+  await openLogin(page)
   await page.getByRole('textbox', { name: 'E-mail' }).fill(account.email)
   await page.getByRole('textbox', { name: 'Senha' }).fill(account.password)
   await page.getByRole('button', { name: 'Entrar' }).click()
@@ -49,10 +58,7 @@ export async function loginTutor(page, account = fixtures.tutor) {
 }
 
 export async function loginProfessional(page, account = fixtures.groomer) {
-  await page.goto(appUrl, { waitUntil: 'domcontentloaded' })
-  await page.getByRole('button', { name: 'Sou profissional' }).waitFor({ timeout: 90000 })
-  await page.getByRole('button', { name: 'Sou profissional' }).click()
-  await page.getByText('Já tem uma conta? Entrar').click()
+  await openLogin(page)
   await page.getByRole('textbox', { name: 'E-mail' }).fill(account.email)
   await page.getByRole('textbox', { name: 'Senha' }).fill(account.password)
   await page.getByRole('button', { name: 'Entrar' }).click()

@@ -1,34 +1,32 @@
-import { View } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
-import { MGButton, MGScreen, MGText } from '../../design-system/components'
-import { OnboardingStepper } from '../../design-system/patterns'
-import { useMGTheme } from '../../design-system/theme/useMGTheme'
+import { useQueryClient } from '@tanstack/react-query'
 import { ProviderServicesStackParamList } from '../../navigation/types'
+import ProfessionalRegistrationForm from './ProfessionalRegistrationForm'
+import { saveProfessionalRegistration } from '../../services/professionalRegistration.service'
+import { ProfessionalRegistration } from './professionalRegistrationModel'
+import { useAuthStore } from '../../store/authStore'
+import { useServiceMenuDraft } from './ServiceMenuDraft'
+import { getProviderMenu } from '../../services/provider.service'
+import { useRegistrationNavigation } from '../../store/registrationNavigation'
 
-const steps = [
-  { id: 'registration', label: 'Cadastro' },
-  { id: 'services', label: 'Serviços' },
-  { id: 'location', label: 'Local' },
-]
-
-type RegistrationProps = {
-  navigation: StackNavigationProp<ProviderServicesStackParamList, 'ProfessionalRegistration'>
-}
+type RegistrationProps = { navigation: StackNavigationProp<ProviderServicesStackParamList, 'ProfessionalRegistration'> }
 
 export function ProfessionalRegistrationStepScreen({ navigation }: RegistrationProps) {
-  const { spacing } = useMGTheme()
-  return (
-    <MGScreen
-      safeArea={false}
-      footer={<MGButton label="Continuar" onPress={() => navigation.goBack()} />}
-    >
-      <View style={{ gap: spacing.lg, paddingTop: spacing.md }}>
-        <OnboardingStepper steps={steps} currentStepId="registration" />
-        <MGText variant="heading2">Cadastro profissional</MGText>
-        <MGText variant="body" color="secondary">
-          Os dados da conta e os tipos de atuação ficam neste passo.
-        </MGText>
-      </View>
-    </MGScreen>
-  )
+  const queryClient = useQueryClient()
+  const menuDraft = useServiceMenuDraft()
+  const continueRegistration = async (value: ProfessionalRegistration) => {
+    const saved = await saveProfessionalRegistration(value, 'continue')
+    const auth = useAuthStore.getState()
+    if (auth.token && auth.user) auth.setAuth(auth.token, { ...auth.user, name: saved.name, email: saved.email })
+    queryClient.setQueryData(['professional-registration', useAuthStore.getState().user?.id], saved)
+    await queryClient.invalidateQueries({ queryKey: ['provider-menu'] })
+    const menu = await getProviderMenu()
+    // Refresh the available professions while preserving edits made in the service step.
+    menuDraft.refreshTypes(menu.data.types)
+    navigation.navigate('ServiceMenu')
+  }
+  return <ProfessionalRegistrationForm authenticated onBack={() => navigation.goBack()} onExit={() => {
+    useRegistrationNavigation.getState().setUserId(null)
+    navigation.getParent()?.navigate('BookingsTab')
+  }} onContinue={continueRegistration} />
 }
