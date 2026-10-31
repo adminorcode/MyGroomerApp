@@ -4,8 +4,13 @@ import {
   BadgeCheck,
   Bell,
   CalendarDays,
+  Check,
+  ChevronLeft,
+  ChevronRight,
   Clock3,
+  Coffee,
   Droplets,
+  Ellipsis,
   LucideIcon,
   MapPin,
   PawPrint,
@@ -29,6 +34,11 @@ export type MGIconName =
   | 'sliders-horizontal'
   | 'plus'
   | 'arrow-left'
+  | 'check'
+  | 'chevron-left'
+  | 'chevron-right'
+  | 'coffee'
+  | 'ellipsis'
 
 const ICONS: Record<MGIconName, LucideIcon> = {
   'paw-print': PawPrint,
@@ -43,6 +53,11 @@ const ICONS: Record<MGIconName, LucideIcon> = {
   'sliders-horizontal': SlidersHorizontal,
   plus: Plus,
   'arrow-left': ArrowLeft,
+  check: Check,
+  'chevron-left': ChevronLeft,
+  'chevron-right': ChevronRight,
+  coffee: Coffee,
+  ellipsis: Ellipsis,
 }
 
 type Props = {

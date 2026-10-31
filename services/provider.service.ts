@@ -124,6 +124,28 @@ export const previewServiceLocation = async (address: string, postalCode: string
     return response.data
 }
 
+export const getWeeklyAvailability = async () => {
+    const response = await api.get('/providers/weekly-availability')
+    return response.data
+}
+
+export const saveWeeklyAvailability = async (routine: unknown) => {
+    const response = await api.put('/providers/weekly-availability', routine)
+    return response.data
+}
+
+export const getWeeklySlots = async (date: string, durationMinutes: number) => {
+    const response = await api.get('/providers/weekly-availability/slots', {
+        params: { date, duration_minutes: durationMinutes },
+    })
+    return response.data as { data: { slots: string[] } }
+}
+
+export const addManualAppointment = async (appointment: { starts_at: string, ends_at: string }) => {
+    const response = await api.post('/providers/weekly-availability/appointments', appointment)
+    return response.data
+}
+
 export const saveServiceLocation = async (location: {
     address: string
     postal_code: string | null

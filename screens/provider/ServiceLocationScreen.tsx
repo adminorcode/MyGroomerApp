@@ -258,6 +258,11 @@ export default function ServiceLocationScreen({ navigation }: Props) {
             Informe de onde você sai, até onde atende e como cobra o deslocamento.
           </MGText>
         </View>
+        <MGButton
+          label="Disponibilidade semanal"
+          variant="secondary"
+          onPress={() => navigation.navigate('WeeklyAvailability')}
+        />
         <MGTextField
           label="Endereço-base"
           required

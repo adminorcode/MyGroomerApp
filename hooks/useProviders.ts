@@ -1,9 +1,10 @@
-import { createProviderService, deleteProviderService, getProviderEarnings, getProviderMenu, getProviderServiceById, getProviderServices, getPublicProfile, getServiceLocation, getServiceProviders, previewServiceLocation, registerAsProvider, saveProviderMenu, saveServiceLocation, searchCoverage, updateProviderService } from "../services/provider.service"
+import { addManualAppointment, createProviderService, deleteProviderService, getProviderEarnings, getProviderMenu, getProviderServiceById, getProviderServices, getPublicProfile, getServiceLocation, getServiceProviders, getWeeklyAvailability, getWeeklySlots, previewServiceLocation, registerAsProvider, saveProviderMenu, saveServiceLocation, saveWeeklyAvailability, searchCoverage, updateProviderService } from "../services/provider.service"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAuthStore } from "../store/authStore"
 import { CreateProvider, ProviderServiceDetailed, CoverageProvider, CoverageSearchParams, PublicProfile } from "../types/provider.types"
 import { ServiceMenu } from "../screens/provider/serviceMenuModel"
 import { LocatedPoint, ServiceLocation } from "../screens/provider/serviceLocationModel"
+import { WeeklyRoutine } from "../screens/provider/weeklyAvailabilityModel"
 import { ProviderEarnings } from "../types/transaction.types"
 import { parseJwtPayload } from "../utils/jwt"
 
@@ -138,6 +139,45 @@ export const useDeleteProviderService = () => {
 }
 
 // useProviders.ts
+export const useGetWeeklyAvailability = () => {
+    return useQuery({
+        queryKey: ['weekly-availability'],
+        queryFn: getWeeklyAvailability,
+        retry: false,
+        select: (data) => data.data as WeeklyRoutine,
+    })
+}
+
+export const useSaveWeeklyAvailability = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: saveWeeklyAvailability,
+        onSuccess: (response) => {
+            queryClient.setQueryData(['weekly-availability'], response)
+            queryClient.invalidateQueries({ queryKey: ['weekly-slots'] })
+        },
+    })
+}
+
+export const useWeeklySlots = (date: string, enabled: boolean) => {
+    return useQuery({
+        queryKey: ['weekly-slots', date, 60],
+        queryFn: () => getWeeklySlots(date, 60),
+        enabled,
+        select: (data) => data.data.slots,
+    })
+}
+
+export const useAddManualAppointment = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: addManualAppointment,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['weekly-slots'] })
+        },
+    })
+}
+
 export const useRegisterAsProvider = () => {
     const setAuth = useAuthStore((state) => state.setAuth)
     return useMutation({
