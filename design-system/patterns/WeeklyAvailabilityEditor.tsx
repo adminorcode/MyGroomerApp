@@ -120,13 +120,13 @@ export default function WeeklyAvailabilityEditor({ value, onChange, issues, focu
         })}
       </View>
 
-      <View style={[styles.focusCard, { backgroundColor: colors.surface.pinkSubtle, borderRadius: radius.lg, padding: spacing.md, gap: spacing.md, overflow: 'hidden' }]}>
+      <View style={[styles.focusCard, { backgroundColor: colors.surface.pinkSubtle, borderRadius: radius.lg, padding: spacing.md, gap: spacing.xl, overflow: 'hidden' }]}>
         <View style={[styles.focusHead, { gap: spacing.xs }]}>
           <Pressable accessibilityRole="button" accessibilityLabel="Dia anterior" onPress={() => shift(-1)} style={styles.iconHit}>
             <MGIcon name="chevron-left" size={20} color={colors.text.primary} />
           </Pressable>
           <MGIcon name="calendar-days" size={18} color={colors.action.primary} />
-          <MGText variant="label" numberOfLines={1} style={styles.dayTitle}>{day.title}</MGText>
+          <MGText variant="bodySmall" numberOfLines={1} style={styles.dayTitle}>{day.title}</MGText>
           <MGText variant="caption" numberOfLines={1}>Dia ativo</MGText>
           <TrackSwitch
             on={!!current.enabled}
@@ -219,12 +219,12 @@ export default function WeeklyAvailabilityEditor({ value, onChange, issues, focu
               accessibilityLabel="Aplicar este horário aos dias ativos"
               disabled={others.length === 0}
               onPress={applyToActive}
-              style={[styles.applyRow, { minHeight: 48, gap: spacing.sm }]}
+              style={[styles.applyRow, { minHeight: 48, gap: spacing.sm, backgroundColor: 'transparent' }]}
             >
-              <View style={[styles.checkBox, { borderColor: others.length ? colors.action.primary : colors.border.default }]}>
+              <View style={[styles.checkBox, { borderColor: others.length ? colors.action.primary : colors.border.default, backgroundColor: 'transparent' }]}>
                 {applied ? <MGIcon name="check" size={14} color={colors.action.primary} /> : null}
               </View>
-              <MGText variant="label" color={others.length ? 'brand' : 'secondary'} style={styles.applyLabel}>
+              <MGText variant="bodySmall" color={others.length ? 'brand' : 'secondary'} style={styles.applyLabel}>
                 Aplicar este horário aos dias ativos
               </MGText>
               <MGIcon name="chevron-right" size={18} color={colors.action.primary} />
