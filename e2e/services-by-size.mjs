@@ -202,9 +202,9 @@ async function run() {
     )
     await page.getByRole('button', { name: 'Concluir' }).click()
     await page.getByRole('button', { name: 'Voltar' }).click()
-    await page.getByText('Cadastro profissional', { exact: true }).waitFor()
-    check('AC-05 Voltar abre o cadastro', true)
-    await page.getByRole('button', { name: 'Continuar' }).click()
+    await page.getByRole('textbox', { name: 'CPF / CNPJ', exact: true }).waitFor()
+    check('AC-05 Voltar abre G02 editável', await page.getByRole('textbox', { name: 'Experiência', exact: true }).isEditable())
+    await page.getByRole('button', { name: 'Voltar', exact: true }).click()
     await page.getByText('Hidratação teste', { exact: true }).first().waitFor()
 
     await page.getByRole('button', { name: 'Desativar Banho', exact: true }).click()

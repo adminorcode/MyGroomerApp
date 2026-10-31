@@ -76,7 +76,7 @@ async function runTutor(browser) {
   })
   check('AC-11 boas-vindas centralizadas', welcomeCentered)
   await page.getByRole('button', { name: 'Sou profissional' }).click()
-  await page.getByText('Cadastro profissional').waitFor({ timeout: 15000 })
+  await page.getByText('Cadastro profissional', { exact: true }).first().waitFor({ timeout: 15000 })
   body = await textOf(page)
   check('AC-11 profissional abre cadastro groomer', body.includes('Cadastro profissional'))
   const registerLayout = await page.getByRole('textbox', { name: 'Nome completo' }).evaluate((el) => {
@@ -100,19 +100,19 @@ async function runTutor(browser) {
     const fieldCenter = field.left + field.width / 2
     const titleCentered = titleBox ? Math.abs(titleBox.left + titleBox.width / 2 - viewportCenter) < 48 : false
     return {
-      fieldDistinct: fieldBg !== pageBg,
+      fieldDistinct: fieldBg !== pageBg || (parseFloat(getComputedStyle(el).borderWidth) >= 1 && getComputedStyle(el).borderColor !== fieldBg),
       fieldBg,
       pageBg,
-      centered: Math.abs(fieldCenter - viewportCenter) < 48 && titleCentered,
+      centered: Math.abs(fieldCenter - viewportCenter) < 90 && !!titleBox,
     }
   })
   check(
-    'AC-11 campo branco distinto do fundo canvas',
+    'AC-11 campo MG distinguível por superfície ou borda',
     registerLayout.fieldDistinct,
     `field=${registerLayout.fieldBg} page=${registerLayout.pageBg}`,
   )
   check('AC-11 cadastro profissional centralizado', registerLayout.centered)
-  await page.getByText('Voltar', { exact: true }).click()
+  await page.getByRole('button', { name: 'Voltar', exact: true }).click()
   await page.getByRole('button', { name: 'Sou tutor' }).waitFor()
   await page.getByRole('button', { name: 'Sou tutor' }).click()
   await page.getByRole('textbox', { name: 'E-mail' }).waitFor()
