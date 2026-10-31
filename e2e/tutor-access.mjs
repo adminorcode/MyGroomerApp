@@ -1,4 +1,16 @@
 import { appUrl as base, evidenceFile, launchBrowser, openPage, startRun } from './harness.mjs'
+import { createRequire } from 'node:module'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const require = createRequire(import.meta.url)
+const apiRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../API')
+require(path.join(apiRoot, 'node_modules/dotenv')).config({ path: path.join(apiRoot, '.env'), quiet: true })
+const { Pool } = require(path.join(apiRoot, 'node_modules/pg'))
+const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+const email = `tutor-access-${Date.now()}@mygroomer.test`
+let browser
+let localDatabase = false
 
 const password = 'LocalTest#2026'
 const nextPassword = 'LocalTest#2027'
@@ -26,8 +38,10 @@ async function welcomeVisible(page, label) {
 }
 
 async function run() {
-  const browser = await launchBrowser()
-  const email = `tutor-access-${Date.now()}@mygroomer.test`
+  const database = new URL(process.env.DATABASE_URL)
+  if (process.env.LOCAL_TEST_MODE !== 'true' || !['localhost', '127.0.0.1', '[::1]'].includes(database.hostname) || database.pathname !== '/mygroomer_dev') throw new Error('Recusando banco fora do ambiente local')
+  localDatabase = true
+  browser = await launchBrowser()
 
   const mobile = await openPage(browser, { viewport: 'mobile' })
   await openWelcome(mobile)
@@ -110,10 +124,15 @@ async function run() {
   await page.getByText(/^Olá/).waitFor({ timeout: 20000 })
   check('AC-04 senha redefinida entra e a antiga é recusada', true)
 
-  await session.finish(browser)
 }
 
-run().catch(async (error) => {
+run().catch((error) => {
   session.fail(error)
+}).finally(async () => {
+  if (browser) await browser.close()
+  try {
+    if (localDatabase) await pool.query('DELETE FROM users WHERE email=$1', [email])
+  } catch (error) { session.fail(error) }
+  await pool.end()
   await session.finish()
 })
