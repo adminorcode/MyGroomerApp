@@ -73,5 +73,6 @@ export type ProviderServicesStackParamList = {
     ProfessionalRegistration: undefined
     ServiceMenu: undefined
     ServiceLocation: undefined
+    WeeklyAvailability: undefined
     ServiceOfferEditor: { draftKey: string }
 }

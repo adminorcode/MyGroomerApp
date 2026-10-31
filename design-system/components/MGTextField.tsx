@@ -9,6 +9,8 @@ export type MGTextFieldProps = TextInputProps & {
   helperText?: string
   required?: boolean
   menu?: ReactNode
+  trailing?: ReactNode
+  compact?: boolean
 }
 
 export default function MGTextField({
@@ -17,6 +19,9 @@ export default function MGTextField({
   helperText,
   required = false,
   menu,
+  trailing,
+  compact = false,
+  accessibilityLabel: accessibilityLabelProp,
   style,
   editable = true,
   onFocus,
@@ -39,8 +44,8 @@ export default function MGTextField({
       : colors.border.default
 
   return (
-    <View style={[styles.fieldGroup, { marginBottom: spacing.base, zIndex: menu ? 2 : 0 }]}>
-      <MGText variant="label" style={{ marginBottom: spacing.sm }}>
+    <View style={[styles.fieldGroup, { marginBottom: compact ? 0 : spacing.base, zIndex: menu ? 2 : 0 }]}>
+      <MGText variant="label" numberOfLines={compact ? 1 : undefined} style={{ marginBottom: spacing.sm }}>
         {required ? `${label} *` : label}
       </MGText>
       <View style={styles.inputSlot}>
@@ -48,7 +53,7 @@ export default function MGTextField({
           {...props}
           value={controlledValue}
           editable={editable}
-          accessibilityLabel={label}
+          accessibilityLabel={accessibilityLabelProp ?? label}
           accessibilityState={{ disabled, ...accessibilityState }}
           onFocus={(event) => {
             setFocused(true)
@@ -64,6 +69,7 @@ export default function MGTextField({
               borderWidth: 2,
               borderRadius: radius.md,
               paddingHorizontal: spacing.md,
+              paddingRight: trailing ? spacing.xl + spacing.sm : spacing.md,
               minHeight: 52,
               fontSize: textStyles.body.fontSize,
               fontFamily: fonts.regular,
@@ -74,6 +80,7 @@ export default function MGTextField({
             style,
           ]}
         />
+        {trailing ? <View style={styles.trailing} pointerEvents="none">{trailing}</View> : null}
         {menu ? <View style={[styles.menu, { marginTop: spacing.xs }]}>{menu}</View> : null}
       </View>
       {error ? (
@@ -94,6 +101,13 @@ const styles = StyleSheet.create({
   inputSlot: {
     position: 'relative',
     zIndex: 1,
+  },
+  trailing: {
+    position: 'absolute',
+    right: 12,
+    top: 0,
+    height: 52,
+    justifyContent: 'center',
   },
   menu: {
     position: 'absolute',

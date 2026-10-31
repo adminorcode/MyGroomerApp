@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { ReactNode, Ref } from 'react'
 import { ActivityIndicator, ScrollView, StyleSheet, View, ViewStyle } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import MGErrorState from './MGErrorState'
@@ -14,6 +14,7 @@ type Props = {
   error?: string | null
   onRetry?: () => void
   contentStyle?: ViewStyle
+  scrollRef?: Ref<ScrollView>
 }
 
 export default function MGScreen({
@@ -26,6 +27,7 @@ export default function MGScreen({
   error,
   onRetry,
   contentStyle,
+  scrollRef,
 }: Props) {
   const { colors, spacing } = useMGTheme()
   const bg = background === 'default' ? colors.surface.default : colors.surface.canvas
@@ -40,6 +42,7 @@ export default function MGScreen({
     </View>
   ) : scrollable ? (
     <ScrollView
+      ref={scrollRef}
       style={{ flex: 1 }}
       contentContainerStyle={[
         { paddingHorizontal: spacing.base, paddingBottom: footer ? spacing.xl + spacing.lg : spacing.xl, flexGrow: 1 },
