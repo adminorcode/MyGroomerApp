@@ -197,6 +197,7 @@ async function run() {
   check('AC-03 três conteúdos persistidos privados', stored.rows.length === 3 && stored.rows.every(row => row.size === row.bytes))
   await page.getByRole('button', { name: 'Voltar', exact: true }).click()
   await field(page, 'Experiência').waitFor()
+  check('AC-01 máscara de CPF aplicada aos dados autenticados', await field(page, 'CPF / CNPJ').inputValue() === '529.982.247-25')
   check('AC-04 G02 autenticada recupera arquivos', await page.getByRole('button', { name: /Remover certificado.pdf/ }).count() === 1 && !(await field(page, 'E-mail').isEditable()))
   check('AC-05 aviso de análise humana', await page.getByText('Validação feita por pessoas reais', { exact: true }).isVisible())
   await page.getByRole('button', { name: 'Voltar', exact: true }).scrollIntoViewIfNeeded()
