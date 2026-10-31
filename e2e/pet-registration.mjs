@@ -1,4 +1,16 @@
-import { appUrl as base, evidenceFile, launchBrowser, openPage, startRun } from './harness.mjs'
+import { evidenceFile, launchBrowser, openPage, openLogin, openRegistrationWelcome, startRun } from './harness.mjs'
+import { createRequire } from 'node:module'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const require = createRequire(import.meta.url)
+const apiRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../API')
+require(path.join(apiRoot, 'node_modules/dotenv')).config({ path: path.join(apiRoot, '.env'), quiet: true })
+const { Pool } = require(path.join(apiRoot, 'node_modules/pg'))
+const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+const email = `pet-${Date.now()}@mygroomer.test`
+let browser
+let localDatabase = false
 
 const password = 'LocalTest#2026'
 const petName = `Nina ${Date.now()}`
@@ -13,10 +25,8 @@ async function textOf(page) {
 }
 
 async function registerAndLogin(page, email) {
-  await page.goto(base, { waitUntil: 'domcontentloaded' })
-  await page.getByText('Sou tutor', { exact: true }).waitFor({ timeout: 90000 })
+  await openRegistrationWelcome(page)
   await page.getByRole('button', { name: 'Sou tutor' }).click()
-  await page.getByText('Não tem uma conta? Cadastre-se').click()
   await page.getByRole('button', { name: 'Criar conta' }).waitFor()
   await page.getByRole('textbox', { name: 'Nome completo' }).fill('Tutor Pet')
   await page.getByRole('textbox', { name: 'E-mail' }).fill(email)
@@ -32,9 +42,7 @@ async function registerAndLogin(page, email) {
 }
 
 async function login(page, email) {
-  await page.goto(base, { waitUntil: 'domcontentloaded' })
-  await page.getByText('Sou tutor', { exact: true }).waitFor({ timeout: 90000 })
-  await page.getByRole('button', { name: 'Sou tutor' }).click()
+  await openLogin(page)
   await page.getByRole('textbox', { name: 'E-mail' }).fill(email)
   await page.getByRole('textbox', { name: 'Senha' }).fill(password)
   await page.getByRole('button', { name: 'Entrar' }).click()
@@ -57,8 +65,10 @@ async function petNameVisible(page, label) {
 }
 
 async function run() {
-  const browser = await launchBrowser()
-  const email = `pet-${Date.now()}@mygroomer.test`
+  const database = new URL(process.env.DATABASE_URL)
+  if (process.env.LOCAL_TEST_MODE !== 'true' || !['localhost', '127.0.0.1', '[::1]'].includes(database.hostname) || database.pathname !== '/mygroomer_dev') throw new Error('Recusando banco fora do ambiente local')
+  localDatabase = true
+  browser = await launchBrowser()
   let blockPetList = true
 
   const page = await openPage(browser, { viewport: 'mobile' })
@@ -158,10 +168,15 @@ async function run() {
   await petNameVisible(dark, 'celular escuro')
   await dark.context().close()
 
-  await session.finish(browser)
 }
 
-run().catch(async (error) => {
+run().catch((error) => {
   session.fail(error)
+}).finally(async () => {
+  if (browser) await browser.close()
+  try {
+    if (localDatabase) await pool.query('DELETE FROM users WHERE email=$1', [email])
+  } catch (error) { session.fail(error) }
+  await pool.end()
   await session.finish()
 })

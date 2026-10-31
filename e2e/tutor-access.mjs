@@ -1,4 +1,4 @@
-import { appUrl as base, evidenceFile, launchBrowser, openPage, startRun } from './harness.mjs'
+import { appUrl as base, evidenceFile, launchBrowser, openPage, openRegistrationWelcome, startRun } from './harness.mjs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -25,8 +25,7 @@ async function textOf(page) {
 }
 
 async function openWelcome(page) {
-  await page.goto(base, { waitUntil: 'domcontentloaded' })
-  await page.getByText('Sou tutor', { exact: true }).waitFor({ timeout: 90000 })
+  await openRegistrationWelcome(page)
 }
 
 async function welcomeVisible(page, label) {
@@ -52,8 +51,6 @@ async function run() {
   check('AC-01 profissional abre G02', await mobile.getByRole('textbox', { name: 'CPF / CNPJ', exact: true }).count() === 1 && !body.includes('Forma de repasse'))
   await mobile.getByRole('button', { name: 'Voltar', exact: true }).click()
   await mobile.getByRole('button', { name: 'Sou tutor' }).click()
-  await mobile.getByText('Acesse sua conta').waitFor()
-  await mobile.getByText('Não tem uma conta? Cadastre-se').click()
   await mobile.getByRole('button', { name: 'Criar conta' }).waitFor()
   await mobile.getByRole('button', { name: 'Criar conta' }).click()
   await mobile.getByText('O nome é obrigatório').waitFor()
@@ -70,8 +67,6 @@ async function run() {
   await openWelcome(page)
   await welcomeVisible(page, 'desktop claro')
   await page.getByRole('button', { name: 'Sou tutor' }).click()
-  await page.getByText('Acesse sua conta').waitFor()
-  await page.getByText('Não tem uma conta? Cadastre-se').click()
   await page.getByRole('button', { name: 'Criar conta' }).waitFor()
 
   await page.route('**/auth/register', async (route) => {
@@ -104,9 +99,7 @@ async function run() {
   page.once('dialog', (dialog) => dialog.accept())
   await page.getByRole('button', { name: 'Abrir perfil' }).click()
   await page.getByText('Sair', { exact: true }).click()
-  await page.getByText('Sou tutor', { exact: true }).waitFor({ timeout: 20000 })
-
-  await page.getByRole('button', { name: 'Sou tutor' }).click()
+  await page.getByRole('button', { name: 'Entrar', exact: true }).waitFor({ timeout: 20000 })
   await page.getByText('Esqueci minha senha', { exact: true }).click()
   await page.getByRole('textbox', { name: 'E-mail' }).fill(email)
   await page.getByRole('button', { name: 'Enviar' }).click()

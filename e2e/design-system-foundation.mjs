@@ -1,4 +1,4 @@
-import { appUrl as base, evidenceFile, fixtures, launchBrowser, openPage, startRun } from './harness.mjs'
+import { appUrl as base, evidenceFile, fixtures, launchBrowser, openPage, openLogin, openRegistrationWelcome, startRun } from './harness.mjs'
 
 const tutor = fixtures.tutor
 const groomer = fixtures.groomer
@@ -13,8 +13,7 @@ async function textOf(page) {
 }
 
 async function openWelcome(page) {
-  await page.goto(base, { waitUntil: 'domcontentloaded' })
-  await page.getByRole('button', { name: 'Sou tutor' }).waitFor({ timeout: 90000 })
+  await openRegistrationWelcome(page)
 }
 
 function visibleButton(page, name) {
@@ -113,13 +112,13 @@ async function runTutor(browser) {
   )
   check('AC-11 cadastro profissional centralizado', registerLayout.centered)
   await page.getByRole('button', { name: 'Voltar', exact: true }).click()
-  await page.getByRole('button', { name: 'Sou tutor' }).waitFor()
-  await page.getByRole('button', { name: 'Sou tutor' }).click()
+  await page.getByRole('button', { name: 'Já tem uma conta? Entrar', exact: true }).click()
   await page.getByRole('textbox', { name: 'E-mail' }).waitFor()
   body = await textOf(page)
   check('AC-11 login tutor usa campos MG', body.includes('E-mail') && body.includes('Senha') && body.includes('Entrar'))
 
   await page.getByText('Não tem uma conta? Cadastre-se').click()
+  await page.getByRole('button', { name: 'Sou tutor' }).click()
   await page.getByRole('button', { name: 'Criar conta' }).waitFor()
   const namePlaceholder = await placeholderColor(page, 'Nome completo')
   const emailPlaceholder = await placeholderColor(page, 'E-mail')
@@ -131,9 +130,8 @@ async function runTutor(browser) {
   )
   const phonePhText = await page.getByRole('textbox', { name: 'Telefone' }).getAttribute('placeholder')
   check('AC-11 placeholder do telefone em português', phonePhText === 'Digite seu telefone', phonePhText ?? '')
-  await page.getByText('Já tem uma conta? Entrar', { exact: false }).click().catch(async () => {
-    await openWelcome(page)
-    await page.getByRole('button', { name: 'Sou tutor' }).click()
+  await page.getByText('Já tem uma conta? Entrar', { exact: true }).filter({ visible: true }).click().catch(async () => {
+    await openLogin(page)
     await page.getByRole('textbox', { name: 'E-mail' }).waitFor()
   })
 
@@ -235,8 +233,7 @@ async function runTutor(browser) {
 async function runGroomer(browser) {
   const page = await openPage(browser, { viewport: 'mobile' })
 
-  await openWelcome(page)
-  await page.getByRole('button', { name: 'Sou tutor' }).click()
+  await openLogin(page)
   await page.getByRole('textbox', { name: 'E-mail' }).waitFor({ timeout: 20000 })
   await page.getByRole('textbox', { name: 'E-mail' }).fill(groomer.email)
   await page.getByRole('textbox', { name: 'Senha' }).fill(groomer.password)

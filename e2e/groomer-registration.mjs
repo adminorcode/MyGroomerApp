@@ -3,7 +3,7 @@ import { mkdirSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import crypto from 'node:crypto'
-import { appUrl, evidenceFile, gateRoute, launchBrowser, openPage, startRun } from './harness.mjs'
+import { appUrl, evidenceFile, gateRoute, launchBrowser, openPage, openRegistrationWelcome, startRun } from './harness.mjs'
 
 const require = createRequire(import.meta.url)
 const apiRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../API')
@@ -35,8 +35,7 @@ async function request(route, method = 'GET', body, token) {
   return { status: response.status, body: await response.json() }
 }
 async function openForm(page) {
-  await page.goto(appUrl, { waitUntil: 'domcontentloaded' })
-  await page.getByRole('button', { name: 'Sou profissional' }).waitFor({ timeout: 90000 })
+  await openRegistrationWelcome(page)
   await page.getByRole('button', { name: 'Sou profissional' }).click()
   await field(page, 'Nome completo').waitFor({ timeout: 20000 })
 }
@@ -145,13 +144,13 @@ async function run() {
   check('AC-04 rascunho público sai do assistente', await page.getByRole('button', { name: 'Sou tutor' }).isVisible())
   await page.unroute('**/professional-types/public')
   await page.route('**/professional-types/public', route => route.abort())
-  await page.reload()
+  await openRegistrationWelcome(page)
   await page.getByRole('button', { name: 'Sou profissional' }).click()
   await page.getByRole('button', { name: 'Tentar novamente', exact: true }).waitFor()
   await page.getByRole('button', { name: 'Salvar e sair', exact: true }).click()
   await page.getByRole('button', { name: 'Sou profissional' }).waitFor()
   await page.unroute('**/professional-types/public')
-  await page.reload()
+  await openRegistrationWelcome(page)
   await page.getByRole('button', { name: 'Sou profissional' }).click()
   await page.getByRole('button', { name: /Remover certificado.pdf/ }).waitFor()
   check('AC-04 rascunho público restaura dados tipos anexos sem senha', (await field(page, 'Nome completo').inputValue()) === 'Mariana Souza Oliveira' && await page.getByRole('checkbox', { name: typeName, exact: true }).isChecked() && await field(page, 'Senha').inputValue() === '' && await page.getByRole('button', { name: /Remover evidencia.png/ }).count() === 1)
@@ -173,7 +172,7 @@ async function run() {
   check('AC-04 falha pós-cadastro informa recuperação e fixa email', !(await field(page, 'E-mail').isEditable()))
   await page.getByRole('button', { name: 'Salvar e sair', exact: true }).click()
   await page.getByRole('button', { name: 'Sou profissional' }).waitFor()
-  await page.reload()
+  await openRegistrationWelcome(page)
   await page.getByRole('button', { name: 'Sou profissional' }).click()
   await page.getByText(/Sua conta já foi criada para/).waitFor()
   check('AC-04 rascunho retoma conta criada sem senha', !(await field(page, 'E-mail').isEditable()) && await field(page, 'Senha').inputValue() === '')
