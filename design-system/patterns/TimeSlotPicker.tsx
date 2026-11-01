@@ -37,13 +37,17 @@ export default function TimeSlotPicker({
         <MGText variant="label">Horários disponíveis</MGText>
         <View style={[styles.wrap, { gap: spacing.sm }]}>
           {slots.map((slot) => (
+            <View key={slot.id} style={{ width: '30%', flexGrow: 1, maxWidth: '33%' }}>
             <MGChip
-              key={slot.id}
               label={slot.label}
+              minHeight={48}
+              density="compact"
+              appearance="solid"
               selected={selectedSlotId === slot.id}
               disabled={slot.disabled}
               onPress={slot.disabled ? undefined : () => onSelectSlot?.(slot.id)}
             />
+            </View>
           ))}
         </View>
         {helperText ? (

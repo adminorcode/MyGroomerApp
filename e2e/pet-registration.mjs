@@ -149,12 +149,12 @@ async function run() {
   await page.getByRole('button', { name: /Groomer de Teste/ }).click()
   await page.getByRole('radio', { name: /^Banho, A partir de/ }).click()
   await page.getByRole('button', { name: 'Agendar serviço' }).click()
-  await page.getByText('Data e horário').waitFor({ timeout: 15000 })
+  await page.getByText('Escolha um horário', { exact: true }).waitFor({ timeout: 15000 })
   await page.getByRole('radio', { name: new RegExp(petName) }).click()
   body = await textOf(page)
   check(
     'AC-04 pet salvo selecionado sem novo cadastro',
-    body.includes('Selecionado') && body.includes(petName) && body.includes('Agendar serviço') && !body.includes('Salvar e continuar'),
+    await page.getByLabel(`Pet: ${petName}`, { exact: true }).count() === 1 && await page.getByRole('button', { name: 'Trocar pet', exact: true }).count() === 1 && !body.includes('Salvar e continuar'),
   )
   await page.context().close()
 

@@ -16,10 +16,10 @@ const { check } = session
 const rules = 'Atendimento em domicílio. O tutor precisa estar presente durante o serviço.'
 
 async function expectBooking(page, serviceName) {
-  await page.getByText('Data e horário').waitFor({ timeout: 15000 })
+  await page.getByText('Escolha um horário', { exact: true }).waitFor({ timeout: 15000 })
   await page.getByText('Pet', { exact: true }).waitFor()
   await page.getByLabel(`Serviço: ${serviceName}`, { exact: true }).waitFor()
-  await page.getByLabel('Groomer: Groomer de Teste', { exact: true }).waitFor()
+  await page.getByLabel('Profissional: Groomer de Teste', { exact: true }).waitFor()
 }
 
 async function openProfile(page) {
