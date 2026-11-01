@@ -72,6 +72,9 @@ export const searchCoverage = async (params: CoverageSearchParams) => {
             address: params.address,
             service_id: params.service_id,
             category_id: params.category_id,
+            ...(params.latitude != null && params.longitude != null
+                ? { latitude: params.latitude, longitude: params.longitude }
+                : {}),
         },
     })
     return response.data

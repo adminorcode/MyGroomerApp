@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Check } from 'lucide-react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
@@ -9,10 +9,13 @@ import { useFetchCategories } from '../../hooks/useCategory'
 import { useGetAllServices } from '../../hooks/useServices'
 import { useCoverageSearch } from '../../hooks/useProviders'
 import { CoverageSearchParams } from '../../types/provider.types'
+import { AddressSuggestion, autocompleteServiceLocation, getMapTiles } from '../../services/provider.service'
+import ServiceLocationMap from '../provider/ServiceLocationMap'
 import { useTheme } from '../../context/ThemeContext'
+import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
-import { MGButton, MGEmptyState, MGErrorState, MGTextField } from '../../design-system/components'
+import { MGButton, MGEmptyState, MGErrorState, MGText, MGTextField } from '../../design-system/components'
 import { GroomerSearchCard } from '../../design-system/patterns'
 import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
 import { formatMoney } from '../../utils/formatMoney'
@@ -32,8 +35,15 @@ type Draft = {
 
 type Option = { id: string, name: string }
 
+type PickedPoint = { latitude: number, longitude: number, label: string }
+
+function mapLabel(point: PickedPoint) {
+    return `Mapa do atendimento. ${point.label}.`
+}
+
 export default function TutorSearchScreen({ navigation, route }: Props) {
     const { colors } = useTheme()
+    const theme = useMGTheme()
     const categories = useFetchCategories()
     const [draft, setDraft] = useState<Draft>({
         address: '',
@@ -42,8 +52,59 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
     })
     const [formError, setFormError] = useState({ address: '', filter: '' })
     const [query, setQuery] = useState<CoverageSearchParams | null>(null)
+    const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([])
+    const [suggesting, setSuggesting] = useState(false)
+    const [picked, setPicked] = useState<PickedPoint | null>(null)
+    const [tileUrl, setTileUrl] = useState<string | null>(null)
+    const [tilesReady, setTilesReady] = useState(false)
     const services = useGetAllServices(draft.categoryId || undefined)
     const search = useCoverageSearch(query)
+    const suggestTicket = useRef(0)
+    const skipSuggest = useRef(false)
+    const hideMenu = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+    useEffect(() => {
+        let active = true
+        void getMapTiles()
+            .then(result => { if (active) setTileUrl(result.data.url) })
+            .catch(() => { if (active) setTileUrl(null) })
+            .finally(() => { if (active) setTilesReady(true) })
+        return () => { active = false }
+    }, [])
+
+    useEffect(() => {
+        const ticket = suggestTicket.current + 1
+        suggestTicket.current = ticket
+        if (skipSuggest.current) {
+            skipSuggest.current = false
+            setSuggestions([])
+            setSuggesting(false)
+            return
+        }
+        const text = draft.address.trim()
+        if (text.length < 3) {
+            setSuggestions([])
+            setSuggesting(false)
+            return
+        }
+        setSuggesting(true)
+        const handle = setTimeout(() => {
+            void autocompleteServiceLocation(text)
+                .then(result => {
+                    if (suggestTicket.current !== ticket) return
+                    setSuggestions(result.data)
+                })
+                .catch(() => {
+                    if (suggestTicket.current === ticket) setSuggestions([])
+                })
+                .finally(() => {
+                    if (suggestTicket.current === ticket) setSuggesting(false)
+                })
+        }, 300)
+        return () => clearTimeout(handle)
+    }, [draft.address])
+
+    const pickedPoint = picked && picked.label === draft.address.trim() ? picked : null
 
     const publish = (next: Draft) => {
         const address = next.address.trim()
@@ -54,11 +115,46 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
             setQuery(null)
             return
         }
+        const point = picked && picked.label === address ? picked : null
         setQuery({
             address,
             service_id: next.serviceId || undefined,
             category_id: next.categoryId || undefined,
+            ...(point ? { latitude: point.latitude, longitude: point.longitude } : {}),
         })
+    }
+
+    const changeAddress = (address: string) => {
+        suggestTicket.current += 1
+        setDraft(current => ({ ...current, address }))
+        setPicked(null)
+        setQuery(null)
+        setSuggestions([])
+        setFormError(current => ({ ...current, address: '' }))
+    }
+
+    const chooseSuggestion = (item: AddressSuggestion) => {
+        if (hideMenu.current) clearTimeout(hideMenu.current)
+        skipSuggest.current = true
+        suggestTicket.current += 1
+        setSuggestions([])
+        setSuggesting(false)
+        setDraft(current => ({ ...current, address: item.address }))
+        setPicked({ latitude: item.latitude, longitude: item.longitude, label: item.address })
+        setQuery(null)
+        setFormError(current => ({ ...current, address: '' }))
+    }
+
+    const dismissMenu = () => {
+        if (hideMenu.current) clearTimeout(hideMenu.current)
+        suggestTicket.current += 1
+        setSuggestions([])
+        setSuggesting(false)
+    }
+
+    const closeMenuSoon = () => {
+        if (hideMenu.current) clearTimeout(hideMenu.current)
+        hideMenu.current = setTimeout(dismissMenu, 250)
     }
 
     const selectCategory = (categoryId: string) => {
@@ -79,6 +175,7 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
 
     const categoryOptions = (categories.data ?? []) as Option[]
     const serviceOptions = ((services.data ?? []) as Option[]).filter(item => item.id && item.name)
+    const menuOpen = suggestions.length > 0
 
     return (
         <ScreenContainer>
@@ -93,14 +190,94 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
                     label="Endereço do atendimento"
                     accessibilityLabel="Endereço do atendimento"
                     placeholder="Avenida Paulista, São Paulo"
+                    role="combobox"
+                    aria-expanded={menuOpen}
+                    accessibilityState={{ expanded: menuOpen }}
                     value={draft.address}
-                    onChangeText={(address) => {
-                        setDraft(current => ({ ...current, address }))
-                        setQuery(null)
+                    onChangeText={changeAddress}
+                    onFocus={() => {
+                        if (hideMenu.current) clearTimeout(hideMenu.current)
                     }}
+                    onBlur={closeMenuSoon}
                     error={formError.address}
                     autoCapitalize="words"
+                    maxLength={200}
+                    helperText={formError.address ? undefined : 'Digite para ver sugestões'}
+                    menu={suggesting && suggestions.length === 0 ? (
+                        <FieldWait label="Buscando endereços" />
+                    ) : menuOpen ? (
+                        <View
+                            style={{
+                                maxHeight: 240,
+                                backgroundColor: theme.colors.surface.default,
+                                borderRadius: theme.radius.md,
+                                borderWidth: 1,
+                                borderColor: theme.colors.border.default,
+                                overflow: 'hidden',
+                                zIndex: 1,
+                                ...theme.elevation.overlay,
+                            }}
+                        >
+                                <ScrollView
+                                    keyboardShouldPersistTaps="handled"
+                                    nestedScrollEnabled
+                                    style={{ maxHeight: 240, backgroundColor: theme.colors.surface.default }}
+                                    role={'listbox' as 'list'}
+                                >
+                                    {suggestions.map((item, index) => (
+                                        <Pressable
+                                            key={`${item.latitude}-${item.longitude}-${item.label}`}
+                                            role="option"
+                                            accessibilityLabel={item.label}
+                                            onPressIn={() => {
+                                                if (hideMenu.current) clearTimeout(hideMenu.current)
+                                            }}
+                                            onPress={() => chooseSuggestion(item)}
+                                            style={({ pressed }) => ({
+                                                minHeight: 48,
+                                                justifyContent: 'center',
+                                                paddingHorizontal: theme.spacing.md,
+                                                paddingVertical: theme.spacing.sm,
+                                                backgroundColor: pressed ? theme.colors.surface.pinkSubtle : theme.colors.surface.default,
+                                                borderTopWidth: index === 0 ? 0 : StyleSheet.hairlineWidth,
+                                                borderTopColor: theme.colors.border.default,
+                                            })}
+                                        >
+                                            <MGText variant="body">{item.label}</MGText>
+                                        </Pressable>
+                                    ))}
+                                </ScrollView>
+                        </View>
+                    ) : null}
                 />
+                {pickedPoint ? (
+                    <View style={{ gap: theme.spacing.sm, marginBottom: theme.spacing.md }}>
+                        {tileUrl ? (
+                            <ServiceLocationMap
+                                latitude={pickedPoint.latitude}
+                                longitude={pickedPoint.longitude}
+                                radiusKm={null}
+                                label={mapLabel(pickedPoint)}
+                                tileUrl={tileUrl}
+                            />
+                        ) : tilesReady ? null : (
+                            <FieldWait label="Localizando no mapa" />
+                        )}
+                        <MGText variant="body">{pickedPoint.label}</MGText>
+                        {tileUrl ? (
+                            <MGText variant="caption" color="secondary" style={{ fontSize: 10, lineHeight: 12 }}>
+                                Powered by Geoapify · OpenStreetMap
+                            </MGText>
+                        ) : null}
+                    </View>
+                ) : (
+                    <View accessible accessibilityLabel="Mapa sem ponto" style={{ marginBottom: theme.spacing.md }}>
+                        <MGEmptyState
+                            title="Mapa sem ponto"
+                            description="Escolha um endereço sugerido para ver o ponto no mapa."
+                        />
+                    </View>
+                )}
                 <Text style={[styles.groupLabel, { color: colors.text }]}>Modalidade</Text>
                 <OptionRow
                     label="Modalidade"
@@ -174,7 +351,16 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
                                     coverageLabel={item.service_name}
                                     ratingLabel={rating === 'Sem avaliações' ? undefined : rating}
                                     showChevron
-                                    onPress={() => navigation.navigate('GroomerProfile', { providerServiceId: item.id })}
+                                    onPress={() => {
+                                        if (!query) return
+                                        navigation.navigate('GroomerProfile', {
+                                            providerServiceId: item.id,
+                                            customerLocation: query.address,
+                                            ...(query.latitude != null && query.longitude != null
+                                                ? { customerLatitude: query.latitude, customerLongitude: query.longitude }
+                                                : {}),
+                                        })
+                                    }}
                                 />
                             )
                         })
@@ -182,6 +368,31 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
                 </View>
             </KeyboardAwareScrollView>
         </ScreenContainer>
+    )
+}
+
+function FieldWait({ label }: { label: string }) {
+    const { colors, radius, spacing: gap, elevation } = useMGTheme()
+    return (
+        <View
+            accessibilityRole="progressbar"
+            accessibilityLabel={label}
+            style={{
+                minHeight: 48,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: gap.sm,
+                paddingHorizontal: gap.md,
+                backgroundColor: colors.surface.default,
+                borderRadius: radius.md,
+                borderWidth: 1,
+                borderColor: colors.border.default,
+                ...elevation.low,
+            }}
+        >
+            <ActivityIndicator size="small" color={colors.action.primary} />
+            <MGText variant="body">{label}</MGText>
+        </View>
     )
 }
 
@@ -241,7 +452,7 @@ const styles = StyleSheet.create({
         paddingBottom: spacing.md,
     },
     option: {
-        minHeight: 44,
+        minHeight: 48,
         borderRadius: borderRadius.md,
         paddingHorizontal: spacing.md,
         flexDirection: 'row',

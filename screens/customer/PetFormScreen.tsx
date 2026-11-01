@@ -20,7 +20,13 @@ import { MGButton, MGErrorState, MGTextField } from '../../design-system/compone
 import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
 import { getErrorMessage } from '../../utils/error'
 
-type PetFormParams = { petId?: string, providerServiceId?: string }
+type PetFormParams = {
+    petId?: string
+    providerServiceId?: string
+    customerLocation?: string
+    customerLatitude?: number
+    customerLongitude?: number
+}
 
 type Props = {
     navigation: StackNavigationProp<HomeStackParamList, 'PetForm'> | StackNavigationProp<ProfileStackParamList, 'PetForm'>
@@ -73,6 +79,9 @@ export default function PetFormScreen({ navigation, route }: Props) {
                 ;(navigation as StackNavigationProp<HomeStackParamList, 'PetForm'>).navigate('BookService', {
                     providerServiceId,
                     petId: savedId,
+                    customerLocation: params.customerLocation,
+                    customerLatitude: params.customerLatitude,
+                    customerLongitude: params.customerLongitude,
                 })
                 return
             }

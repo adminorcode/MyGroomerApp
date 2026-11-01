@@ -31,13 +31,16 @@ export default function BookServiceScreen({ navigation, route }: Props) {
   const { colors, spacing, radius } = useMGTheme()
   const runtime = useRuntime()
   const { providerServiceId, petId: requestedPetId } = route.params
+  const carriedLocation = route.params.customerLocation?.trim() ?? ''
+  const carriedLatitude = route.params.customerLatitude
+  const carriedLongitude = route.params.customerLongitude
   const service = useGetProviderServiceById(providerServiceId)
   const pets = usePets()
   const { mutateAsync: createBooking, isPending } = useCreateBooking()
   const queryClient = useQueryClient()
   const sending = useRef(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [location, setLocation] = useState('')
+  const [location, setLocation] = useState(carriedLocation)
   const [selectedPetId, setSelectedPetId] = useState(requestedPetId)
   const [choosingPet, setChoosingPet] = useState(!requestedPetId)
   const [date, setDate] = useState(bookingToday)
@@ -73,6 +76,9 @@ export default function BookServiceScreen({ navigation, route }: Props) {
       const result = await createBooking({
         pet_id: selectedPet.id, provider_service_id: providerServiceId,
         scheduled_at: new Date(selectedSlot), customer_location: location.trim(),
+        ...(carriedLatitude != null && carriedLongitude != null
+          ? { customer_latitude: carriedLatitude, customer_longitude: carriedLongitude }
+          : {}),
       })
       const bookingId = result.data.booking.id
       if (result.data.payment_mode === 'disabled') {
@@ -155,7 +161,12 @@ export default function BookServiceScreen({ navigation, route }: Props) {
         {choosingPet || !selectedPet || pets.isError ? <View style={{ marginTop: spacing.lg }}>
           <PetPicker pets={pets.data} isLoading={pets.isLoading} isError={pets.isError} selectedPetId={selectedPetId}
             onSelect={petId => { if (!busy) { setSelectedPetId(petId); setChoosingPet(false); setSelection(null); setSubmitError('') } }}
-            onCreate={() => { if (!busy) navigation.navigate('PetForm', { providerServiceId }) }}
+            onCreate={() => { if (!busy) navigation.navigate('PetForm', {
+              providerServiceId,
+              customerLocation: carriedLocation || undefined,
+              customerLatitude: carriedLatitude,
+              customerLongitude: carriedLongitude,
+            }) }}
             onRetry={() => { void pets.refetch() }} />
         </View> : null}
         <View style={{ gap: spacing.md, marginTop: spacing.lg, marginBottom: spacing.lg }}>
@@ -208,7 +219,25 @@ export default function BookServiceScreen({ navigation, route }: Props) {
             <><MGText variant="heading3">Nenhum horário disponível</MGText><MGText color="secondary">Escolha outro dia para este atendimento.</MGText></>
           )}
         </View>
-        <MGTextField label="Local" value={location} onChangeText={setLocation} placeholder="Digite seu endereço" autoCapitalize="words" editable={!busy} />
+        {carriedLocation ? (
+          <View
+            accessible
+            accessibilityLabel={`Local do atendimento: ${carriedLocation}`}
+            style={{
+              gap: spacing.xs,
+              padding: spacing.md,
+              borderRadius: radius.md,
+              borderWidth: 1,
+              borderColor: colors.border.default,
+              backgroundColor: colors.surface.default,
+            }}
+          >
+            <MGText variant="label">Local do atendimento</MGText>
+            <MGText variant="body">{carriedLocation}</MGText>
+          </View>
+        ) : (
+          <MGTextField label="Local" value={location} onChangeText={setLocation} placeholder="Digite seu endereço" autoCapitalize="words" editable={!busy} />
+        )}
         {submitError ? <View accessibilityRole="alert" accessibilityLiveRegion="assertive" style={{ marginTop: spacing.md, gap: spacing.sm }}>
           <MGText color="error">{submitError}</MGText><MGText variant="bodySmall">Confira os horários e tente novamente. Seus dados foram mantidos.</MGText>
         </View> : null}

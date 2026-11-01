@@ -27,14 +27,20 @@ export type CustomerTabParamList = {
     ProfileTab: undefined
 }
 
+export type ChosenServiceAddress = {
+    customerLocation?: string
+    customerLatitude?: number
+    customerLongitude?: number
+}
+
 export type HomeStackParamList = {
     Home: undefined
     TutorSearch: { serviceId?: string, categoryId?: string } | undefined
     Services: {categoryId: string, categoryName: string}
     ServiceProviders: {serviceId: string, serviceName: string}
-    GroomerProfile: {providerServiceId: string}
-    BookService: {providerServiceId: string, petId?: string}
-    PetForm: { petId?: string, providerServiceId?: string }
+    GroomerProfile: { providerServiceId: string } & ChosenServiceAddress
+    BookService: { providerServiceId: string, petId?: string } & ChosenServiceAddress
+    PetForm: { petId?: string, providerServiceId?: string } & ChosenServiceAddress
 }
 
 export type BookingsStackParamList = {
@@ -48,7 +54,7 @@ export type ProfileStackParamList = {
     Profile:undefined
     BecomeAProvider:undefined
     Pets: undefined
-    PetForm: { petId?: string, providerServiceId?: string }
+    PetForm: { petId?: string, providerServiceId?: string } & ChosenServiceAddress
     DesignSystemShowcase: undefined
 }
 

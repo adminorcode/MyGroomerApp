@@ -3,7 +3,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { randomUUID } from 'node:crypto'
 import { mkdirSync } from 'node:fs'
-import { evidenceFile, launchBrowser, openPage, loginTutor, gateRoute, startRun } from './harness.mjs'
+import { evidenceFile, fillServiceAddress, launchBrowser, openPage, loginTutor, gateRoute, startRun } from './harness.mjs'
 
 const require = createRequire(import.meta.url)
 const apiRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../API')
@@ -39,7 +39,7 @@ async function capture(page, name, locator) {
 async function openBooking(page) {
   await loginTutor(page, { email: tutorEmail, password: 'admin' })
   await page.getByRole('button', { name: 'Buscar um serviço' }).click()
-  await page.getByRole('textbox', { name: 'Endereço do atendimento' }).fill('Avenida Paulista, São Paulo')
+  await fillServiceAddress(page, 'Avenida Paulista, São Paulo')
   if (!await page.getByRole('radio', { name: 'Banho, selecionado' }).count()) await page.getByRole('radio', { name: 'Banho', exact: true }).click()
   await page.getByRole('button', { name: 'Buscar', exact: true }).click()
   await page.getByRole('button', { name: new RegExp(professionalName) }).click()
@@ -104,14 +104,13 @@ async function execute() {
   gate.delayMs = 1800
   await page.getByRole('radio',{name:/^Luna horários/}).click()
   await page.getByText('Buscando horários…',{exact:true}).waitFor()
-  check('AC-02 carregamento parcial mantém endereço editável',await page.getByRole('textbox',{name:'Local',exact:true}).isEditable())
+  check('AC-02 carregamento parcial mantém o local da busca',await page.getByLabel('Local do atendimento: Avenida Paulista, São Paulo').isVisible())
   await capture(page,'loading',page.getByText('Buscando horários…',{exact:true}))
   gate.delayMs = 0
   await page.getByRole('button',{name:'09:00',exact:true}).waitFor()
   const expected = (await available(smallPet)).data
   check('AC-02 API usa duração do porte pequeno',expected.duration_minutes === 60)
   check('AC-02 grade contém somente slots da API',JSON.stringify(await page.getByRole('button',{name:/^\d\d:\d\d$/}).allTextContents()) === JSON.stringify(expected.slots.map(clock)))
-  await page.getByRole('textbox',{name:'Local',exact:true}).fill('Avenida Paulista, 123 — São Paulo')
   await page.getByRole('button',{name:'09:00',exact:true}).click()
   check('AC-03 contexto mostra profissional serviço e pet', await page.getByLabel(`Profissional: ${professionalName}`,{exact:true}).count() === 1 && await page.getByLabel('Serviço: Banho',{exact:true}).count() === 1 && await page.getByLabel('Pet: Luna horários',{exact:true}).count() === 1)
   check('AC-02 seleção explícita libera envio',await create.isEnabled())
@@ -161,7 +160,7 @@ async function execute() {
   check('AC-05 envio pendente desabilita repetição',await create.isDisabled())
   const refused = await responseWait
   await page.getByRole('alert').waitFor()
-  check('AC-04 conflito real recebe 409 e mantém formulário',refused.status() === 409 && await create.isDisabled() && await page.getByRole('textbox',{name:'Local',exact:true}).inputValue() === 'Avenida Paulista, 123 — São Paulo')
+  check('AC-04 conflito real recebe 409 e mantém formulário',refused.status() === 409 && await create.isDisabled() && await page.getByLabel('Local do atendimento: Avenida Paulista, São Paulo').isVisible())
   check('AC-05 um único POST no envio',posts===1)
   await capture(page,'conflict',page.getByRole('alert'))
   await request(`/providers/agenda-blocks/${conflict.id}`,'DELETE',undefined,providerToken)

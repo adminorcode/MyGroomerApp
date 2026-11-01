@@ -60,6 +60,8 @@ export type CoverageSearchParams = {
     address: string
     service_id?: string
     category_id?: string
+    latitude?: number
+    longitude?: number
 }
 
 export type PublicProfileService = {

@@ -1,6 +1,9 @@
+import { mkdirSync } from 'node:fs'
+import path from 'node:path'
 import {
   checkContrast,
   evidenceFile,
+  fillServiceAddress,
   gateRoute,
   launchBrowser,
   loginTutor,
@@ -24,7 +27,7 @@ async function expectBooking(page, serviceName) {
 
 async function openProfile(page) {
   await page.getByRole('button', { name: 'Buscar um serviço' }).click()
-  await page.getByRole('textbox', { name: 'Endereço do atendimento' }).fill('Avenida Paulista, São Paulo')
+  await fillServiceAddress(page, 'Avenida Paulista, São Paulo')
   const selected = page.getByRole('radio', { name: 'Banho, selecionado' })
   if (await selected.count() === 0) {
     await page.getByRole('radio', { name: 'Banho', exact: true }).click()
@@ -74,6 +77,16 @@ async function run(browser) {
   check('AC-03 serviço selecionado libera o agendamento', await book.isEnabled())
   await book.click()
   await expectBooking(page, 'Banho')
+  const carried = page.getByLabel('Local do atendimento: Avenida Paulista, São Paulo')
+  await carried.waitFor()
+  check(
+    'AC-05 endereço da busca segue para o agendamento',
+    await carried.isVisible() && await page.getByRole('textbox', { name: 'Local', exact: true }).count() === 0,
+  )
+  const shotDir = evidenceFile('007-groomer-public-profile', 'ui-review')
+  mkdirSync(shotDir, { recursive: true })
+  await carried.scrollIntoViewIfNeeded()
+  await page.screenshot({ path: path.join(shotDir, '01-mobile-local.png'), fullPage: true })
   check('AC-03 Banho segue com o profissional para pet e horário', true)
 
   await page.getByRole('button', { name: 'Voltar' }).click()
@@ -92,6 +105,12 @@ async function run(browser) {
     check,
   )
   check('AC-04 desktop também começa sem seleção', await wide.getByRole('button', { name: 'Agendar serviço' }).isDisabled())
+  await wide.getByRole('radio', { name: /^Banho, A partir de/ }).click()
+  await wide.getByRole('button', { name: 'Agendar serviço' }).click()
+  const wideLocation = wide.getByLabel('Local do atendimento: Avenida Paulista, São Paulo')
+  await wideLocation.waitFor({ timeout: 15000 })
+  await wideLocation.scrollIntoViewIfNeeded()
+  await wide.screenshot({ path: path.join(shotDir, '02-desktop-local.png'), fullPage: true })
 }
 
 let browser

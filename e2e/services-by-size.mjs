@@ -2,6 +2,7 @@ import { createRequire } from 'node:module'
 import {
   checkContrast,
   evidenceFile,
+  fillServiceAddress,
   launchBrowser,
   loginProfessional,
   loginTutor,
@@ -214,7 +215,7 @@ async function run() {
     const tutor = await openPage(browser, { viewport: 'mobile' })
     await loginTutor(tutor)
     await tutor.getByRole('button', { name: 'Buscar um serviço' }).click()
-    await tutor.getByRole('textbox', { name: 'Endereço do atendimento' }).fill('Avenida Paulista, São Paulo')
+    await fillServiceAddress(tutor, 'Avenida Paulista, São Paulo')
     await tutor.getByRole('radio', { name: 'Banho', exact: true }).click()
     await tutor.getByRole('button', { name: 'Buscar' }).click()
     await tutor.getByText('Nenhum groomer atende este endereço.').waitFor({ timeout: 15000 })

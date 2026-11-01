@@ -65,6 +65,21 @@ export async function loginProfessional(page, account = fixtures.groomer) {
   await page.getByText('Agendamentos').waitFor({ timeout: 20000 })
 }
 
+export async function fillServiceAddress(page, address) {
+  const field = page.getByRole('combobox', { name: 'Endereço do atendimento' })
+  await field.waitFor({ timeout: 15000 })
+  await field.fill('')
+  const pending = page.waitForResponse(
+    (response) => response.url().includes('/service-location/autocomplete'),
+    { timeout: 15000 },
+  )
+  await field.fill(address)
+  await pending
+  await field.blur()
+  await page.getByRole('listbox').waitFor({ state: 'hidden', timeout: 5000 })
+  await page.getByRole('progressbar', { name: 'Buscando endereços' }).waitFor({ state: 'hidden', timeout: 5000 })
+}
+
 export async function gateRoute(page, pattern, gate) {
   await page.route(pattern, async (route) => {
     if (gate.fail) {

@@ -32,7 +32,12 @@ export default function GroomerPublicProfileScreen({ navigation, route }: Props)
 
     const openBooking = () => {
         if (!selectedServiceId) return
-        navigation.navigate('BookService', { providerServiceId: selectedServiceId })
+        navigation.navigate('BookService', {
+            providerServiceId: selectedServiceId,
+            customerLocation: route.params.customerLocation,
+            customerLatitude: route.params.customerLatitude,
+            customerLongitude: route.params.customerLongitude,
+        })
     }
 
     if (isLoading || (!profile && isFetching)) {

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import {
   checkContrast,
   evidenceFile,
+  fillServiceAddress,
   launchBrowser,
   loginProfessional,
   loginTutor,
@@ -103,7 +104,7 @@ async function leaveServices(page) {
 }
 
 async function searchTutor(page, address) {
-  await page.getByRole('textbox', { name: 'Endereço do atendimento' }).fill(address)
+  await fillServiceAddress(page, address)
   await page.getByRole('button', { name: 'Buscar' }).click()
 }
 

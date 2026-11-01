@@ -1,4 +1,4 @@
-import { appUrl as base, evidenceFile, fixtures, launchBrowser, openPage, openLogin, openRegistrationWelcome, startRun } from './harness.mjs'
+import { appUrl as base, evidenceFile, fillServiceAddress, fixtures, launchBrowser, openPage, openLogin, openRegistrationWelcome, startRun } from './harness.mjs'
 
 const tutor = fixtures.tutor
 const groomer = fixtures.groomer
@@ -143,8 +143,7 @@ async function runTutor(browser) {
   check('AC-12 home do tutor', /Olá/.test(body) && body.includes('Início'))
 
   await page.getByRole('button', { name: 'Buscar um serviço' }).click()
-  await page.getByRole('textbox', { name: 'Endereço do atendimento' }).waitFor({ timeout: 15000 })
-  await page.getByRole('textbox', { name: 'Endereço do atendimento' }).fill('Avenida Paulista, São Paulo')
+  await fillServiceAddress(page, 'Avenida Paulista, São Paulo')
   const banho = page.getByRole('radio', { name: /Banho/i }).first()
   if ((await banho.count()) > 0) {
     await banho.click()
