@@ -1,5 +1,5 @@
 import { chromium } from 'playwright'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -7,6 +7,17 @@ const here = path.dirname(fileURLToPath(import.meta.url))
 
 export const appUrl = 'http://localhost:8081'
 export const apiUrl = 'http://127.0.0.1:3000'
+
+const brandSource = readFileSync(new URL('../constants/brand.ts', import.meta.url), 'utf8')
+
+function brandDefault(name) {
+  const match = brandSource.match(new RegExp(`export const ${name} = '([^']*)'`))
+  if (!match) throw new Error(`constants/brand.ts não declara ${name}`)
+  return match[1]
+}
+
+export const APP_NAME = process.env.EXPO_PUBLIC_APP_NAME?.trim() || brandDefault('APP_NAME_DEFAULT')
+export const APP_SCHEME = process.env.EXPO_PUBLIC_APP_SCHEME?.trim() || brandDefault('APP_SCHEME_DEFAULT')
 
 export const fixtures = {
   tutor: { email: 'tutor@email.com', password: 'admin' },

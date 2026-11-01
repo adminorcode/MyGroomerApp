@@ -724,7 +724,7 @@ Referência principal: WCAG 2.2 nível AA, adaptada às particularidades do mobi
 
 ### 17.1. Diretriz de integração
 
-O frontend do My Groomer parte de um **repositório React Native existente** (referência de origem do projeto: **Boame**). Este documento não afirma qual é sua arquitetura atual. Antes de implementar:
+O frontend parte de um **repositório React Native existente**. O nome público atual é Tio de Pet e fica em `constants/brand.ts`. Este documento não afirma qual é a arquitetura atual. Antes de implementar:
 
 1. Inspecionar `package.json`, versão RN e gerenciamento de dependências.
 2. Inspecionar navegação atual, estrutura de pastas, gerenciamento de formulários, estado global, temas, assets e i18n.
@@ -1076,6 +1076,8 @@ Um ticket de tela só está pronto quando:
 
 ## 23. REFERÊNCIAS VISUAIS E RASTREABILIDADE
 
+As referências de tela e os assets estão na pasta `img reference` da raiz do MyGroomer: `C:\Users\lucas\source\repos\MyGroomer\img reference`. Os PNGs de fluxo ficam nessa pasta; ilustrações e ícones ficam em `img reference/Assets/`.
+
 Material do projeto disponível em pacotes anteriores:
 
 **Tutor:** `My_Groomer_Wireframes_PNG_v02.zip` e `My_Groomer_Wireframes_Fluxo_Tutor_PNG_v02.pdf`.
@@ -1095,7 +1097,7 @@ G09_Solicitacoes_recebidas.png
 G10_Perfil_publico.png
 ```
 
-**Atenção:** esses arquivos só estarão disponíveis ao agente se forem compartilhados ou estiverem presentes no workspace. **Este `.md` funciona sozinho** para orientar o desenvolvimento, mas o refinamento visual ficará mais fiel quando os PNGs também forem fornecidos.
+**Atenção:** os PNGs de referência estão em `C:\Users\lucas\source\repos\MyGroomer\img reference`. Consulte o arquivo da tela antes do refinamento visual. **Este `.md` funciona sozinho** para tokens, componentes e regras; o PNG define hierarquia e composição, não a tela funcional nem os dados de exemplo.
 
 ---
 

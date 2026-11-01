@@ -4,6 +4,7 @@ import { AuthStackParamList } from "../../navigation/types";
 import { spacing } from "../../constants/theme";
 import { MGButton, MGScreen } from "../../design-system/components";
 import { ProfileRoleSelector } from "../../design-system/patterns";
+import { APP_NAME } from "../../constants/brand";
 
 type WelcomeScreenNavigationProp = StackNavigationProp<AuthStackParamList, "Welcome">;
 
@@ -16,7 +17,7 @@ export default function WelcomeScreen({ navigation }: Props) {
         <MGScreen scrollable contentStyle={styles.container}>
           <View style={styles.content}>
             <ProfileRoleSelector
-                title="MyGroomer"
+                title={APP_NAME}
                 subtitle="Banho e tosa em domicílio"
                 tutorLabel="Sou tutor"
                 groomerLabel="Sou profissional"

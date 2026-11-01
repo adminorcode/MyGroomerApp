@@ -2,6 +2,7 @@ import { StyleSheet, View, useWindowDimensions } from 'react-native'
 import MGButton from '../components/MGButton'
 import MGText from '../components/MGText'
 import { useMGTheme } from '../theme/useMGTheme'
+import { APP_NAME } from '../../constants/brand'
 
 type Props = {
   title?: string
@@ -13,7 +14,7 @@ type Props = {
 }
 
 export default function ProfileRoleSelector({
-  title = 'MyGroomer',
+  title = APP_NAME,
   subtitle = 'Banho e tosa em domicílio',
   onSelectTutor,
   onSelectGroomer,

@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "Boame",
+    "name": "Tio de Pet",
     "slug": "client",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "scheme": "boame",
+    "scheme": "tiodepet",
     "ios": {
       "supportsTablet": true
     },
@@ -54,7 +54,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Allow Boame to use your location to set service locations."
+          "locationWhenInUsePermission": "O Tio de Pet usa sua localização para definir o local do atendimento."
         }
       ],
       "expo-web-browser",

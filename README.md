@@ -1,4 +1,4 @@
-# Boame Client
+# Tio de Pet
 
 ## Teste local MyGroomer
 
@@ -12,15 +12,13 @@ npm run web -- --localhost --port 8081
 
 Abra `http://localhost:8081`. A configuração de exemplo aponta REST e Socket.io para esta máquina. Contas fictícias: `tutor@email.com` e `groomer@email.com`, ambas com senha `admin`.
 
-O aviso de teste é exibido a partir da configuração da API. Nesse modo, reservas não abrem checkout, cadastro dispensa e-mail real e Google fica oculto. Use apenas dados fictícios. Os valores/telas legados do Boame ainda não representam políticas financeiras do MyGroomer.
+O aviso de teste é exibido a partir da configuração da API. Nesse modo, reservas não abrem checkout, cadastro dispensa e-mail real e Google fica oculto. Use apenas dados fictícios. O nome exibido fica em `constants/brand.ts`. Valores herdados do marketplace anterior ainda não representam políticas financeiras deste produto.
 
 `localhost` no celular representa o próprio aparelho; para acesso físico é necessário configurar URLs alcançáveis e a interface de escuta da API. A validação deste lote cobre navegador e exportações de bundle Android/iOS, sem equivaler a teste em dispositivo.
 
 Checagem de tipos: `node node_modules/typescript/bin/tsc --noEmit`. Builds exportados ficam em `dist-*`, ignorados pelo Git e excluídos da checagem de fontes.
 
-React Native (Expo) mobile app for **Boame** — a service marketplace that connects customers to registered providers for domestic and commercial services, starting with car wash and home cleaning.
-
-Built by **Asante** as a full-stack portfolio project. Pairs with the [Boame API](https://github.com/littlegod20/boa_me).
+Aplicativo React Native (Expo) do **Tio de Pet**. Tutores encontram profissionais de pet para atendimento em domicílio no Brasil. O nome e o esquema de link ficam em `constants/brand.ts` (`EXPO_PUBLIC_APP_NAME`, `EXPO_PUBLIC_APP_SCHEME`). A API correspondente está em [MyGroomerApi](https://github.com/adminorcode/MyGroomerApi). O repositório deste aplicativo continua [MyGroomerApp](https://github.com/adminorcode/MyGroomerApp).
 
 ---
 
@@ -66,7 +64,7 @@ Customers browse services, pick a provider, book and pay via Mobile Money or car
 |-------|-----------|-----|
 | Framework | Expo SDK 56 + React Native | Fast iteration, EAS builds, native modules when needed |
 | Language | TypeScript | Shared types with the API domain model |
-| Navigation | React Navigation 7 | Stack + bottom tabs, deep linking (`boame://`) |
+| Navigation | React Navigation 7 | Stack + bottom tabs, deep linking (`tiodepet://`, configurável) |
 | Server state | TanStack Query | Caching, mutations, and loading/error UX for API calls |
 | Client state | Zustand + AsyncStorage | Persisted auth session |
 | Forms | React Hook Form + Zod | Schema-first validation aligned with the API |
@@ -91,7 +89,7 @@ App.tsx
 ```
 
 ```
-UI → hooks (TanStack Query) → services (Axios) → Boame API
+UI → hooks (TanStack Query) → services (Axios) → API do Tio de Pet
                 ↓
          SocketContext → Socket.io (chat / unread)
                 ↓
@@ -108,7 +106,7 @@ UI → hooks (TanStack Query) → services (Axios) → Boame API
 - JWT stored in Zustand, persisted with AsyncStorage
 - Automatic `Authorization` header on every request
 - Global logout on `401` responses
-- Deep links for auth screens (`boame://login`, `register`, `verify-email`)
+- Deep links for auth screens (`tiodepet://login`, `register`, `verify-email`; o esquema vem de `APP_SCHEME`)
 
 ### Customer experience
 - Home: categories and services catalogue
@@ -181,7 +179,7 @@ client/
 ### Prerequisites
 - Node.js 18+
 - Expo Go **or** a development build (`expo-dev-client` is in the project)
-- Running [Boame API](../server) on a machine reachable from your phone/emulator
+- API do Tio de Pet em execução numa máquina alcançável pelo celular ou emulador
 - For physical devices: use your LAN IP (not `localhost`) in `.env`
 
 ### Setup
@@ -212,12 +210,16 @@ Create a `.env` in `client/` (gitignored):
 ```env
 EXPO_PUBLIC_API_URL=http://YOUR_LAN_IP:3000/api/v1
 EXPO_PUBLIC_SOCKET_URL=http://YOUR_LAN_IP:3000
+EXPO_PUBLIC_APP_NAME=Tio de Pet
+EXPO_PUBLIC_APP_SCHEME=tiodepet
 ```
 
 | Variable | Purpose |
 |----------|---------|
 | `EXPO_PUBLIC_API_URL` | REST base URL (must include `/api/v1`) |
 | `EXPO_PUBLIC_SOCKET_URL` | Socket.io origin (no `/api` path) |
+| `EXPO_PUBLIC_APP_NAME` | Nome público. Padrão: Tio de Pet |
+| `EXPO_PUBLIC_APP_SCHEME` | Esquema de deep link. Padrão: `tiodepet`. A API precisa do mesmo valor em `APP_SCHEME` |
 
 Restart Expo after changing env vars so Metro picks them up.
 
@@ -244,7 +246,7 @@ npx eas build --profile development --platform android
 | Payments | Booking flow opens Paystack URL via `expo-web-browser` |
 | Chat | `SocketProvider` + conversation/message services |
 | Location | Text-based location on bookings (map picker planned) |
-| Deep linking | Scheme `boame` in `app.json` |
+| Deep linking | Esquema em `constants/brand.ts`, aplicado por `app.config.ts` |
 
 ---
 
@@ -285,4 +287,4 @@ Backend-planned features that will land in this client over time:
 
 ---
 
-*Pairs with the Boame API — DigitalOcean (API) + Expo EAS (mobile) for deployment.*
+*Aplicativo Tio de Pet. O workspace e os repositórios continuam com o nome MyGroomer.*

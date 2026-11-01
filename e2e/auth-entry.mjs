@@ -1,6 +1,6 @@
 import path from 'node:path'
 import { mkdirSync } from 'node:fs'
-import { appUrl, evidenceFile, gateRoute, launchBrowser, loginProfessional, openLogin, openPage, startRun } from './harness.mjs'
+import { APP_NAME, appUrl, evidenceFile, gateRoute, launchBrowser, loginProfessional, openLogin, openPage, startRun } from './harness.mjs'
 
 const run = startRun({ command: 'node e2e/auth-entry.mjs', evidence: evidenceFile('010-groomer-registration/auth-entry', 'auth-entry.log') })
 const { check } = run
@@ -98,8 +98,8 @@ try {
   await button(desktop, 'Sou tutor').waitFor()
   await capture(desktop, '06-welcome-desktop')
   await desktop.setViewportSize({ width: 320, height: 760 })
-  await desktop.getByText('MyGroomer', { exact: true }).waitFor()
-  const logo = await desktop.getByText('MyGroomer', { exact: true }).boundingBox()
+  await desktop.getByText(APP_NAME, { exact: true }).waitFor()
+  const logo = await desktop.getByText(APP_NAME, { exact: true }).boundingBox()
   check('AE-06 logotipo fica em uma linha em320', logo.height <= 41)
   await capture(desktop, '07-welcome-narrow')
   await desktop.evaluate(() => {

@@ -1,4 +1,4 @@
-import { appUrl as base, evidenceFile, fillServiceAddress, fixtures, launchBrowser, openPage, openLogin, openRegistrationWelcome, startRun } from './harness.mjs'
+import { APP_NAME, appUrl as base, evidenceFile, fillServiceAddress, fixtures, launchBrowser, openPage, openLogin, openRegistrationWelcome, startRun } from './harness.mjs'
 
 const tutor = fixtures.tutor
 const groomer = fixtures.groomer
@@ -48,7 +48,7 @@ async function runTutor(browser) {
 
   await openWelcome(page)
   let body = await textOf(page)
-  const logoFace = await fontFamily(page.getByText('MyGroomer').first())
+  const logoFace = await fontFamily(page.getByText(APP_NAME).first())
   const subtitleFace = await fontFamily(page.getByText('Banho e tosa em domicílio').first())
   const tutorButtonFace = await fontFamily(page.getByText('Sou tutor', { exact: true }).first())
   check('AC-14 logotipo permanece em Abres', usesFace(logoFace, 'Abres'), logoFace)
@@ -56,12 +56,12 @@ async function runTutor(browser) {
   check('AC-14 botão em Inter SemiBold', usesFace(tutorButtonFace, 'Inter-SemiBold'), tutorButtonFace)
   check(
     'AC-11 boas-vindas com seletor de perfil',
-    body.includes('MyGroomer') &&
+    body.includes(APP_NAME) &&
       body.includes('Banho e tosa em domicílio') &&
       body.includes('Sou tutor') &&
       body.includes('Sou profissional'),
   )
-  const welcomeCentered = await page.getByText('MyGroomer').evaluate((el) => {
+  const welcomeCentered = await page.getByText(APP_NAME).evaluate((el) => {
     const title = el.getBoundingClientRect()
     const button = Array.from(document.querySelectorAll('[role="button"]')).find((node) =>
       (node.textContent || '').includes('Sou tutor'),
@@ -263,7 +263,7 @@ async function runGroomer(browser) {
 async function runLightOnlyGuard(browser) {
   const page = await openPage(browser, { viewport: 'mobile', colorScheme: 'dark' })
   await openWelcome(page)
-  const background = await page.getByText('MyGroomer').evaluate((el) => {
+  const background = await page.getByText(APP_NAME).evaluate((el) => {
     let node = el
     while (node) {
       const bg = getComputedStyle(node).backgroundColor

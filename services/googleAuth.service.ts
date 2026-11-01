@@ -1,8 +1,9 @@
 import * as Linking from 'expo-linking'
 import * as WebBrowser from 'expo-web-browser'
 import { API_BASE_URL } from '../constants/api'
+import { appDeepLink } from '../constants/brand'
 
-const GOOGLE_REDIRECT_URI = 'boame://auth/callback'
+const GOOGLE_REDIRECT_URI = appDeepLink('auth/callback')
 
 export async function signInWithGoogle(): Promise<string> {
     const authUrl = `${API_BASE_URL.replace(/\/$/, '')}/auth/google`

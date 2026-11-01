@@ -9,11 +9,12 @@ import * as Linking from 'expo-linking'
 import { useSyncUnreadFromConversations, useUnreadMessagesListener } from '../hooks/useUnreadMessages'
 import { useTheme } from '../context/ThemeContext'
 import { RootParamList } from './types'
+import { APP_SCHEME } from '../constants/brand'
 
 const prefix = Linking.createURL('/')
 
 const linking: LinkingOptions<RootParamList> = {
-    prefixes: [prefix, 'boame://'],
+    prefixes: [prefix, `${APP_SCHEME}://`],
     config: {
         screens: {
             Auth: {

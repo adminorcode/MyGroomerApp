@@ -1,4 +1,4 @@
-import { appUrl as base, evidenceFile, launchBrowser, openPage, openRegistrationWelcome, startRun } from './harness.mjs'
+import { APP_NAME, appUrl as base, evidenceFile, launchBrowser, openPage, openRegistrationWelcome, startRun } from './harness.mjs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -30,8 +30,8 @@ async function openWelcome(page) {
 
 async function welcomeVisible(page, label) {
   const body = await textOf(page)
-  check(`${label} boas-vindas`, body.includes('MyGroomer') && body.includes('Banho e tosa em domicílio') && body.includes('Sou tutor') && body.includes('Sou profissional'))
-  const titleColor = await page.getByText('MyGroomer').evaluate((element) => getComputedStyle(element).color)
+  check(`${label} boas-vindas`, body.includes(APP_NAME) && body.includes('Banho e tosa em domicílio') && body.includes('Sou tutor') && body.includes('Sou profissional'))
+  const titleColor = await page.getByText(APP_NAME).evaluate((element) => getComputedStyle(element).color)
   const background = await page.locator('body').evaluate((element) => getComputedStyle(element).backgroundColor)
   check(`${label} texto visível`, titleColor !== background && titleColor !== 'rgba(0, 0, 0, 0)')
 }
