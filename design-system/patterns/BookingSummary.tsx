@@ -29,13 +29,13 @@ export default function BookingSummary({
   return (
     <MGCard>
       <MGText variant="heading3">{title}</MGText>
-      <View style={{ marginTop: spacing.md, gap: spacing.sm }}>
+      <View style={{ marginTop: spacing.sm, gap: spacing.sm }}>
         {rows.map((row) => (
           <View key={`${row.label}-${row.value}`} accessibilityLabel={`${row.label}: ${row.value}`} style={styles.row}>
-            <MGText variant="bodySmall" color="secondary" style={styles.label}>
+            <MGText variant="body" color="secondary" style={styles.label}>
               {row.label}
             </MGText>
-            <MGText variant="bodySmall" style={styles.value}>
+            <MGText variant="body" style={[styles.value, { fontFamily: fonts.semibold }]}>
               {row.value}
             </MGText>
           </View>

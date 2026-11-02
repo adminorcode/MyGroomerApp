@@ -1,4 +1,4 @@
-import { BookingStatus, CreateBookingInput } from "../types/booking.types"
+import { BookingStatus, CreateBookingInput, CreateBookingResponse } from "../types/booking.types"
 import api from "./api"
 
 export type BookingSlots = { slots: string[], duration_minutes: number, price: number, timezone: 'America/Sao_Paulo' }
@@ -21,7 +21,7 @@ export const getBookings = async (params: GetBookingsParams = {}) => {
     return response.data
 }
 
-export const createBooking = async (booking: CreateBookingInput) => {
+export const createBooking = async (booking: CreateBookingInput): Promise<CreateBookingResponse> => {
     const response = await api.post('/bookings', booking)
     return response.data
 }
