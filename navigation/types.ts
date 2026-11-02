@@ -40,6 +40,7 @@ export type HomeStackParamList = {
     ServiceProviders: {serviceId: string, serviceName: string}
     GroomerProfile: { providerServiceId: string } & ChosenServiceAddress
     BookService: { providerServiceId: string, petId?: string } & ChosenServiceAddress
+    BookingRequest: { providerServiceId: string, petId: string, scheduledAt: string } & ChosenServiceAddress
     PetForm: { petId?: string, providerServiceId?: string } & ChosenServiceAddress
 }
 

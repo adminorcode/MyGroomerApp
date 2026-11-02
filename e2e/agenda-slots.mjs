@@ -10,7 +10,8 @@ const apiRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../.
 require(path.join(apiRoot, 'node_modules/dotenv')).config({ path: path.join(apiRoot, '.env'), quiet: true })
 const { Pool } = require(path.join(apiRoot, 'node_modules/pg'))
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
-const run = startRun({ command: 'node e2e/agenda-slots.mjs', evidence: evidenceFile('008-agenda-slots', 'agenda-slots.log') })
+const planDir = process.env.E2E_PLAN_DIR || '008-agenda-slots'
+const run = startRun({ command: 'node e2e/agenda-slots.mjs', evidence: evidenceFile(planDir, 'agenda-slots.log') })
 const { check } = run
 const base = 'http://127.0.0.1:3000/api/v1'
 const providerId = randomUUID(), tutorId = randomUUID(), professionalId = randomUUID(), offerId = randomUUID()
@@ -18,7 +19,7 @@ const suffix = randomUUID()
 const tutorEmail = `slots-ui-${suffix}@mygroomer.test`, providerEmail = `slots-pro-${suffix}@mygroomer.test`
 const professionalName = 'Profissional de horários e cuidados pet em domicílio'
 let browser, guarded = false, tutorToken, providerToken, smallPet, largePet
-const screenshotDir = path.dirname(evidenceFile('008-agenda-slots', 'ui-review/mobile.png'))
+const screenshotDir = path.dirname(evidenceFile(planDir, 'ui-review/mobile.png'))
 const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date())
 const addDays = (date, days) => { const value = new Date(`${date}T12:00:00Z`); value.setUTCDate(value.getUTCDate() + days); return value.toISOString().slice(0,10) }
 const emptyDate = addDays(today, 1), openDate = addDays(today, 2)
@@ -91,14 +92,14 @@ async function execute() {
   await emptyPets.route('**/api/v1/pets',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({data:[]})}))
   await openBooking(emptyPets)
   await emptyPets.getByText('Você ainda não cadastrou um pet.',{exact:true}).waitFor()
-  check('AC-03 sem pets oferece cadastro e bloqueia envio',await emptyPets.getByRole('button',{name:'Cadastrar pet',exact:true}).isEnabled() && await emptyPets.getByRole('button',{name:'Criar agendamento de teste',exact:true}).isDisabled())
+  check('AC-03 sem pets oferece cadastro e bloqueia envio',await emptyPets.getByRole('button',{name:'Cadastrar pet',exact:true}).isEnabled() && await emptyPets.getByRole('button',{name:'Revisar solicitação',exact:true}).isDisabled())
   await capture(emptyPets,'no-pets')
   await emptyPets.context().close()
   const page = await openPage(browser)
   const gate = {fail:false,delayMs:0}
   await gateRoute(page,'**/api/v1/bookings/slots?**',gate)
   await openBooking(page)
-  const create = page.getByRole('button',{name:'Criar agendamento de teste'})
+  const create = page.getByRole('button',{name:'Revisar solicitação'})
   check('AC-02 sem pet e slot não envia',await create.isDisabled())
   await page.getByRole('radio',{name:dayLabel(openDate),exact:true}).click()
   gate.delayMs = 1800
@@ -149,21 +150,27 @@ async function execute() {
   await page.getByText(/Duração: 60 min/).waitFor()
   const next = (await available(smallPet)).data.slots.find(iso => clock(iso) !== clock(first))
   await page.getByRole('button',{name:clock(next),exact:true}).click()
-  const conflict = (await request('/providers/agenda-blocks','POST',{starts_at:next,ends_at:new Date(new Date(next).getTime()+60*60000).toISOString()},providerToken)).data
   const submission = {fail:false,delayMs:1200}
   await gateRoute(page,'**/api/v1/bookings',submission)
   let posts = 0
   page.on('request',request=>{if(request.method()==='POST' && request.url().endsWith('/bookings')) posts++})
-  const responseWait = page.waitForResponse(response=>response.request().method()==='POST' && response.url().endsWith('/bookings'))
   await create.click()
-  await page.getByText('Enviando agendamento…',{exact:true}).waitFor()
-  check('AC-05 envio pendente desabilita repetição',await create.isDisabled())
+  await page.getByText('Resumo do agendamento',{exact:true}).waitFor()
+  await page.getByLabel(/^Data: /).waitFor()
+  const conflict = (await request('/providers/agenda-blocks','POST',{starts_at:next,ends_at:new Date(new Date(next).getTime()+60*60000).toISOString()},providerToken)).data
+  const send = page.getByRole('button',{name:'Solicitar agendamento',exact:true})
+  const responseWait = page.waitForResponse(response=>response.request().method()==='POST' && response.url().endsWith('/bookings'))
+  await send.click()
+  await page.getByLabel('Enviando solicitação',{exact:true}).waitFor()
+  check('AC-05 envio pendente desabilita repetição',await send.isDisabled())
   const refused = await responseWait
-  await page.getByRole('alert').waitFor()
-  check('AC-04 conflito real recebe 409 e mantém formulário',refused.status() === 409 && await create.isDisabled() && await page.getByLabel('Local do atendimento: Avenida Paulista, São Paulo').isVisible())
+  await page.getByText('Este horário não está mais disponível. Escolha outro horário.',{exact:true}).waitFor()
+  check('AC-04 conflito real recebe 409 e mantém o resumo',refused.status() === 409 && await send.isDisabled())
   check('AC-05 um único POST no envio',posts===1)
-  await capture(page,'conflict',page.getByRole('alert'))
+  await capture(page,'conflict',page.getByText('Este horário não está mais disponível. Escolha outro horário.',{exact:true}))
   await request(`/providers/agenda-blocks/${conflict.id}`,'DELETE',undefined,providerToken)
+  await page.getByRole('button',{name:'Voltar',exact:true}).last().click()
+  await page.getByText('Escolha um horário',{exact:true}).waitFor()
   await page.getByRole('radio',{name:dayLabel(emptyDate),exact:true}).click()
   await page.getByText('Nenhum horário disponível',{exact:true}).waitFor()
   await page.getByRole('radio',{name:dayLabel(openDate),exact:true}).click()
@@ -185,13 +192,20 @@ async function execute() {
   await capture(page,'desktop',page.getByText('Horários disponíveis',{exact:true}))
   check('AC-03 desktop mantém contexto e envio',await create.isEnabled())
   submission.delayMs=0
-  const createdWait = page.waitForResponse(response=>response.request().method()==='POST' && response.url().endsWith('/bookings'))
   await create.click()
+  await page.getByText('Resumo do agendamento',{exact:true}).waitFor()
+  await page.getByLabel(/^Data: /).waitFor()
+  const createdWait = page.waitForResponse(response=>response.request().method()==='POST' && response.url().endsWith('/bookings'))
+  await page.getByRole('button',{name:'Solicitar agendamento',exact:true}).click()
   const createdResponse = await createdWait
   const createdBody = await createdResponse.json()
+  await page.getByLabel('Status: Aguardando confirmação',{exact:true}).waitFor({timeout:15000})
+  check('AC-04 sucesso cria solicitação real',createdResponse.status()===201 && !!createdBody.data.booking.id)
+  await capture(page,'created',page.getByText('Solicitação enviada',{exact:true}))
+  await page.getByRole('button',{name:'Ver solicitação',exact:true}).click()
   await page.getByText('Detalhe do agendamento',{exact:true}).waitFor({timeout:15000})
-  check('AC-04 sucesso cria reserva real e abre detalhe',createdResponse.status()===201 && !!createdBody.data.booking.id)
-  await capture(page,'created')
+  const reference = `#${createdBody.data.booking.id.slice(0,8).toUpperCase()}`
+  check('AC-04 ver solicitação abre o detalhe da solicitação criada',await page.getByText(reference,{exact:true}).count() === 1)
   await page.context().close()
 }
 try { await execute() } catch(error) { run.fail(error) } finally {

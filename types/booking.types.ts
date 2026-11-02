@@ -38,10 +38,19 @@ export interface Booking {
 export type CreateBookingInput = {
     pet_id: string
     provider_service_id: string
-    scheduled_at: Date
+    scheduled_at: string
     customer_location: string
     customer_latitude?: number
     customer_longitude?: number
+}
+
+export type CreateBookingResponse = {
+    success?: boolean
+    message: string
+    data: {
+        created: boolean
+        booking: Booking
+    }
 }
 
 export type BookingCardTypes = {

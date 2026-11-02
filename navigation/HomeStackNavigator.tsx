@@ -3,6 +3,7 @@ import { HomeStackParamList } from './types'
 import HomeScreen from '../screens/customer/HomeScreen'
 import ServiceProvidersScreen from '../screens/customer/ServiceProvidersScreen'
 import BookServiceScreen from '../screens/customer/BookServiceScreen'
+import BookingRequestScreen from '../screens/customer/BookingRequestScreen'
 import ServiceScreen from '../screens/customer/ServiceScreen'
 import PetFormScreen from '../screens/customer/PetFormScreen'
 import TutorSearchScreen from '../screens/customer/TutorSearchScreen'
@@ -19,6 +20,7 @@ export default function HomeStackNavigator() {
         <Stack.Screen name='ServiceProviders' component={ServiceProvidersScreen} />
         <Stack.Screen name='GroomerProfile' component={GroomerPublicProfileScreen} />
         <Stack.Screen name='BookService' component={BookServiceScreen} />
+        <Stack.Screen name='BookingRequest' component={BookingRequestScreen} />
         <Stack.Screen name='PetForm' component={PetFormScreen} />
     </Stack.Navigator>
   )
