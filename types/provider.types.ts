@@ -70,15 +70,41 @@ export type PublicProfileService = {
     price: number | string
 }
 
+export type PublicProfileArea = {
+    radius_km: number
+    address: string
+}
+
+export type PublicProfileScheduleDay = {
+    weekday: number
+    start: string
+    end: string
+}
+
+export type PublicProfileGalleryPhoto = {
+    id: string
+}
+
 export type PublicProfile = {
     provider_id: string
     name: string
     photo_url?: string | null
+    photo_id?: string | null
     is_verified?: boolean
     average_rating?: number | string
     review_count?: number
     attendance_rules?: string | null
+    area?: PublicProfileArea | null
+    schedule?: PublicProfileScheduleDay[]
+    gallery?: PublicProfileGalleryPhoto[]
     services: PublicProfileService[]
+}
+
+export type PublicPhotoInput = {
+    name: string
+    mime_type: 'image/jpeg' | 'image/png'
+    size: number
+    base64: string
 }
 
 export type CoverageProvider = {

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, View, ActivityIndicator } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
+import { RouteProp } from '@react-navigation/core'
 import { MGButton, MGChip, MGEmptyState, MGScreen, MGText, MGTextField } from '../../design-system/components'
 import { OnboardingStepper } from '../../design-system/patterns'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
@@ -31,6 +32,7 @@ const steps = [
 
 type Props = {
   navigation: StackNavigationProp<ProviderServicesStackParamList, 'ServiceLocation'>
+  route: RouteProp<ProviderServicesStackParamList, 'ServiceLocation'>
 }
 
 function mapLabel(point: LocatedPoint, radiusKm: RadiusKm | null) {
@@ -38,8 +40,9 @@ function mapLabel(point: LocatedPoint, radiusKm: RadiusKm | null) {
   return `Mapa do atendimento. ${point.label}. ${radius}.`
 }
 
-export default function ServiceLocationScreen({ navigation }: Props) {
+export default function ServiceLocationScreen({ navigation, route }: Props) {
   const { colors, elevation, radius, spacing } = useMGTheme()
+  const fromProfile = route.params?.origin === 'profile'
   const location = useGetServiceLocation()
   const save = useSaveServiceLocation()
   const [address, setAddress] = useState('')
@@ -222,6 +225,7 @@ export default function ServiceLocationScreen({ navigation }: Props) {
         travel_fee_per_km: feeAmount(travelFeeMode, travelFeePerKm),
       })
       setSavedNotice(true)
+      if (fromProfile) navigation.goBack()
     } catch (error) {
       setSaveError(getErrorMessage(error))
     }
@@ -241,7 +245,7 @@ export default function ServiceLocationScreen({ navigation }: Props) {
           </View>
           <View style={{ flex: 1 }}>
             <MGButton
-              label="Continuar"
+              label={fromProfile ? 'Salvar' : 'Continuar'}
               onPress={() => { void publish() }}
               disabled={!ready || save.isPending}
               loading={save.isPending}
@@ -251,18 +255,20 @@ export default function ServiceLocationScreen({ navigation }: Props) {
       )}
     >
       <View style={{ gap: spacing.lg, paddingTop: spacing.md }}>
-        <OnboardingStepper steps={steps} currentStepId="location" />
+        {fromProfile ? null : <OnboardingStepper steps={steps} currentStepId="location" />}
         <View style={{ gap: spacing.xs }}>
-          <MGText variant="heading2">Local de atendimento</MGText>
+          <MGText variant="heading2">{fromProfile ? 'Área de atendimento' : 'Local de atendimento'}</MGText>
           <MGText variant="body" color="secondary">
             Informe de onde você sai, até onde atende e como cobra o deslocamento.
           </MGText>
         </View>
-        <MGButton
-          label="Disponibilidade semanal"
-          variant="secondary"
-          onPress={() => navigation.navigate('WeeklyAvailability')}
-        />
+        {fromProfile ? null : (
+          <MGButton
+            label="Disponibilidade semanal"
+            variant="secondary"
+            onPress={() => navigation.navigate('WeeklyAvailability')}
+          />
+        )}
         <MGTextField
           label="Endereço-base"
           required

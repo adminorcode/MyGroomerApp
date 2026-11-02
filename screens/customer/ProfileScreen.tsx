@@ -1,6 +1,6 @@
 import { AppAlert } from '../../utils/alert'
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native'
-import { ChevronRight, LogOut, PawPrint, Store } from 'lucide-react-native'
+import { ChevronRight, IdCard, LogOut, PawPrint, Store } from 'lucide-react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { CustomerTabParamList, ProfileStackParamList } from '../../navigation/types'
 import { useAuthStore } from '../../store/authStore'
@@ -50,6 +50,30 @@ export default function ProfileScreen({ navigation }: Props) {
           </View>
         )}
       </View>
+
+      {user?.role === 'provider' && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Perfil público"
+          onPress={() => navigation.navigate('PublicProfile')}
+          style={({ pressed }) => [
+            styles.actionRow,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+            pressed && styles.pressed,
+          ]}
+        >
+          <View style={[styles.actionIcon, { backgroundColor: colors.selectionSoft }]}>
+            <IdCard size={20} color={colors.primary} />
+          </View>
+          <View style={styles.actionTextWrapper}>
+            <Text style={[styles.actionTitle, { color: colors.text }]}>Perfil público</Text>
+            <Text style={[styles.actionSubtitle, { color: colors.textSecondary }]}>
+              Veja e edite o que o tutor encontra na busca
+            </Text>
+          </View>
+          <ChevronRight size={20} color={colors.textSecondary} />
+        </Pressable>
+      )}
 
       {user?.role === 'customer' && (
         <Pressable
