@@ -44,11 +44,20 @@ writeFileSync(pngPath, Buffer.from(
 let providerRow
 let offersRows
 let weekdayRows
+let galleryRows
 
 async function capture() {
   providerRow = (await pool.query('SELECT * FROM providers WHERE id = $1', [providerId])).rows[0]
   offersRows = (await pool.query('SELECT * FROM provider_services WHERE provider_id = $1 ORDER BY id', [providerId])).rows
   weekdayRows = (await pool.query('SELECT * FROM provider_weekdays WHERE provider_id = $1 ORDER BY weekday', [providerId])).rows
+  galleryRows = (await pool.query(
+    'SELECT id, mime_type, size, content, created_at FROM provider_gallery_photos WHERE provider_id = $1 ORDER BY created_at, id',
+    [providerId],
+  )).rows
+}
+
+async function clearGallery() {
+  await pool.query('DELETE FROM provider_gallery_photos WHERE provider_id = $1', [providerId])
 }
 
 async function restore() {
@@ -76,7 +85,15 @@ async function restore() {
       [providerId, day.weekday, day.start_minute, day.end_minute, day.break_start_minute, day.break_end_minute],
     )
   }
+  if (!galleryRows) return
   await pool.query('DELETE FROM provider_gallery_photos WHERE provider_id = $1', [providerId])
+  for (const photo of galleryRows) {
+    await pool.query(
+      `INSERT INTO provider_gallery_photos (id, provider_id, mime_type, size, content, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [photo.id, providerId, photo.mime_type, photo.size, photo.content, photo.created_at],
+    )
+  }
 }
 
 async function loginApi(email) {
@@ -375,6 +392,7 @@ try {
   await capture()
   const token = await loginApi('groomer@email.com')
   originalProfile = await readProfile(token)
+  await clearGallery()
   await clearRoutine(token)
   browser = await launchBrowser()
   await run(browser)
@@ -391,7 +409,7 @@ try {
       profile.attendance_rules === originalProfile?.attendance_rules
         && JSON.stringify(profile.area) === JSON.stringify(originalProfile?.area)
         && (profile.photo_id ?? null) === (originalProfile?.photo_id ?? null)
-        && profile.gallery.length === 0
+        && profile.gallery.map(photo => photo.id).join(',') === (originalProfile?.gallery ?? []).map(photo => photo.id).join(',')
         && JSON.stringify(profile.services) === JSON.stringify(originalProfile?.services)
         && JSON.stringify(profile.schedule) === JSON.stringify(originalProfile?.schedule),
       JSON.stringify({

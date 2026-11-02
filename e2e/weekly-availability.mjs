@@ -23,6 +23,9 @@ const { check } = session
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 const providerId = '10000000-0000-4000-8000-000000000003'
 let snapshot
+let weekdayRows = []
+let manualRows = []
+let captured = false
 
 async function capture() {
   const current = await pool.query(
@@ -30,11 +33,43 @@ async function capture() {
     [providerId],
   )
   snapshot = current.rows[0]
+  weekdayRows = (await pool.query(
+    'SELECT weekday, start_minute, end_minute, break_start_minute, break_end_minute FROM provider_weekdays WHERE provider_id = $1 ORDER BY weekday',
+    [providerId],
+  )).rows
+  manualRows = (await pool.query(
+    'SELECT id, starts_at, ends_at FROM provider_manual_appointments WHERE provider_id = $1',
+    [providerId],
+  )).rows
+  captured = true
+}
+
+async function prepareEmptyRoutine() {
+  await pool.query('DELETE FROM provider_manual_appointments WHERE provider_id = $1', [providerId])
+  await pool.query('DELETE FROM provider_weekdays WHERE provider_id = $1', [providerId])
+  await pool.query(
+    'UPDATE providers SET travel_gap_minutes = NULL, manual_fit = false WHERE id = $1',
+    [providerId],
+  )
 }
 
 async function restore() {
+  if (!captured) return
   await pool.query('DELETE FROM provider_manual_appointments WHERE provider_id = $1', [providerId])
+  for (const row of manualRows) {
+    await pool.query(
+      'INSERT INTO provider_manual_appointments (id, provider_id, starts_at, ends_at) VALUES ($1, $2, $3, $4)',
+      [row.id, providerId, row.starts_at, row.ends_at],
+    )
+  }
   await pool.query('DELETE FROM provider_weekdays WHERE provider_id = $1', [providerId])
+  for (const day of weekdayRows) {
+    await pool.query(
+      `INSERT INTO provider_weekdays (provider_id, weekday, start_minute, end_minute, break_start_minute, break_end_minute)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [providerId, day.weekday, day.start_minute, day.end_minute, day.break_start_minute, day.break_end_minute],
+    )
+  }
   if (!snapshot) return
   await pool.query(
     'UPDATE providers SET travel_gap_minutes = $2, manual_fit = $3 WHERE id = $1',
@@ -63,6 +98,7 @@ async function openAvailability(page) {
 
 async function run() {
   await capture()
+  await prepareEmptyRoutine()
   const browser = await launchBrowser()
   const page = await openPage(browser, { viewport: 'mobile' })
   try {

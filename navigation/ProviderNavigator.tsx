@@ -1,7 +1,7 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { View, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { LayoutDashboardIcon, Wallet, Wrench } from 'lucide-react-native'
+import { CalendarDays, Wallet, Wrench } from 'lucide-react-native'
 import { useTheme } from '../context/ThemeContext'
 import { fonts } from '../constants/theme'
 import ProviderBookingsStackNavigator from './ProviderBookingsStackNavigator'
@@ -61,9 +61,9 @@ export default function ProviderNavigator() {
                 name="BookingsTab"
                 component={ProviderBookingsStackNavigator}
                 options={{
-                    tabBarLabel: 'Painel',
+                    tabBarLabel: 'Agenda',
                     tabBarIcon: ({ color, size }) => (
-                        <LayoutDashboardIcon color={color} size={size} />
+                        <CalendarDays color={color} size={size} />
                     ),
                 }}
             />
