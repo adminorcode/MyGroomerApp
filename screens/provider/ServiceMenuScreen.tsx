@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
+import { RouteProp } from '@react-navigation/core'
 import { MGButton, MGEmptyState, MGScreen, MGText } from '../../design-system/components'
 import { OnboardingStepper, ServiceEditorCard } from '../../design-system/patterns'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
@@ -28,6 +29,7 @@ const steps = [
 
 type Props = {
   navigation: StackNavigationProp<ProviderServicesStackParamList, 'ServiceMenu'>
+  route: RouteProp<ProviderServicesStackParamList, 'ServiceMenu'>
 }
 
 function priceLine(offer: DraftOffer) {
@@ -47,12 +49,13 @@ function durationLabel(offer: DraftOffer) {
   return parts.length ? parts.join(' · ') : undefined
 }
 
-export default function ServiceMenuScreen({ navigation }: Props) {
+export default function ServiceMenuScreen({ navigation, route }: Props) {
   const { spacing } = useMGTheme()
   const draft = useServiceMenuDraft()
   const menu = useGetProviderMenu()
   const save = useSaveProviderMenu()
   const [saveError, setSaveError] = useState<string | null>(null)
+  const fromProfile = route.params?.origin === 'profile'
 
   useEffect(() => {
     if (menu.data && !draft.state) draft.load(menu.data)
@@ -69,6 +72,10 @@ export default function ServiceMenuScreen({ navigation }: Props) {
     try {
       const result = await save.mutateAsync(toMenuPayload(draft.state.offers))
       draft.load(result.data)
+      if (fromProfile) {
+        navigation.goBack()
+        return
+      }
       navigation.navigate('ServiceLocation')
     } catch (error) {
       setSaveError(getErrorMessage(error))
@@ -88,12 +95,12 @@ export default function ServiceMenuScreen({ navigation }: Props) {
             <MGButton
               label="Voltar"
               variant="secondary"
-              onPress={() => navigation.navigate('ProfessionalRegistration')}
+              onPress={() => (fromProfile ? navigation.goBack() : navigation.navigate('ProfessionalRegistration'))}
             />
           </View>
           <View style={{ flex: 1 }}>
             <MGButton
-              label="Continuar"
+              label={fromProfile ? 'Salvar' : 'Continuar'}
               onPress={() => { void publish() }}
               disabled={!!issue || save.isPending || !draft.state}
               loading={save.isPending}
@@ -103,9 +110,9 @@ export default function ServiceMenuScreen({ navigation }: Props) {
       )}
     >
       <View style={{ gap: spacing.lg, paddingTop: spacing.md }}>
-        <OnboardingStepper steps={steps} currentStepId="services" />
+        {fromProfile ? null : <OnboardingStepper steps={steps} currentStepId="services" />}
         <View style={{ gap: spacing.xs }}>
-          <MGText variant="heading2">Dados do serviço</MGText>
+          <MGText variant="heading2">{fromProfile ? 'Serviços e preços' : 'Dados do serviço'}</MGText>
           <MGText variant="body" color="secondary">
             Publique cada serviço com um tipo da conta, descrição, preço e duração para pequeno, médio e grande.
           </MGText>

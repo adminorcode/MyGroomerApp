@@ -1,7 +1,7 @@
-import { addManualAppointment, createProviderService, deleteProviderService, getProviderEarnings, getProviderMenu, getProviderServiceById, getProviderServices, getPublicProfile, getServiceLocation, getServiceProviders, getWeeklyAvailability, getWeeklySlots, previewServiceLocation, registerAsProvider, saveProviderMenu, saveServiceLocation, saveWeeklyAvailability, searchCoverage, updateProviderService } from "../services/provider.service"
+import { addManualAppointment, addOwnGalleryPhoto, createProviderService, deleteProviderService, getOwnPublicProfile, getProviderEarnings, getProviderMenu, getProviderServiceById, getProviderServices, getPublicProfile, getServiceLocation, getServiceProviders, getWeeklyAvailability, getWeeklySlots, previewServiceLocation, registerAsProvider, removeOwnGalleryPhoto, removeOwnPublicPhoto, saveOwnPublicDescription, saveOwnPublicPhoto, saveProviderMenu, saveServiceLocation, saveWeeklyAvailability, searchCoverage, updateProviderService } from "../services/provider.service"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAuthStore } from "../store/authStore"
-import { CreateProvider, ProviderServiceDetailed, CoverageProvider, CoverageSearchParams, PublicProfile } from "../types/provider.types"
+import { CreateProvider, ProviderServiceDetailed, CoverageProvider, CoverageSearchParams, PublicPhotoInput, PublicProfile } from "../types/provider.types"
 import { ServiceMenu } from "../screens/provider/serviceMenuModel"
 import { LocatedPoint, ServiceLocation } from "../screens/provider/serviceLocationModel"
 import { WeeklyRoutine } from "../screens/provider/weeklyAvailabilityModel"
@@ -24,6 +24,8 @@ export const useSaveProviderMenu = () => {
             queryClient.invalidateQueries({ queryKey: ['provider-menu'] })
             queryClient.invalidateQueries({ queryKey: ['coverage'] })
             queryClient.invalidateQueries({ queryKey: ['service-providers'] })
+            queryClient.invalidateQueries({ queryKey: ['own-public-profile'] })
+            queryClient.invalidateQueries({ queryKey: ['public-profile'] })
         },
     })
 }
@@ -55,6 +57,8 @@ export const useSaveServiceLocation = () => {
         onSuccess: (response) => {
             queryClient.setQueryData(['service-location'], response)
             queryClient.invalidateQueries({ queryKey: ['coverage'] })
+            queryClient.invalidateQueries({ queryKey: ['own-public-profile'] })
+            queryClient.invalidateQueries({ queryKey: ['public-profile'] })
         },
     })
 }
@@ -75,11 +79,76 @@ export const useGetServiceProviders = (serviceId: string, page?: number, limit?:
     })
 }
 
-export const useGetPublicProfile = (providerServiceId: string) => {
+export const useGetPublicProfile = (providerServiceId: string, enabled = true) => {
     return useQuery({
         queryKey: ['public-profile', providerServiceId],
         queryFn: () => getPublicProfile(providerServiceId),
+        enabled: enabled && Boolean(providerServiceId),
         select: (data) => data.data as PublicProfile,
+    })
+}
+
+export const useGetOwnPublicProfile = () => {
+    return useQuery({
+        queryKey: ['own-public-profile'],
+        queryFn: getOwnPublicProfile,
+        retry: false,
+        select: (data) => data.data as PublicProfile,
+    })
+}
+
+export const useSaveOwnPublicDescription = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: (description: string) => saveOwnPublicDescription(description),
+        onSuccess: (response) => {
+            queryClient.setQueryData(['own-public-profile'], response)
+            queryClient.invalidateQueries({ queryKey: ['public-profile'] })
+        },
+    })
+}
+
+export const useSaveOwnPublicPhoto = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: (photo: PublicPhotoInput) => saveOwnPublicPhoto(photo),
+        onSuccess: (response) => {
+            queryClient.setQueryData(['own-public-profile'], response)
+            queryClient.invalidateQueries({ queryKey: ['public-profile'] })
+        },
+    })
+}
+
+export const useRemoveOwnPublicPhoto = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: removeOwnPublicPhoto,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['own-public-profile'] })
+            queryClient.invalidateQueries({ queryKey: ['public-profile'] })
+        },
+    })
+}
+
+export const useAddOwnGalleryPhoto = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: (photo: PublicPhotoInput) => addOwnGalleryPhoto(photo),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['own-public-profile'] })
+            queryClient.invalidateQueries({ queryKey: ['public-profile'] })
+        },
+    })
+}
+
+export const useRemoveOwnGalleryPhoto = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: (photoId: string) => removeOwnGalleryPhoto(photoId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['own-public-profile'] })
+            queryClient.invalidateQueries({ queryKey: ['public-profile'] })
+        },
     })
 }
 
@@ -155,6 +224,8 @@ export const useSaveWeeklyAvailability = () => {
         onSuccess: (response) => {
             queryClient.setQueryData(['weekly-availability'], response)
             queryClient.invalidateQueries({ queryKey: ['weekly-slots'] })
+            queryClient.invalidateQueries({ queryKey: ['own-public-profile'] })
+            queryClient.invalidateQueries({ queryKey: ['public-profile'] })
         },
     })
 }

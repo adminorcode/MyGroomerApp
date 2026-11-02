@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Pressable, ScrollView, View } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
+import { RouteProp } from '@react-navigation/core'
 import { MGButton, MGIcon, MGScreen, MGText, MGTextField } from '../../design-system/components'
 import { WeeklyAvailabilityEditor, WeekdayKey } from '../../design-system/patterns'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
@@ -27,10 +28,12 @@ const GAPS: TravelGap[] = [15, 30, 45, 60, 75, 90, 105, 120]
 
 type Props = {
   navigation: StackNavigationProp<ProviderServicesStackParamList, 'WeeklyAvailability'>
+  route: RouteProp<ProviderServicesStackParamList, 'WeeklyAvailability'>
 }
 
-export default function WeeklyAvailabilityScreen({ navigation }: Props) {
+export default function WeeklyAvailabilityScreen({ navigation, route }: Props) {
   const { colors, spacing, radius } = useMGTheme()
+  const fromProfile = route.params?.origin === 'profile'
   const routine = useGetWeeklyAvailability()
   const save = useSaveWeeklyAvailability()
   const include = useAddManualAppointment()
@@ -85,6 +88,10 @@ export default function WeeklyAvailabilityScreen({ navigation }: Props) {
       const next = draftFromRoutine(result.data)
       setDraft(next)
       setSaved(next)
+      if (fromProfile) {
+        navigation.goBack()
+        return
+      }
       setSavedNotice(true)
     } catch (error) {
       setSaveError(getErrorMessage(error))
@@ -121,8 +128,8 @@ export default function WeeklyAvailabilityScreen({ navigation }: Props) {
           </View>
           <View style={{ flex: 1 }}>
             <MGButton
-              label="Ir para revisão"
-              iconRight={<MGIcon name="chevron-right" size={18} color={colors.onAction.primary} />}
+              label={fromProfile ? 'Salvar' : 'Ir para revisão'}
+              iconRight={fromProfile ? undefined : <MGIcon name="chevron-right" size={18} color={colors.onAction.primary} />}
               onPress={() => { void publish() }}
               disabled={save.isPending || !draft}
               loading={save.isPending}
@@ -133,9 +140,9 @@ export default function WeeklyAvailabilityScreen({ navigation }: Props) {
     >
       {draft ? (
         <View style={{ gap: spacing.lg, paddingTop: spacing.md }}>
-          <AvailabilityStepper />
+          {fromProfile ? null : <AvailabilityStepper />}
           <View style={{ gap: spacing.xs }}>
-            <MGText variant="heading2">Disponibilidade</MGText>
+            <MGText variant="heading2">{fromProfile ? 'Horários de atendimento' : 'Disponibilidade'}</MGText>
             <MGText variant="body" color="secondary">
               Defina seus dias de trabalho, horários e tempo entre atendimentos.
             </MGText>

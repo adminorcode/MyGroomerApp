@@ -51,9 +51,20 @@ export type BookingsStackParamList = {
     ReviewDetail: { reviewId: string }
 }
 
-export type ProfileStackParamList = {
-    Profile:undefined
-    BecomeAProvider:undefined
+export type ProfileEditOrigin = { origin?: 'profile' } | undefined
+
+export type ProviderEditionStackParamList = {
+    ServiceMenu: ProfileEditOrigin
+    ServiceLocation: ProfileEditOrigin
+    WeeklyAvailability: ProfileEditOrigin
+    ServiceOfferEditor: { draftKey: string }
+}
+
+export type ProfileStackParamList = ProviderEditionStackParamList & {
+    Profile: undefined
+    PublicProfile: undefined
+    PublicProfilePreview: undefined
+    BecomeAProvider: undefined
     Pets: undefined
     PetForm: { petId?: string, providerServiceId?: string } & ChosenServiceAddress
     DesignSystemShowcase: undefined
@@ -76,10 +87,6 @@ export type ProviderBookingsStackParamList = {
     ProviderBookingDetail: { bookingId: string }
 }
 
-export type ProviderServicesStackParamList = {
+export type ProviderServicesStackParamList = ProviderEditionStackParamList & {
     ProfessionalRegistration: undefined
-    ServiceMenu: undefined
-    ServiceLocation: undefined
-    WeeklyAvailability: undefined
-    ServiceOfferEditor: { draftKey: string }
 }

@@ -1,4 +1,4 @@
-import { CoverageSearchParams, CreateProvider } from "../types/provider.types"
+import { CoverageSearchParams, CreateProvider, PublicPhotoInput } from "../types/provider.types"
 import api from "./api"
 
 
@@ -22,6 +22,34 @@ export const getProviderServiceById = async (providerServiceId: string) => {
 export const getPublicProfile = async (providerServiceId: string) => {
     const response = await api.get(`/providers/${providerServiceId}/profile`)
     return response.data
+}
+
+export const getOwnPublicProfile = async () => {
+    const response = await api.get('/providers/me/public-profile')
+    return response.data
+}
+
+export const saveOwnPublicDescription = async (description: string) => {
+    const response = await api.put('/providers/me/description', { attendance_rules: description })
+    return response.data
+}
+
+export const saveOwnPublicPhoto = async (photo: PublicPhotoInput) => {
+    const response = await api.put('/providers/me/photo', photo)
+    return response.data
+}
+
+export const removeOwnPublicPhoto = async () => {
+    await api.delete('/providers/me/photo')
+}
+
+export const addOwnGalleryPhoto = async (photo: PublicPhotoInput) => {
+    const response = await api.post('/providers/me/gallery', photo)
+    return response.data
+}
+
+export const removeOwnGalleryPhoto = async (photoId: string) => {
+    await api.delete(`/providers/me/gallery/${photoId}`)
 }
 
 export const getProviderServices = async (page?: number, limit?: number) => {

@@ -3,13 +3,13 @@ import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
 import { MGButton, MGChip, MGScreen, MGText, MGTextField } from '../../design-system/components'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
-import { ProviderServicesStackParamList } from '../../navigation/types'
+import { ProviderEditionStackParamList } from '../../navigation/types'
 import { useServiceMenuDraft } from './ServiceMenuDraft'
 import { offerTitle, SIZE_KEYS, SIZE_LABELS } from './serviceMenuModel'
 
 type Props = {
-  navigation: StackNavigationProp<ProviderServicesStackParamList, 'ServiceOfferEditor'>
-  route: RouteProp<ProviderServicesStackParamList, 'ServiceOfferEditor'>
+  navigation: StackNavigationProp<ProviderEditionStackParamList, 'ServiceOfferEditor'>
+  route: RouteProp<ProviderEditionStackParamList, 'ServiceOfferEditor'>
 }
 
 export default function ServiceOfferEditorScreen({ navigation, route }: Props) {
