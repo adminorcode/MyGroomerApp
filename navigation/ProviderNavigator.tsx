@@ -8,7 +8,7 @@ import ProviderBookingsStackNavigator from './ProviderBookingsStackNavigator'
 import { ProviderTabParamList } from './types'
 import { ProfileStackNavigator } from './ProfileStackNavigator'
 import Earnings from '../screens/provider/Earnings'
-import ProviderRequestsScreen from '../screens/provider/ProviderRequestsScreen'
+import ProviderRequestsStackNavigator from './ProviderRequestsStackNavigator'
 import ProviderServicesStackNavigator from './ProviderServicesStackNavigator'
 import MessagesStackNavigator from './MessagesStackNavigator'
 import MessageTabIcon from '../components/shared/MessageTabIcon'
@@ -79,7 +79,7 @@ export default function ProviderNavigator() {
 
             <Tab.Screen
                 name="RequestsTab"
-                component={ProviderRequestsScreen}
+                component={ProviderRequestsStackNavigator}
                 options={{
                     tabBarLabel: tabLabel('Solicitações'),
                     tabBarAccessibilityLabel: 'Solicitações',
