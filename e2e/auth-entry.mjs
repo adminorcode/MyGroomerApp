@@ -74,6 +74,7 @@ try {
   check('AE-05 espera bloqueia cadastro e submissão duplicada', await button(page, 'Não tem uma conta? Cadastre-se').isDisabled())
   await capture(page, '04-login-pending')
   await page.getByText(/^Olá/).waitFor({ timeout: 20000 })
+  await button(page, 'Abrir perfil').waitFor({ timeout: 10000 })
   check('AE-05 tutor entra com conta existente', await button(page, 'Abrir perfil').isVisible())
   await page.reload()
   await page.getByText(/^Olá/).waitFor({ timeout: 20000 })

@@ -41,6 +41,12 @@ const SAMPLE_PET: Pet = {
   age_years: 3,
   notes: null,
   photo_url: null,
+  allergies: null,
+  medications: null,
+  health_conditions: null,
+  vaccination_up_to_date: null,
+  behavior: null,
+  special_care: null,
 }
 
 type Props = {

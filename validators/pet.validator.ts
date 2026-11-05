@@ -33,6 +33,12 @@ export const petFormSchema = z.object({
         }
     }),
     notes: z.string().trim().max(500, 'As observações devem ter no máximo 500 caracteres'),
+    allergies: z.string().trim().max(500, 'A anamnese deve ter no máximo 500 caracteres'),
+    medications: z.string().trim().max(500, 'A anamnese deve ter no máximo 500 caracteres'),
+    health_conditions: z.string().trim().max(500, 'A anamnese deve ter no máximo 500 caracteres'),
+    behavior: z.string().trim().max(500, 'A anamnese deve ter no máximo 500 caracteres'),
+    special_care: z.string().trim().max(500, 'A anamnese deve ter no máximo 500 caracteres'),
+    vaccination: z.enum(['yes', 'no', 'unknown']),
 })
 
 export type PetFormValues = z.output<typeof petFormSchema>

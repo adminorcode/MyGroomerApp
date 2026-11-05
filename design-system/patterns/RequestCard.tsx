@@ -31,7 +31,7 @@ export type RequestCardProps = {
   blocked?: boolean
   onAccept?: () => void
   onReject?: () => void
-  onPress?: () => void
+  onOpen?: () => void
 }
 
 export default function RequestCard({
@@ -47,7 +47,7 @@ export default function RequestCard({
   blocked = false,
   onAccept,
   onReject,
-  onPress,
+  onOpen,
 }: RequestCardProps) {
   const { colors, spacing } = useMGTheme()
   const pet = petName?.trim() || 'Pet não informado'
@@ -57,14 +57,14 @@ export default function RequestCard({
   const status = STATUS[group]
   const canRespond = group === 'pending' && Boolean(onAccept && onReject)
 
-  const card = (
-      <MGCard padding={spacing.md}>
+  const summary = (
         <View style={[styles.top, { gap: spacing.md }]}>
           <MGAvatar uri={petPhotoUrl} name={pet} kind="pet" size={64} />
           <View style={[styles.details, { gap: spacing.xs }]}>
             <View style={[styles.titleRow, { gap: spacing.sm }]}>
               <MGText variant="title" numberOfLines={2} style={{ flex: 1 }}>{pet}</MGText>
               <MGBadge label={status.label} tone={status.tone} />
+              {onOpen ? <MGIcon name="chevron-right" size={20} color={colors.text.secondary} /> : null}
             </View>
             <MGText variant="bodySmall" color="secondary" numberOfLines={1}>Tutor: {tutor}</MGText>
             <View style={[styles.line, { gap: spacing.sm }]}>
@@ -81,6 +81,19 @@ export default function RequestCard({
             </View>
           </View>
         </View>
+  )
+
+  const card = (
+      <MGCard padding={spacing.md}>
+        {onOpen ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Abrir ficha de ${pet}, ${scheduledAtLabel}`}
+            onPress={onOpen}
+          >
+            {summary}
+          </Pressable>
+        ) : summary}
         <MGDivider spacing={spacing.md} />
         <View style={[styles.footer, { gap: spacing.md }]}>
           <View style={styles.price}>
@@ -116,11 +129,7 @@ export default function RequestCard({
 
   return (
     <View role="article" aria-label={`Solicitação de ${pet}, ${scheduledAtLabel}`} style={{ marginBottom: spacing.md }}>
-      {onPress ? (
-        <Pressable accessibilityRole="button" onPress={onPress}>
-          {card}
-        </Pressable>
-      ) : card}
+      {card}
     </View>
   )
 }

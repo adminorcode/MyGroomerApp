@@ -23,6 +23,12 @@ export type Pet = {
     age_years: number
     notes: string | null
     photo_url: string | null
+    allergies: string | null
+    medications: string | null
+    health_conditions: string | null
+    vaccination_up_to_date: boolean | null
+    behavior: string | null
+    special_care: string | null
 }
 
 export function petSpeciesLabel(species: string) {

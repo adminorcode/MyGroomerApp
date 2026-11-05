@@ -16,7 +16,8 @@ import { PET_SIZES, PET_SPECIES, PetSize, PetSpecies } from '../../types/pet.typ
 import { useTheme } from '../../context/ThemeContext'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
-import { MGButton, MGErrorState, MGTextField } from '../../design-system/components'
+import { MGButton, MGChip, MGErrorState, MGText, MGTextField } from '../../design-system/components'
+import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
 import { getErrorMessage } from '../../utils/error'
 
@@ -40,6 +41,12 @@ const emptyValues: PetFormInput = {
     size: '',
     age_years: '',
     notes: '',
+    allergies: '',
+    medications: '',
+    health_conditions: '',
+    behavior: '',
+    special_care: '',
+    vaccination: 'unknown',
 }
 
 export default function PetFormScreen({ navigation, route }: Props) {
@@ -65,6 +72,16 @@ export default function PetFormScreen({ navigation, route }: Props) {
             size: existing.data.size,
             age_years: String(existing.data.age_years),
             notes: existing.data.notes ?? '',
+            allergies: existing.data.allergies ?? '',
+            medications: existing.data.medications ?? '',
+            health_conditions: existing.data.health_conditions ?? '',
+            behavior: existing.data.behavior ?? '',
+            special_care: existing.data.special_care ?? '',
+            vaccination: existing.data.vaccination_up_to_date === true
+                ? 'yes'
+                : existing.data.vaccination_up_to_date === false
+                    ? 'no'
+                    : 'unknown',
         })
     }, [existing.data, reset])
 
@@ -212,6 +229,7 @@ export default function PetFormScreen({ navigation, route }: Props) {
                         />
                     )}
                 />
+                <HealthSection control={control} errors={errors} />
                 <MGButton
                     label={petId ? 'Salvar' : 'Salvar e continuar'}
                     loading={isPending}
@@ -219,6 +237,75 @@ export default function PetFormScreen({ navigation, route }: Props) {
                 />
             </KeyboardAwareScrollView>
         </ScreenContainer>
+    )
+}
+
+const HEALTH_FIELDS = [
+    { name: 'allergies', label: 'Alergias' },
+    { name: 'medications', label: 'Medicamentos em uso' },
+    { name: 'health_conditions', label: 'Condições de saúde' },
+    { name: 'behavior', label: 'Comportamento' },
+    { name: 'special_care', label: 'Cuidados especiais' },
+] as const
+
+const VACCINATION = [
+    { value: 'yes', label: 'Em dia' },
+    { value: 'no', label: 'Não está em dia' },
+    { value: 'unknown', label: 'Não informado' },
+] as const
+
+function HealthSection({
+    control,
+    errors,
+}: {
+    control: ReturnType<typeof useForm<PetFormInput, unknown, PetFormValues>>['control']
+    errors: Partial<Record<'allergies' | 'medications' | 'health_conditions' | 'behavior' | 'special_care', { message?: string }>>
+}) {
+    const { spacing } = useMGTheme()
+    return (
+        <View style={{ gap: spacing.sm, marginBottom: spacing.md }}>
+            <MGText variant="title">Saúde e cuidados</MGText>
+            {HEALTH_FIELDS.map(field => (
+                <Controller
+                    key={field.name}
+                    control={control}
+                    name={field.name}
+                    render={({ field: { onChange, onBlur, value } }) => (
+                        <MGTextField
+                            label={field.label}
+                            accessibilityLabel={field.label}
+                            value={value}
+                            onChangeText={onChange}
+                            onBlur={onBlur}
+                            multiline
+                            error={errors[field.name]?.message}
+                        />
+                    )}
+                />
+            ))}
+            <Controller
+                control={control}
+                name="vaccination"
+                render={({ field: { value, onChange } }) => (
+                    <View style={{ gap: spacing.sm, marginBottom: spacing.base }}>
+                        <MGText variant="label">Vacinação em dia</MGText>
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+                            {VACCINATION.map(option => (
+                                <MGChip
+                                    key={option.value}
+                                    label={option.label}
+                                    accessibilityLabel={option.label}
+                                    selected={value === option.value}
+                                    appearance="solid"
+                                    minHeight={52}
+                                    onPress={() => onChange(option.value)}
+                                />
+                            ))}
+                        </View>
+                    </View>
+                )}
+            />
+        </View>
     )
 }
 

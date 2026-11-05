@@ -9,6 +9,12 @@ export type SavePetBody = {
     size: Pet['size']
     age_years: number
     notes: string | null
+    allergies: string | null
+    medications: string | null
+    health_conditions: string | null
+    vaccination_up_to_date: boolean | null
+    behavior: string | null
+    special_care: string | null
 }
 
 export const toPetBody = (values: PetFormValues): SavePetBody => ({
@@ -18,6 +24,12 @@ export const toPetBody = (values: PetFormValues): SavePetBody => ({
     size: values.size,
     age_years: Number(values.age_years),
     notes: values.notes.trim() || null,
+    allergies: values.allergies.trim() || null,
+    medications: values.medications.trim() || null,
+    health_conditions: values.health_conditions.trim() || null,
+    vaccination_up_to_date: values.vaccination === 'yes' ? true : values.vaccination === 'no' ? false : null,
+    behavior: values.behavior.trim() || null,
+    special_care: values.special_care.trim() || null,
 })
 
 export const listPets = async () => {

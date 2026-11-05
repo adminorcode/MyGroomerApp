@@ -86,6 +86,7 @@ export default function MGButton({
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ disabled: blocked, busy: loading }}
+      aria-busy={loading}
       disabled={blocked}
       style={({ pressed }) => [
         styles.base,
