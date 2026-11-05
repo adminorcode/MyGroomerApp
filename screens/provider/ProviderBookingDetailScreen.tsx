@@ -1,226 +1,375 @@
 import { AppAlert } from '../../utils/alert'
-import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native'
-import ScreenContainer from '../../components/shared/ScreenContainer'
-import ScreenHeader from '../../components/shared/ScreenHeader'
+import { ReactNode } from 'react'
+import { ActivityIndicator, Pressable, ScrollView, StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
+import {
+  Bone,
+  Cake,
+  Clock3,
+  Coins,
+  Dog,
+  FileText,
+  LucideIcon,
+  MapPin,
+  MessageCircle,
+  Phone,
+} from 'lucide-react-native'
+import { CompositeNavigationProp } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
-import { ProviderBookingsStackParamList } from '../../navigation/types'
-import { useChangeBookingStatus, useGetBookingById } from '../../hooks/useBooking'
-import { borderRadius, fonts, spacing } from '../../constants/theme'
-import { useTheme } from '../../context/ThemeContext'
-import { CalendarClock, Hash, MapPin, Clock, User } from 'lucide-react-native'
-import { DetailRow } from '../../components/shared/DetailRow'
-import { MGButton, MGErrorState, MGText } from '../../design-system/components'
+import {
+  ProviderBookingsStackParamList,
+  ProviderRequestsStackParamList,
+  RootParamList,
+} from '../../navigation/types'
+import {
+  useChangeBookingStatus,
+  useGetBookingById,
+  useOpenBookingConversation,
+} from '../../hooks/useBooking'
+import { MGButton, MGCard, MGErrorState, MGIcon, MGText } from '../../design-system/components'
 import { BookingStatusBadge } from '../../design-system/patterns'
+import MGAvatar from '../../design-system/components/MGAvatar'
 import { BookingStatus } from '../../types/booking.types'
-import { formatDateTime } from '../../utils/formatDate'
 import { formatMoney } from '../../utils/formatMoney'
-import { useRuntime } from '../../context/RuntimeContext'
+import { formatDisplayPhone } from '../../utils/formatPhone'
+import { petSizeLabel } from '../../types/pet.types'
+import { useMGTheme } from '../../design-system/theme/useMGTheme'
+import { useState } from 'react'
+import RescheduleBookingSheet from './RescheduleBookingSheet'
+import { getErrorMessage } from '../../utils/error'
 
-type ProviderBookingDetailNavigationProp = StackNavigationProp<ProviderBookingsStackParamList, 'ProviderBookingDetail'>
-type ProviderBookingDetailRouteProp = RouteProp<ProviderBookingsStackParamList, 'ProviderBookingDetail'>
+type DetailRoute = RouteProp<
+  ProviderBookingsStackParamList | ProviderRequestsStackParamList,
+  'ProviderBookingDetail'
+>
+type DetailNav = CompositeNavigationProp<
+  StackNavigationProp<ProviderBookingsStackParamList | ProviderRequestsStackParamList, 'ProviderBookingDetail'>,
+  StackNavigationProp<RootParamList>
+>
 
 type Props = {
-    navigation: ProviderBookingDetailNavigationProp,
-    route: ProviderBookingDetailRouteProp
+  navigation: DetailNav
+  route: DetailRoute
 }
 
-type NextAction = {
-    label: string
-    next: BookingStatus
-    confirm?: { title: string; message: string; cta: string }
+const timezone = 'America/Sao_Paulo'
+
+/** G08: gancho do loop — âncora no início (Hoje ou data) + hora + fechamento entre parênteses. */
+function formatScheduledSummary(value: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  const now = new Date()
+  const todayParts = Object.fromEntries(new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(now).map(p => [p.type, p.value]))
+  const valueParts = Object.fromEntries(new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(date).map(p => [p.type, p.value]))
+  const isToday = todayParts.year === valueParts.year
+    && todayParts.month === valueParts.month
+    && todayParts.day === valueParts.day
+  const time = new Intl.DateTimeFormat('pt-BR', { timeZone: timezone, hour: '2-digit', minute: '2-digit' }).format(date)
+  const longDate = new Intl.DateTimeFormat('pt-BR', {
+    timeZone: timezone,
+    day: 'numeric',
+    month: 'long',
+  }).format(date)
+  return `${isToday ? 'Hoje' : longDate}, ${time} (${longDate})`
 }
 
-const nextActionByStatus: Partial<Record<BookingStatus, NextAction>> = {
-    [BookingStatus.PENDING_CONFIRMATION]: {
-        label: 'Confirmar agendamento',
-        next: BookingStatus.CONFIRMED,
-    },
-    [BookingStatus.CONFIRMED]: {
-        label: 'Iniciar atendimento',
-        next: BookingStatus.IN_PROGRESS,
-    },
-    [BookingStatus.IN_PROGRESS]: {
-        label: 'Concluir atendimento',
-        next: BookingStatus.COMPLETED,
-        confirm: {
-            title: 'Concluir o atendimento?',
-            message: 'Isso encerra o agendamento e dispara o repasse. Esta ação não pode ser desfeita.',
-            cta: 'Concluir atendimento',
-        },
-    },
+function formatDuration(minutes?: number | null) {
+  if (minutes == null || !Number.isFinite(minutes)) return 'Duração não informada'
+  const hours = Math.floor(minutes / 60)
+  const mins = minutes % 60
+  if (hours <= 0) return `${mins} min`
+  return `${hours}h${String(mins).padStart(2, '0')}`
 }
 
-const ProviderBookingDetailScreen = ({ navigation, route }: Props) => {
-    const { bookingId } = route.params
-    const { colors } = useTheme()
-    const runtime = useRuntime()
-    const { data, isLoading, isError } = useGetBookingById(bookingId)
-    const { mutateAsync, isPending } = useChangeBookingStatus()
+function formatAge(years?: number | null) {
+  if (years == null || !Number.isFinite(years)) return 'Idade não informada'
+  if (years === 1) return '1 ano'
+  return `${years} anos`
+}
+
+type SectionProps = {
+  icon: MGIconName
+  title: string
+  children: ReactNode
+}
+
+type MGIconName = Parameters<typeof MGIcon>[0]['name']
+
+function DetailSection({ icon, title, children }: SectionProps) {
+  const { colors, spacing } = useMGTheme()
+  return (
+    <MGCard padding={spacing.md} style={{ marginBottom: spacing.md }}>
+      <View style={[styles.sectionHead, { gap: spacing.sm, marginBottom: spacing.md }]}>
+        <MGIcon name={icon} size={20} color={colors.action.primary} />
+        <MGText variant="title">{title}</MGText>
+      </View>
+      {children}
+    </MGCard>
+  )
+}
+
+type FactProps = { icon: LucideIcon, label: string, value: string, style?: StyleProp<ViewStyle> }
+
+function DetailFact({ icon: Icon, label, value, style }: FactProps) {
+  const { colors, spacing } = useMGTheme()
+  return (
+    <View style={[styles.fact, { gap: spacing.sm }, style]}>
+      <Icon size={18} color={colors.action.primary} />
+      <View style={{ flex: 1, gap: 2 }}>
+        <MGText variant="caption" color="secondary">{label}</MGText>
+        <MGText variant="body">{value}</MGText>
+      </View>
+    </View>
+  )
+}
+
+export default function ProviderBookingDetailScreen({ navigation, route }: Props) {
+  const { bookingId } = route.params
+  const { colors, spacing } = useMGTheme()
+  const { data, isLoading, isError, refetch } = useGetBookingById(bookingId)
+  const changeStatus = useChangeBookingStatus()
+  const openConversation = useOpenBookingConversation()
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
+
+    const screenHeader = (
+        <View style={[styles.header, { paddingHorizontal: spacing.base, paddingTop: spacing.md, paddingBottom: spacing.sm, gap: spacing.sm }]}>
+            <Pressable accessibilityRole="button" accessibilityLabel="Voltar" onPress={() => navigation.goBack()} hitSlop={8}>
+                <MGIcon name="arrow-left" size={24} color={colors.action.primary} />
+            </Pressable>
+            <MGText variant="heading2" accessibilityRole="header" style={{ flex: 1 }}>Detalhes do agendamento</MGText>
+        </View>
+    )
 
     if (isLoading) {
         return (
-            <ScreenContainer>
-                <View style={styles.centered}>
-                    <ActivityIndicator size="large" color={colors.primary} />
+            <View style={{ flex: 1, backgroundColor: colors.surface.canvas, alignItems: 'center' }}>
+                <View style={{ flex: 1, width: '100%', maxWidth: 720 }}>
+                    {screenHeader}
+                    <View style={styles.centered}>
+                        <ActivityIndicator size="large" color={colors.action.primary} accessibilityLabel="Carregando detalhes do agendamento" />
+                    </View>
                 </View>
-            </ScreenContainer>
+            </View>
         )
     }
 
     if (isError || !data) {
         return (
-            <ScreenContainer>
-                <View style={styles.centered}>
-                    <MGErrorState message="Não foi possível carregar este agendamento." />
+            <View style={{ flex: 1, backgroundColor: colors.surface.canvas, alignItems: 'center' }}>
+                <View style={{ flex: 1, width: '100%', maxWidth: 720, paddingHorizontal: spacing.base }}>
+                    {screenHeader}
+                    <View style={[styles.centered, { paddingHorizontal: spacing.lg }]}>
+                        <MGErrorState message="Não foi possível carregar este agendamento." onRetry={() => { void refetch() }} />
+                    </View>
                 </View>
-            </ScreenContainer>
+            </View>
         )
     }
 
-    const nextAction = nextActionByStatus[data.booking_status]
+  const petName = data.pet_name?.trim() || 'Pet não informado'
+  const tutor = data.customer_name?.trim() || 'Tutor não informado'
+  const canRespond = data.booking_status === BookingStatus.PENDING_CONFIRMATION
+  const canReschedule = data.booking_status === BookingStatus.PENDING_CONFIRMATION
+    || data.booking_status === BookingStatus.CONFIRMED
+  const showProgressAction = data.booking_status === BookingStatus.CONFIRMED
+    || data.booking_status === BookingStatus.IN_PROGRESS
 
-    const runTransition = async (next: BookingStatus) => {
-      try {
-          await mutateAsync({ bookingId, booking_status: next })
-      } catch (e) {
-          AppAlert.alert('Não foi possível atualizar', 'Algo deu errado ao atualizar este agendamento. Tente novamente.')
+  const progressAction = data.booking_status === BookingStatus.CONFIRMED
+    ? { label: 'Iniciar atendimento', next: BookingStatus.IN_PROGRESS }
+    : data.booking_status === BookingStatus.IN_PROGRESS
+      ? { label: 'Concluir atendimento', next: BookingStatus.COMPLETED }
+      : null
+
+  const runStatus = async (next: BookingStatus) => {
+    setActionError(null)
+    try {
+      await changeStatus.mutateAsync({ bookingId, booking_status: next })
+      if (next === BookingStatus.CANCELLED || next === BookingStatus.CONFIRMED) {
+        navigation.goBack()
       }
+    } catch (error) {
+      setActionError(getErrorMessage(error))
     }
+  }
 
-    const handleAction = () => {
-        if (!nextAction) return
-
-        if (nextAction.confirm) {
-            AppAlert.alert(
-                nextAction.confirm.title,
-                runtime.localTest ? 'Concluir o atendimento de teste? Nenhum repasse será realizado.' : nextAction.confirm.message,
-                [
-                    { text: 'Cancelar', style: 'cancel' },
-                    { text: nextAction.confirm.cta, style: 'default', onPress: () => runTransition(nextAction.next) },
-                ]
-            )
-            return
-        }
-
-        runTransition(nextAction.next)
+  const handleChat = async () => {
+    setActionError(null)
+    try {
+      const response = await openConversation.mutateAsync(bookingId)
+      const conversation = response.data
+      navigation.navigate('Chat', { conversationId: conversation.id, otherName: data.customer_name })
+    } catch (error) {
+      setActionError(getErrorMessage(error))
     }
+  }
 
-    return (
-        <ScreenContainer>
-            <ScreenHeader
-                title='Detalhe do agendamento'
-                description='Gerencie o atendimento deste tutor'
-                showBackButton
-                onBack={() => navigation.goBack()}
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.surface.canvas, alignItems: 'center' }}>
+      <View style={{ flex: 1, width: '100%', maxWidth: 720 }}>
+        {screenHeader}
+
+        <ScrollView contentContainerStyle={{ paddingHorizontal: spacing.base, paddingBottom: spacing.xl }} showsVerticalScrollIndicator={false}>
+          <MGCard padding={spacing.md} style={{ marginBottom: spacing.md }}>
+            <View style={[styles.hero, { gap: spacing.md }]}>
+              <MGAvatar name={petName} kind="pet" size={72} />
+              <View style={{ flex: 1, gap: spacing.xs }}>
+                <View style={styles.heroTitle}>
+                  <MGText variant="title" style={{ flex: 1 }}>{petName}</MGText>
+                  <BookingStatusBadge status={data.booking_status} />
+                </View>
+                <MGText variant="bodySmall" color="secondary">Tutor: {tutor}</MGText>
+                <View style={[styles.line, { gap: spacing.sm }]}>
+                  <MGIcon name="scissors" size={16} color={colors.action.primary} />
+                  <MGText variant="bodySmall" style={{ flex: 1 }}>{data.service_name}</MGText>
+                </View>
+                <View style={[styles.line, { gap: spacing.sm }]}>
+                  <MGIcon name="calendar-days" size={16} color={colors.action.primary} />
+                  <MGText variant="bodySmall" style={{ flex: 1 }}>{formatScheduledSummary(data.scheduled_at)}</MGText>
+                </View>
+                <View style={[styles.line, { gap: spacing.sm }]}>
+                  <MGIcon name="map-pin" size={16} color={colors.text.secondary} />
+                  <MGText variant="bodySmall" color="secondary" style={{ flex: 1 }}>{data.customer_location}</MGText>
+                </View>
+              </View>
+            </View>
+          </MGCard>
+
+          <DetailSection icon="paw-print" title="Dados do pet">
+            <View style={[styles.grid, { gap: spacing.md }]}>
+              <DetailFact icon={Dog} label="Porte" value={data.pet_size ? petSizeLabel(data.pet_size) : 'Não informado'} style={styles.factGridItem} />
+              <DetailFact icon={Bone} label="Raça" value={data.pet_breed?.trim() || 'Não informada'} style={styles.factGridItem} />
+              <DetailFact icon={Cake} label="Idade" value={formatAge(data.pet_age_years)} style={styles.factGridItem} />
+              <DetailFact icon={FileText} label="Observações" value={data.pet_notes?.trim() || 'Nenhuma observação'} style={styles.factGridItem} />
+            </View>
+          </DetailSection>
+
+          <DetailSection icon="badge-check" title="Dados do tutor">
+            <View style={[styles.twoColumns, { gap: spacing.md }]}>
+              <View style={styles.column}>
+                <DetailFact icon={Phone} label="Telefone" value={formatDisplayPhone(data.customer_phone)} />
+              </View>
+              <View style={styles.column}>
+                <DetailFact icon={MapPin} label="Endereço" value={data.customer_location?.trim() || 'Endereço não informado'} />
+              </View>
+            </View>
+          </DetailSection>
+
+          <DetailSection icon="scissors" title="Serviço solicitado">
+            <View style={[styles.twoColumns, { gap: spacing.md }]}>
+              <View style={styles.column}>
+                <DetailFact icon={FileText} label="Serviço" value={data.service_name} />
+              </View>
+              <View style={[styles.column, { gap: spacing.md }]}>
+                <DetailFact icon={Clock3} label="Duração estimada" value={formatDuration(data.duration_minutes)} />
+                <DetailFact icon={Coins} label="Valor" value={formatMoney(data.price)} />
+              </View>
+            </View>
+          </DetailSection>
+
+          {actionError ? (
+            <MGText variant="bodySmall" color="error" accessibilityRole="alert" style={{ marginBottom: spacing.md }}>{actionError}</MGText>
+          ) : null}
+
+          {canRespond ? (
+            <MGButton
+              label="Aceitar agendamento"
+              iconLeft={<MGIcon name="check" size={18} color={colors.text.inverse} />}
+              onPress={() => { void runStatus(BookingStatus.CONFIRMED) }}
+              loading={changeStatus.isPending}
+              disabled={changeStatus.isPending}
+              style={{ marginBottom: spacing.sm }}
             />
+          ) : null}
 
-            <ScrollView
-                style={styles.scroll}
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
+          {showProgressAction && progressAction ? (
+            <MGButton
+              label={progressAction.label}
+              onPress={() => {
+                if (progressAction.next === BookingStatus.COMPLETED) {
+                  AppAlert.alert(
+                    'Concluir o atendimento?',
+                    'Isso encerra o agendamento. Esta ação não pode ser desfeita.',
+                    [
+                      { text: 'Cancelar', style: 'cancel' },
+                      { text: progressAction.label, onPress: () => { void runStatus(progressAction.next) } },
+                    ],
+                  )
+                  return
+                }
+                void runStatus(progressAction.next)
+              }}
+              loading={changeStatus.isPending}
+              disabled={changeStatus.isPending}
+              style={{ marginBottom: spacing.sm }}
+            />
+          ) : null}
+
+          <View style={[styles.rowActions, { gap: spacing.sm, marginBottom: spacing.sm }]}>
+            {canReschedule ? (
+              <MGButton
+                label="Reagendar"
+                variant="secondary"
+                iconLeft={<MGIcon name="calendar-days" size={18} color={colors.action.primaryOutline} />}
+                fullWidth={false}
+                style={styles.halfButton}
+                onPress={() => setSheetOpen(true)}
+                disabled={changeStatus.isPending}
+              />
+            ) : null}
+            <MGButton
+              label="Falar com tutor"
+              variant="teal"
+              iconLeft={<MessageCircle size={18} color={colors.onAction.secondary} />}
+              fullWidth={false}
+              style={styles.halfButton}
+              onPress={() => { void handleChat() }}
+              loading={openConversation.isPending}
+              disabled={openConversation.isPending || changeStatus.isPending}
+            />
+          </View>
+
+          {canRespond ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => { void runStatus(BookingStatus.CANCELLED) }}
+              disabled={changeStatus.isPending}
+              style={{ alignItems: 'center', paddingVertical: spacing.sm }}
             >
-                {/* Header: service name + status */}
-                <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                    <View style={styles.headerRow}>
-                        <MGText variant="title" style={{ flex: 1 }}>
-                            {data.service_name}
-                        </MGText>
-                        <BookingStatusBadge status={data.booking_status} />
-                    </View>
-                    <MGText variant="bodySmall" color="secondary" style={{ marginTop: spacing.xs }}>
-                        para {data.customer_name}
-                    </MGText>
+              <MGText variant="body" color="brand">Recusar agendamento</MGText>
+            </Pressable>
+          ) : null}
+        </ScrollView>
+      </View>
 
-                    <View style={[styles.priceRow, { borderTopColor: colors.border }]}>
-                        <MGText variant="body" color="secondary">Preço</MGText>
-                        <MGText variant="title" color="brand" style={{ fontFamily: fonts.bold }}>{formatMoney(data.price)}</MGText>
-                    </View>
-                </View>
-
-                {/* Details */}
-                <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                    <DetailRow
-                        icon={<User size={18} color={colors.primary} />}
-                        label="Tutor"
-                        value={data.customer_name}
-                    />
-                    <DetailRow
-                        icon={<CalendarClock size={18} color={colors.primary} />}
-                        label="Agendado"
-                        value={formatDateTime(data.scheduled_at)}
-                    />
-                    <DetailRow
-                        icon={<MapPin size={18} color={colors.primary} />}
-                        label="Local"
-                        value={data.customer_location}
-                    />
-                    <DetailRow
-                        icon={<Hash size={18} color={colors.primary} />}
-                        label="Referência"
-                        value={`#${data.id.slice(0, 8).toUpperCase()}`}
-                    />
-                    <DetailRow
-                        icon={<Clock size={18} color={colors.primary} />}
-                        label="Solicitado em"
-                        value={formatDateTime(data.created_at)}
-                        isLast
-                    />
-                </View>
-
-                {/* Action Button */}
-                {nextAction && (
-                    <View style={styles.actionContainer}>
-                        <MGButton
-                            label={nextAction.label}
-                            onPress={handleAction}
-                            loading={isPending}
-                            disabled={isPending}
-                        />
-                    </View>
-                )}
-            </ScrollView>
-        </ScreenContainer>
-    )
+      <RescheduleBookingSheet
+        visible={sheetOpen}
+        bookingId={bookingId}
+        providerServiceId={data.provider_service_id}
+        petId={data.pet_id}
+        onClose={() => setSheetOpen(false)}
+        onSuccess={() => { void refetch() }}
+      />
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({
-    scroll: {
-        flex: 1,
-    },
-    scrollContent: {
-        paddingTop: spacing.md,
-        paddingBottom: spacing.xl,
-    },
-    centered: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: spacing.lg,
-    },
-    card: {
-        padding: spacing.md,
-        borderRadius: borderRadius.lg,
-        borderWidth: 1,
-        marginBottom: spacing.lg,
-    },
-    headerRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: spacing.sm,
-    },
-    priceRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        borderTopWidth: 1,
-        marginTop: spacing.md,
-        paddingTop: spacing.md,
-    },
-    actionContainer: {
-        width: '100%',
-    },
+  centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  header: { flexDirection: 'row', alignItems: 'center' },
+  hero: { flexDirection: 'row', alignItems: 'flex-start' },
+  heroTitle: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
+  line: { flexDirection: 'row', alignItems: 'flex-start' },
+  sectionHead: { flexDirection: 'row', alignItems: 'center' },
+  grid: { flexDirection: 'row', flexWrap: 'wrap' },
+  twoColumns: { flexDirection: 'row', alignItems: 'flex-start' },
+  column: { flex: 1, minWidth: 0 },
+  fact: { flexDirection: 'row', alignItems: 'flex-start' },
+  factGridItem: { width: '48%', minWidth: 140 },
+  rowActions: { flexDirection: 'row', flexWrap: 'wrap' },
+  halfButton: { flex: 1, minWidth: 140 },
 })
-
-export default ProviderBookingDetailScreen

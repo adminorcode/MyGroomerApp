@@ -1,5 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { useFocusEffect } from '@react-navigation/native'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { ProviderRequestsStackParamList } from '../../navigation/types'
 import { ActivityIndicator, ScrollView, View } from 'react-native'
 import { MGCard, MGEmptyState, MGErrorState, MGIcon, MGText } from '../../design-system/components'
 import { RequestCard } from '../../design-system/patterns'
@@ -10,7 +12,11 @@ import { getErrorMessage } from '../../utils/error'
 import RequestGroupTabs from './RequestGroupTabs'
 import { EMPTY_COPY, pendingTodayHint, pendingTodayTitle, requestDateLabel } from './requestsModel'
 
-export default function ProviderRequestsScreen() {
+type Props = {
+  navigation: StackNavigationProp<ProviderRequestsStackParamList, 'ProviderRequests'>
+}
+
+export default function ProviderRequestsScreen({ navigation }: Props) {
   const { colors, spacing } = useMGTheme()
   const [group, setGroup] = useState<RequestGroupFilter>('pending')
   const [actionError, setActionError] = useState<string | null>(null)
@@ -105,6 +111,7 @@ export default function ProviderRequestsScreen() {
                 responding={respond.isPending && respond.variables?.bookingId === item.id ? respond.variables.response : null}
                 onAccept={() => { void answer(item.id, 'accept') }}
                 onReject={() => { void answer(item.id, 'reject') }}
+                onPress={() => navigation.navigate('ProviderBookingDetail', { bookingId: item.id })}
               />
             ))}
           </ScrollView>

@@ -328,10 +328,10 @@ async function execute() {
     await navTab('Solicitações').click()
     await page.getByText('Solicitações recebidas', { exact: true }).waitFor({ timeout: 15000 })
   }
-  await segment(page, 'Pendentes').click()
-  await page.getByRole('article').first().waitFor({ timeout: 15000 })
   await book('late')
   const lateCount = (await requestsOf('pending')).pending_today_count
+  await segment(page, 'Pendentes').click()
+  await article(page, 'late').waitFor({ timeout: 15000 })
   await leaveAndReturn()
   await article(page, 'late').waitFor({ timeout: 15000 })
   check('FE-08 voltar à aba mostra o pedido novo e o aviso atualizado', await article(page, 'late').isVisible() && await bannerIs(page, lateCount), bannerTitle(lateCount))

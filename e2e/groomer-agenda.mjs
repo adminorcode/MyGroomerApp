@@ -189,7 +189,7 @@ async function execute() {
   await page.getByRole('button', { name: 'Hoje', exact: true }).click()
   await page.getByRole('button', { name: card(confirmedTime) }).waitFor()
   await page.getByRole('button', { name: card(confirmedTime) }).click()
-  await page.getByText('Detalhe do agendamento', { exact: true }).waitFor()
+  await page.getByText('Detalhes do agendamento', { exact: true }).waitFor()
   check('AC-05 detalhe', await page.getByRole('button', { name: 'Voltar', exact: true }).isVisible())
   await page.getByRole('button', { name: 'Voltar', exact: true }).click()
   await page.getByText('Agenda do groomer', { exact: true }).waitFor()

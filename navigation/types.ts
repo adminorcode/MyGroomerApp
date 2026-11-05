@@ -88,6 +88,11 @@ export type ProviderBookingsStackParamList = {
     ProviderBookingDetail: { bookingId: string }
 }
 
+export type ProviderRequestsStackParamList = {
+    ProviderRequests: undefined
+    ProviderBookingDetail: { bookingId: string }
+}
+
 export type ProviderServicesStackParamList = ProviderEditionStackParamList & {
     ProfessionalRegistration: undefined
 }

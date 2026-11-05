@@ -17,7 +17,7 @@ export default function ChatHeader({ name, avatarUri, status, onBack, onCall, on
 
     return (
         <View style={[styles.container, { borderBottomColor: colors.border }]}>
-            <Pressable onPress={onBack} hitSlop={spacing.sm} style={styles.backBtn}>
+            <Pressable accessibilityRole="button" accessibilityLabel="Voltar" onPress={onBack} hitSlop={spacing.sm} style={styles.backBtn}>
                 <ChevronLeft size={26} color={colors.text} />
             </Pressable>
 

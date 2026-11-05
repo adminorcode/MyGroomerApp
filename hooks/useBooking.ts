@@ -1,5 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { changeBookingStatus, createBooking, findBookingById, getBookings } from "../services/booking.service"
+import {
+    changeBookingStatus,
+    createBooking,
+    findBookingById,
+    getBookings,
+    getBookingSlots,
+    openBookingConversation,
+    rescheduleBooking,
+} from "../services/booking.service"
 import { Booking, BookingStatus, CreateBookingInput } from "../types/booking.types"
 
 
@@ -48,9 +56,49 @@ export const useChangeBookingStatus = ()=>{
         onSuccess: ()=>{
             queryClient.invalidateQueries({queryKey: ['bookings']})
             queryClient.invalidateQueries({queryKey: ['booking']})
+            queryClient.invalidateQueries({queryKey: ['provider-requests']})
+            queryClient.invalidateQueries({queryKey: ['provider-agenda']})
         },
         onError: (error) =>{
             console.log(error)
         }
+    })
+}
+
+export const useRescheduleBooking = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: ({ bookingId, scheduled_at }: { bookingId: string, scheduled_at: string }) => (
+            rescheduleBooking(bookingId, scheduled_at)
+        ),
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['bookings'] })
+            queryClient.invalidateQueries({ queryKey: ['booking', variables.bookingId] })
+            queryClient.invalidateQueries({ queryKey: ['provider-requests'] })
+            queryClient.invalidateQueries({ queryKey: ['provider-agenda'] })
+        },
+    })
+}
+
+export const useRescheduleBookingSlots = (
+    bookingId: string,
+    providerServiceId: string,
+    petId: string | null | undefined,
+    date: string,
+    enabled: boolean,
+) => useQuery({
+    queryKey: ['booking-slots', 'reschedule', bookingId, date],
+    queryFn: ({ signal }) => getBookingSlots(providerServiceId, petId!, date, signal, bookingId),
+    enabled: enabled && Boolean(petId),
+    select: data => data.slots,
+})
+
+export const useOpenBookingConversation = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: (bookingId: string) => openBookingConversation(bookingId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['conversations'] })
+        },
     })
 }

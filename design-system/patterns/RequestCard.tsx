@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 import { RequestGroup } from '../../types/request.types'
 import { formatMoney } from '../../utils/formatMoney'
 import MGAvatar from '../components/MGAvatar'
@@ -31,6 +31,7 @@ export type RequestCardProps = {
   blocked?: boolean
   onAccept?: () => void
   onReject?: () => void
+  onPress?: () => void
 }
 
 export default function RequestCard({
@@ -46,6 +47,7 @@ export default function RequestCard({
   blocked = false,
   onAccept,
   onReject,
+  onPress,
 }: RequestCardProps) {
   const { colors, spacing } = useMGTheme()
   const pet = petName?.trim() || 'Pet não informado'
@@ -55,8 +57,7 @@ export default function RequestCard({
   const status = STATUS[group]
   const canRespond = group === 'pending' && Boolean(onAccept && onReject)
 
-  return (
-    <View role="article" aria-label={`Solicitação de ${pet}, ${scheduledAtLabel}`} style={{ marginBottom: spacing.md }}>
+  const card = (
       <MGCard padding={spacing.md}>
         <View style={[styles.top, { gap: spacing.md }]}>
           <MGAvatar uri={petPhotoUrl} name={pet} kind="pet" size={64} />
@@ -111,6 +112,15 @@ export default function RequestCard({
           ) : null}
         </View>
       </MGCard>
+  )
+
+  return (
+    <View role="article" aria-label={`Solicitação de ${pet}, ${scheduledAtLabel}`} style={{ marginBottom: spacing.md }}>
+      {onPress ? (
+        <Pressable accessibilityRole="button" onPress={onPress}>
+          {card}
+        </Pressable>
+      ) : card}
     </View>
   )
 }
