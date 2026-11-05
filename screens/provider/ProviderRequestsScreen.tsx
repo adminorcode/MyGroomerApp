@@ -111,7 +111,7 @@ export default function ProviderRequestsScreen({ navigation }: Props) {
                 responding={respond.isPending && respond.variables?.bookingId === item.id ? respond.variables.response : null}
                 onAccept={() => { void answer(item.id, 'accept') }}
                 onReject={() => { void answer(item.id, 'reject') }}
-                onPress={() => navigation.navigate('ProviderBookingDetail', { bookingId: item.id })}
+                onOpen={() => navigation.navigate('ProviderRequestProfile', { bookingId: item.id })}
               />
             ))}
           </ScrollView>

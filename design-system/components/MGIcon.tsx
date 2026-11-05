@@ -11,6 +11,7 @@ import {
   Coffee,
   Droplets,
   Ellipsis,
+  FileText,
   LucideIcon,
   MapPin,
   PawPrint,
@@ -39,6 +40,7 @@ export type MGIconName =
   | 'chevron-right'
   | 'coffee'
   | 'ellipsis'
+  | 'file-text'
 
 const ICONS: Record<MGIconName, LucideIcon> = {
   'paw-print': PawPrint,
@@ -58,6 +60,7 @@ const ICONS: Record<MGIconName, LucideIcon> = {
   'chevron-right': ChevronRight,
   coffee: Coffee,
   ellipsis: Ellipsis,
+  'file-text': FileText,
 }
 
 type Props = {

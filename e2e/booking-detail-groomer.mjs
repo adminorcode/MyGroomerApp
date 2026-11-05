@@ -100,8 +100,8 @@ const openRequests = async page => {
 
 async function openDetailFromRequests(page) {
   await openRequests(page)
-  const card = page.getByRole('article').first()
-  await card.click()
+  await page.getByRole('button', { name: /^Abrir ficha de / }).first().click()
+  await page.getByRole('button', { name: 'Ver agendamento', exact: true }).click()
   await page.getByText('Detalhes do agendamento', { exact: true }).waitFor({ timeout: 15000 })
 }
 
@@ -114,7 +114,8 @@ async function execute() {
   await loginProfessional(loadingPage)
   await gateRoute(loadingPage, `**/api/v1/bookings/${bookingId}`, { delayMs: 2500 })
   await openRequests(loadingPage)
-  await loadingPage.getByRole('article').first().click()
+  await loadingPage.getByRole('button', { name: /^Abrir ficha de / }).first().click()
+  await loadingPage.getByRole('button', { name: 'Ver agendamento', exact: true }).click()
   check('FE-01 carregando', await loadingPage.getByLabel('Carregando detalhes do agendamento').isVisible().catch(() => false))
   await capture(loadingPage, '02-mobile-carregando')
   await loadingPage.close()
@@ -124,7 +125,8 @@ async function execute() {
   await loginProfessional(errorPage)
   await gateRoute(errorPage, `**/api/v1/bookings/${bookingId}`, { fail: true })
   await openRequests(errorPage)
-  await errorPage.getByRole('article').first().click()
+  await errorPage.getByRole('button', { name: /^Abrir ficha de / }).first().click()
+  await errorPage.getByRole('button', { name: 'Ver agendamento', exact: true }).click()
   check('FE-02 erro', await errorPage.getByText('Não foi possível carregar este agendamento.').waitFor({ timeout: 20000 }).then(() => true, () => false))
   await capture(errorPage, '03-mobile-erro')
   await errorPage.close()
@@ -134,12 +136,13 @@ async function execute() {
   await openDetailFromRequests(page)
 
   check('AC-01 título da tela', await page.getByText('Detalhes do agendamento', { exact: true }).isVisible())
-  check('AC-01 seção Dados do pet', await page.getByText('Dados do pet', { exact: true }).isVisible())
-  check('AC-01 seção Dados do tutor', await page.getByText('Dados do tutor', { exact: true }).isVisible())
+  check('AC-01 seção Dados do pet', await page.getByText('Dados do pet', { exact: true }).last().isVisible())
+  check('AC-01 seção Dados do tutor', await page.getByText('Dados do tutor', { exact: true }).last().isVisible())
   check('AC-01 seção Serviço solicitado', await page.getByText('Serviço solicitado', { exact: true }).isVisible())
   check(
     'AC-01 telefone do tutor',
-    await page.getByText('+55 (11) 99999-9999').isVisible().catch(() => page.getByText('Telefone não informado').isVisible()),
+    (await page.getByText('+55 (11) 99999-9999').count()) > 0
+    || (await page.getByText('Telefone não informado').count()) > 0,
   )
 
   await capture(page, '01-mobile-detalhe-pendente')
@@ -171,10 +174,13 @@ async function execute() {
     await page.waitForTimeout(500)
   }
   check('AC-02 aceitar confirma', confirmed)
-  await page.getByText('Solicitações recebidas', { exact: true }).waitFor({ timeout: 15000 }).catch(() => {})
+  await page.getByText('Ficha do atendimento', { exact: true }).waitFor({ timeout: 15000 })
+  await page.getByRole('button', { name: 'Voltar', exact: true }).click()
+  await page.getByText('Solicitações recebidas', { exact: true }).waitFor({ timeout: 15000 })
 
   await page.getByRole('tab', { name: 'Aceitas', exact: true }).click()
-  await page.getByRole('article').first().click()
+  await page.getByRole('button', { name: /^Abrir ficha de / }).first().click()
+  await page.getByRole('button', { name: 'Ver agendamento', exact: true }).click()
   await page.getByText('Detalhes do agendamento', { exact: true }).waitFor({ timeout: 15000 })
   await page.getByRole('button', { name: 'Falar com tutor' }).click()
   await page.getByRole('textbox', { name: 'Mensagem' }).waitFor({ timeout: 20000 })

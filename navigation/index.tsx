@@ -24,6 +24,15 @@ const linking: LinkingOptions<RootParamList> = {
                     VerifyEmail: 'verify-email',
                 },
             },
+            Provider: {
+                screens: {
+                    RequestsTab: {
+                        screens: {
+                            ProviderRequestProfile: 'ficha/:bookingId',
+                        },
+                    },
+                },
+            },
         },
     },
 }

@@ -242,7 +242,9 @@ async function execute() {
   await article(page, 'accepted').waitFor({ timeout: 15000 })
   check('AC-02 card aceito mostra o selo e não oferece resposta',
     await article(page, 'accepted').getByText('Aceita', { exact: true }).isVisible()
-    && await article(page, 'accepted').getByRole('button').count() === 0)
+    && await article(page, 'accepted').getByRole('button', { name: /^Abrir ficha de / }).count() === 1
+    && await article(page, 'accepted').getByRole('button', { name: /^Aceitar / }).count() === 0
+    && await article(page, 'accepted').getByRole('button', { name: /^Recusar / }).count() === 0)
   await segment(page, 'Pendentes').click()
   await article(page, 'p1').waitFor({ timeout: 15000 })
 

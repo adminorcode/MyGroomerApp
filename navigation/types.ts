@@ -90,6 +90,7 @@ export type ProviderBookingsStackParamList = {
 
 export type ProviderRequestsStackParamList = {
     ProviderRequests: undefined
+    ProviderRequestProfile: { bookingId: string }
     ProviderBookingDetail: { bookingId: string }
 }
 
