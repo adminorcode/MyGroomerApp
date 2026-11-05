@@ -10,6 +10,7 @@ export type { TimeSlotOption } from './TimeSlotPicker'
 export { default as AgendaAppointmentCard } from './AgendaAppointmentCard'
 export type { AgendaAppointmentCardProps } from './AgendaAppointmentCard'
 export { default as RequestCard } from './RequestCard'
+export type { RequestCardProps } from './RequestCard'
 export { default as ServiceEditorCard } from './ServiceEditorCard'
 export type { ServicePriceBySize } from './ServiceEditorCard'
 export {
