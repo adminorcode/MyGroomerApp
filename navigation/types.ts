@@ -76,6 +76,7 @@ export type MessagesStackParamList = {
 
 export type ProviderTabParamList = {
     BookingsTab: undefined
+    RequestsTab: undefined
     ServicesTab: undefined
     EarningsTab: undefined
     MessagesTab: undefined

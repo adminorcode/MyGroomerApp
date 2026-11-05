@@ -1,13 +1,14 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { View, StyleSheet } from 'react-native'
+import { View, StyleSheet, Text, useWindowDimensions } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { CalendarDays, Wallet, Wrench } from 'lucide-react-native'
+import { Bell, CalendarDays, Wallet, Wrench } from 'lucide-react-native'
 import { useTheme } from '../context/ThemeContext'
 import { fonts } from '../constants/theme'
 import ProviderBookingsStackNavigator from './ProviderBookingsStackNavigator'
 import { ProviderTabParamList } from './types'
 import { ProfileStackNavigator } from './ProfileStackNavigator'
 import Earnings from '../screens/provider/Earnings'
+import ProviderRequestsScreen from '../screens/provider/ProviderRequestsScreen'
 import ProviderServicesStackNavigator from './ProviderServicesStackNavigator'
 import MessagesStackNavigator from './MessagesStackNavigator'
 import MessageTabIcon from '../components/shared/MessageTabIcon'
@@ -20,6 +21,13 @@ const Tab = createBottomTabNavigator<ProviderTabParamList>()
 
 export default function ProviderNavigator() {
     const { colors } = useTheme()
+    const { width } = useWindowDimensions()
+    // Cinco abas: com o ellipsis padrão do rótulo, "Solicitações" e "Rendimentos" viram "Solicitaçõ...".
+    // O rótulo próprio cabe inteiro (11 pt, 10 pt abaixo de 360 pt) e nunca é cortado.
+    // Como nas barras de aba do sistema, o tamanho não cresce com o texto ampliado do aparelho.
+    const tabLabel = (label: string) => ({ color }: { color: string }) => (
+        <Text maxFontSizeMultiplier={1} style={{ color, fontSize: width < 360 ? 10 : 11, fontFamily: fonts.medium, textAlign: 'center' }}>{label}</Text>
+    )
     const [initialRoute] = useState<keyof ProviderTabParamList>(() => useRegistrationNavigation.getState().userId === useAuthStore.getState().user?.id ? 'ServicesTab' : 'BookingsTab')
 
     return (
@@ -61,7 +69,8 @@ export default function ProviderNavigator() {
                 name="BookingsTab"
                 component={ProviderBookingsStackNavigator}
                 options={{
-                    tabBarLabel: 'Agenda',
+                    tabBarLabel: tabLabel('Agenda'),
+                    tabBarAccessibilityLabel: 'Agenda',
                     tabBarIcon: ({ color, size }) => (
                         <CalendarDays color={color} size={size} />
                     ),
@@ -69,10 +78,21 @@ export default function ProviderNavigator() {
             />
 
             <Tab.Screen
+                name="RequestsTab"
+                component={ProviderRequestsScreen}
+                options={{
+                    tabBarLabel: tabLabel('Solicitações'),
+                    tabBarAccessibilityLabel: 'Solicitações',
+                    tabBarIcon: ({ color, size }) => <Bell color={color} size={size} />,
+                }}
+            />
+
+            <Tab.Screen
                 name="ServicesTab"
                 component={ProviderServicesStackNavigator}
                 options={{
-                    tabBarLabel: 'Serviços',
+                    tabBarLabel: tabLabel('Serviços'),
+                    tabBarAccessibilityLabel: 'Serviços',
                     tabBarIcon: ({ color, size }) => <Wrench color={color} size={size} />,
                 }}
             />
@@ -81,7 +101,8 @@ export default function ProviderNavigator() {
                 name="EarningsTab"
                 component={Earnings}
                 options={{
-                    tabBarLabel: 'Rendimentos',
+                    tabBarLabel: tabLabel('Rendimentos'),
+                    tabBarAccessibilityLabel: 'Rendimentos',
                     tabBarIcon: ({ color, size }) => <Wallet color={color} size={size} />,
                 }}
             />
@@ -90,7 +111,8 @@ export default function ProviderNavigator() {
                 name="MessagesTab"
                 component={MessagesStackNavigator}
                 options={{
-                    tabBarLabel: 'Mensagens',
+                    tabBarLabel: tabLabel('Mensagens'),
+                    tabBarAccessibilityLabel: 'Mensagens',
                     tabBarIcon: ({ color, size }) => (
                         <MessageTabIcon color={color} size={size} />
                     ),

@@ -12,6 +12,8 @@ const run = startRun({
   evidence: evidenceFile('015-groomer-agenda', 'groomer-agenda.log'),
 })
 const { check } = run
+const { Pool } = require(path.join(apiRoot, 'node_modules/pg'))
+let pool
 const base = 'http://127.0.0.1:3000/api/v1'
 const shotDir = path.dirname(evidenceFile('015-groomer-agenda', 'ui-review/today-mobile.png'))
 const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date())
@@ -69,6 +71,7 @@ async function capture(page, name) {
 }
 
 async function setup() {
+  pool = new Pool({ connectionString: process.env.DATABASE_URL })
   const db = new URL(process.env.DATABASE_URL)
   if (process.env.LOCAL_TEST_MODE !== 'true' || !['localhost', '127.0.0.1', '[::1]'].includes(db.hostname) || db.pathname !== '/mygroomer_dev') {
     throw new Error('Recusando banco fora do ambiente local')
@@ -86,7 +89,9 @@ async function setup() {
   if (!pet || !offer) throw new Error('A conta de demonstração não tem pet ou oferta de banho')
 }
 
-async function book(slot, status) {
+// A API só cria reservas em horário futuro. Para o spec não depender da hora do dia, a reserva nasce
+// num horário livre de outro dia e, se `at` vier, é movida no banco local para esse instante de hoje.
+async function book(slot, status, at) {
   const created = await request('/bookings', 'POST', {
     pet_id: pet.id,
     provider_service_id: offer.id,
@@ -97,6 +102,7 @@ async function book(slot, status) {
   })
   const id = created.data.booking.id
   bookingIds.push(id)
+  if (at) await pool.query('UPDATE bookings SET scheduled_at = $1 WHERE id = $2', [at, id])
   if (status === 'pending_confirmation') return id
   await request(`/bookings/${id}/status`, 'PATCH', { booking_status: 'confirmed' }, providerToken)
   if (status === 'en_route') await request(`/bookings/${id}/status`, 'PATCH', { booking_status: 'en_route' }, providerToken)
@@ -110,18 +116,29 @@ async function cleanup() {
   if (savedRoutine) {
     await request('/providers/weekly-availability', 'PUT', savedRoutine, providerToken).catch(() => {})
   }
+  if (pool) {
+    if (bookingIds.length) await pool.query('DELETE FROM bookings WHERE id = ANY($1::uuid[])', [bookingIds]).catch(error => run.fail(error))
+    await pool.end().catch(() => {})
+  }
 }
 
 async function execute() {
   await setup()
-  const todaySlots = await slotsOn(today)
   const laterSlots = await slotsOn(otherDay)
-  if (todaySlots.length < 4 || laterSlots.length < 1) throw new Error(`Slots insuficientes: hoje ${todaySlots.length}, outro dia ${laterSlots.length}`)
-  const [confirmedSlot, travelingSlot, pendingSlot, freeSlot] = todaySlots
+  if (laterSlots.length < 5) throw new Error(`Slots insuficientes em ${otherDay}: ${laterSlots.length}`)
+  const sourceDay = addDays(today, 5)
+  const at = hhmm => new Date(`${today}T${hhmm}:00-03:00`).toISOString()
+  // Horários fora da grade de 15 minutos: nunca coincidem com um horário de outro dia.
+  const confirmedSlot = at('09:10')
+  const travelingSlot = at('10:25')
+  const pendingSlot = at('11:40')
   const outsideSlot = laterSlots[0]
-  await book(confirmedSlot, 'confirmed')
-  await book(travelingSlot, 'en_route')
-  await book(pendingSlot, 'pending_confirmation')
+  const freeSlot = laterSlots[4]
+  for (const [moved, status] of [[confirmedSlot, 'confirmed'], [travelingSlot, 'en_route'], [pendingSlot, 'pending_confirmation']]) {
+    const [created] = await slotsOn(sourceDay)
+    if (!created) throw new Error(`Sem horário livre em ${sourceDay}`)
+    await book(created, status, moved)
+  }
   await book(outsideSlot, 'confirmed')
   const confirmedTime = clock(confirmedSlot)
   const travelingTime = clock(travelingSlot)
@@ -176,7 +193,8 @@ async function execute() {
   check('AC-05 detalhe', await page.getByRole('button', { name: 'Voltar', exact: true }).isVisible())
   await page.getByRole('button', { name: 'Voltar', exact: true }).click()
   await page.getByText('Agenda do groomer', { exact: true }).waitFor()
-  const free = partsOf(freeSlot)
+  // O bloqueio da tela é de hoje, para a linha aparecer na visão Hoje a qualquer hora.
+  const free = partsOf(at('13:20'))
   const range = cover(free.time)
   await page.getByRole('button', { name: 'Bloquear horário', exact: true }).click()
   const confirm = page.getByRole('button', { name: 'Confirmar bloqueio', exact: true })
@@ -194,14 +212,18 @@ async function execute() {
   check('AC-05 bloqueio gravado', (await posted).ok())
   await page.getByText('Horário bloqueado', { exact: true }).waitFor({ timeout: 15000 })
   await page.getByRole('button', { name: 'Fechar', exact: true }).waitFor({ state: 'hidden' })
-  const offered = await slotsOn(free.date)
-  check('AC-05 slot bloqueado sai da oferta', !offered.some(iso => clock(iso) === clock(freeSlot)))
   await capture(page, 'block-created')
   const unlock = page.getByRole('button', { name: `Desbloquear ${range.start}`, exact: true })
   await unlock.click()
   await unlock.waitFor({ state: 'hidden', timeout: 15000 })
-  const restored = await slotsOn(free.date)
-  check('AC-05 desbloquear devolve o slot', restored.some(iso => clock(iso) === clock(freeSlot)))
+  // O efeito na oferta é medido num horário futuro de outro dia, com bloqueio criado pela API,
+  // porque hoje à noite não sobra horário futuro para observar.
+  const freeEnd = new Date(new Date(freeSlot).getTime() + 30 * 60000).toISOString()
+  const apiBlock = (await request('/providers/agenda-blocks', 'POST', { starts_at: freeSlot, ends_at: freeEnd }, providerToken)).data
+  const apiBlockId = apiBlock?.id ?? apiBlock?.block?.id
+  check('AC-05 slot bloqueado sai da oferta', !(await slotsOn(otherDay)).includes(freeSlot))
+  await request(`/providers/agenda-blocks/${apiBlockId}`, 'DELETE', undefined, providerToken)
+  check('AC-05 desbloquear devolve o slot', (await slotsOn(otherDay)).includes(freeSlot))
   check('AC-07',
     await page.getByRole('button', { name: 'Hoje', exact: true }).isVisible()
     && await page.getByRole('button', { name: 'Semana', exact: true }).isVisible()
