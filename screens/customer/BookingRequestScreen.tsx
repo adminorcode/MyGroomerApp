@@ -254,7 +254,7 @@ export default function BookingRequestScreen({ navigation, route }: Props) {
         </View>
       )}>
       {header}
-      <View style={{ gap: spacing.sm }}>
+      <View style={{ gap: spacing.base }}>
         <BookingSummary title="Detalhes do serviço" rows={detailsRows(
           service.data.provider_name,
           pet?.name ?? '',

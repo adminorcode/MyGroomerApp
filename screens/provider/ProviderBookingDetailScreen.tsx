@@ -138,7 +138,7 @@ export default function ProviderBookingDetailScreen({ navigation, route }: Props
 
     const screenHeader = (
         <View style={[styles.header, { paddingHorizontal: spacing.base, paddingTop: spacing.md, paddingBottom: spacing.sm, gap: spacing.sm }]}>
-            <Pressable accessibilityRole="button" accessibilityLabel="Voltar" onPress={() => navigation.goBack()} hitSlop={8}>
+            <Pressable accessibilityRole="button" accessibilityLabel="Voltar" onPress={() => navigation.goBack()} hitSlop={8} style={{ minWidth: 48, minHeight: 48, alignItems: 'center', justifyContent: 'center' }}>
                 <MGIcon name="arrow-left" size={24} color={colors.action.primary} />
             </Pressable>
             <MGText variant="heading2" accessibilityRole="header" style={{ flex: 1 }}>Detalhes do agendamento</MGText>
@@ -219,7 +219,7 @@ export default function ProviderBookingDetailScreen({ navigation, route }: Props
               <MGAvatar name={petName} kind="pet" size={72} />
               <View style={{ flex: 1, gap: spacing.xs }}>
                 <View style={styles.heroTitle}>
-                  <MGText variant="title" style={{ flex: 1 }}>{petName}</MGText>
+                  <MGText variant="title">{petName}</MGText>
                   <BookingStatusBadge status={data.booking_status} />
                 </View>
                 <MGText variant="bodySmall" color="secondary">Tutor: {tutor}</MGText>
@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'center' },
   hero: { flexDirection: 'row', alignItems: 'flex-start' },
-  heroTitle: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
+  heroTitle: { alignItems: 'flex-start', gap: 8 },
   line: { flexDirection: 'row', alignItems: 'flex-start' },
   sectionHead: { flexDirection: 'row', alignItems: 'center' },
   grid: { flexDirection: 'row', flexWrap: 'wrap' },

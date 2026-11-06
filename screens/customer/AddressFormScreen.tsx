@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
-import { MGButton, MGChip, MGErrorState, MGText, MGTextField } from '../../design-system/components'
+import { MGButton, MGChip, MGErrorState, MGIcon, MGText, MGTextField } from '../../design-system/components'
 import { AddressMapPlaceholder, AddressPlaceCard } from '../../design-system/patterns'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import ScreenContainer from '../../components/shared/ScreenContainer'
@@ -340,10 +340,16 @@ export default function AddressFormScreen({ navigation, route }: Props) {
                                 accessibilityRole="checkbox"
                                 accessibilityLabel="Marcar como padrão"
                                 accessibilityState={{ checked: makeDefault }}
+                                aria-checked={makeDefault}
                                 onPress={() => setMakeDefault(value => !value)}
-                                style={{ minHeight: 48, justifyContent: 'center' }}
+                                style={{ minHeight: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md }}
                             >
                                 <MGText>{makeDefault ? 'Padrão marcado' : 'Marcar como padrão'}</MGText>
+                                <View style={{ width: 48, height: 28, borderRadius: radius.pill, padding: spacing.xxs, alignItems: makeDefault ? 'flex-end' : 'flex-start', backgroundColor: makeDefault ? colors.action.secondary : colors.state.disabledSurface }}>
+                                    <View style={{ width: 24, height: 24, borderRadius: radius.pill, backgroundColor: colors.surface.default, alignItems: 'center', justifyContent: 'center' }}>
+                                        {makeDefault ? <MGIcon name="check" size={16} color={colors.action.secondary} /> : null}
+                                    </View>
+                                </View>
                             </Pressable>
                         ) : (
                             <MGText variant="caption" color="secondary">Este endereço fica como padrão.</MGText>

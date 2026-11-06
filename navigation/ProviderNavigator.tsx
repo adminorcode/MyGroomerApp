@@ -1,9 +1,9 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { View, StyleSheet, Text, useWindowDimensions } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { Bell, CalendarDays, Wallet, Wrench } from 'lucide-react-native'
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Bell, CalendarDays, Wallet, Scissors } from 'lucide-react-native'
 import { useTheme } from '../context/ThemeContext'
-import { fonts } from '../constants/theme'
+import { fonts, layout, spacing, borderRadius } from '../constants/theme'
 import ProviderBookingsStackNavigator from './ProviderBookingsStackNavigator'
 import { ProviderTabParamList } from './types'
 import { ProfileStackNavigator } from './ProfileStackNavigator'
@@ -21,6 +21,7 @@ const Tab = createBottomTabNavigator<ProviderTabParamList>()
 
 export default function ProviderNavigator() {
     const { colors } = useTheme()
+    const insets = useSafeAreaInsets()
     const { width } = useWindowDimensions()
     // Cinco abas: com o ellipsis padrão do rótulo, "Solicitações" e "Rendimentos" viram "Solicitaçõ...".
     // O rótulo próprio cabe inteiro (11 pt, 10 pt abaixo de 360 pt) e nunca é cortado.
@@ -49,14 +50,17 @@ export default function ProviderNavigator() {
             )}
             screenOptions={{
                 headerShown: false,
-                tabBarActiveTintColor: colors.primary,
+                tabBarActiveTintColor: colors.primaryText,
                 tabBarInactiveTintColor: colors.navInactive,
                 tabBarStyle: {
-                    backgroundColor: colors.background,
+                    backgroundColor: colors.surface,
                     borderTopWidth: 1,
                     borderTopColor: colors.border,
-                    height: 110,
-                    paddingTop: 5,
+                    height: layout.tabBarHeight + insets.bottom,
+                    paddingTop: spacing.sm,
+                    paddingBottom: Math.max(insets.bottom, spacing.sm),
+                    borderTopLeftRadius: borderRadius.xl,
+                    borderTopRightRadius: borderRadius.xl,
                 },
                 tabBarLabelStyle: {
                     fontSize: 12,
@@ -93,7 +97,7 @@ export default function ProviderNavigator() {
                 options={{
                     tabBarLabel: tabLabel('Serviços'),
                     tabBarAccessibilityLabel: 'Serviços',
-                    tabBarIcon: ({ color, size }) => <Wrench color={color} size={size} />,
+                    tabBarIcon: ({ color, size }) => <Scissors color={color} size={size} />,
                 }}
             />
 

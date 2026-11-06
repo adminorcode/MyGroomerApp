@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const appRoot = path.resolve(here, '..')
-const skip = new Set(['harness.mjs', 'preload.mjs', 'database.mjs', 'run-suite.mjs'])
+const skip = new Set(['harness.mjs', 'preload.mjs', 'database.mjs', 'run-suite.mjs', 'visual-helpers.mjs', 'visual-audit.mjs'])
 const specs = readdirSync(here)
   .filter(name => name.endsWith('.mjs') && !skip.has(name) && !name.startsWith('_'))
   .sort()

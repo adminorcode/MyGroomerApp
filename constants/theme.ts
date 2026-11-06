@@ -9,7 +9,8 @@ export { elevation } from '../design-system/tokens'
 export const lightColors = {
     brand: palette.brand.pink,
     primary: palette.action.primary,
-    onPrimary: palette.text.inverse,
+    primaryText: palette.action.primaryText,
+    onPrimary: palette.onAction.primary,
     primaryPressed: palette.action.primaryPressed,
     primaryLight: palette.brand.pinkLight,
     primaryDark: palette.action.primaryPressed,
@@ -48,6 +49,7 @@ export const lightColors = {
 export const darkColors = {
     brand: '#D95786',
     primary: '#F6B5CB',
+    primaryText: '#F6B5CB',
     onPrimary: '#253D42',
     primaryPressed: '#E59BB8',
     primaryLight: '#F6B5CB',
@@ -115,6 +117,9 @@ export const borderRadius = {
 }
 
 export const layout = {
+    contentMaxWidth: 720,
+    formMaxWidth: 480,
+    tabBarHeight: 72,
     screenPadding: spacing.base,
     screenPaddingOnboarding: spacing.lg,
 }

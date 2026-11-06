@@ -30,8 +30,8 @@ async function openWelcome(page) {
 
 async function welcomeVisible(page, label) {
   const body = await textOf(page)
-  check(`${label} boas-vindas`, body.includes(APP_NAME) && body.includes('Banho e tosa em domicílio') && body.includes('Sou tutor') && body.includes('Sou profissional'))
-  const titleColor = await page.getByText(APP_NAME).evaluate((element) => getComputedStyle(element).color)
+  check(`${label} boas-vindas`, body.includes(APP_NAME) && body.includes('O cuidado que seu pet merece, pertinho de você.') && body.includes('Sou tutor') && body.includes('Sou profissional'))
+  const titleColor = await page.getByText(APP_NAME, { exact: true }).and(page.locator(':not([aria-hidden="true"] *)')).evaluate((element) => getComputedStyle(element).color)
   const background = await page.locator('body').evaluate((element) => getComputedStyle(element).backgroundColor)
   check(`${label} texto visível`, titleColor !== background && titleColor !== 'rgba(0, 0, 0, 0)')
 }
@@ -83,7 +83,7 @@ async function run() {
   await create.click()
   const sawBusy = await busyWait
   check('AC-02 carregamento do cadastro', sawBusy)
-  const reachedLogin = await page.getByRole('button', { name: 'Entrar' }).waitFor({ timeout: 20000 }).then(() => true).catch(async () => {
+  const reachedLogin = await page.getByRole('button', { name: 'Entrar', exact: true }).waitFor({ timeout: 20000 }).then(() => true).catch(async () => {
     console.error(await textOf(page))
     return false
   })
@@ -92,7 +92,7 @@ async function run() {
 
   await page.getByRole('textbox', { name: 'E-mail' }).fill(email)
   await page.getByRole('textbox', { name: 'Senha' }).fill(password)
-  await page.getByRole('button', { name: 'Entrar' }).click()
+  await page.getByRole('button', { name: 'Entrar', exact: true }).click()
   await page.getByText(/^Olá/).waitFor({ timeout: 20000 })
   check('AC-04 conta nova entra', true)
 
@@ -107,13 +107,13 @@ async function run() {
   await page.getByRole('textbox', { name: 'Nova senha' }).fill(nextPassword)
   await page.getByRole('button', { name: 'Redefinir senha' }).click()
   await page.getByText('Senha redefinida com sucesso').waitFor({ timeout: 20000 })
-  await page.getByRole('button', { name: 'Entrar' }).click()
+  await page.getByRole('button', { name: 'Entrar', exact: true }).click()
   await page.getByRole('textbox', { name: 'E-mail' }).fill(email)
   await page.getByRole('textbox', { name: 'Senha' }).fill(password)
-  await page.getByRole('button', { name: 'Entrar' }).click()
+  await page.getByRole('button', { name: 'Entrar', exact: true }).click()
   await page.getByText('E-mail ou senha inválidos').waitFor({ timeout: 20000 })
   await page.getByRole('textbox', { name: 'Senha' }).fill(nextPassword)
-  await page.getByRole('button', { name: 'Entrar' }).click()
+  await page.getByRole('button', { name: 'Entrar', exact: true }).click()
   await page.getByText(/^Olá/).waitFor({ timeout: 20000 })
   check('AC-04 senha redefinida entra e a antiga é recusada', true)
 

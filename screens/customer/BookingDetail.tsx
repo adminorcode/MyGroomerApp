@@ -13,7 +13,8 @@ import StatusBadge from '../../components/shared/StatusBadge'
 import { CalendarClock, Hash, MapPin, Clock, PawPrint } from 'lucide-react-native'
 import { petSizeLabel, petSpeciesLabel } from '../../types/pet.types'
 import { DetailRow } from '../../components/shared/DetailRow'
-import { MGButton, MGErrorState } from '../../design-system/components'
+import { MGButton, MGErrorState, MGIcon } from '../../design-system/components'
+import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { BookingStatus } from '../../types/booking.types'
 import { formatDateTime } from '../../utils/formatDate'
 import { useCreateConversation } from '../../hooks/useConversations'
@@ -35,8 +36,9 @@ type Props = {
 const BookingDetail = ({ navigation, route }: Props) => {
     const { bookingId } = route.params
     const { colors } = useTheme()
+    const { elevation } = useMGTheme()
     const runtime = useRuntime()
-    const { data, isLoading, isError } = useGetBookingById(bookingId)
+    const { data, isLoading, isError, refetch } = useGetBookingById(bookingId)
     const {mutateAsync, isPending} = useChangeBookingStatus()
     const {mutateAsync: createConvo} = useCreateConversation()
 
@@ -51,7 +53,7 @@ const BookingDetail = ({ navigation, route }: Props) => {
         return (
         <ScreenContainer>
             <View style={styles.centered}>
-                <ActivityIndicator size="large" color={colors.primary} />
+                <ActivityIndicator accessibilityLabel="Carregando agendamento" size="large" color={colors.primary} />
             </View>
         </ScreenContainer>
         )
@@ -60,7 +62,8 @@ const BookingDetail = ({ navigation, route }: Props) => {
     if (isError || !data) {
         return (
             <ScreenContainer>
-                <MGErrorState message="Não foi possível carregar este agendamento." />
+                <ScreenHeader title="Detalhe do agendamento" showBackButton onBack={() => navigation.goBack()} />
+                <MGErrorState message="Não foi possível carregar este agendamento." onRetry={() => { void refetch() }} />
             </ScreenContainer>
         )
     }
@@ -108,7 +111,12 @@ const BookingDetail = ({ navigation, route }: Props) => {
                     showsVerticalScrollIndicator={false}
                 >
                     {/* Header: service name + status */}
-                    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                    <View style={[styles.card, elevation.low, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+                        <View style={{ width: 52, height: 52, borderRadius: borderRadius.md, backgroundColor: colors.infoSoft, alignItems: 'center', justifyContent: 'center' }}>
+                            <MGIcon name={/banho/i.test(data.service_name) ? 'bath' : /tosa/i.test(data.service_name) ? 'scissors' : 'paw-print'} size={28} color={colors.secondary} />
+                        </View>
+                        <View style={{ flex: 1, minWidth: 0 }}>
                         <View style={styles.headerRow}>
                             <Text style={[styles.serviceName, { color: colors.text }]}>
                                 {data.service_name}
@@ -118,15 +126,17 @@ const BookingDetail = ({ navigation, route }: Props) => {
                         <Text style={[styles.providerName, { color: colors.textSecondary }]}>
                             por {data.provider_name}
                         </Text>
+                        </View>
+                        </View>
 
                         <View style={[styles.priceRow, { borderTopColor: colors.border }]}>
                             <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>Preço</Text>
-                            <Text style={[styles.price, { color: colors.primary }]}>{formatMoney(data.price)}</Text>
+                            <Text style={[styles.price, { color: colors.primaryText }]}>{formatMoney(data.price)}</Text>
                         </View>
                     </View>
 
                     {/* Details */}
-                    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                    <View style={[styles.card, elevation.low, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                         <DetailRow
                             icon={<CalendarClock size={18} color={colors.primary} />}
                             label="Agendado"
@@ -243,19 +253,21 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.lg,
     },
     card: {
-        padding: spacing.md,
+        padding: spacing.base,
         borderRadius: borderRadius.lg,
         borderWidth: 1,
         marginBottom: spacing.lg,
     },
     headerRow: {
         flexDirection: 'row',
+        flexWrap: 'wrap',
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: spacing.sm,
     },
     serviceName: {
         flex: 1,
+        minWidth: 80,
         fontSize: typography.sizes.lg,
         fontFamily: fonts.semibold,
     },
@@ -283,6 +295,7 @@ const styles = StyleSheet.create({
     actionContainer:{
         display:'flex',
         flexDirection:'row',
+        flexWrap: 'wrap',
         alignItems: 'center',
         justifyContent: 'center',
         gap: spacing.md,

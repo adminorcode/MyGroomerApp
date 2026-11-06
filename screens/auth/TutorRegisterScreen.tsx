@@ -17,6 +17,9 @@ import { Role } from "../../types/auth.types";
 import { useTheme } from "../../context/ThemeContext";
 import { useRuntime } from "../../context/RuntimeContext";
 import { getErrorMessage } from "../../utils/error";
+import { ArrowLeft } from 'lucide-react-native';
+import { MGIconButton } from '../../design-system/components';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type TutorRegisterNavigationProp = StackNavigationProp<AuthStackParamList, "TutorRegister">;
 
@@ -47,6 +50,7 @@ export default function TutorRegisterScreen({ navigation }: Props) {
     };
 
     return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top', 'left', 'right']}>
         <KeyboardAwareScrollView
             contentContainerStyle={[styles.container, { backgroundColor: colors.background }]}
             keyboardShouldPersistTaps="handled"
@@ -54,9 +58,13 @@ export default function TutorRegisterScreen({ navigation }: Props) {
             enableOnAndroid
         >
             <View style={styles.content}>
-            <MGText variant="heading1" color="brand" style={[styles.title, { fontFamily: fonts.logo }]}>
-                Criar conta
-            </MGText>
+            <View style={styles.heading}>
+                <MGIconButton accessibilityLabel="Voltar" icon={<ArrowLeft size={spacing.xl} color={colors.text} />} onPress={() => navigation.goBack()} />
+                <MGText variant="heading1" accessibilityRole="header" style={{ flex: 1 }}>Criar minha conta</MGText>
+            </View>
+            <View style={[styles.intro, { backgroundColor: colors.selectionSoft }]}>
+                <MGText>Encontre profissionais para cuidar do seu melhor amigo.</MGText>
+            </View>
             <View style={styles.form}>
                 <Controller
                     control={control}
@@ -130,13 +138,15 @@ export default function TutorRegisterScreen({ navigation }: Props) {
                             <Pressable
                                 accessibilityRole="checkbox"
                                 accessibilityState={{ checked: value }}
+                                aria-checked={value}
+                                accessibilityLabel="Aceito os termos e a política de privacidade"
                                 onPress={() => onChange(!value)}
                                 style={styles.consentRow}
                             >
                                 <View
                                     style={[
                                         styles.consentBox,
-                                        { borderColor: errors.accepted_terms ? colors.error : colors.border },
+                                        { borderColor: errors.accepted_terms ? colors.error : colors.textSecondary },
                                         value && { backgroundColor: colors.primary, borderColor: colors.primary },
                                     ]}
                                 >
@@ -175,11 +185,10 @@ export default function TutorRegisterScreen({ navigation }: Props) {
                     </MGText>
                 )}
             </View>
-            <MGText color="brand" style={styles.loginLink} onPress={() => navigation.navigate("Login")}>
-                Já tem uma conta? Entrar
-            </MGText>
+            <MGButton label="Já tem uma conta? Entrar" variant="tertiary" disabled={isPending || isGooglePending} style={styles.loginLink} onPress={() => navigation.navigate('Login')} />
             </View>
         </KeyboardAwareScrollView>
+        </SafeAreaView>
     );
 }
 
@@ -188,16 +197,15 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         alignItems: "center",
         paddingHorizontal: spacing.xl,
-        paddingTop: spacing.xxxl,
+        paddingTop: spacing.base,
         paddingBottom: spacing.huge,
     },
     content: {
         width: "100%",
         maxWidth: 448,
     },
-    title: {
-        marginBottom: spacing.lg,
-    },
+    heading: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.lg },
+    intro: { padding: spacing.base, borderRadius: borderRadius.xl, marginBottom: spacing.lg },
     form: {
         width: "100%",
         gap: spacing.sm,
@@ -207,6 +215,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: spacing.sm,
         marginBottom: spacing.sm,
+        minHeight: spacing.huge,
     },
     consentBox: {
         width: 24,

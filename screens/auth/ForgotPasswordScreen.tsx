@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { AuthStackParamList } from "../../navigation/types";
-import { fonts, spacing, typography } from "../../constants/theme";
+import { spacing, typography } from "../../constants/theme";
 import { MGButton, MGText, MGTextField } from "../../design-system/components";
 import { forgotPasswordSchema } from "../../validators/auth.validator";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,6 +11,8 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { useForgotPasswordMutation } from "../../hooks/useAuth";
 import { useTheme } from "../../context/ThemeContext";
 import { getErrorMessage } from "../../utils/error";
+import MGBrand from '../../design-system/components/MGBrand';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type ForgotPasswordNavigationProp = StackNavigationProp<AuthStackParamList, "ForgotPassword">;
 
@@ -33,13 +35,16 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
     const waitingForEmail = isSuccess && !data?.reset_token;
 
     return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top', 'left', 'right']}>
         <KeyboardAwareScrollView
             contentContainerStyle={[styles.container, { backgroundColor: colors.background }]}
             keyboardShouldPersistTaps="handled"
             extraScrollHeight={20}
             enableOnAndroid
         >
-            <MGText variant="heading1" color="brand" style={[styles.title, { fontFamily: fonts.logo }]}>
+            <View style={styles.content}>
+            <View style={styles.brand}><MGBrand compact /></View>
+            <MGText variant="heading1" accessibilityRole="header" style={styles.title}>
                 Esqueci minha senha
             </MGText>
             <MGText variant="bodySmall" style={styles.help}>
@@ -76,10 +81,10 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
                     </MGText>
                 )}
             </View>
-            <MGText color="brand" style={styles.backLink} onPress={() => navigation.navigate("Login")}>
-                Voltar ao login
-            </MGText>
+            <MGButton label="Voltar ao login" variant="tertiary" disabled={isPending} style={styles.backLink} onPress={() => navigation.navigate('Login')} />
+            </View>
         </KeyboardAwareScrollView>
+        </SafeAreaView>
     );
 }
 
@@ -88,9 +93,11 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         alignItems: "center",
         paddingHorizontal: spacing.xl,
-        paddingTop: spacing.huge,
-        paddingBottom: 100,
+        paddingTop: spacing.xl,
+        paddingBottom: spacing.huge,
     },
+    content: { width: '100%', maxWidth: 448 },
+    brand: { alignItems: 'center', marginBottom: spacing.xxl },
     title: {
         marginBottom: spacing.md,
     },

@@ -13,7 +13,7 @@ export default function SectionHeader({ title, onPress, actionLabel }: Props) {
     <View style={styles.container}>
       <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
       {actionLabel && onPress  && <Pressable onPress={onPress}>
-        <Text style={[styles.buttonText, { color: colors.primary }]}>{actionLabel}</Text>
+        <Text style={[styles.buttonText, { color: colors.primaryText }]}>{actionLabel}</Text>
       </Pressable>}
     </View>
   )

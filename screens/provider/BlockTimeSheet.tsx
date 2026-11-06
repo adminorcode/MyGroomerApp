@@ -1,6 +1,7 @@
 import { Modal, Platform, KeyboardAvoidingView, Pressable, ScrollView, View } from 'react-native'
 import { useEffect, useState } from 'react'
-import { MGButton, MGText, MGTextField } from '../../design-system/components'
+import { MGButton, MGCard, MGIcon, MGText, MGTextField } from '../../design-system/components'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { palette } from '../../design-system/tokens'
 import { blockInstants, blockRangeError } from './agendaPeriod'
@@ -15,6 +16,7 @@ type Props = {
 
 export default function BlockTimeSheet({ visible, initialDate, submitting, onClose, onConfirm }: Props) {
   const { colors, spacing, radius } = useMGTheme()
+  const insets = useSafeAreaInsets()
   const [date, setDate] = useState(initialDate)
   const [start, setStart] = useState('09:00')
   const [end, setEnd] = useState('09:00')
@@ -32,25 +34,32 @@ export default function BlockTimeSheet({ visible, initialDate, submitting, onClo
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: palette.overlay.scrim }}
+        style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center', backgroundColor: palette.overlay.scrim }}
       >
         <View
           style={{
             height: '78%',
             width: '100%',
-            backgroundColor: colors.surface.default,
+            maxWidth: 720,
+            backgroundColor: colors.surface.canvas,
             borderTopLeftRadius: radius.xl,
             borderTopRightRadius: radius.xl,
             overflow: 'hidden',
           }}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.base, paddingTop: spacing.base }}>
-            <MGText variant="heading3">Bloquear horário</MGText>
-            <Pressable accessibilityRole="button" accessibilityLabel="Fechar" onPress={onClose} hitSlop={12} style={{ minHeight: 44, justifyContent: 'center' }}>
+            <MGText variant="heading2" accessibilityRole="header" style={{ flex: 1 }}>Bloquear horário</MGText>
+            <Pressable accessibilityRole="button" accessibilityLabel="Fechar" onPress={onClose} hitSlop={12} style={{ minWidth: 48, minHeight: 48, alignItems: 'center', justifyContent: 'center' }}>
               <MGText variant="label" color="brand">Fechar</MGText>
             </Pressable>
           </View>
           <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: spacing.base, paddingTop: spacing.md }}>
+            <MGText variant="bodySmall" color="secondary" style={{ marginBottom: spacing.lg }}>Defina um intervalo indisponível na sua agenda.</MGText>
+            <MGCard>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.md }}>
+              <MGIcon name="calendar-days" color={colors.action.primary} size={20} />
+              <MGText variant="title">Período</MGText>
+            </View>
             <MGTextField label="Data" value={date} onChangeText={setDate} autoCapitalize="none" helperText="AAAA-MM-DD" />
             <MGTextField label="Início" value={start} onChangeText={setStart} autoCapitalize="none" helperText="Intervalos de 15 minutos" />
             <MGTextField
@@ -60,8 +69,9 @@ export default function BlockTimeSheet({ visible, initialDate, submitting, onClo
               autoCapitalize="none"
               error={error ?? undefined}
             />
+            </MGCard>
           </ScrollView>
-          <View style={{ padding: spacing.base, paddingTop: 0 }}>
+          <View style={{ padding: spacing.base, paddingTop: 0, paddingBottom: spacing.base + insets.bottom }}>
             <MGButton
               label="Confirmar bloqueio"
               loading={submitting}

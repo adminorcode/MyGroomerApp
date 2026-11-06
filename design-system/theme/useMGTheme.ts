@@ -15,6 +15,7 @@ export function useMGTheme() {
     action: {
       primary: palette.action.primary,
       primaryPressed: palette.action.primaryPressed,
+      primaryText: palette.action.primaryText,
       primaryOutline: palette.action.primaryOutline,
       secondary: palette.action.secondary,
       secondaryPressed: lightColors.secondaryPressed,
@@ -37,7 +38,7 @@ export function useMGTheme() {
     },
     overlay: palette.overlay,
     onAction: {
-      primary: palette.text.inverse,
+      primary: palette.onAction.primary,
       secondary: palette.text.inverse,
       error: palette.text.inverse,
     },

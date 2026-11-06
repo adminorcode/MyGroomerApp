@@ -1,13 +1,13 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { View, StyleSheet } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { CustomerTabParamList } from './types'
 import HomeStackNavigator from './HomeStackNavigator'
 import BookingsStackNavigator from './BookingsStackNavigator'
 import MessagesStackNavigator from './MessagesStackNavigator'
 import { BookMinus, Home } from 'lucide-react-native'
 import { useTheme } from '../context/ThemeContext'
-import { fonts } from '../constants/theme'
+import { fonts, layout, spacing, borderRadius } from '../constants/theme'
 import { ProfileStackNavigator } from './ProfileStackNavigator'
 import MessageTabIcon from '../components/shared/MessageTabIcon'
 import AppHeader from '../components/shared/AppHeader'
@@ -16,6 +16,7 @@ const Tab = createBottomTabNavigator<CustomerTabParamList>()
 
 export default function CustomerNavigator() {
     const { colors } = useTheme()
+    const insets = useSafeAreaInsets()
 
     return (
         <Tab.Navigator
@@ -27,14 +28,17 @@ export default function CustomerNavigator() {
             )}
             screenOptions={{
                 headerShown: false,
-                tabBarActiveTintColor: colors.primary,
+                tabBarActiveTintColor: colors.primaryText,
                 tabBarInactiveTintColor: colors.navInactive,
                 tabBarStyle: {
-                    backgroundColor: colors.background,
+                    backgroundColor: colors.surface,
                     borderTopWidth: 1,
                     borderTopColor: colors.border,
-                    height: 110,
-                    paddingTop: 5,
+                    height: layout.tabBarHeight + insets.bottom,
+                    paddingTop: spacing.sm,
+                    paddingBottom: Math.max(insets.bottom, spacing.sm),
+                    borderTopLeftRadius: borderRadius.xl,
+                    borderTopRightRadius: borderRadius.xl,
                 },
                 tabBarLabelStyle: {
                     fontSize: 12,

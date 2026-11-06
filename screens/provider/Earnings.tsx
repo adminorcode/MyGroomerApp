@@ -4,7 +4,7 @@ import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
 import TransactionStatusBadge from '../../components/shared/TransactionStatusBadge'
-import { MGEmptyState, MGErrorState } from '../../design-system/components'
+import { MGCard, MGEmptyState, MGErrorState, MGIcon, MGText } from '../../design-system/components'
 import { useTheme } from '../../context/ThemeContext'
 import { useGetProviderEarnings } from '../../hooks/useProviders'
 import { ProviderTransaction } from '../../types/transaction.types'
@@ -23,28 +23,28 @@ function formatDate(value: string) {
 
 export default function Earnings() {
   const { colors } = useTheme()
-  const { data, isLoading, isError } = useGetProviderEarnings()
+  const { data, isLoading, isError, refetch } = useGetProviderEarnings()
 
   const renderSummary = () => (
-    <View style={styles.summaryRow}>
-      <View style={[styles.summaryCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+    <MGCard style={{ marginBottom: spacing.lg }}>
+      <View style={{ gap: spacing.sm }}>
         <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Total recebido</Text>
-        <Text style={[styles.summaryValue, { color: colors.success }]} numberOfLines={1} adjustsFontSizeToFit>
+        <Text style={[styles.summaryValue, { color: colors.secondary }]}>
           {formatMoney(data?.totalEarned ?? 0)}
         </Text>
-      </View>
-
-      <View style={[styles.summaryCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm }}>
         <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Pendente</Text>
-        <Text style={[styles.summaryValue, { color: colors.warning }]} numberOfLines={1} adjustsFontSizeToFit>
+        <Text style={[styles.summaryLabel, { color: colors.primaryText, backgroundColor: colors.selectionSoft, borderRadius: borderRadius.pill, paddingHorizontal: spacing.sm, paddingVertical: spacing.xs }]}>
           {formatMoney(data?.pending ?? 0)}
         </Text>
       </View>
-    </View>
+      </View>
+    </MGCard>
   )
 
   const renderTransaction = ({ item }: { item: ProviderTransaction }) => (
-    <View style={[styles.txCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+    <MGCard style={{ marginBottom: spacing.sm }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
       <View style={[styles.txIcon, { backgroundColor: colors.selectionSoft }]}>
         <ArrowDownLeft size={20} color={colors.primary} />
       </View>
@@ -66,6 +66,7 @@ export default function Earnings() {
         <TransactionStatusBadge status={item.transaction_status} />
       </View>
     </View>
+    </MGCard>
   )
 
   return (
@@ -81,12 +82,15 @@ export default function Earnings() {
         </View>
       ) : isError ? (
         <View style={styles.centered}>
-          <MGErrorState message="Não foi possível carregar os rendimentos." />
+          <MGErrorState message="Não foi possível carregar os rendimentos." onRetry={() => { void refetch() }} />
         </View>
       ) : (
         <>
           {renderSummary()}
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Histórico de repasses</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.md }}>
+            <MGIcon name="file-text" color={colors.primary} size={20} />
+            <MGText variant="title">Histórico de repasses</MGText>
+          </View>
           <FlatList
             data={data?.transactions ?? []}
             style={styles.list}
@@ -117,18 +121,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingBottom: spacing.xl,
   },
-  summaryRow: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    marginBottom: spacing.lg,
-  },
-  summaryCard: {
-    flex: 1,
-    padding: spacing.md,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    gap: spacing.xs,
-  },
   summaryLabel: {
     fontSize: typography.sizes.sm,
     fontFamily: fonts.medium,
@@ -136,20 +128,6 @@ const styles = StyleSheet.create({
   summaryValue: {
     fontSize: typography.sizes.xl,
     fontFamily: fonts.bold,
-  },
-  sectionTitle: {
-    fontSize: typography.sizes.lg,
-    fontFamily: fonts.semibold,
-    marginBottom: spacing.md,
-  },
-  txCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing.md,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    marginBottom: spacing.sm,
-    gap: spacing.md,
   },
   txIcon: {
     width: 40,

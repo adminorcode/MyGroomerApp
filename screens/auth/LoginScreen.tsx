@@ -17,6 +17,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { useRuntime } from '../../context/RuntimeContext'
 import { getErrorMessage } from '../../utils/error'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import MGBrand from '../../design-system/components/MGBrand'
 
 type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>
 
@@ -49,7 +50,8 @@ export default function LoginScreen({navigation}: Props) {
             enableOnAndroid={true}
         >
             <View style={styles.content}>
-            <MGText variant="heading1" color="brand" style={styles.title}>
+            <View style={styles.brand}><MGBrand compact /></View>
+            <MGText variant="heading1" accessibilityRole="header" style={styles.title}>
                 Acesse sua conta
             </MGText>
             <View style={styles.form}>
@@ -140,7 +142,7 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         alignItems: 'center',
         paddingHorizontal: spacing.xl,
-        paddingTop: spacing.xxxl,
+        paddingTop: spacing.xl,
         paddingBottom: spacing.huge,
     },
     content: {
@@ -148,8 +150,9 @@ const styles = StyleSheet.create({
         maxWidth: 448,
     },
     title: {
-        marginBottom: spacing.lg,
+        marginBottom: spacing.xl,
     },
+    brand: { alignItems: 'center', marginBottom: spacing.xxl },
     form: {
         width: '100%',
         gap: spacing.sm,
@@ -164,6 +167,7 @@ const styles = StyleSheet.create({
     forgotLink: {
         marginBottom: spacing.sm,
         alignSelf: 'flex-start',
+        paddingHorizontal: 0,
     },
     registerLink: {
         marginTop: spacing.xl,

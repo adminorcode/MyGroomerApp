@@ -61,6 +61,7 @@ export default function MGTextField({
           editable={editable}
           accessibilityLabel={accessibilityLabelProp ?? label}
           accessibilityState={{ disabled, ...accessibilityState }}
+          aria-disabled={disabled}
           onFocus={(event) => {
             setFocused(true)
             onFocus?.(event)
@@ -81,7 +82,7 @@ export default function MGTextField({
               fontFamily: fonts.regular,
               borderColor,
               backgroundColor: disabled ? colors.state.disabledSurface : colors.surface.default,
-              color: disabled ? colors.state.disabledText : colors.text.primary,
+              color: colors.text.primary,
             },
             style,
           ]}

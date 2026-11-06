@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import ProviderSetupIntro from './ProviderSetupIntro'
 import { Pressable, ScrollView, View } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
@@ -139,14 +140,12 @@ export default function WeeklyAvailabilityScreen({ navigation, route }: Props) {
       )}
     >
       {draft ? (
-        <View style={{ gap: spacing.lg, paddingTop: spacing.md }}>
+        <View style={{ gap: spacing.lg, paddingTop: spacing.md, width: '100%', maxWidth: 720, alignSelf: 'center' }}>
           {fromProfile ? null : <AvailabilityStepper />}
-          <View style={{ gap: spacing.xs }}>
-            <MGText variant="heading2">{fromProfile ? 'Horários de atendimento' : 'Disponibilidade'}</MGText>
-            <MGText variant="body" color="secondary">
-              Defina seus dias de trabalho, horários e tempo entre atendimentos.
-            </MGText>
-          </View>
+          <ProviderSetupIntro
+            title={fromProfile ? 'Horários de atendimento' : 'Disponibilidade'}
+            description="Organize sua rotina. Defina dias de trabalho, horários e intervalos para controlar sua disponibilidade."
+          />
           <WeeklyAvailabilityEditor
             value={draft.days}
             issues={reveal ? dayIssues(draft) : undefined}
@@ -158,7 +157,7 @@ export default function WeeklyAvailabilityScreen({ navigation, route }: Props) {
               setDraft({ ...draft, days })
             }}
           />
-          <View style={{ gap: spacing.sm }}>
+          <View style={{ gap: spacing.sm, backgroundColor: colors.surface.default, borderRadius: radius.lg, padding: spacing.base }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
               <MGIcon name="clock-3" size={20} color={colors.action.primary} />
               <MGText variant="heading3">Tempo entre atendimentos</MGText>

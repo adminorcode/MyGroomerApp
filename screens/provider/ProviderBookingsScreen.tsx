@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { ActivityIndicator, ScrollView, View } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
-import { MGButton, MGCard, MGChip, MGEmptyState, MGErrorState, MGText } from '../../design-system/components'
+import { MGButton, MGCard, MGChip, MGEmptyState, MGErrorState, MGIcon, MGText } from '../../design-system/components'
 import { AgendaAppointmentCard } from '../../design-system/patterns'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { useCreateAgendaBlock, useDeleteAgendaBlock, useProviderAgenda } from '../../hooks/useAgenda'
@@ -119,27 +119,26 @@ export default function ProviderBookingsScreen({ navigation }: Props) {
         </View>
 
         {view === 'today' && agenda.data ? (
-          <View style={{ flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md }}>
-            <View accessible accessibilityLabel={visitLabel(summary.visits)} style={{ flex: 1 }}>
-              <MGCard variant="teal" padding={spacing.sm}>
+          <MGCard variant="teal" padding={spacing.md} style={{ marginBottom: spacing.md }}>
+          <View style={{ flexDirection: 'row', gap: spacing.md }}>
+            <View accessible accessibilityLabel={visitLabel(summary.visits)} style={{ flex: 1, gap: spacing.xs }}>
+                <MGIcon name="calendar-days" color={colors.action.secondary} />
                 <MGText variant="title">{summary.visits}</MGText>
-                <MGText variant="caption" color="secondary">{summary.visits === 1 ? 'atendimento' : 'atendimentos'}</MGText>
-              </MGCard>
+                <MGText variant="caption">{summary.visits === 1 ? 'atendimento' : 'atendimentos'}</MGText>
             </View>
-            <View accessible accessibilityLabel={pendingLabel(summary.pending)} style={{ flex: 1 }}>
-              <MGCard variant="pink" padding={spacing.sm}>
+            <View accessible accessibilityLabel={pendingLabel(summary.pending)} style={{ flex: 1, gap: spacing.xs }}>
+                <MGIcon name="file-text" color={colors.action.primary} />
                 <MGText variant="title">{summary.pending}</MGText>
-                <MGText variant="caption" color="secondary">{summary.pending === 1 ? 'solicitação pendente' : 'solicitações pendentes'}</MGText>
-              </MGCard>
+                <MGText variant="caption">{summary.pending === 1 ? 'solicitação pendente' : 'solicitações pendentes'}</MGText>
             </View>
-            <View accessible accessibilityLabel={summary.upcoming ? `Próximo às ${clockInSaoPaulo(summary.upcoming.scheduled_at)}, ${summary.upcoming.service_name ?? 'serviço'}` : 'Não há próximo horário'} style={{ flex: 1 }}>
-              <MGCard padding={spacing.sm}>
-                {summary.upcoming ? <MGText variant="caption" color="secondary">próximo às</MGText> : null}
+            <View accessible accessibilityLabel={summary.upcoming ? `Próximo às ${clockInSaoPaulo(summary.upcoming.scheduled_at)}, ${summary.upcoming.service_name ?? 'serviço'}` : 'Não há próximo horário'} style={{ flex: 1, gap: spacing.xs }}>
+                <MGIcon name="clock-3" color={colors.action.secondary} />
+                {summary.upcoming ? <MGText variant="caption">próximo às</MGText> : null}
                 <MGText variant="title">{summary.upcoming ? clockInSaoPaulo(summary.upcoming.scheduled_at) : '—'}</MGText>
                 <MGText variant="caption" numberOfLines={2}>{summary.upcoming ? (summary.upcoming.service_name ?? 'Serviço') : 'Não há próximo horário'}</MGText>
-              </MGCard>
             </View>
           </View>
+          </MGCard>
         ) : null}
 
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm, marginBottom: spacing.sm }}>

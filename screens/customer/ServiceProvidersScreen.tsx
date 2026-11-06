@@ -22,7 +22,7 @@ type Props = {
 export default function ServiceProvidersScreen({ navigation, route }: Props) {
   const { colors } = useTheme()
   const { serviceId, serviceName } = route.params
-  const { data, isLoading, isError } = useGetServiceProviders(serviceId)
+  const { data, isLoading, isError, refetch } = useGetServiceProviders(serviceId)
 
   return (
     <ScreenContainer>
@@ -35,11 +35,11 @@ export default function ServiceProvidersScreen({ navigation, route }: Props) {
 
       {isLoading ? (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={colors.primary} />
+          <ActivityIndicator accessibilityLabel="Carregando profissionais" size="large" color={colors.primary} />
         </View>
       ) : isError ? (
         <View style={styles.centered}>
-          <MGErrorState message="Não foi possível carregar os groomers." />
+          <MGErrorState message="Não foi possível carregar os groomers." onRetry={() => { void refetch() }} />
         </View>
       ) : (
         <FlatList
@@ -50,6 +50,7 @@ export default function ServiceProvidersScreen({ navigation, route }: Props) {
           renderItem={({ item }) => (
             <GroomerSearchCard
               name={item.name}
+              photoUrl={item.profile_picture}
               priceLabel={item.price != null ? `A partir de ${formatMoney(item.price)}` : undefined}
               coverageLabel={item.service_area}
               showChevron
@@ -77,6 +78,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     flexGrow: 1,
+    gap: spacing.xs,
     paddingBottom: spacing.xl,
   },
   centered: {

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import ProviderSetupIntro from './ProviderSetupIntro'
 import { View } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
@@ -109,14 +110,12 @@ export default function ServiceMenuScreen({ navigation, route }: Props) {
         </View>
       )}
     >
-      <View style={{ gap: spacing.lg, paddingTop: spacing.md }}>
+      <View style={{ gap: spacing.lg, paddingTop: spacing.md, width: '100%', maxWidth: 720, alignSelf: 'center' }}>
         {fromProfile ? null : <OnboardingStepper steps={steps} currentStepId="services" />}
-        <View style={{ gap: spacing.xs }}>
-          <MGText variant="heading2">{fromProfile ? 'Serviços e preços' : 'Dados do serviço'}</MGText>
-          <MGText variant="body" color="secondary">
-            Publique cada serviço com um tipo da conta, descrição, preço e duração para pequeno, médio e grande.
-          </MGText>
-        </View>
+        <ProviderSetupIntro
+          title={fromProfile ? 'Serviços e preços' : 'Dados do serviço'}
+          description="Monte seu cardápio: defina os serviços, preços e duração por porte. Essas informações aparecem para o tutor ao agendar."
+        />
         <MGButton
           label="Adicionar serviço"
           variant="secondary"

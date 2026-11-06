@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native'
 import { ChevronRight } from 'lucide-react-native'
 import MGAvatar from '../components/MGAvatar'
+import MGArtwork from '../components/MGArtwork'
 import MGText from '../components/MGText'
 import { useMGTheme } from '../theme/useMGTheme'
 
@@ -25,7 +26,7 @@ export default function GroomerSearchCard({
   onPress,
   showChevron = true,
 }: GroomerSearchCardProps) {
-  const { colors, spacing, radius, fonts } = useMGTheme()
+  const { colors, spacing, radius, fonts, elevation } = useMGTheme()
   const meta = [priceLabel, coverageLabel, ratingLabel].filter(Boolean).join(' · ')
   const details = [coverageLabel, ratingLabel].filter(Boolean).join(' · ')
 
@@ -37,19 +38,20 @@ export default function GroomerSearchCard({
       onPress={onPress}
       style={({ pressed }) => [
         styles.card,
+        elevation.low,
         {
           backgroundColor: colors.surface.default,
           borderColor: colors.border.default,
           borderRadius: radius.lg,
-          padding: spacing.md,
+          padding: spacing.base,
           marginBottom: spacing.sm,
           opacity: pressed ? 0.92 : 1,
         },
       ]}
     >
-      <MGAvatar name={name} uri={photoUrl} kind="person" size={48} />
+      {photoUrl ? <MGAvatar name={name} uri={photoUrl} kind="person" size={64} /> : <View style={{ backgroundColor: colors.surface.pinkSubtle, borderRadius: radius.lg }}><MGArtwork name="poodle" width={72} height={80} /></View>}
       <View style={[styles.content, { marginLeft: spacing.md }]}>
-        <MGText variant="title" numberOfLines={1}>
+        <MGText variant="title" numberOfLines={2}>
           {name}
         </MGText>
         {subtitle ? (
@@ -63,7 +65,7 @@ export default function GroomerSearchCard({
           </MGText>
         ) : null}
         {details ? (
-          <MGText variant="caption" color="secondary" numberOfLines={1} style={{ marginTop: spacing.xs }}>
+          <MGText variant="caption" color="secondary" style={{ marginTop: spacing.xs }}>
             {details}
           </MGText>
         ) : null}

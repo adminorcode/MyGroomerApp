@@ -1,7 +1,8 @@
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { ChevronLeft, Phone, Video } from 'lucide-react-native'
 import { useTheme } from '../../context/ThemeContext'
 import { fonts, spacing, typography } from '../../constants/theme'
+import { MGAvatar } from '../../design-system/components'
 
 type Props = {
     name: string
@@ -16,20 +17,12 @@ export default function ChatHeader({ name, avatarUri, status, onBack, onCall, on
     const { colors } = useTheme()
 
     return (
-        <View style={[styles.container, { borderBottomColor: colors.border }]}>
-            <Pressable accessibilityRole="button" accessibilityLabel="Voltar" onPress={onBack} hitSlop={spacing.sm} style={styles.backBtn}>
+        <View style={[styles.container, { borderColor: colors.border, backgroundColor: colors.surface }]}>
+            <Pressable accessibilityRole="button" accessibilityLabel="Voltar" onPress={onBack} hitSlop={spacing.sm} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]}>
                 <ChevronLeft size={26} color={colors.text} />
             </Pressable>
 
-            {avatarUri ? (
-                <Image source={{ uri: avatarUri }} style={styles.avatar} />
-            ) : (
-                <View style={[styles.avatar, styles.avatarFallback, { backgroundColor: colors.selectionSoft }]}>
-                    <Text style={[styles.avatarInitial, { color: colors.primary }]}>
-                        {name.charAt(0).toUpperCase()}
-                    </Text>
-                </View>
-            )}
+            <MGAvatar name={name} uri={avatarUri} size={40} />
 
             <View style={styles.info}>
                 <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
@@ -43,12 +36,12 @@ export default function ChatHeader({ name, avatarUri, status, onBack, onCall, on
             </View>
 
             <View style={styles.actions}>
-                <Pressable onPress={onVideoCall} hitSlop={spacing.sm}>
+                {onVideoCall ? <Pressable accessibilityRole="button" accessibilityLabel="Chamada de vídeo" onPress={onVideoCall} hitSlop={spacing.sm}>
                     <Video size={22} color={colors.primary} />
-                </Pressable>
-                <Pressable onPress={onCall} hitSlop={spacing.sm}>
+                </Pressable> : null}
+                {onCall ? <Pressable accessibilityRole="button" accessibilityLabel="Ligar" onPress={onCall} hitSlop={spacing.sm}>
                     <Phone size={20} color={colors.primary} />
-                </Pressable>
+                </Pressable> : null}
             </View>
         </View>
     )
@@ -60,10 +53,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: spacing.sm,
         gap: spacing.sm,
-        borderBottomWidth: 1,
+        borderWidth: 1,
+        borderRadius: spacing.base,
+        marginBottom: spacing.sm,
+        paddingHorizontal: spacing.sm,
     },
     backBtn: {
-        marginRight: -spacing.xs,
+        minWidth: 48,
+        minHeight: 48,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     avatar: {
         width: 40,

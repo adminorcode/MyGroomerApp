@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, View, useWindowDimensions } from 'react-native'
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, View, useWindowDimensions } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, ArrowRight, Award, Check, FileUp, IdCard, LockKeyhole, Mail, PawPrint, Phone, ShieldCheck, Trash2, UserRound } from 'lucide-react-native'
@@ -12,6 +12,7 @@ import { getErrorMessage } from '../../utils/error'
 import { emptyRegistration, FILE_TYPES, MAX_FILES, MAX_FILE_SIZE, ProfessionalRegistration, registrationErrors, registrationPayload, RegistrationAttachment } from './professionalRegistrationModel'
 import { useAuthStore } from '../../store/authStore'
 import ProfessionalDocumentField from './ProfessionalDocumentField'
+import MGArtwork from '../../design-system/components/MGArtwork'
 
 type Props = {
   authenticated?: boolean
@@ -34,7 +35,7 @@ function RegistrationProgress() {
           <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
             <View style={{ position: 'absolute', left: index ? 0 : '50%', right: index === steps.length - 1 ? '50%' : 0, height: 2, backgroundColor: colors.border.default }} />
             <View style={{ width: spacing.xxl, height: spacing.xxl, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: index === 0 ? colors.action.primary : colors.state.disabledSurface }}>
-              <MGText variant="label" color={index === 0 ? 'inverse' : 'secondary'}>{index + 1}</MGText>
+              <MGText variant="label" style={{ color: index === 0 ? colors.onAction.primary : colors.text.primary }}>{index + 1}</MGText>
             </View>
           </View>
           <MGText variant="caption" color={index === 0 ? 'brand' : 'secondary'} style={{ textAlign: 'center' }}>{label}</MGText>
@@ -212,7 +213,7 @@ export default function ProfessionalRegistrationForm({ authenticated = false, re
                 <MGText variant={compact ? 'heading2' : 'display'}>Vamos conhecer você melhor!</MGText>
                 <MGText color="secondary" variant={compact ? 'bodySmall' : 'body'}>Preencha seus dados profissionais para que possamos validar seu perfil.</MGText>
               </View>
-              <Image source={require('../../assets/registration/mascot.png')} accessible={false} style={{ width: compact ? 92 : 144, height: compact ? 120 : 160, resizeMode: 'contain' }} />
+              <MGArtwork name="professional" width={compact ? 92 : 144} height={compact ? 120 : 160} />
             </View>
             {restored ? <MGText accessibilityLiveRegion="polite" variant="bodySmall" color="info">Rascunho recuperado. Continue de onde parou.</MGText> : null}
             {registeredEmail ? <MGText accessibilityLiveRegion="polite" variant="bodySmall" color="info">Sua conta já foi criada para {registeredEmail}. Use a senha cadastrada e toque em Continuar para salvar os dados atuais e abrir os serviços.</MGText> : null}
@@ -237,7 +238,7 @@ export default function ProfessionalRegistrationForm({ authenticated = false, re
                 {fieldError('professional_type_ids') ? <MGText variant="caption" color="error">{fieldError('professional_type_ids')}</MGText> : null}
               </View>
               <View style={{ padding: spacing.base, gap: spacing.md, borderWidth: 1, borderStyle: 'dashed', borderColor: colors.action.secondary, borderRadius: radius.md, backgroundColor: colors.surface.tealSubtle }}>
-                <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' }}><FileUp size={spacing.xxl} color={colors.action.secondary} /><View style={{ flex: 1, gap: spacing.xs }}><MGText variant="title">Anexar evidências</MGText><MGText variant="bodySmall" color="secondary">Envie certificados, diplomas ou outros comprovantes da sua experiência.</MGText><MGText variant="caption" color="secondary">JPG, PNG ou PDF · até 10 MB por arquivo · máximo de 5 arquivos</MGText></View></View>
+                <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' }}><FileUp size={spacing.xxl} color={colors.action.secondary} /><View style={{ flex: 1, gap: spacing.xs }}><MGText variant="title">Anexar evidências</MGText><MGText variant="bodySmall" >Envie certificados, diplomas ou outros comprovantes da sua experiência.</MGText><MGText variant="caption" >JPG, PNG ou PDF · até 10 MB por arquivo · máximo de 5 arquivos</MGText></View></View>
                 <MGButton label="Selecionar arquivos" variant="teal" disabled={!!busy || readingFiles || value.attachments.length >= MAX_FILES} loading={readingFiles} onPress={() => { void selectFiles() }} />
                 {readingFiles ? <MGText accessibilityLiveRegion="polite" variant="bodySmall" color="info">Lendo os arquivos selecionados…</MGText> : null}
                 {value.attachments.map((attachment, index) => <View key={attachment.id ?? `${index}-${attachment.name}`} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}><View style={{ flex: 1 }}><MGText variant="bodySmall" style={{ flexShrink: 1 }}>{attachment.name}</MGText><MGText variant="caption" color="secondary">{(attachment.size / 1024 / 1024).toLocaleString('pt-BR', { maximumFractionDigits: 2 })} MB</MGText></View><MGIconButton accessibilityLabel={`Remover ${attachment.name}`} disabled={!!busy || readingFiles} onPress={() => update('attachments', value.attachments.filter((_, itemIndex) => itemIndex !== index))} icon={<Trash2 color={colors.feedback.error} size={spacing.lg} />} style={{ minWidth: spacing.huge, minHeight: spacing.huge }} /></View>)}
@@ -245,7 +246,7 @@ export default function ProfessionalRegistrationForm({ authenticated = false, re
               </View>
               {!authenticated ? <View style={{ marginTop: spacing.lg }}><FieldRow icon={<LockKeyhole {...iconProps} />}><View><MGTextField required label="Senha" value={password} autoCapitalize="none" autoCorrect={false} autoComplete={registeredEmail ? 'current-password' : 'new-password'} textContentType={registeredEmail ? 'password' : 'newPassword'} secureTextEntry={!visiblePassword} editable={!busy} onChangeText={setPassword} onBlur={() => touch('password')} error={fieldError('password')} helperText={registeredEmail ? 'Use a senha definida ao criar esta conta. Ela não é salva no rascunho.' : '8 ou mais caracteres, com maiúscula, minúscula, número e símbolo. A senha não é salva no rascunho.'} /><MGButton label={visiblePassword ? 'Ocultar senha' : 'Mostrar senha'} variant="tertiary" fullWidth={false} disabled={!!busy} onPress={() => setVisiblePassword(previous => !previous)} /></View></FieldRow></View> : null}
             </View>
-            <View style={{ flexDirection: 'row', gap: spacing.md, padding: spacing.base, borderRadius: radius.xl, borderWidth: 1, borderColor: colors.action.secondary, backgroundColor: colors.surface.tealSubtle }}><ShieldCheck size={spacing.xxl} color={colors.action.secondary} /><View style={{ flex: 1, gap: spacing.xs }}><MGText variant="title" color="info">Validação feita por pessoas reais</MGText><MGText variant="bodySmall" color="secondary">Seus dados e certificações serão analisados pela nossa equipe. Continuar não torna seu perfil verificado.</MGText></View></View>
+            <View style={{ flexDirection: 'row', gap: spacing.md, padding: spacing.base, borderRadius: radius.xl, borderWidth: 1, borderColor: colors.action.secondary, backgroundColor: colors.surface.tealSubtle }}><ShieldCheck size={spacing.xxl} color={colors.action.secondary} /><View style={{ flex: 1, gap: spacing.xs }}><MGText variant="title">Validação feita por pessoas reais</MGText><MGText variant="bodySmall" >Seus dados e certificações serão analisados pela nossa equipe. Continuar não torna seu perfil verificado.</MGText></View></View>
             <MGText variant="caption" color="secondary">* Campos obrigatórios. Você pode salvar um rascunho e terminar depois.</MGText>
             {onLogin ? <MGButton label="Já tem uma conta? Entrar" variant="tertiary" fullWidth={false} disabled={!!busy} onPress={onLogin} style={{ alignSelf: 'center' }} /> : null}
           </View>

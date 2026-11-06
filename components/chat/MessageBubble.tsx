@@ -22,9 +22,9 @@ function formatBubbleTime(value?: string) {
 export default function MessageBubble({ content, timestamp, isOwn, isSeen, isEdited, isPending }: Props) {
     const { colors } = useTheme()
 
-    const bubbleColor = isOwn ? colors.primary : colors.surface
+    const bubbleColor = isOwn ? colors.primary : colors.infoSoft
     const textColor = isOwn ? colors.onPrimary : colors.text
-    const metaColor = isOwn ? colors.onPrimary : colors.textSecondary
+    const metaColor = isOwn ? colors.onPrimary : colors.text
 
     return (
         <View style={[styles.row, isOwn ? styles.rowOwn : styles.rowOther]}>
@@ -33,7 +33,6 @@ export default function MessageBubble({ content, timestamp, isOwn, isSeen, isEdi
                     styles.bubble,
                     { backgroundColor: bubbleColor, borderColor: colors.border },
                     isOwn ? styles.bubbleOwn : styles.bubbleOther,
-                    !isOwn && styles.bubbleOtherBorder,
                 ]}
             >
                 <Text style={[styles.content, { color: textColor }]}>{content}</Text>
@@ -75,9 +74,9 @@ const styles = StyleSheet.create({
     },
     bubble: {
         maxWidth: '80%',
-        paddingHorizontal: spacing.sm + 2,
-        paddingTop: spacing.xs + 2,
-        paddingBottom: spacing.xs,
+        paddingHorizontal: spacing.md,
+        paddingTop: spacing.sm,
+        paddingBottom: spacing.sm,
         borderRadius: borderRadius.lg,
     },
     bubbleOwn: {

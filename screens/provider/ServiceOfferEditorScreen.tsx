@@ -1,11 +1,12 @@
 import { View } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
-import { MGButton, MGChip, MGScreen, MGText, MGTextField } from '../../design-system/components'
+import { MGButton, MGCard, MGChip, MGIcon, MGScreen, MGText, MGTextField } from '../../design-system/components'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { ProviderEditionStackParamList } from '../../navigation/types'
 import { useServiceMenuDraft } from './ServiceMenuDraft'
-import { offerTitle, SIZE_KEYS, SIZE_LABELS } from './serviceMenuModel'
+import { offerTitle, parseMinutes, parseMoney, SIZE_KEYS, SIZE_LABELS } from './serviceMenuModel'
+import { formatMoney } from '../../utils/formatMoney'
 
 type Props = {
   navigation: StackNavigationProp<ProviderEditionStackParamList, 'ServiceOfferEditor'>
@@ -13,7 +14,7 @@ type Props = {
 }
 
 export default function ServiceOfferEditorScreen({ navigation, route }: Props) {
-  const { spacing } = useMGTheme()
+  const { colors, spacing } = useMGTheme()
   const draft = useServiceMenuDraft()
   const offer = draft.state?.offers.find(item => item.key === route.params.draftKey)
 
@@ -52,7 +53,7 @@ export default function ServiceOfferEditorScreen({ navigation, route }: Props) {
         </View>
       )}
     >
-      <View style={{ gap: spacing.md, paddingTop: spacing.md }}>
+      <View style={{ gap: spacing.md, paddingTop: spacing.md, width: '100%', maxWidth: 720, alignSelf: 'center' }}>
         <MGText variant="heading2">{offer.service_id ? title : 'Novo serviço'}</MGText>
         {offer.service_id ? (
           <MGText variant="body" color="secondary">{offer.category_id ? draft.state.categories.find(category => category.id === offer.category_id)?.name : ''}</MGText>
@@ -83,6 +84,7 @@ export default function ServiceOfferEditorScreen({ navigation, route }: Props) {
             </View>
           </View>
         ) : null}
+        <MGCard>
         <View style={{ gap: spacing.sm }}>
           <MGText variant="label">Tipo</MGText>
           {draft.state.types.length === 0 ? (
@@ -109,15 +111,24 @@ export default function ServiceOfferEditorScreen({ navigation, route }: Props) {
             ))}
           </View>
         </View>
+        </MGCard>
+        <MGCard>
         <MGTextField
+          icon="file-text"
           label="Descrição"
           value={offer.description}
           onChangeText={text => draft.updateOffer(offer.key, { description: text })}
           required
           multiline
         />
+        </MGCard>
         {SIZE_KEYS.map(size => (
-          <View key={size}>
+          <MGCard key={size}>
+          <View style={{ gap: spacing.sm }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+              <MGIcon name="paw-print" color={colors.action.primary} size={20} />
+              <MGText variant="title">Porte {SIZE_LABELS[size].toLowerCase()}</MGText>
+            </View>
             <MGTextField
               label={`Preço ${SIZE_LABELS[size].toLowerCase()}`}
               value={offer.prices[size]}
@@ -128,6 +139,7 @@ export default function ServiceOfferEditorScreen({ navigation, route }: Props) {
               required
             />
             <MGTextField
+              icon="clock-3"
               label={`Duração ${SIZE_LABELS[size].toLowerCase()}`}
               value={offer.durations[size]}
               onChangeText={text => draft.updateOffer(offer.key, {
@@ -138,7 +150,25 @@ export default function ServiceOfferEditorScreen({ navigation, route }: Props) {
               required
             />
           </View>
+          </MGCard>
         ))}
+        <MGCard variant="teal">
+          <View style={{ gap: spacing.sm }}>
+            <MGText variant="title">Resumo do serviço</MGText>
+            <MGText variant="body">{title}</MGText>
+            {SIZE_KEYS.map(size => {
+              const price = parseMoney(offer.prices[size])
+              const duration = parseMinutes(offer.durations[size])
+              return (
+                <View key={size} style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: spacing.xs }}>
+                  <MGText variant="bodySmall">{SIZE_LABELS[size]}</MGText>
+                  <MGText variant="bodySmall">{price.ok && price.value != null ? formatMoney(price.value) : 'Preço não informado'} · {duration.ok && duration.value != null ? `${duration.value} min` : 'Duração não informada'}</MGText>
+                </View>
+              )
+            })}
+            <MGText variant="caption">Concluir mantém as alterações no cardápio. Salve o cardápio para publicá-las.</MGText>
+          </View>
+        </MGCard>
       </View>
     </MGScreen>
   )

@@ -24,11 +24,11 @@ export default function MGBadge({ label, tone = 'neutral', icon }: Props) {
   const toneStyles: Record<MGBadgeTone, { color: string; background: string }> = {
     pending: { color: colors.action.primaryOutline, background: colors.surface.pinkSubtle },
     confirmed: { color: colors.feedback.success, background: colors.feedback.successSurface },
-    info: { color: colors.feedback.info, background: colors.feedback.infoSurface },
+    info: { color: colors.text.primary, background: colors.feedback.infoSurface },
     success: { color: colors.feedback.success, background: colors.feedback.successSurface },
     warning: { color: colors.feedback.warning, background: colors.feedback.warningSurface },
     error: { color: colors.feedback.error, background: colors.feedback.errorSurface },
-    neutral: { color: colors.text.secondary, background: colors.state.disabledSurface },
+    neutral: { color: colors.text.primary, background: colors.state.disabledSurface },
   }
 
   const { color, background } = toneStyles[tone]
@@ -43,11 +43,13 @@ export default function MGBadge({ label, tone = 'neutral', icon }: Props) {
           paddingVertical: spacing.xs,
           borderRadius: radius.lg,
           columnGap: spacing.xs,
+          maxWidth: '100%',
+          flexShrink: 1,
         },
       ]}
     >
       {icon}
-      <MGText variant="caption" style={{ color }}>
+      <MGText variant="caption" style={{ color, flexShrink: 1 }}>
         {label}
       </MGText>
     </View>

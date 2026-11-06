@@ -1,7 +1,7 @@
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { ChevronRight } from 'lucide-react-native'
-import { MGButton, MGEmptyState, MGErrorState, MGText } from '../../design-system/components'
+import { MGButton, MGEmptyState, MGErrorState, MGIcon, MGText } from '../../design-system/components'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
@@ -48,7 +48,7 @@ export default function AddressesScreen({ navigation }: Props) {
                                     onPress={() => openForm(item.id)}
                                     style={({ pressed }) => ({
                                         minHeight: 72,
-                                        padding: spacing.md,
+                                        padding: spacing.base,
                                         borderRadius: radius.lg,
                                         borderWidth: 1,
                                         borderColor: colors.border.default,
@@ -58,6 +58,9 @@ export default function AddressesScreen({ navigation }: Props) {
                                         gap: spacing.sm,
                                     })}
                                 >
+                                    <View style={{ width: 40, height: 40, borderRadius: radius.md, backgroundColor: colors.surface.pinkSubtle, alignItems: 'center', justifyContent: 'center' }}>
+                                        <MGIcon name={item.label === 'work' ? 'building-2' : 'map-pin'} color={colors.action.primary} />
+                                    </View>
                                     <View style={{ flex: 1, gap: spacing.xs }}>
                                         <MGText variant="label">{addressLabelName(item.label)}</MGText>
                                         <MGText>{item.address}</MGText>

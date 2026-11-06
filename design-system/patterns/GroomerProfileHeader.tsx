@@ -36,12 +36,12 @@ export default function GroomerProfileHeader({
         </View>
       </View>
       {specialties.length > 0 ? (
-        <MGText variant="bodySmall" color="secondary">
+        <MGText variant="bodySmall">
           {specialties.join(' · ')}
         </MGText>
       ) : null}
       {description ? (
-        <MGText variant="body" color="secondary">
+        <MGText variant="body">
           {description}
         </MGText>
       ) : null}

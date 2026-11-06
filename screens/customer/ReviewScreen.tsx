@@ -3,8 +3,6 @@ import { useState } from 'react'
 import {
   View,
   Text,
-  TextInput,
-  Alert,
   StyleSheet,
   Platform,
   KeyboardAvoidingView,
@@ -17,7 +15,8 @@ import { BookingsStackParamList } from '../../navigation/types'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
 import StarRating from '../../components/shared/StarRating'
-import BoameBtn from '../../components/shared/BoameBtn'
+import { MGButton, MGIcon, MGTextField } from '../../design-system/components'
+import MGArtwork from '../../design-system/components/MGArtwork'
 import { useTheme } from '../../context/ThemeContext'
 import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
 
@@ -81,6 +80,10 @@ const ReviewScreen = ({ navigation, route }: Props) => {
         >
           {/* Rating — focal point */}
           <View style={styles.ratingSection}>
+            <View style={[styles.illustration, { backgroundColor: colors.selectionSoft }]}>
+              <MGArtwork name="puppy" width={116} height={116} />
+              <View style={styles.bathIcon}><MGIcon name="bath" size={32} color={colors.secondary} /></View>
+            </View>
             <Text style={[styles.ratingLabel, { color: colors.text }]}>{contextText}</Text>
             <View style={styles.starsWrapper}>
               <StarRating rating={rating} onRatingChange={setRating} size={40} />
@@ -88,24 +91,21 @@ const ReviewScreen = ({ navigation, route }: Props) => {
           </View>
 
           {/* Comment */}
-          <Text style={[styles.label, { color: colors.text }]}>Sua avaliação</Text>
-          <TextInput
+          <MGTextField
+            label="Sua avaliação"
+            accessibilityLabel="Sua avaliação"
             value={comment}
             onChangeText={setComment}
             placeholder='Conte o que mais chamou atenção...'
-            placeholderTextColor={colors.textSecondary}
             multiline
             numberOfLines={5}
             textAlignVertical='top'
-            style={[
-              styles.input,
-              { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text },
-            ]}
+            style={styles.input}
           />
         </ScrollView>
 
-        <BoameBtn
-          title='Enviar avaliação'
+        <MGButton
+          label='Enviar avaliação'
           onPress={handleSubmit}
           loading={isPending}
           disabled={isPending}
@@ -126,9 +126,11 @@ const styles = StyleSheet.create({
   },
   ratingSection: {
     alignItems: 'center',
-    marginVertical: spacing.xl,
+    marginBottom: spacing.xl,
     gap: spacing.lg,
   },
+  illustration: { width: 152, height: 136, borderRadius: borderRadius.full, alignItems: 'center', justifyContent: 'center' },
+  bathIcon: { position: 'absolute', bottom: 0, right: spacing.sm },
   ratingLabel: {
     fontSize: typography.sizes.lg,
     fontFamily: fonts.semibold,
@@ -145,11 +147,6 @@ const styles = StyleSheet.create({
   },
   input: {
     minHeight: 120,
-    borderWidth: 1,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    fontSize: typography.sizes.md,
-    fontFamily: fonts.regular,
   },
   submitButton: {
     marginBottom: spacing.lg,

@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Image, StyleSheet, View } from 'react-native'
-import MGIcon from './MGIcon'
 import MGText from './MGText'
+import MGArtwork from './MGArtwork'
 import { useMGTheme } from '../theme/useMGTheme'
 
 export type MGAvatarKind = 'person' | 'pet'
@@ -16,6 +16,7 @@ type Props = {
 export default function MGAvatar({ uri, name, kind = 'person', size = 48 }: Props) {
   const { colors } = useMGTheme()
   const [failed, setFailed] = useState(false)
+  useEffect(() => setFailed(false), [uri])
   const showImage = Boolean(uri) && !failed
   const initial = name.trim().charAt(0).toUpperCase() || '?'
 
@@ -28,7 +29,7 @@ export default function MGAvatar({ uri, name, kind = 'person', size = 48 }: Prop
           width: size,
           height: size,
           borderRadius: size / 2,
-          backgroundColor: kind === 'pet' ? colors.surface.pinkSubtle : colors.surface.tealSubtle,
+          backgroundColor: colors.surface.pinkSubtle,
         },
       ]}
     >
@@ -40,7 +41,7 @@ export default function MGAvatar({ uri, name, kind = 'person', size = 48 }: Prop
           accessibilityLabel={name}
         />
       ) : kind === 'pet' ? (
-        <MGIcon name="paw-print" size={Math.round(size * 0.45)} color={colors.action.primary} />
+        <MGArtwork name="pet-placeholder" width={size * 0.85} />
       ) : (
         <MGText variant="title" color="brand">
           {initial}

@@ -15,14 +15,14 @@ export default function ScreenHeader({ title, description, showBackButton, onBac
   return (
     <View style={styles.container}>
       {showBackButton && (
-        <Pressable onPress={onBack} hitSlop={spacing.sm} accessibilityRole="button" accessibilityLabel="Voltar">
+        <Pressable onPress={onBack} hitSlop={spacing.sm} style={({ pressed }) => ({ minWidth: 48, minHeight: 48, alignItems: 'center', justifyContent: 'center', opacity: pressed ? 0.6 : 1 })} accessibilityRole="button" accessibilityLabel="Voltar">
           <ChevronLeft size={24} color={colors.text} />
         </Pressable>
       )}
       <View style={styles.titleContainer}>
-        <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
+        <Text accessibilityRole="header" style={[styles.title, { color: colors.text }]}>{title}</Text>
         {description && (
-            <Text style={[styles.description, { color: colors.textSecondary }]} numberOfLines={2}>
+            <Text style={[styles.description, { color: colors.textSecondary }]}>
             {description}
             </Text>
         )}
@@ -36,14 +36,14 @@ const styles = StyleSheet.create({
     marginVertical: spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
+    gap: spacing.xs,
   },
   titleContainer: {
     flex: 1,
   },
   title: {
     fontSize: typography.sizes.xl,
-    fontFamily: fonts.semibold,
+    fontFamily: fonts.bold,
   },
   description: {
     fontSize: typography.sizes.sm,

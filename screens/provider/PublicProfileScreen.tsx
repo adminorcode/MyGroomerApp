@@ -1,9 +1,11 @@
 import { ReactNode, useCallback, useRef, useState } from 'react'
+import MGArtwork from '../../design-system/components/MGArtwork'
 import { ActivityIndicator, View } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { useFocusEffect } from '@react-navigation/native'
 import {
   MGButton,
+  MGCard,
   MGEmptyState,
   MGErrorState,
   MGIcon,
@@ -158,8 +160,10 @@ export default function PublicProfileScreen({ navigation }: Props) {
               borderWidth: 1,
               borderColor: colors.border.default,
               backgroundColor: colors.surface.pinkSubtle,
+              overflow: 'hidden',
             }}
           >
+            <MGArtwork name="paw-decoration" width={80} height={96} style={{ position: 'absolute', top: spacing.sm, right: spacing.sm, opacity: 0.55 }} />
             <GroomerProfileHeader
               name={profile.name}
               photoUrl={photoUri}
@@ -269,9 +273,9 @@ export default function PublicProfileScreen({ navigation }: Props) {
             onAction={() => navigation.navigate('ServiceLocation', { origin: 'profile' })}
           >
             {profile.area ? (
-              <View style={{ gap: spacing.xxs }}>
+              <View style={{ gap: spacing.xxs, padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.surface.tealSubtle }}>
                 <MGText variant="title">{areaRadiusLabel(profile.area.radius_km)}</MGText>
-                <MGText variant="body" color="secondary">{profile.area.address}</MGText>
+                <MGText variant="body">{profile.area.address}</MGText>
               </View>
             ) : (
               <MGText variant="body" color="secondary">Área de atendimento ainda não informada.</MGText>
@@ -292,7 +296,7 @@ export default function PublicProfileScreen({ navigation }: Props) {
             ) : (
               <View style={{ gap: spacing.sm }}>
                 {profile.services.map(service => (
-                  <View key={service.id} style={{ gap: spacing.xxs }}>
+                  <View key={service.id} style={{ gap: spacing.xxs, padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.surface.pinkSubtle }}>
                     <MGText variant="title">{service.name}</MGText>
                     <MGText variant="body" color="brand" style={{ fontFamily: fonts.bold }}>
                       A partir de {formatMoney(service.price)}
@@ -350,18 +354,10 @@ function Section({ icon, title, actionLabel, onAction, children }: {
   onAction?: () => void
   children: ReactNode
 }) {
-  const { colors, spacing, radius } = useMGTheme()
+  const { colors, spacing } = useMGTheme()
   return (
-    <View
-      style={{
-        gap: spacing.sm,
-        padding: spacing.base,
-        borderRadius: radius.lg,
-        borderWidth: 1,
-        borderColor: colors.border.default,
-        backgroundColor: colors.surface.default,
-      }}
-    >
+    <MGCard>
+    <View style={{ gap: spacing.sm }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
         <MGIcon name={icon} size={20} color={colors.action.primary} />
         <MGText variant="heading3" style={{ flex: 1 }}>{title}</MGText>
@@ -378,6 +374,7 @@ function Section({ icon, title, actionLabel, onAction, children }: {
       </View>
       {children}
     </View>
+    </MGCard>
   )
 }
 

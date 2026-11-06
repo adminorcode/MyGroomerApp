@@ -2,7 +2,7 @@ import { StyleSheet, View } from "react-native";
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { AuthStackParamList } from "../../navigation/types";
-import { fonts, spacing, typography } from "../../constants/theme";
+import { spacing, typography } from "../../constants/theme";
 import { ToggleInput } from "../../components/shared/Input";
 import { MGButton, MGText } from "../../design-system/components";
 import { resetPasswordSchema } from "../../validators/auth.validator";
@@ -13,6 +13,8 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { useResetPasswordMutation } from "../../hooks/useAuth";
 import { useTheme } from "../../context/ThemeContext";
 import { getErrorMessage } from "../../utils/error";
+import MGBrand from '../../design-system/components/MGBrand';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type ResetPasswordNavigationProp = StackNavigationProp<AuthStackParamList, "ResetPassword">;
 type ResetPasswordRouteProp = RouteProp<AuthStackParamList, "ResetPassword">;
@@ -35,13 +37,16 @@ export default function ResetPasswordScreen({ navigation, route }: Props) {
     };
 
     return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top', 'left', 'right']}>
         <KeyboardAwareScrollView
             contentContainerStyle={[styles.container, { backgroundColor: colors.background }]}
             keyboardShouldPersistTaps="handled"
             extraScrollHeight={20}
             enableOnAndroid
         >
-            <MGText variant="heading1" color="brand" style={[styles.title, { fontFamily: fonts.logo }]}>
+            <View style={styles.content}>
+            <View style={styles.brand}><MGBrand compact /></View>
+            <MGText variant="heading1" accessibilityRole="header" style={styles.title}>
                 Nova senha
             </MGText>
             {isSuccess ? (
@@ -78,7 +83,9 @@ export default function ResetPasswordScreen({ navigation, route }: Props) {
                     )}
                 </View>
             )}
+            </View>
         </KeyboardAwareScrollView>
+        </SafeAreaView>
     );
 }
 
@@ -87,9 +94,11 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         alignItems: "center",
         paddingHorizontal: spacing.xl,
-        paddingTop: spacing.huge,
-        paddingBottom: 100,
+        paddingTop: spacing.xl,
+        paddingBottom: spacing.huge,
     },
+    content: { width: '100%', maxWidth: 448 },
+    brand: { alignItems: 'center', marginBottom: spacing.xxl },
     title: {
         marginBottom: spacing.lg,
     },

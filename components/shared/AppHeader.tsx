@@ -1,5 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native'
-import { Bell } from 'lucide-react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import { useAuthStore } from '../../store/authStore'
 import { useTheme } from '../../context/ThemeContext'
 import { fonts, layout, spacing, typography } from '../../constants/theme'
@@ -25,15 +24,6 @@ export default function AppHeader({ onProfilePress }: Props) {
                 </Text>
             </View>
 
-            <Pressable
-                hitSlop={8}
-                accessibilityRole="button"
-                accessibilityLabel="Notificações"
-                onPress={() => {}}
-                style={styles.bellButton}
-            >
-                <Bell color={colors.text} size={22} />
-            </Pressable>
         </View>
     )
 }
@@ -44,7 +34,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: layout.screenPadding,
-        paddingTop: spacing.sm,
+        paddingTop: spacing.md,
         paddingBottom: spacing.md,
         borderBottomWidth: StyleSheet.hairlineWidth,
     },
@@ -59,8 +49,5 @@ const styles = StyleSheet.create({
         flexShrink: 1,
         fontSize: typography.sizes.md,
         fontFamily: fonts.semibold,
-    },
-    bellButton: {
-        padding: spacing.xs,
     },
 })

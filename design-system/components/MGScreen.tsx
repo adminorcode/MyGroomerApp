@@ -3,6 +3,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, View, ViewStyle } from 'reac
 import { SafeAreaView } from 'react-native-safe-area-context'
 import MGErrorState from './MGErrorState'
 import { useMGTheme } from '../theme/useMGTheme'
+import { layout } from '../../constants/theme'
 
 type Props = {
   children: ReactNode
@@ -45,7 +46,7 @@ export default function MGScreen({
       ref={scrollRef}
       style={{ flex: 1 }}
       contentContainerStyle={[
-        { paddingHorizontal: spacing.base, paddingBottom: footer ? spacing.xl + spacing.lg : spacing.xl, flexGrow: 1 },
+        { paddingHorizontal: spacing.base, paddingBottom: footer ? spacing.xl + spacing.lg : spacing.xl, flexGrow: 1, width: '100%', maxWidth: layout.contentMaxWidth, alignSelf: 'center' },
         contentStyle,
       ]}
       keyboardShouldPersistTaps="handled"
@@ -53,14 +54,14 @@ export default function MGScreen({
       {children}
     </ScrollView>
   ) : (
-    <View style={[{ flex: 1, paddingHorizontal: spacing.base }, contentStyle]}>{children}</View>
+    <View style={[{ flex: 1, paddingHorizontal: spacing.base, width: '100%', maxWidth: layout.contentMaxWidth, alignSelf: 'center' }, contentStyle]}>{children}</View>
   )
 
   const content = (
     <View style={[styles.root, { backgroundColor: bg }]}>
       {body}
       {footer ? (
-        <View style={[styles.footer, { padding: spacing.base, borderTopColor: colors.border.default }]}>
+        <View style={[styles.footer, { padding: spacing.base, borderTopColor: colors.border.default, width: '100%', maxWidth: layout.contentMaxWidth, alignSelf: 'center', backgroundColor: colors.surface.default }]}>
           {footer}
         </View>
       ) : null}
