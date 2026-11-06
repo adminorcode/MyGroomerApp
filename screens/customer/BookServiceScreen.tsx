@@ -153,9 +153,9 @@ export default function BookServiceScreen({ navigation, route }: Props) {
                     backgroundColor: selected ? colors.action.primary : pressed ? colors.state.pressedSurface : colors.surface.default,
                     alignItems: 'center', justifyContent: 'center', gap: spacing.xs,
                   })}>
-                  <MGText variant="bodySmall" color={selected ? 'inverse' : 'secondary'}>{bookingDateLabel(day, { weekday: 'short' }).replace('.', '')}</MGText>
+                  <MGText variant="bodySmall" style={{ color: selected ? colors.onAction.primary : colors.text.secondary }}>{bookingDateLabel(day, { weekday: 'short' }).replace('.', '')}</MGText>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
-                    <MGText variant="heading3" color={selected ? 'inverse' : 'primary'}>{bookingDateLabel(day, { day: '2-digit' })}</MGText>
+                    <MGText variant="heading3" style={{ color: selected ? colors.onAction.primary : colors.text.primary }}>{bookingDateLabel(day, { day: '2-digit' })}</MGText>
                     {selected ? <Check size={12} color={colors.onAction.primary} /> : null}
                   </View>
                 </Pressable>

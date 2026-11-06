@@ -118,9 +118,11 @@ Estas **cinco cores** são a escolha de marca aprovada. Preservá-las sem substi
 | `text.inverse` | `#FFFFFF` | Texto sobre fundos escuros aprovados |
 | `border.default` | `#D9E0E1` | Separadores e contornos não críticos |
 | `border.strong` | `#60767A` | Contornos que precisam de maior percepção |
-| `action.primary` | `#B8326A` | Botão rosa com texto branco; texto rosa de tamanho comum |
-| `action.primaryPressed` | `#A7285A` | Estado pressionado do botão primário |
-| `action.primaryOutline` | `#B8326A` | Botão secundário com texto/contorno rosa legível |
+| `action.primary` | `#D95786` | Fundo rosa de botões, seleção e destaque; usar `onAction.primary` no conteúdo |
+| `action.primaryPressed` | `#DC628D` | Estado pressionado do botão primário |
+| `action.primaryText` | `#C62669` | Links, rótulos e texto rosa com contraste em superfícies claras |
+| `onAction.primary` | `#101C20` | Texto/ícone sobre a ação rosa padrão e pressed |
+| `action.primaryOutline` | `#C62669` | Botão secundário com texto/contorno rosa legível |
 | `action.secondary` | `#167D83` | Botões teal, texto branco, destaques operacionais |
 | `action.focus` | `#167D83` | Destaque de foco e edição |
 | `feedback.success` | `#176B54` | Texto/ícone de sucesso |
@@ -136,7 +138,7 @@ Estas **cinco cores** são a escolha de marca aprovada. Preservá-las sem substi
 
 ### 3.3. Regra crítica de contraste
 
-**Não usar texto branco pequeno sobre `#D95786`.** A combinação tem contraste aproximado de **3,71:1**, inferior ao mínimo de **4,5:1** para texto comum da WCAG AA. Para CTAs com texto branco, usar `#B8326A` (aprox. **5,67:1** sobre branco). O rosa original continua aparecendo em ícones, marca, bordas/decorações e áreas onde o contraste exigido seja atendido.
+**Revisão de cor solicitada em 06/11/2026:** usar o rosa de referência `#D95786` como fundo primário com `onAction.primary` (`#101C20`, contraste 4,68:1). O estado pressed é `#DC628D` (5,11:1 com o mesmo texto). Não usar branco pequeno sobre esses fundos: branco sobre `#D95786` fica em 3,71:1. Links, texto rosa e outlines usam `action.primaryText`/`primaryOutline` (`#C62669`), mais vivos e legíveis em branco/canvas/pinkSubtle. Não reutilizar o token de preenchimento para texto. Marca, rosa claro e superfícies suaves permanecem preservados.
 
 Outras combinações aprovadas para texto comum:
 
@@ -146,8 +148,8 @@ Outras combinações aprovadas para texto comum:
 | `#60767A` sobre `#FFFFFF` | 4,81:1 | Texto secundário |
 | `#167D83` sobre `#FFFFFF` | 4,89:1 | Texto teal |
 | `#167D83` sobre `#F9F8F6` | 4,61:1 | Texto teal no canvas |
-| `#FFFFFF` sobre `#B8326A` | 5,67:1 | Texto de CTA rosa |
-| `#B8326A` sobre `#FCE5ED` | 4,75:1 | Texto rosa em chips claros |
+| `#101C20` sobre `#D95786` | 4,68:1 | Texto de CTA rosa |
+| `#C62669` sobre `#FCE5ED` | 4,53:1 | Texto rosa em chips claros |
 | `#167D83` sobre `#E9F3F2` | 4,32:1 | **Evitar para texto comum**; usar `text.primary` nesse fundo |
 
 Os índices são aproximados e precisam ser revalidados nas combinações reais, com opacidade e imagens de fundo.
@@ -165,7 +167,7 @@ Uso preferencial em código: `colors.text.primary`, `colors.action.primary`, `co
 
 **Interações:**
 
-- Primário padrão: `action.primary` (rosa escuro + branco).
+- Primário padrão: `action.primary` (rosa da referência + `onAction.primary`).
 - Primário pressed: `action.primaryPressed`.
 - Secundário outline: fundo transparente/branco, texto e borda `action.primaryOutline`.
 - Terciário/ghost: texto `action.primaryOutline`, sem borda.
@@ -386,7 +388,7 @@ Cada componente compartilhado deve expor **variantes semânticas**, estado acess
 
 | Variante | Aparência | Uso |
 |---|---|---|
-| `primary` | `action.primary` / texto branco | Continuar, solicitar, confirmar, aceitar |
+| `primary` | `action.primary` / `onAction.primary` | Continuar, solicitar, confirmar, aceitar |
 | `secondary` | Outline `action.primaryOutline` | Voltar, reagendar, ação alternativa |
 | `tertiary` | Ghost, texto `action.primaryOutline` | Editar, ver mais, navegar |
 | `teal` | `action.secondary` / branco | Contato, suporte, ação operacional secundária |
@@ -810,12 +812,14 @@ export const palette = {
     strong: '#60767A',
   },
   action: {
-    primary: '#B8326A',
-    primaryPressed: '#A7285A',
-    primaryOutline: '#B8326A',
+    primary: '#D95786',
+    primaryPressed: '#DC628D',
+    primaryText: '#C62669',
+    primaryOutline: '#C62669',
     secondary: '#167D83',
     focus: '#167D83',
   },
+  onAction: { primary: '#101C20' },
   feedback: {
     success: '#176B54',
     successSurface: '#E5F5EF',
@@ -897,7 +901,7 @@ export function MGPrimaryButton({ label, onPress, disabled = false, loading = fa
         blocked && styles.disabled,
       ]}
     >
-      {loading ? <ActivityIndicator color={palette.text.inverse} /> : null}
+      {loading ? <ActivityIndicator color={palette.onAction.primary} /> : null}
       <Text style={[styles.label, blocked && styles.disabledLabel]}>{label}</Text>
     </Pressable>
   );
@@ -920,7 +924,7 @@ const styles = StyleSheet.create({
     fontSize: typography.button.fontSize,
     lineHeight: typography.button.lineHeight,
     fontWeight: '600',
-    color: palette.text.inverse,
+    color: palette.onAction.primary,
   },
   disabledLabel: { color: palette.state.disabledText },
 });

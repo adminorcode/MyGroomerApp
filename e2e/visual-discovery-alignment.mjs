@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import path from 'node:path'
 import { evidenceFile, fillServiceAddress, gateRoute, launchBrowser, loginProfessional, loginTutor, openPage, startRun } from './harness.mjs'
 import { activeText, capture, fit, navigateRegistered, plan } from './visual-helpers.mjs'
+import { inspectRenderedText } from './visual-audit.mjs'
 
 const run = startRun({ command: 'node --import ./e2e/preload.mjs e2e/visual-discovery-alignment.mjs', evidence: evidenceFile(plan, 'visual-discovery-alignment.log') })
 const { check } = run
@@ -66,6 +67,16 @@ try {
   await page.getByRole('button', { name: '09:00', exact: true }).waitFor()
   check('VIS-04 seleção depende de slot real', await page.getByRole('button', { name: 'Revisar solicitação', exact: true }).isDisabled())
   await page.getByRole('button', { name: '09:00', exact: true }).click()
+  const selectedSlot = page.getByRole('button', { name: '09:00', exact: true })
+  await selectedSlot.hover()
+  await page.mouse.down()
+  await page.waitForTimeout(80)
+  const pressedSlot = await selectedSlot.evaluate(el => ({ background: getComputedStyle(el).backgroundColor, opacity: getComputedStyle(el).opacity }))
+  check('PA-02 slot selecionado pressionado usa rosa claro sem opacidade', pressedSlot.background === 'rgb(220, 98, 141)' && pressedSlot.opacity === '1', JSON.stringify(pressedSlot))
+  check('PA-02 slot pressionado mantém contraste de texto AA', (await inspectRenderedText(page)).candidates.length === 0)
+  await capture(page, 'discovery-slot-pressed')
+  await page.mouse.move(1, 1)
+  await page.mouse.up()
   await fit(page, check, 'discovery-time', { scroll: true })
   await page.getByRole('button', { name: 'Revisar solicitação', exact: true }).click()
   await activeText(page, 'Resumo do agendamento').waitFor()

@@ -47,7 +47,7 @@ function OptionSelector<T extends string>({ label, options, value, onChange, err
     const { colors } = useTheme()
     return (
         <View style={styles.selectorGroup}>
-            <Text style={[styles.selectorLabel, { color: colors.primary }]}>{label}</Text>
+            <Text style={[styles.selectorLabel, { color: colors.primaryText }]}>{label}</Text>
             <View style={styles.selectorRow}>
                 {options.map((option) => {
                     const isSelected = value === option.value

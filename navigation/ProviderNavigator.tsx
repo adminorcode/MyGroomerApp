@@ -50,7 +50,7 @@ export default function ProviderNavigator() {
             )}
             screenOptions={{
                 headerShown: false,
-                tabBarActiveTintColor: colors.primary,
+                tabBarActiveTintColor: colors.primaryText,
                 tabBarInactiveTintColor: colors.navInactive,
                 tabBarStyle: {
                     backgroundColor: colors.surface,

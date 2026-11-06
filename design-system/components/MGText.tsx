@@ -37,7 +37,7 @@ export default function MGText({
     primary: colors.text.primary,
     secondary: colors.text.secondary,
     inverse: colors.text.inverse,
-    brand: colors.action.primary,
+    brand: colors.action.primaryText,
     error: colors.feedback.error,
     success: colors.feedback.success,
     warning: colors.feedback.warning,

@@ -69,10 +69,13 @@ export default function MGChip({
             paddingVertical: spacing.sm,
             borderRadius: radius.pill,
             borderWidth: 1,
-            backgroundColor,
+            backgroundColor: pressed && !disabled
+              ? solid && selected
+                ? colors.action.primaryPressed
+                : selected ? colors.surface.default : colors.surface.pinkSubtle
+              : backgroundColor,
             borderColor,
             width: density === 'compact' ? '100%' : undefined,
-            opacity: pressed && !disabled ? 0.9 : 1,
           },
         ] as ViewStyle[]
       }

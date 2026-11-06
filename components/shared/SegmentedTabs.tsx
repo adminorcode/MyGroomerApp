@@ -14,7 +14,7 @@ export default function SegmentedTabs({ tabs, activeTab, onTabChange }: Props) {
     <View style={styles.container}>
       {tabs.map((tab) => (
         <Pressable key={tab} onPress={() => onTabChange(tab)} style={styles.tab}>
-        <Text style={[styles.tabText, { color: activeTab === tab ? colors.primary : colors.textSecondary }]}>
+        <Text style={[styles.tabText, { color: activeTab === tab ? colors.primaryText : colors.textSecondary }]}>
             {tab}
         </Text>
         {activeTab === tab && (

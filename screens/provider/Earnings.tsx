@@ -34,7 +34,7 @@ export default function Earnings() {
         </Text>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm }}>
         <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Pendente</Text>
-        <Text style={[styles.summaryLabel, { color: colors.primary, backgroundColor: colors.selectionSoft, borderRadius: borderRadius.pill, paddingHorizontal: spacing.sm, paddingVertical: spacing.xs }]}>
+        <Text style={[styles.summaryLabel, { color: colors.primaryText, backgroundColor: colors.selectionSoft, borderRadius: borderRadius.pill, paddingHorizontal: spacing.sm, paddingVertical: spacing.xs }]}>
           {formatMoney(data?.pending ?? 0)}
         </Text>
       </View>

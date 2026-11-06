@@ -35,7 +35,7 @@ function RegistrationProgress() {
           <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
             <View style={{ position: 'absolute', left: index ? 0 : '50%', right: index === steps.length - 1 ? '50%' : 0, height: 2, backgroundColor: colors.border.default }} />
             <View style={{ width: spacing.xxl, height: spacing.xxl, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: index === 0 ? colors.action.primary : colors.state.disabledSurface }}>
-              <MGText variant="label" color={index === 0 ? 'inverse' : 'primary'}>{index + 1}</MGText>
+              <MGText variant="label" style={{ color: index === 0 ? colors.onAction.primary : colors.text.primary }}>{index + 1}</MGText>
             </View>
           </View>
           <MGText variant="caption" color={index === 0 ? 'brand' : 'secondary'} style={{ textAlign: 'center' }}>{label}</MGText>

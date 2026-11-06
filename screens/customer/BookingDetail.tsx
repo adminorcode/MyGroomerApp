@@ -131,7 +131,7 @@ const BookingDetail = ({ navigation, route }: Props) => {
 
                         <View style={[styles.priceRow, { borderTopColor: colors.border }]}>
                             <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>Preço</Text>
-                            <Text style={[styles.price, { color: colors.primary }]}>{formatMoney(data.price)}</Text>
+                            <Text style={[styles.price, { color: colors.primaryText }]}>{formatMoney(data.price)}</Text>
                         </View>
                     </View>
 

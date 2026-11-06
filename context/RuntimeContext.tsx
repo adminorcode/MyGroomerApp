@@ -36,7 +36,7 @@ export function RuntimeProvider({ children }: { children: ReactNode }) {
       <View style={{ flex: 1, padding: 24, justifyContent: 'center', gap: 16 }}>
         <Text style={{ color: colors.error }}>API indisponível. Verifique se o servidor local está iniciado.</Text>
         <Pressable accessibilityRole="button" onPress={() => runtime.refetch()}>
-          <Text style={{ color: colors.primary }}>Tentar novamente</Text>
+          <Text style={{ color: colors.primaryText }}>Tentar novamente</Text>
         </Pressable>
       </View>
     )

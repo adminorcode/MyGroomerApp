@@ -1,9 +1,11 @@
 // My Groomer Design System v1.0 — seção 3.
-// brand.pink não é fundo de CTA com texto branco pequeno.
+// Revisão visual 06/11/2026: rosa da referência no fill; foreground próprio para AA.
+const pink = '#D95786'
+const pinkText = '#C62669'
 
 export const palette = {
   brand: {
-    pink: '#D95786',
+    pink,
     pinkLight: '#F6B5CB',
     teal: '#167D83',
     background: '#F9F8F6',
@@ -25,11 +27,15 @@ export const palette = {
     strong: '#60767A',
   },
   action: {
-    primary: '#B8326A',
-    primaryPressed: '#A7285A',
-    primaryOutline: '#B8326A',
+    primary: pink,
+    primaryPressed: '#DC628D',
+    primaryText: pinkText,
+    primaryOutline: pinkText,
     secondary: '#167D83',
     focus: '#167D83',
+  },
+  onAction: {
+    primary: '#101C20',
   },
   feedback: {
     success: '#176B54',

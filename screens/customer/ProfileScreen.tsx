@@ -39,7 +39,7 @@ export default function ProfileScreen({ navigation }: Props) {
 
       <View style={styles.profileSection}>
         <View style={[styles.avatar, { backgroundColor: colors.selectionSoft }]}>
-          <Text style={[styles.avatarText, { color: colors.primary }]}>{initial}</Text>
+          <Text style={[styles.avatarText, { color: colors.primaryText }]}>{initial}</Text>
         </View>
 
         <Text style={[styles.name, { color: colors.text }]}>{user?.name ?? 'Usuário desconhecido'}</Text>
