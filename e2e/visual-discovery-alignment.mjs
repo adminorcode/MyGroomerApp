@@ -72,7 +72,7 @@ try {
   await page.mouse.down()
   await page.waitForTimeout(80)
   const pressedSlot = await selectedSlot.evaluate(el => ({ background: getComputedStyle(el).backgroundColor, opacity: getComputedStyle(el).opacity }))
-  check('PA-02 slot selecionado pressionado usa rosa claro sem opacidade', pressedSlot.background === 'rgb(220, 98, 141)' && pressedSlot.opacity === '1', JSON.stringify(pressedSlot))
+  check('PA-02 slot selecionado pressionado usa rosa de ação escuro sem opacidade', pressedSlot.background === 'rgb(185, 64, 108)' && pressedSlot.opacity === '1', JSON.stringify(pressedSlot))
   check('PA-02 slot pressionado mantém contraste de texto AA', (await inspectRenderedText(page)).candidates.length === 0)
   await capture(page, 'discovery-slot-pressed')
   await page.mouse.move(1, 1)

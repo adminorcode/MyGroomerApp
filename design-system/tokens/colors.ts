@@ -1,5 +1,5 @@
 // My Groomer Design System v1.0 — seção 3.
-// Revisão visual 06/11/2026: rosa da referência no fill; foreground próprio para AA.
+// Revisão 06/11/2026: ação próxima da marca, com contraste AA para texto branco.
 const pink = '#D95786'
 const pinkText = '#C62669'
 
@@ -27,15 +27,15 @@ export const palette = {
     strong: '#60767A',
   },
   action: {
-    primary: pink,
-    primaryPressed: '#DC628D',
+    primary: '#C64878',
+    primaryPressed: '#B9406C',
     primaryText: pinkText,
     primaryOutline: pinkText,
     secondary: '#167D83',
     focus: '#167D83',
   },
   onAction: {
-    primary: '#101C20',
+    primary: '#FFFFFF',
   },
   feedback: {
     success: '#176B54',
