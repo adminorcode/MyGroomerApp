@@ -126,17 +126,19 @@ export default function WeeklyAvailabilityEditor({ value, onChange, issues, focu
             <MGIcon name="chevron-left" size={20} color={colors.text.primary} />
           </Pressable>
           <MGIcon name="calendar-days" size={18} color={colors.action.primary} />
-          <MGText variant="bodySmall" numberOfLines={1} style={styles.dayTitle}>{day.title}</MGText>
-          <MGText variant="caption" numberOfLines={1}>Dia ativo</MGText>
+          <MGText variant="bodySmall" style={styles.dayTitle}>{day.title}</MGText>
+          <Pressable accessibilityRole="button" accessibilityLabel="Próximo dia" onPress={() => shift(1)} style={styles.iconHit}>
+            <MGIcon name="chevron-right" size={20} color={colors.text.primary} />
+          </Pressable>
+        </View>
+        <View style={[styles.focusHead, { justifyContent: 'space-between', gap: spacing.sm }]}>
+          <MGText variant="caption">Dia ativo</MGText>
           <TrackSwitch
             on={!!current.enabled}
             label="Dia ativo"
             tone="primary"
             onPress={() => toggle(day.key)}
           />
-          <Pressable accessibilityRole="button" accessibilityLabel="Próximo dia" onPress={() => shift(1)} style={styles.iconHit}>
-            <MGIcon name="chevron-right" size={20} color={colors.text.primary} />
-          </Pressable>
         </View>
 
         {current.enabled ? (

@@ -20,7 +20,7 @@ try {
 
   const mobile = await openPage(browser, { viewport: 'mobile' })
   await openRegistrationWelcome(mobile)
-  const title = mobile.getByText(APP_NAME, { exact: true })
+  const title = mobile.getByText(APP_NAME, { exact: true }).and(mobile.locator(':not([aria-hidden="true"] *)'))
   await title.waitFor()
   const body = await mobile.locator('body').innerText()
   check('AC-01 boas-vindas exibe o nome configurado', body.includes(APP_NAME) && !/boame/i.test(body))
@@ -31,14 +31,14 @@ try {
 
   const desktop = await openPage(browser, { viewport: 'desktop' })
   await openRegistrationWelcome(desktop)
-  await desktop.getByText(APP_NAME, { exact: true }).waitFor()
-  check('AC-03 nome visível no desktop', await desktop.getByText(APP_NAME, { exact: true }).isVisible())
+  await desktop.getByText(APP_NAME, { exact: true }).and(desktop.locator(':not([aria-hidden="true"] *)')).waitFor()
+  check('AC-03 nome visível no desktop', await desktop.getByText(APP_NAME, { exact: true }).and(desktop.locator(':not([aria-hidden="true"] *)')).isVisible())
   await capture(desktop, '02-welcome-desktop')
 
   const narrow = await openPage(browser)
   await narrow.setViewportSize({ width: 320, height: 760 })
   await openRegistrationWelcome(narrow)
-  const narrowTitle = narrow.getByText(APP_NAME, { exact: true })
+  const narrowTitle = narrow.getByText(APP_NAME, { exact: true }).and(narrow.locator(':not([aria-hidden="true"] *)'))
   await narrowTitle.waitFor()
   const narrowBox = await narrowTitle.boundingBox()
   check('AC-04 nome em uma linha em 320', narrowBox.height <= 41)

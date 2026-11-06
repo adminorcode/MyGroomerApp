@@ -22,7 +22,7 @@ type Props = {
 export default function MyBookingsScreen({navigation}: Props) {
     const {colors} = useTheme()
     const [statusFilter, setStatusFilter] = useState<BookingStatus | undefined>(undefined)
-    const {data:bookings, isLoading, isError} = useGetBookings(statusFilter)
+    const {data:bookings, isLoading, isError, refetch} = useGetBookings(statusFilter)
 
   return (
     <ScreenContainer>
@@ -35,11 +35,11 @@ export default function MyBookingsScreen({navigation}: Props) {
 
         { isLoading ? (
             <View style={styles.centered}>
-            <ActivityIndicator size="large" color={colors.primary} />
+            <ActivityIndicator accessibilityLabel="Carregando agendamentos" size="large" color={colors.primary} />
             </View>
         ) : isError ? (
             <View style={styles.centered}>
-              <MGErrorState message="Não foi possível carregar os agendamentos." />
+              <MGErrorState message="Não foi possível carregar os agendamentos." onRetry={() => { void refetch() }} />
             </View>
         ) : (
             <FlatList
@@ -84,6 +84,7 @@ const styles = StyleSheet.create({
     },
     listContent: {
       flexGrow: 1,
+      gap: spacing.xs,
       paddingBottom: spacing.xl,
     },
     centered: {

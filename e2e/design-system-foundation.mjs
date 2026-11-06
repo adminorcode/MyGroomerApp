@@ -48,20 +48,20 @@ async function runTutor(browser) {
 
   await openWelcome(page)
   let body = await textOf(page)
-  const logoFace = await fontFamily(page.getByText(APP_NAME).first())
-  const subtitleFace = await fontFamily(page.getByText('Banho e tosa em domicílio').first())
+  const logoFace = await fontFamily(page.getByText(APP_NAME, { exact: true }).and(page.locator(':not([aria-hidden="true"] *)')).first())
+  const subtitleFace = await fontFamily(page.getByText('O cuidado que seu pet merece, pertinho de você.').first())
   const tutorButtonFace = await fontFamily(page.getByText('Sou tutor', { exact: true }).first())
-  check('AC-14 logotipo permanece em Abres', usesFace(logoFace, 'Abres'), logoFace)
+  check('VIS-01 marca atual em Inter', usesFace(logoFace, 'Inter-Bold'), logoFace)
   check('AC-14 subtítulo em Inter Regular', usesFace(subtitleFace, 'Inter-Regular'), subtitleFace)
   check('AC-14 botão em Inter SemiBold', usesFace(tutorButtonFace, 'Inter-SemiBold'), tutorButtonFace)
   check(
     'AC-11 boas-vindas com seletor de perfil',
     body.includes(APP_NAME) &&
-      body.includes('Banho e tosa em domicílio') &&
+      body.includes('O cuidado que seu pet merece, pertinho de você.') &&
       body.includes('Sou tutor') &&
       body.includes('Sou profissional'),
   )
-  const welcomeCentered = await page.getByText(APP_NAME).evaluate((el) => {
+  const welcomeCentered = await page.getByText(APP_NAME, { exact: true }).and(page.locator(':not([aria-hidden="true"] *)')).evaluate((el) => {
     const title = el.getBoundingClientRect()
     const button = Array.from(document.querySelectorAll('[role="button"]')).find((node) =>
       (node.textContent || '').includes('Sou tutor'),
@@ -263,7 +263,7 @@ async function runGroomer(browser) {
 async function runLightOnlyGuard(browser) {
   const page = await openPage(browser, { viewport: 'mobile', colorScheme: 'dark' })
   await openWelcome(page)
-  const background = await page.getByText(APP_NAME).evaluate((el) => {
+  const background = await page.getByText(APP_NAME, { exact: true }).and(page.locator(':not([aria-hidden="true"] *)')).evaluate((el) => {
     let node = el
     while (node) {
       const bg = getComputedStyle(node).backgroundColor

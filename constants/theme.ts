@@ -115,6 +115,9 @@ export const borderRadius = {
 }
 
 export const layout = {
+    contentMaxWidth: 720,
+    formMaxWidth: 480,
+    tabBarHeight: 72,
     screenPadding: spacing.base,
     screenPaddingOnboarding: spacing.lg,
 }

@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 import { Pressable, View } from 'react-native'
-import { MGEmptyState, MGIcon, MGText } from '../../design-system/components'
+import { MGCard, MGEmptyState, MGIcon, MGText } from '../../design-system/components'
+import MGArtwork from '../../design-system/components/MGArtwork'
 import { GroomerProfileHeader } from '../../design-system/patterns'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import ProfileGallery from './ProfileGallery'
@@ -26,6 +27,12 @@ export default function GroomerPublicProfileView({ profile, mode, selectedServic
 
   return (
     <View style={{ gap: spacing.lg }}>
+      {!photoUrl && !profile.photo_id && mode === 'booking' ? (
+        <View style={{ backgroundColor: colors.surface.pinkSubtle, borderRadius: radius.xl, alignItems: 'center', padding: spacing.base }}>
+          <MGArtwork name="poodle" width={192} height={160} />
+        </View>
+      ) : null}
+      <MGCard>
       <GroomerProfileHeader
         name={profile.name}
         photoUrl={photoUrl}
@@ -33,6 +40,7 @@ export default function GroomerPublicProfileView({ profile, mode, selectedServic
         ratingLabel={profileRatingLabel(profile.average_rating, profile.review_count)}
         specialties={services.map(service => service.name)}
       />
+      </MGCard>
 
       <Section icon="paw-print" title="Regras de atendimento">
         <MGText variant="body" color={description ? 'primary' : 'secondary'}>
@@ -42,9 +50,9 @@ export default function GroomerPublicProfileView({ profile, mode, selectedServic
 
       <Section icon="map-pin" title="Área de atendimento">
         {profile.area ? (
-          <View style={{ gap: spacing.xxs }}>
+          <View style={{ gap: spacing.xxs, padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.surface.tealSubtle }}>
             <MGText variant="title">{areaRadiusLabel(profile.area.radius_km)}</MGText>
-            <MGText variant="body" color="secondary">{profile.area.address}</MGText>
+            <MGText variant="body">{profile.area.address}</MGText>
           </View>
         ) : (
           <MGText variant="body" color="secondary">Área de atendimento ainda não informada.</MGText>
@@ -116,12 +124,20 @@ export default function GroomerPublicProfileView({ profile, mode, selectedServic
         )}
       </Section>
 
-      <Section icon="calendar-days" title="Fotos">
+      <Section icon="calendar-days" title="Fotos / Galeria">
         <ProfileGallery
           photoIds={(profile.gallery ?? []).map(photo => photo.id)}
           emptyTitle="Nenhuma foto publicada."
         />
       </Section>
+      {mode === 'preview' ? (
+        <MGCard>
+          <View style={{ gap: spacing.sm }}>
+            <MGText variant="title">Seu perfil na busca</MGText>
+            <MGText variant="bodySmall" color="secondary">Confira como seus serviços, horários e fotos aparecem para o tutor.</MGText>
+          </View>
+        </MGCard>
+      ) : null}
     </View>
   )
 }
@@ -131,24 +147,17 @@ function Section({ icon, title, children }: {
   title: string
   children: ReactNode
 }) {
-  const { colors, spacing, radius } = useMGTheme()
+  const { colors, spacing } = useMGTheme()
   return (
-    <View
-      style={{
-        gap: spacing.sm,
-        padding: spacing.base,
-        borderRadius: radius.lg,
-        borderWidth: 1,
-        borderColor: colors.border.default,
-        backgroundColor: colors.surface.default,
-      }}
-    >
+    <MGCard>
+    <View style={{ gap: spacing.sm }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
         <MGIcon name={icon} size={20} color={colors.action.primary} />
         <MGText variant="heading3" style={{ flex: 1 }}>{title}</MGText>
       </View>
       {children}
     </View>
+    </MGCard>
   )
 }
 
@@ -168,7 +177,7 @@ function ScheduleDay({ day }: { day: PublicProfileScheduleDay }) {
       }}
     >
       <MGText variant="label">{weekdayLabel(day.weekday)}</MGText>
-      <MGText variant="caption" color="secondary">{scheduleText(day)}</MGText>
+      <MGText variant="caption">{scheduleText(day)}</MGText>
     </View>
   )
 }
@@ -185,7 +194,8 @@ function ServiceOption({ service, selected, onSelect }: {
   return (
     <Pressable
       accessibilityRole="radio"
-      accessibilityState={{ selected }}
+      accessibilityState={{ selected, checked: selected }}
+      aria-checked={selected}
       accessibilityLabel={label}
       onPress={() => onSelect?.(service.id)}
       style={{

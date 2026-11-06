@@ -30,6 +30,7 @@ import { BookingStatus } from '../../types/booking.types'
 import { Pet } from '../../types/pet.types'
 import { ProfileStackParamList } from '../../navigation/types'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
+import MGArtwork from '../../design-system/components/MGArtwork'
 
 const SAMPLE_PET: Pet = {
   id: 'showcase-pet',
@@ -54,7 +55,7 @@ type Props = {
 }
 
 export default function DesignSystemShowcaseScreen({ navigation }: Props) {
-  const { spacing } = useMGTheme()
+  const { spacing, colors, radius } = useMGTheme()
   const [chipOn, setChipOn] = useState(true)
   const [field, setField] = useState('')
 
@@ -145,11 +146,22 @@ export default function DesignSystemShowcaseScreen({ navigation }: Props) {
         <MGText variant="heading3">Estados</MGText>
         <MGEmptyState
           title="Nenhum agendamento"
+          illustration={<MGArtwork name="professional" width={96} />}
           description="Quando houver pedidos, eles aparecem aqui."
           actionLabel="Buscar groomer"
           onAction={() => undefined}
         />
         <MGErrorState message="Não foi possível carregar os dados." onRetry={() => undefined} />
+
+        <MGText variant="heading3">Cores e superfícies</MGText>
+        <View style={styles.row}>
+          {[
+            { name: 'Rosa', color: colors.brand.pink },
+            { name: 'Teal', color: colors.brand.teal },
+            { name: 'Ação', color: colors.action.primary },
+            { name: 'Fundo', color: colors.surface.canvas },
+          ].map(({ name, color }) => <View key={name} style={{ gap: spacing.xs }}><View style={{ width: 56, height: 40, backgroundColor: color, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border.default }} /><MGText variant="caption">{name}</MGText></View>)}
+        </View>
 
         <MGDivider />
 

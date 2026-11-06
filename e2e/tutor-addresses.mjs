@@ -118,6 +118,8 @@ async function run() {
     await page.getByRole('button', { name: 'Trabalho', exact: true }).click()
     await pickSuggestion(page, 'Rua Augusta, São Paulo')
     await page.getByRole('checkbox', { name: 'Marcar como padrão' }).click()
+    await page.getByRole('checkbox', { name: 'Marcar como padrão', checked: true }).waitFor()
+    check('VIS-07 endereço padrão anuncia a marcação', await page.getByRole('checkbox', { name: 'Marcar como padrão', checked: true }).count() === 1)
     await page.getByRole('button', { name: 'Salvar endereço' }).click()
     await page.getByRole('button', { name: /Trabalho\./ }).waitFor({ timeout: 15000 })
     check('AC-03 dois endereços', await page.getByRole('button', { name: /Casa\./ }).count() > 0)

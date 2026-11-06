@@ -57,6 +57,7 @@ export default function MGChip({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ selected, disabled }}
+      aria-selected={selected}
       disabled={disabled || !onPress}
       onPress={onPress}
       style={({ pressed }) =>

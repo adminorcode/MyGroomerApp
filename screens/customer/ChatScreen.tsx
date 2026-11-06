@@ -24,6 +24,8 @@ import ChatHeader from '../../components/chat/ChatHeader'
 import ChatInputBar from '../../components/chat/ChatInputBar'
 import MessageBubble from '../../components/chat/MessageBubble'
 import ChatDateSeparator, { formatDateLabel } from '../../components/chat/ChatDateSeparator'
+import { MGErrorState } from '../../design-system/components'
+import ScreenHeader from '../../components/shared/ScreenHeader'
 
 type ChatScreenNavigationProp = StackNavigationProp<RootParamList, 'Chat'>
 type ChatScreenRouteProp = RouteProp<RootParamList, 'Chat'>
@@ -60,7 +62,7 @@ const ChatScreen = ({ navigation, route }: Props) => {
   const currentUserId = useAuthStore((state) => state.user?.id)
   const { otherName, conversationId } = route.params
   
-  const { data: conversationMessages, isLoading, isError, hasNextPage, fetchNextPage } = useGetConversationMessages(conversationId)
+  const { data: conversationMessages, isLoading, isError, hasNextPage, fetchNextPage, refetch } = useGetConversationMessages(conversationId)
   const [draft, setDraft] = useState('')
   const conversationClient = useGetConversations()
 
@@ -139,6 +141,7 @@ const ChatScreen = ({ navigation, route }: Props) => {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
       <View style={styles.headerWrapper}>
+        <ScreenHeader title="Conversa" />
         <ChatHeader
           name={otherName ?? 'Conversa'}
           onBack={() => navigation.goBack()}
@@ -156,9 +159,7 @@ const ChatScreen = ({ navigation, route }: Props) => {
           </View>
         ) : isError ? (
           <View style={styles.centered}>
-            <Text style={[styles.message, { color: colors.error }]}>
-              Não foi possível carregar esta conversa.
-            </Text>
+            <MGErrorState message="Não foi possível carregar esta conversa." onRetry={() => refetch()} />
           </View>
         ) : (
           <FlatList
@@ -193,6 +194,9 @@ const ChatScreen = ({ navigation, route }: Props) => {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
+    width: '100%',
+    maxWidth: layout.contentMaxWidth,
+    alignSelf: 'center',
   },
   flex: {
     flex: 1,

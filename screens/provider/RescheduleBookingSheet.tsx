@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native'
-import { MGButton, MGChip, MGText } from '../../design-system/components'
+import { MGButton, MGCard, MGChip, MGIcon, MGText } from '../../design-system/components'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { useRescheduleBooking, useRescheduleBookingSlots } from '../../hooks/useBooking'
 import { getErrorMessage } from '../../utils/error'
@@ -51,6 +52,7 @@ export default function RescheduleBookingSheet({
   onSuccess,
 }: Props) {
   const { colors, spacing, radius } = useMGTheme()
+  const insets = useSafeAreaInsets()
   const dates = useMemo(() => calendarDates(14), [])
   const [date, setDate] = useState(dates[0] ?? '')
   const [slot, setSlot] = useState<string | null>(null)
@@ -72,15 +74,21 @@ export default function RescheduleBookingSheet({
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose}>
+      <Pressable style={[styles.backdrop, { backgroundColor: colors.overlay.scrim }]} onPress={onClose}>
         <Pressable
-          style={[styles.sheet, { backgroundColor: colors.surface.default, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, padding: spacing.base }]}
+          style={[styles.sheet, { backgroundColor: colors.surface.canvas, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl, padding: spacing.base, paddingBottom: spacing.base + insets.bottom }]}
           onPress={event => event.stopPropagation()}
         >
-          <MGText variant="heading3" accessibilityRole="header">Reagendar atendimento</MGText>
+          <MGText variant="heading2" accessibilityRole="header">Reagendar atendimento</MGText>
           <MGText variant="bodySmall" color="secondary" style={{ marginTop: spacing.xs, marginBottom: spacing.md }}>
             Escolha uma nova data e horário disponíveis.
           </MGText>
+          <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ paddingBottom: spacing.sm }} keyboardShouldPersistTaps="handled">
+          <MGCard>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.md }}>
+            <MGIcon name="calendar-days" color={colors.action.primary} size={20} />
+            <MGText variant="title">Nova data</MGText>
+          </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.sm, paddingBottom: spacing.sm }}>
             {dates.map(item => (
               <MGChip
@@ -91,12 +99,23 @@ export default function RescheduleBookingSheet({
               />
             ))}
           </ScrollView>
+          </MGCard>
+          <View style={{ marginTop: spacing.md }}>
+          <MGCard>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.md }}>
+            <MGIcon name="clock-3" color={colors.action.primary} size={20} />
+            <MGText variant="title">Novo horário</MGText>
+          </View>
           {slots.isLoading ? (
-            <View style={{ paddingVertical: spacing.lg, alignItems: 'center' }}>
+            <View accessibilityRole="progressbar" accessibilityLabel="Carregando horários disponíveis" style={{ paddingVertical: spacing.lg, alignItems: 'center', gap: spacing.sm }}>
               <ActivityIndicator color={colors.action.primary} />
+              <MGText variant="bodySmall" color="secondary">Carregando horários disponíveis</MGText>
             </View>
           ) : slots.isError ? (
-            <MGText variant="bodySmall" color="error">Não foi possível carregar os horários.</MGText>
+            <View style={{ gap: spacing.sm }}>
+              <MGText variant="bodySmall" color="error" accessibilityRole="alert">Não foi possível carregar os horários.</MGText>
+              <MGButton label="Tentar novamente" variant="secondary" onPress={() => { void slots.refetch() }} />
+            </View>
           ) : (slots.data?.length ?? 0) === 0 ? (
             <MGText variant="bodySmall" color="secondary">Nenhum horário livre neste dia.</MGText>
           ) : (
@@ -111,9 +130,12 @@ export default function RescheduleBookingSheet({
               ))}
             </View>
           )}
+          </MGCard>
+          </View>
           {error ? (
             <MGText variant="bodySmall" color="error" accessibilityRole="alert" style={{ marginTop: spacing.md }}>{error}</MGText>
           ) : null}
+          </ScrollView>
           <View style={{ marginTop: spacing.lg, gap: spacing.sm }}>
             <MGButton label="Confirmar novo horário" onPress={() => { void submit() }} loading={reschedule.isPending} disabled={!slot || reschedule.isPending} />
             <MGButton label="Cancelar" variant="secondary" onPress={onClose} disabled={reschedule.isPending} />
@@ -125,7 +147,7 @@ export default function RescheduleBookingSheet({
 }
 
 const styles = StyleSheet.create({
-  backdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.35)' },
-  sheet: { maxHeight: '80%' },
+  backdrop: { flex: 1, justifyContent: 'flex-end', alignItems: 'center' },
+  sheet: { maxHeight: '85%', width: '100%', maxWidth: 720 },
   slotGrid: { flexDirection: 'row', flexWrap: 'wrap' },
 })

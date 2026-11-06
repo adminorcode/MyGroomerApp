@@ -394,6 +394,7 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
                 <MGButton label="Buscar" onPress={() => publish(draft)} loading={search.isFetching && !search.data} />
 
                 <View style={styles.results}>
+                    <MGText variant="heading3" style={{ marginBottom: theme.spacing.md }}>Profissionais disponíveis</MGText>
                     {query === null ? (
                         <MGEmptyState
                             title="Busque quem atende"
@@ -501,7 +502,8 @@ function OptionRow({ label, options, selectedId, onSelect }: {
                     <Pressable
                         key={option.id}
                         accessibilityRole="radio"
-                        accessibilityState={{ selected }}
+                        accessibilityState={{ selected, checked: selected }}
+                        aria-checked={selected}
                         accessibilityLabel={selected ? `${option.name}, selecionado` : option.name}
                         onPress={() => onSelect(option.id)}
                         style={[

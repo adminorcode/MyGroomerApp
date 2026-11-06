@@ -3,7 +3,8 @@ import { View, StyleSheet, ActivityIndicator } from 'react-native'
 import { useRoute } from '@react-navigation/native'
 import { useTheme } from '../../context/ThemeContext'
 import { spacing } from '../../constants/theme'
-import { MGEmptyState, MGErrorState, MGText } from '../../design-system/components'
+import { MGErrorState, MGScreen, MGText } from '../../design-system/components'
+import MGBrand from '../../design-system/components/MGBrand'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { AuthStackParamList } from '../../navigation/types'
 import { useVerifyEmailMutation } from '../../hooks/useAuth'
@@ -14,7 +15,6 @@ type Props = {
 }
 
 export default function VerifyEmailScreen({ navigation }: Props) {
-  console.log("VerifyEmailScreen mounted")
     const route = useRoute()
     const { mutate, isPending, isSuccess, isError, error } = useVerifyEmailMutation()
     const { colors } = useTheme();
@@ -23,7 +23,6 @@ export default function VerifyEmailScreen({ navigation }: Props) {
     const hasMutated = useRef(false)
     useEffect(() => {
         // extract token from deep link params
-        console.log("Verify screen params:", params)
         if (params?.token && !hasMutated.current) {
             mutate({ token: params.token })
             hasMutated.current = true
@@ -41,57 +40,36 @@ export default function VerifyEmailScreen({ navigation }: Props) {
     }, [isSuccess])
 
 
-    if (isPending) {
-        return (
-            <View style={[styles.container, { backgroundColor: colors.background }]}>
-                <ActivityIndicator size="large" color={colors.primary} />
-                <MGText color="secondary" style={styles.message}>Verificando seu e-mail...</MGText>
-            </View>
-        )
-    }
-
-    if (isSuccess) {
-        return (
-            <View style={[styles.container, { backgroundColor: colors.background}]}>
-                <MGEmptyState
-                    title="E-mail verificado!"
-                    description="Sua conta está pronta. Você já pode entrar."
-                />
-            </View>
-        )
-    }
-
-    if (isError) {
-        return (
-            <View style={[styles.container, { backgroundColor: colors.background }]}>
-                <MGErrorState
-                    message={error ? getErrorMessage(error) : 'O link pode ter expirado.'}
-                    onRetry={() => navigation.navigate('Login')}
-                    retryLabel="Voltar ao login"
-                />
-            </View>
-        )
-    }
-
-    // no token in URL
     return (
-        <View style={[styles.container, { backgroundColor: colors.background }]}>
-            <MGEmptyState
-                title="Confira seu e-mail"
-                description="Enviamos um link de verificação para o seu e-mail. Toque nele para confirmar a conta."
-            />
-        </View>
+        <MGScreen scrollable contentStyle={styles.container}>
+            <View style={styles.content}>
+                <MGBrand compact />
+                <View style={styles.status} accessibilityLiveRegion="polite">
+                    {isPending ? <>
+                        <ActivityIndicator accessibilityLabel="Verificando e-mail" color={colors.primary} />
+                        <MGText color="secondary" style={styles.message}>Verificando seu e-mail...</MGText>
+                    </> : isError ? <MGErrorState
+                        message={error ? getErrorMessage(error) : 'O link pode ter expirado.'}
+                        onRetry={() => navigation.navigate('Login')}
+                        retryLabel="Voltar ao login"
+                    /> : <>
+                        <MGText variant="heading1" accessibilityRole="header" style={styles.message}>{isSuccess ? 'E-mail verificado!' : 'Confira seu e-mail'}</MGText>
+                        <MGText color="secondary" style={styles.message}>{isSuccess ? 'Sua conta está pronta. Você já pode entrar.' : 'Enviamos um link de verificação para o seu e-mail. Toque nele para confirmar a conta.'}</MGText>
+                    </>}
+                </View>
+            </View>
+        </MGScreen>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
         alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: spacing.lg,
-        gap: spacing.md,
+        paddingHorizontal: spacing.xl,
+        paddingTop: spacing.xl,
     },
+    content: { width: '100%', maxWidth: 448, alignItems: 'center' },
+    status: { width: '100%', gap: spacing.lg, marginTop: spacing.xxxl },
     message: {
         textAlign: 'center',
     },

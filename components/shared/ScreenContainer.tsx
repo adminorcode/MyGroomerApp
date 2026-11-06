@@ -19,5 +19,5 @@ export default function ScreenContainer({ children }: Props) {
 
 const styles = StyleSheet.create({
     safe: { flex: 1 },
-    content: { paddingHorizontal: layout.screenPadding, flex: 1 },
+    content: { paddingHorizontal: layout.screenPadding, flex: 1, width: '100%', maxWidth: layout.contentMaxWidth, alignSelf: 'center' },
 })

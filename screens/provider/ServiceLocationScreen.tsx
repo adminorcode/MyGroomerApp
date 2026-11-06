@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import ProviderSetupIntro from './ProviderSetupIntro'
 import { Pressable, ScrollView, StyleSheet, View, ActivityIndicator } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
@@ -280,14 +281,12 @@ export default function ServiceLocationScreen({ navigation, route }: Props) {
         </View>
       )}
     >
-      <View style={{ gap: spacing.lg, paddingTop: spacing.md }}>
+      <View style={{ gap: spacing.lg, paddingTop: spacing.md, width: '100%', maxWidth: 720, alignSelf: 'center' }}>
         {fromProfile ? null : <OnboardingStepper steps={steps} currentStepId="location" />}
-        <View style={{ gap: spacing.xs }}>
-          <MGText variant="heading2">{fromProfile ? 'Área de atendimento' : 'Local de atendimento'}</MGText>
-          <MGText variant="body" color="secondary">
-            Informe de onde você sai, até onde atende e como cobra o deslocamento.
-          </MGText>
-        </View>
+        <ProviderSetupIntro
+          title={fromProfile ? 'Área de atendimento' : 'Local de atendimento'}
+          description="Defina onde você atende. Informe seu endereço-base, o raio de atendimento e como cobra o deslocamento."
+        />
         {fromProfile ? null : (
           <MGButton
             label="Disponibilidade semanal"

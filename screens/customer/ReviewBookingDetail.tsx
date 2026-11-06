@@ -7,6 +7,9 @@ import { useTheme } from '../../context/ThemeContext'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
 import StarRating from '../../components/shared/StarRating'
+import { MGErrorState, MGIcon } from '../../design-system/components'
+import MGArtwork from '../../design-system/components/MGArtwork'
+import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
 
 type ReviewDetailNavigationProp = StackNavigationProp<BookingsStackParamList, 'ReviewDetail'>
@@ -31,8 +34,9 @@ function formatDate(value?: string | Date) {
 
 const ReviewBookingDetail = ({ navigation, route }: Props) => {
   const { colors } = useTheme()
+  const { elevation } = useMGTheme()
   const { reviewId } = route.params
-  const { data, isLoading, isError } = useGetReviewById(reviewId)
+  const { data, isLoading, isError, refetch } = useGetReviewById(reviewId)
 
   return (
     <ScreenContainer>
@@ -45,13 +49,11 @@ const ReviewBookingDetail = ({ navigation, route }: Props) => {
 
       {isLoading ? (
         <View style={styles.centered}>
-          <ActivityIndicator size='large' color={colors.primary} />
+          <ActivityIndicator accessibilityLabel="Carregando avaliação" size='large' color={colors.primary} />
         </View>
       ) : isError || !data ? (
         <View style={styles.centered}>
-          <Text style={[styles.message, { color: colors.error }]}>
-            Não foi possível carregar esta avaliação.
-          </Text>
+          <MGErrorState message="Não foi possível carregar esta avaliação." onRetry={() => { void refetch() }} />
         </View>
       ) : (
         <ScrollView
@@ -59,10 +61,11 @@ const ReviewBookingDetail = ({ navigation, route }: Props) => {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <View style={[styles.card, elevation.low, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <MGArtwork name="paw-decoration" width={32} height={32} style={{ position: 'absolute', top: spacing.sm, right: spacing.xs }} />
             <View style={styles.ratingSection}>
               <StarRating rating={data.rating} size={36} readOnly />
-              <Text style={[styles.ratingValue, { color: colors.textSecondary }]}>
+              <Text style={[styles.ratingValue, { color: colors.text, backgroundColor: colors.infoSoft }]}>
                 {data.rating} de 5
               </Text>
             </View>
@@ -75,9 +78,12 @@ const ReviewBookingDetail = ({ navigation, route }: Props) => {
               </Text>
             )}
 
-            <Text style={[styles.date, { color: colors.textSecondary }]}>
+            <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}>
+            <MGIcon name="calendar-days" size={18} color={colors.secondary} />
+            <Text style={[styles.date, { color: colors.textSecondary, flex: 1 }]}>
               Avaliado em {formatDate(data.created_at)}
             </Text>
+            </View>
           </View>
         </ScrollView>
       )}
@@ -115,6 +121,9 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   ratingValue: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.pill,
     fontSize: typography.sizes.sm,
     fontFamily: fonts.medium,
   },

@@ -120,7 +120,10 @@ export default function ProviderRequestProfileScreen({ navigation, route }: Prop
       <Pressable accessibilityRole="button" accessibilityLabel="Voltar" onPress={() => navigation.goBack()} hitSlop={8} style={styles.back}>
         <MGIcon name="arrow-left" size={24} color={colors.action.primary} />
       </Pressable>
-      <MGText variant="heading2" accessibilityRole="header" style={{ flex: 1 }}>Ficha do atendimento</MGText>
+      <View style={{ flex: 1, gap: spacing.xs }}>
+        <MGText variant="heading2" accessibilityRole="header">Ficha do atendimento</MGText>
+        <MGText variant="bodySmall" color="secondary">Pet, tutor e cuidados para este atendimento</MGText>
+      </View>
     </View>
   )
 
@@ -332,6 +335,9 @@ export default function ProviderRequestProfileScreen({ navigation, route }: Prop
           </View>
         )}
       </ProfileSection>
+      <MGCard variant="teal">
+        <MGText variant="bodySmall">As informações do pet ajudam você a oferecer um atendimento mais seguro e personalizado.</MGText>
+      </MGCard>
     </KeyboardAwareScrollView>,
   )
 }

@@ -2,6 +2,7 @@ import { View } from 'react-native'
 import {
   ArrowLeft,
   BadgeCheck,
+  Bath,
   Bell,
   Building2,
   CalendarDays,
@@ -20,6 +21,7 @@ import {
   Plus,
   Scissors,
   Search,
+  Sparkles,
   SlidersHorizontal,
 } from 'lucide-react-native'
 import { useMGTheme } from '../theme/useMGTheme'
@@ -45,6 +47,8 @@ export type MGIconName =
   | 'file-text'
   | 'building-2'
   | 'locate'
+  | 'bath'
+  | 'sparkles'
 
 const ICONS: Record<MGIconName, LucideIcon> = {
   'paw-print': PawPrint,
@@ -67,6 +71,8 @@ const ICONS: Record<MGIconName, LucideIcon> = {
   'file-text': FileText,
   'building-2': Building2,
   locate: LocateFixed,
+  bath: Bath,
+  sparkles: Sparkles,
 }
 
 type Props = {
@@ -92,6 +98,7 @@ export default function MGIcon({
     <View
       accessible={!decorative}
       accessibilityElementsHidden={decorative}
+      aria-hidden={decorative}
       importantForAccessibility={decorative ? 'no' : 'yes'}
       accessibilityLabel={decorative ? undefined : accessibilityLabel ?? name}
       accessibilityRole={decorative ? undefined : 'image'}

@@ -1,6 +1,7 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native'
 import { useTheme } from '../../context/ThemeContext'
 import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
+import { MGIcon } from '../../design-system/components'
 
 type Props = {
     name: string
@@ -14,14 +15,12 @@ export default function CategoryTile({ name, onPress }: Props) {
             accessibilityRole="button"
             accessibilityLabel={name}
             onPress={onPress}
-            style={[styles.tile, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            style={({ pressed }) => [styles.tile, { backgroundColor: pressed ? colors.selectionSoft : colors.surface, borderColor: colors.border }]}
         >
            <View style={[styles.iconCircle, { backgroundColor: colors.selectionSoft }]}>
-                <Text style={{ color: colors.primary, fontFamily: fonts.semibold, fontSize: typography.sizes.lg }}>
-                    {name.charAt(0).toUpperCase()}
-                </Text>
+                <MGIcon name={/banho/i.test(name) ? 'bath' : /tosa/i.test(name) ? 'scissors' : 'paw-print'} color={colors.primary} size={24} />
             </View>
-            <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>{name}</Text>
+            <Text style={[styles.name, { color: colors.text }]}>{name}</Text>
         </Pressable>
     )
 }
@@ -29,7 +28,8 @@ export default function CategoryTile({ name, onPress }: Props) {
 
 const styles = StyleSheet.create({
     tile: {
-        width: 100,
+        width: 132,
+        minHeight: 112,
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: spacing.md,

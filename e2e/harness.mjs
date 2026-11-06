@@ -30,7 +30,10 @@ export const viewports = {
 }
 
 export function evidenceFile(planDir, fileName) {
-  return path.resolve(here, '../../Plans', planDir, 'evidencias', fileName)
+  // Permite revalidar outro plano sem sobrescrever seus logs históricos.
+  const destination = process.env.E2E_EVIDENCE_PLAN || planDir
+  if (process.env.E2E_EVIDENCE_PLAN && !/^\d{3}-[a-z0-9-]+$/.test(destination)) throw new Error('Diretório de evidência inválido')
+  return path.resolve(here, '../../Plans', destination, 'evidencias', fileName)
 }
 
 export async function writeEvidence(file, data) {
@@ -52,6 +55,11 @@ export async function writeEvidence(file, data) {
 export async function saveScreenshot(page, file, options = {}) {
   const image = await page.screenshot(options)
   await writeEvidence(file, image)
+  if (process.env.E2E_UI_AUDIT === '1') {
+    const { inspectRenderedText } = await import('./visual-audit.mjs')
+    const auditFile = /\.png$/i.test(file) ? file.replace(/\.png$/i, '.audit.json') : `${file}.audit.json`
+    await writeEvidence(auditFile, JSON.stringify(await inspectRenderedText(page), null, 2))
+  }
 }
 
 export function launchBrowser() {
@@ -178,7 +186,7 @@ export function startRun({ command, evidence }) {
     const exitCode = failures.length ? 1 : 0
     if (evidence) {
       await writeEvidence(evidence, [
-        `command: ${command}`,
+        `command: ${process.execArgv.includes('--import') && !command.includes('--import') ? command.replace(/^node /, 'node --import ./e2e/preload.mjs ') : command}`,
         'cwd: React App',
         `started: ${started}`,
         `exit: ${exitCode}`,

@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, TextInput, View } from 'react-native'
-import { Mic, Paperclip, SendHorizontal, Smile } from 'lucide-react-native'
+import { SendHorizontal } from 'lucide-react-native'
 import { useTheme } from '../../context/ThemeContext'
 import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
 
@@ -17,9 +17,6 @@ export default function ChatInputBar({ value, onChangeText, onSend, disabled }: 
     return (
         <View style={styles.container}>
             <View style={[styles.inputWrapper, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                <Pressable hitSlop={spacing.xs}>
-                    <Smile size={22} color={colors.textSecondary} />
-                </Pressable>
 
                 <TextInput
                     accessibilityLabel="Mensagem"
@@ -31,20 +28,18 @@ export default function ChatInputBar({ value, onChangeText, onSend, disabled }: 
                     multiline
                 />
 
-                <Pressable hitSlop={spacing.xs}>
-                    <Paperclip size={20} color={colors.textSecondary} />
-                </Pressable>
             </View>
 
             <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Enviar mensagem"
                 onPress={hasText ? onSend : undefined}
-                disabled={disabled}
+                disabled={disabled || !hasText}
+                accessibilityState={{ disabled: Boolean(disabled || !hasText) }}
                 style={({ pressed }) => [
                     styles.sendBtn,
                     {
-                        backgroundColor: disabled
+                        backgroundColor: disabled || !hasText
                             ? colors.disabled
                             : pressed
                               ? colors.primaryPressed
@@ -52,11 +47,7 @@ export default function ChatInputBar({ value, onChangeText, onSend, disabled }: 
                     },
                 ]}
             >
-                {hasText ? (
-                    <SendHorizontal size={22} color={disabled ? colors.onDisabled : colors.onPrimary} />
-                ) : (
-                    <Mic size={22} color={disabled ? colors.onDisabled : colors.onPrimary} />
-                )}
+                <SendHorizontal size={22} color={disabled || !hasText ? colors.onDisabled : colors.onPrimary} />
             </Pressable>
         </View>
     )
@@ -87,8 +78,8 @@ const styles = StyleSheet.create({
         paddingVertical: spacing.xs,
     },
     sendBtn: {
-        width: 46,
-        height: 46,
+        width: 48,
+        height: 48,
         borderRadius: 9999,
         alignItems: 'center',
         justifyContent: 'center',

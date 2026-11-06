@@ -68,7 +68,7 @@ export default function ProviderRequestsScreen({ navigation }: Props) {
                 <MGIcon name="bell" size={32} color={colors.action.secondary} />
                 <View style={{ flex: 1, gap: spacing.xs }}>
                   <MGText variant="title">{pendingTodayTitle(pendingToday)}</MGText>
-                  <MGText variant="bodySmall" color="secondary">{pendingTodayHint(pendingToday)}</MGText>
+                  <MGText variant="bodySmall">{pendingTodayHint(pendingToday)}</MGText>
                 </View>
               </View>
             </MGCard>

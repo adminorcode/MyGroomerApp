@@ -1,7 +1,10 @@
-import { View, Text, StyleSheet, ActivityIndicator, FlatList, Pressable, Image } from 'react-native'
+import { View, Text, StyleSheet, ActivityIndicator, FlatList, Pressable } from 'react-native'
 import { CompositeNavigationProp } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
+import { MGAvatar, MGErrorState } from '../../design-system/components'
+import MGArtwork from '../../design-system/components/MGArtwork'
+import { elevation } from '../../constants/theme'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
 import { useTheme } from '../../context/ThemeContext'
@@ -39,7 +42,7 @@ function formatTime(value?: string | null) {
 export default function ConversationsScreen({ navigation }: Props) {
   const { colors } = useTheme()
   const {user} = useAuthStore()
-  const { data: conversations, isLoading, isError } = useGetConversations()
+  const { data: conversations, isLoading, isError, refetch } = useGetConversations()
 
   const renderConversation = ({ item }: { item: ConversationListItem }) => {
     const isCustomer = item.customer_id === user?.id
@@ -48,18 +51,12 @@ export default function ConversationsScreen({ navigation }: Props) {
 
     return (
       <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Conversa com ${otherName}`}
         onPress={() => navigation.navigate('Chat', { conversationId: item.id, otherName })}
-        style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.border }]}
+        style={({ pressed }) => [styles.row, elevation.low, { backgroundColor: colors.surface, borderColor: colors.border, opacity: pressed ? 0.7 : 1 }]}
       >
-        {otherProfile ? (
-          <Image source={{ uri: otherProfile }} style={styles.avatar} />
-        ) : (
-          <View style={[styles.avatar, styles.avatarFallback, { backgroundColor: colors.selectionSoft }]}>
-            <Text style={[styles.avatarInitial, { color: colors.primary }]}>
-              {otherName.charAt(0).toUpperCase()}
-            </Text>
-          </View>
-        )}
+        <MGAvatar name={otherName} uri={otherProfile} size={48} />
 
         <View style={styles.rowContent}>
           <View style={styles.rowHeader}>
@@ -77,7 +74,7 @@ export default function ConversationsScreen({ navigation }: Props) {
             </Text>
             
               { item.unread_count > 0 &&
-                (<Text style={{color:'white', backgroundColor:colors.primary, paddingHorizontal:6, borderRadius:999}}>
+                (<Text style={{color:colors.onPrimary, backgroundColor:colors.primary, paddingHorizontal:spacing.sm, borderRadius:borderRadius.full}}>
                 {item.unread_count}
                 </Text>)
               }
@@ -89,17 +86,15 @@ export default function ConversationsScreen({ navigation }: Props) {
 
   return (
     <ScreenContainer>
-      <ScreenHeader title="Mensagens" description={user?.role === 'provider' ? 'Converse com tutores e groomers' : 'Converse com os groomers'} />
+      <ScreenHeader title="Mensagens" description={user?.role === 'provider' ? 'Converse com os tutores' : 'Converse com os profissionais'} />
 
       {isLoading ? (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={colors.primary} />
+          <ActivityIndicator accessibilityLabel="Carregando conversas" size="large" color={colors.primary} />
         </View>
       ) : isError ? (
         <View style={styles.centered}>
-          <Text style={[styles.message, { color: colors.error }]}>
-            Não foi possível carregar as conversas.
-          </Text>
+          <MGErrorState message="Não foi possível carregar as conversas." onRetry={() => refetch()} />
         </View>
       ) : (
         <FlatList
@@ -115,6 +110,7 @@ export default function ConversationsScreen({ navigation }: Props) {
               </Text>
             </View>
           }
+          ListFooterComponent={user?.role === 'provider' && (conversations?.length ?? 0) <= 3 ? <View style={{ flexDirection: 'row', justifyContent: 'center', paddingTop: spacing.xxxl, paddingBottom: spacing.base }}><MGArtwork name="puppy" width={112} /><MGArtwork name="cat" width={100} /></View> : null}
           keyExtractor={(item) => item.id}
         />
       )}
@@ -133,7 +129,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: spacing.md,
+    padding: spacing.base,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
     marginBottom: spacing.sm,
@@ -174,12 +170,15 @@ const styles = StyleSheet.create({
   preview: {
     fontSize: typography.sizes.sm,
     fontFamily: fonts.regular,
-    width:200
+    flex: 1,
+    minWidth: 0,
   },
   previewContainer:{
     flexDirection:'row',
     display:'flex',
-    justifyContent:'space-between'
+    justifyContent:'space-between',
+    alignItems:'center',
+    gap:spacing.sm
   },
   centered: {
     flex: 1,

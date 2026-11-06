@@ -1,8 +1,8 @@
 import { AppAlert } from '../../utils/alert'
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { ChevronRight, IdCard, LogOut, MapPin, PawPrint, Store } from 'lucide-react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
-import { CustomerTabParamList, ProfileStackParamList } from '../../navigation/types'
+import { ProfileStackParamList } from '../../navigation/types'
 import { useAuthStore } from '../../store/authStore'
 import { useTheme } from '../../context/ThemeContext'
 import ScreenContainer from '../../components/shared/ScreenContainer'
@@ -34,6 +34,7 @@ export default function ProfileScreen({ navigation }: Props) {
 
   return (
     <ScreenContainer>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: spacing.lg }}>
       <ScreenHeader title='Perfil' description='Gerencie sua conta' />
 
       <View style={styles.profileSection}>
@@ -46,7 +47,7 @@ export default function ProfileScreen({ navigation }: Props) {
 
         {user?.role && (
           <View style={[styles.rolePill, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Text style={[styles.roleText, { color: colors.textSecondary }]}>{user.role === 'provider' ? 'Groomer' : user.role === 'customer' ? 'Tutor' : 'Administrador'}</Text>
+            <Text style={[styles.roleText, { color: colors.textSecondary }]}>{user.role === 'provider' ? 'Profissional' : user.role === 'customer' ? 'Tutor' : 'Administrador'}</Text>
           </View>
         )}
       </View>
@@ -125,6 +126,8 @@ export default function ProfileScreen({ navigation }: Props) {
 
       {user?.role !== 'provider' && (
         <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Quero ser groomer"
           onPress={() => navigation.navigate('BecomeAProvider')}
           style={({ pressed }) => [
             styles.actionRow,
@@ -169,6 +172,8 @@ export default function ProfileScreen({ navigation }: Props) {
       <View style={styles.spacer} />
 
       <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Sair"
         onPress={handleLogout}
         style={({ pressed }) => [
           styles.logoutButton,
@@ -179,6 +184,7 @@ export default function ProfileScreen({ navigation }: Props) {
         <LogOut size={20} color={colors.error} />
         <Text style={[styles.logoutText, { color: colors.error }]}>Sair</Text>
       </Pressable>
+      </ScrollView>
     </ScreenContainer>
   )
 }
@@ -187,6 +193,7 @@ const styles = StyleSheet.create({
   profileSection: {
     alignItems: 'center',
     marginTop: spacing.xl,
+    marginBottom: spacing.base,
   },
   avatar: {
     width: 88,
@@ -228,7 +235,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
-    marginTop: spacing.xl,
+    marginTop: spacing.md,
   },
   actionIcon: {
     width: 40,
@@ -251,6 +258,7 @@ const styles = StyleSheet.create({
   },
   spacer: {
     flex: 1,
+    minHeight: spacing.xl,
   },
   logoutButton: {
     flexDirection: 'row',

@@ -34,10 +34,10 @@ async function registerAndLogin(page, email) {
   await page.getByRole('textbox', { name: 'Senha' }).fill(password)
   await page.getByRole('checkbox', { name: 'Aceito os termos e a política de privacidade' }).click()
   await page.getByRole('button', { name: 'Criar conta' }).click()
-  await page.getByRole('button', { name: 'Entrar' }).waitFor({ timeout: 20000 })
+  await page.getByRole('button', { name: 'Entrar', exact: true }).waitFor({ timeout: 20000 })
   await page.getByRole('textbox', { name: 'E-mail' }).fill(email)
   await page.getByRole('textbox', { name: 'Senha' }).fill(password)
-  await page.getByRole('button', { name: 'Entrar' }).click()
+  await page.getByRole('button', { name: 'Entrar', exact: true }).click()
   await page.getByText(/^Olá/).waitFor({ timeout: 20000 })
 }
 
@@ -45,7 +45,7 @@ async function login(page, email) {
   await openLogin(page)
   await page.getByRole('textbox', { name: 'E-mail' }).fill(email)
   await page.getByRole('textbox', { name: 'Senha' }).fill(password)
-  await page.getByRole('button', { name: 'Entrar' }).click()
+  await page.getByRole('button', { name: 'Entrar', exact: true }).click()
   await page.getByText(/^Olá/).waitFor({ timeout: 20000 })
 }
 

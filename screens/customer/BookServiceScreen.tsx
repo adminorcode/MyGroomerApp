@@ -8,7 +8,7 @@ import { HomeStackParamList } from '../../navigation/types'
 import { useGetProviderServiceById } from '../../hooks/useProviders'
 import { usePets } from '../../hooks/usePets'
 import PetPicker from '../../components/customer/PetPicker'
-import { MGButton, MGCard, MGErrorState, MGIconButton, MGScreen, MGText, MGTextField } from '../../design-system/components'
+import { MGButton, MGCard, MGErrorState, MGIcon, MGIconButton, MGScreen, MGText, MGTextField } from '../../design-system/components'
 import { TimeSlotPicker } from '../../design-system/patterns'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { getBookingSlots } from '../../services/booking.service'
@@ -103,7 +103,11 @@ export default function BookServiceScreen({ navigation, route }: Props) {
         )}>
         {header}
         <MGCard>
-          <View style={{ gap: spacing.xs }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+            <View style={{ width: 48, height: 48, borderRadius: radius.md, backgroundColor: colors.surface.tealSubtle, alignItems: 'center', justifyContent: 'center' }}>
+              <MGIcon name="paw-print" color={colors.action.secondary} size={28} />
+            </View>
+          <View style={{ gap: spacing.xs, flex: 1, minWidth: 0 }}>
             <MGText variant="heading3" accessibilityLabel={`Profissional: ${service.data.provider_name}`}>{service.data.provider_name}</MGText>
             <MGText color="info" accessibilityLabel={`Serviço: ${service.data.service_name}`}>{service.data.service_name}</MGText>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
@@ -113,6 +117,7 @@ export default function BookServiceScreen({ navigation, route }: Props) {
             {selectedPet && !choosingPet ? <MGButton label="Trocar pet" variant="tertiary" fullWidth={false}
               onPress={() => setChoosingPet(true)} /> : null}
             </View>
+          </View>
           </View>
         </MGCard>
         {choosingPet || !selectedPet || pets.isError ? <View style={{ marginTop: spacing.lg }}>
@@ -176,6 +181,13 @@ export default function BookServiceScreen({ navigation, route }: Props) {
             <><MGText variant="heading3">Nenhum horário disponível</MGText><MGText color="secondary">Escolha outro dia para este atendimento.</MGText></>
           )}
         </View>
+        <MGCard variant="teal" padding={spacing.md}>
+          <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' }}>
+            <MGIcon name="clock-3" size={18} color={colors.action.secondary} />
+            <MGText variant="bodySmall" style={{ flex: 1 }}>A disponibilidade é atualizada para o serviço e o porte do pet. A solicitação depende da confirmação do profissional.</MGText>
+          </View>
+        </MGCard>
+        <View style={{ marginTop: spacing.lg }}>
         {carriedLocation ? (
           <View
             accessible
@@ -195,6 +207,7 @@ export default function BookServiceScreen({ navigation, route }: Props) {
         ) : (
           <MGTextField label="Local" value={location} onChangeText={setLocation} placeholder="Digite seu endereço" autoCapitalize="words" />
         )}
+        </View>
       </MGScreen>
     </KeyboardAvoidingView>
   )

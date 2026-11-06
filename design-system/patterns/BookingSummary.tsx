@@ -29,7 +29,7 @@ export default function BookingSummary({
   return (
     <MGCard>
       <MGText variant="heading3">{title}</MGText>
-      <View style={{ marginTop: spacing.sm, gap: spacing.sm }}>
+      <View style={{ marginTop: spacing.base, gap: spacing.md }}>
         {rows.map((row) => (
           <View key={`${row.label}-${row.value}`} accessibilityLabel={`${row.label}: ${row.value}`} style={styles.row}>
             <MGText variant="body" color="secondary" style={styles.label}>
@@ -68,7 +68,8 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   label: {
-    flexShrink: 0,
+    flexShrink: 1,
+    maxWidth: '42%',
   },
   value: {
     flex: 1,

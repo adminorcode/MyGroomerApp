@@ -3,7 +3,8 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
 import axios from 'axios'
-import { Check, PawPrint } from 'lucide-react-native'
+import { Check } from 'lucide-react-native'
+import MGArtwork from '../../design-system/components/MGArtwork'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
@@ -147,7 +148,7 @@ export default function PetFormScreen({ navigation, route }: Props) {
                     onBack={() => navigation.goBack()}
                 />
                 <View style={[styles.photo, { backgroundColor: colors.selectionSoft }]}>
-                    <PawPrint color={colors.primary} size={28} />
+                    <MGArtwork name="pet-placeholder" width={52} height={52} />
                 </View>
                 <Text style={[styles.photoNote, { color: colors.textSecondary }]}>
                     A foto é opcional. O pet pode ser salvo sem ela.
@@ -339,7 +340,8 @@ function ChoiceField({
                                 <Pressable
                                     key={option.value}
                                     accessibilityRole="radio"
-                                    accessibilityState={{ selected }}
+                                    accessibilityState={{ selected, checked: selected }}
+                                    aria-checked={selected}
                                     accessibilityLabel={option.label}
                                     onPress={() => onChange(option.value)}
                                     style={[
@@ -373,8 +375,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     photo: {
-        width: 72,
-        height: 72,
+        width: 96,
+        height: 96,
         borderRadius: borderRadius.full,
         alignItems: 'center',
         justifyContent: 'center',
@@ -401,6 +403,8 @@ const styles = StyleSheet.create({
         gap: spacing.sm,
     },
     choice: {
+        flexGrow: 1,
+        justifyContent: 'center',
         minHeight: 52,
         borderWidth: 2,
         borderRadius: borderRadius.md,

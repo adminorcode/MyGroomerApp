@@ -14,6 +14,7 @@ import { BoamePhoneInput } from '../../components/shared/Input'
 import { MGButton, MGTextField } from '../../design-system/components'
 import { borderRadius, fonts, layout, spacing, typography } from '../../constants/theme'
 import z from 'zod'
+import MGArtwork from '../../design-system/components/MGArtwork'
 
 type BecomeProviderNavigationProps = StackNavigationProp<ProfileStackParamList, 'BecomeAProvider'>
 
@@ -54,6 +55,8 @@ function OptionSelector<T extends string>({ label, options, value, onChange, err
                         <Pressable
                             key={option.value}
                             accessibilityRole='button'
+                            accessibilityState={{ selected: isSelected }}
+                            aria-selected={isSelected}
                             onPress={() => onChange(option.value)}
                             style={[
                                 styles.option,
@@ -120,6 +123,10 @@ const BecomeAProvider = ({ navigation }: Props) => {
                 onBack={() => navigation.goBack()}
             />
 
+            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.selectionSoft, borderRadius: borderRadius.lg, padding: spacing.base, gap: spacing.sm }}>
+                <View style={{ flex: 1 }}><Text style={{ fontFamily: fonts.semibold, color: colors.text }}>Ofereça seus serviços</Text><Text style={{ fontFamily: fonts.regular, color: colors.text }}>Preencha seus dados para continuar.</Text></View>
+                <MGArtwork name="professional" width={80} />
+            </View>
             <View style={styles.form}>
                 <Controller
                     control={control}
@@ -234,6 +241,9 @@ const BecomeAProvider = ({ navigation }: Props) => {
 
 const styles = StyleSheet.create({
     container: {
+        width: '100%',
+        maxWidth: layout.formMaxWidth,
+        alignSelf: 'center',
         flexGrow: 1,
         paddingHorizontal: layout.screenPadding,
         paddingBottom: spacing.xxl,
@@ -255,6 +265,7 @@ const styles = StyleSheet.create({
         gap: spacing.sm,
     },
     option: {
+        minHeight: 48,
         flex: 1,
         alignItems: 'center',
         paddingVertical: spacing.sm + 4,

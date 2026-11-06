@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ActivityIndicator, Pressable, Image as RNImage, View, useWindowDimensions } from 'react-native'
 import { X } from 'lucide-react-native'
 import { MGIcon, MGText } from '../../design-system/components'
@@ -26,6 +26,8 @@ function GalleryPhoto({ photoId, index, size, onRemove, removing }: {
 }) {
   const { colors, spacing, radius } = useMGTheme()
   const uri = useAuthorizedImage(`/providers/gallery/${photoId}`)
+  const [failed, setFailed] = useState(false)
+  useEffect(() => setFailed(false), [uri])
   const label = `Foto da galeria ${index + 1}`
 
   return (
@@ -43,8 +45,8 @@ function GalleryPhoto({ photoId, index, size, onRemove, removing }: {
           justifyContent: 'center',
         }}
       >
-        {uri ? (
-          <RNImage source={{ uri }} accessibilityLabel={label} style={{ width: size, height: size }} />
+        {uri && !failed ? (
+          <RNImage source={{ uri }} accessibilityLabel={label} style={{ width: size, height: size }} onError={() => setFailed(true)} />
         ) : (
           <MGIcon name="paw-print" size={Math.round(size * 0.28)} color={colors.text.secondary} />
         )}
