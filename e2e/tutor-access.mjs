@@ -38,7 +38,7 @@ async function welcomeVisible(page, label) {
 
 async function run() {
   const database = new URL(process.env.DATABASE_URL)
-  if (process.env.LOCAL_TEST_MODE !== 'true' || !['localhost', '127.0.0.1', '[::1]'].includes(database.hostname) || database.pathname !== '/mygroomer_dev') throw new Error('Recusando banco fora do ambiente local')
+  if (process.env.LOCAL_TEST_MODE !== 'true' || !['localhost', '127.0.0.1', '[::1]'].includes(database.hostname) || database.pathname !== '/mygroomer_e2e') throw new Error('Recusando banco fora do ambiente local')
   localDatabase = true
   browser = await launchBrowser()
 

@@ -1,3 +1,4 @@
+import { saveScreenshot } from './harness.mjs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -71,7 +72,7 @@ async function takeSlot(pet) {
 
 async function capture(page, name, locator) {
   if (locator) await locator.scrollIntoViewIfNeeded()
-  await page.screenshot({ path: path.join(shotDir, `${name}.png`) })
+  await saveScreenshot(page, path.join(shotDir, `${name}.png`))
 }
 
 async function openTimeScreen(page) {
@@ -148,7 +149,7 @@ async function contrastOf(locator) {
 
 async function setup() {
   const db = new URL(process.env.DATABASE_URL)
-  if (process.env.LOCAL_TEST_MODE !== 'true' || !['localhost', '127.0.0.1', '[::1]'].includes(db.hostname) || db.pathname !== '/mygroomer_dev') {
+  if (process.env.LOCAL_TEST_MODE !== 'true' || !['localhost', '127.0.0.1', '[::1]'].includes(db.hostname) || db.pathname !== '/mygroomer_e2e') {
     throw new Error('Recusando banco fora do ambiente local')
   }
   guarded = true

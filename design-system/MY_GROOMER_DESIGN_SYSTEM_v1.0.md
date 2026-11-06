@@ -597,6 +597,8 @@ Estas telas já têm protótipos Pink & Teal. A operação privilegia **leitura 
 
 **Proposta UX:** Teal para área de cobertura (círculo e contorno), rosa para marcador de localização selecionada. Mapas reais devem usar provider/licença aprovados e controles acessíveis.
 
+**Composição do `AddressSelector` (hierarquia da G03).** Todo cadastro de endereço com mapa usa o mesmo cartão branco (`MGCard`): rótulo com ícone rosa ao lado (`map-pin` no endereço, `building-2` em CEP e complemento), campo abaixo e o mapa dentro do cartão, com cantos `lg`, zoom e pino rosa. O círculo do raio, quando existe, é tracejado e teal. "Usar minha localização" fica dentro do cartão, como ação terciária, e não substitui a busca. Sem ponto, o cartão reserva a área do mapa. CEP só aparece onde o contrato grava CEP. O PNG continua sendo hierarquia: nomes e ruas desenhados são exemplo.
+
 ---
 
 ## 13. AGENDAMENTO — DATAS, PREÇOS E ESTADOS

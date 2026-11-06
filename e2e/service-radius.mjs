@@ -182,7 +182,7 @@ async function run() {
     await postalCode.fill('91210-320')
     const map = page.locator('iframe[title*="Rua Vital Brasil, Porto Alegre"]')
     await map.waitFor({ timeout: 20000 })
-    await page.frameLocator('iframe[title*="Rua Vital Brasil, Porto Alegre"]').locator('.leaflet-interactive').nth(1).waitFor({ timeout: 20000 })
+    await page.frameLocator('iframe[title*="Rua Vital Brasil, Porto Alegre"]').locator('.mg-radius').waitFor({ timeout: 20000 })
     await map.scrollIntoViewIfNeeded()
     const zoom = Number(await map.getAttribute('data-zoom'))
     const mapBox = await map.boundingBox()

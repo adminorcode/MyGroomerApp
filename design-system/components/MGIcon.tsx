@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   BadgeCheck,
   Bell,
+  Building2,
   CalendarDays,
   Check,
   ChevronLeft,
@@ -12,6 +13,7 @@ import {
   Droplets,
   Ellipsis,
   FileText,
+  LocateFixed,
   LucideIcon,
   MapPin,
   PawPrint,
@@ -41,6 +43,8 @@ export type MGIconName =
   | 'coffee'
   | 'ellipsis'
   | 'file-text'
+  | 'building-2'
+  | 'locate'
 
 const ICONS: Record<MGIconName, LucideIcon> = {
   'paw-print': PawPrint,
@@ -61,6 +65,8 @@ const ICONS: Record<MGIconName, LucideIcon> = {
   coffee: Coffee,
   ellipsis: Ellipsis,
   'file-text': FileText,
+  'building-2': Building2,
+  locate: LocateFixed,
 }
 
 type Props = {

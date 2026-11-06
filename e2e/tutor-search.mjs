@@ -1,3 +1,4 @@
+import { saveScreenshot } from './harness.mjs'
 import { mkdirSync } from 'node:fs'
 import path from 'node:path'
 import {
@@ -92,7 +93,7 @@ async function run(browser) {
 
   const shotDir = evidenceFile('006-tutor-search', 'ui-review')
   mkdirSync(shotDir, { recursive: true })
-  const shot = (target, name) => target.screenshot({ path: path.join(shotDir, `${name}.png`), fullPage: true })
+  const shot = (target, name) => saveScreenshot(target, path.join(shotDir, `${name}.png`), { fullPage: true })
   await shot(page, '01-mobile-vazio')
 
   await page.getByRole('button', { name: 'Buscar' }).click()

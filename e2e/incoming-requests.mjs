@@ -1,3 +1,4 @@
+import { saveScreenshot } from './harness.mjs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -65,7 +66,7 @@ const requestsOf = async group => (await request(`/providers/requests?group=${gr
 
 async function capture(page, name, fullPage = false) {
   mkdirSync(shotDir, { recursive: true })
-  await page.screenshot({ path: path.join(shotDir, `${name}.png`), fullPage })
+  await saveScreenshot(page, path.join(shotDir, `${name}.png`), { fullPage })
 }
 
 async function book(name) {
@@ -87,7 +88,7 @@ async function book(name) {
 
 async function setup() {
   const db = new URL(process.env.DATABASE_URL)
-  if (process.env.LOCAL_TEST_MODE !== 'true' || !['localhost', '127.0.0.1', '[::1]'].includes(db.hostname) || db.pathname !== '/mygroomer_dev') {
+  if (process.env.LOCAL_TEST_MODE !== 'true' || !['localhost', '127.0.0.1', '[::1]'].includes(db.hostname) || db.pathname !== '/mygroomer_e2e') {
     throw new Error('Recusando banco fora do ambiente local')
   }
   pool = new Pool({ connectionString: process.env.DATABASE_URL })

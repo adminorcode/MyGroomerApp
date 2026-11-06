@@ -1,3 +1,4 @@
+import { saveScreenshot } from './harness.mjs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -35,7 +36,7 @@ async function request(route, method='GET', body, token=tutorToken) {
 const available = pet => request(`/bookings/slots?provider_service_id=${offerId}&pet_id=${pet.id}&date=${openDate}`)
 async function capture(page, name, locator) {
   if (locator) await locator.scrollIntoViewIfNeeded()
-  await page.screenshot({ path: path.join(screenshotDir, `${name}.png`) })
+  await saveScreenshot(page, path.join(screenshotDir, `${name}.png`))
 }
 async function openBooking(page) {
   await loginTutor(page, { email: tutorEmail, password: 'admin' })
@@ -50,7 +51,7 @@ async function openBooking(page) {
 }
 async function setup() {
   const db = new URL(process.env.DATABASE_URL)
-  if (process.env.LOCAL_TEST_MODE !== 'true' || !['localhost','127.0.0.1','[::1]'].includes(db.hostname) || db.pathname !== '/mygroomer_dev') throw new Error('Recusando banco fora do ambiente local')
+  if (process.env.LOCAL_TEST_MODE !== 'true' || !['localhost','127.0.0.1','[::1]'].includes(db.hostname) || db.pathname !== '/mygroomer_e2e') throw new Error('Recusando banco fora do ambiente local')
   guarded = true
   for (const [id, email, name, source] of [[tutorId,tutorEmail,'Tutor horários','tutor@email.com'],[professionalId,providerEmail,professionalName,'groomer@email.com']]) {
     await pool.query(`INSERT INTO users(id,name,email,password,role,email_verified_at,phone_number,address)

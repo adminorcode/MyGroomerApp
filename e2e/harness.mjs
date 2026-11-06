@@ -33,6 +33,27 @@ export function evidenceFile(planDir, fileName) {
   return path.resolve(here, '../../Plans', planDir, 'evidencias', fileName)
 }
 
+export async function writeEvidence(file, data) {
+  mkdirSync(path.dirname(file), { recursive: true })
+  let last
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    try {
+      writeFileSync(file, data)
+      return
+    } catch (error) {
+      last = error
+      if (!['UNKNOWN', 'EBUSY', 'EPERM'].includes(error?.code)) throw error
+      await new Promise(resolve => setTimeout(resolve, 200 * (attempt + 1)))
+    }
+  }
+  throw last
+}
+
+export async function saveScreenshot(page, file, options = {}) {
+  const image = await page.screenshot(options)
+  await writeEvidence(file, image)
+}
+
 export function launchBrowser() {
   return chromium.launch()
 }
@@ -109,7 +130,21 @@ export async function checkContrast(page, locator, name, check) {
   check(name, color !== background && color !== 'rgba(0, 0, 0, 0)', `${color} sobre ${background}`)
 }
 
+function assertE2eDatabase() {
+  let database
+  try {
+    database = new URL(process.env.DATABASE_URL || '')
+  } catch {
+    database = null
+  }
+  const local = database && ['localhost', '127.0.0.1', '[::1]'].includes(database.hostname)
+  if (!local || database.pathname !== '/mygroomer_e2e') {
+    throw new Error('Teste de ponta a ponta recusou o banco. Use node --import ./e2e/preload.mjs para rodar em mygroomer_e2e.')
+  }
+}
+
 export function startRun({ command, evidence }) {
+  assertE2eDatabase()
   const failures = []
   const lines = []
   const started = new Date().toISOString()
@@ -142,8 +177,7 @@ export function startRun({ command, evidence }) {
     if (browser) await browser.close().catch(() => {})
     const exitCode = failures.length ? 1 : 0
     if (evidence) {
-      mkdirSync(path.dirname(evidence), { recursive: true })
-      writeFileSync(evidence, [
+      await writeEvidence(evidence, [
         `command: ${command}`,
         'cwd: React App',
         `started: ${started}`,
@@ -151,7 +185,7 @@ export function startRun({ command, evidence }) {
         '',
         ...lines,
         '',
-      ].join('\n'), 'utf8')
+      ].join('\n'))
     }
     if (exitCode) process.exit(1)
   }

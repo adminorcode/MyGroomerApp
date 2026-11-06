@@ -9,14 +9,18 @@ import { useFetchCategories } from '../../hooks/useCategory'
 import { useGetAllServices } from '../../hooks/useServices'
 import { useCoverageSearch } from '../../hooks/useProviders'
 import { CoverageSearchParams } from '../../types/provider.types'
-import { AddressSuggestion, autocompleteServiceLocation, getMapTiles } from '../../services/provider.service'
+import { AddressSuggestion, autocompleteServiceLocation, getMapTiles, reverseServiceLocation } from '../../services/provider.service'
 import ServiceLocationMap from '../provider/ServiceLocationMap'
+import CurrentLocationActions from '../../components/customer/CurrentLocationActions'
+import { useCurrentPlace } from '../../hooks/useCurrentPlace'
+import { useCustomerAddresses } from '../../hooks/useCustomerAddresses'
+import { addressLabelName, CustomerAddress } from '../../services/customerAddress.service'
 import { useTheme } from '../../context/ThemeContext'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
-import { MGButton, MGEmptyState, MGErrorState, MGText, MGTextField } from '../../design-system/components'
-import { GroomerSearchCard } from '../../design-system/patterns'
+import { MGButton, MGChip, MGEmptyState, MGErrorState, MGText, MGTextField } from '../../design-system/components'
+import { AddressMapPlaceholder, AddressPlaceCard, GroomerSearchCard } from '../../design-system/patterns'
 import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
 import { formatMoney } from '../../utils/formatMoney'
 import { formatRating } from '../../utils/formatRating'
@@ -59,9 +63,36 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
     const [tilesReady, setTilesReady] = useState(false)
     const services = useGetAllServices(draft.categoryId || undefined)
     const search = useCoverageSearch(query)
+    const savedAddresses = useCustomerAddresses()
+    const place = useCurrentPlace()
     const suggestTicket = useRef(0)
     const skipSuggest = useRef(false)
     const hideMenu = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const edited = useRef(false)
+    const seeded = useRef(false)
+    const addressRef = useRef('')
+    const [movingPin, setMovingPin] = useState(false)
+    const [pinError, setPinError] = useState<string | null>(null)
+    addressRef.current = draft.address
+
+    useEffect(() => {
+        if (!savedAddresses.isSuccess || seeded.current) return
+        seeded.current = true
+        const preferred = savedAddresses.data?.find(item => item.is_default)
+        if (preferred) {
+            edited.current = true
+            skipSuggest.current = true
+            setDraft(current => ({ ...current, address: preferred.address }))
+            setPicked({ latitude: preferred.latitude, longitude: preferred.longitude, label: preferred.address })
+            return
+        }
+        void place.capture().then(found => {
+            if (!found || edited.current || addressRef.current.trim()) return
+            skipSuggest.current = true
+            setDraft(current => ({ ...current, address: found.address }))
+            setPicked({ latitude: found.latitude, longitude: found.longitude, label: found.address })
+        })
+    }, [savedAddresses.isSuccess, savedAddresses.data, place])
 
     useEffect(() => {
         let active = true
@@ -125,12 +156,37 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
     }
 
     const changeAddress = (address: string) => {
+        edited.current = true
         suggestTicket.current += 1
         setDraft(current => ({ ...current, address }))
         setPicked(null)
         setQuery(null)
         setSuggestions([])
         setFormError(current => ({ ...current, address: '' }))
+    }
+
+    const chooseSaved = (item: CustomerAddress) => {
+        edited.current = true
+        if (hideMenu.current) clearTimeout(hideMenu.current)
+        skipSuggest.current = true
+        suggestTicket.current += 1
+        setSuggestions([])
+        setSuggesting(false)
+        setDraft(current => ({ ...current, address: item.address }))
+        setPicked({ latitude: item.latitude, longitude: item.longitude, label: item.address })
+        setQuery(null)
+        setPinError(null)
+        setFormError(current => ({ ...current, address: '' }))
+    }
+
+    const movePin = (latitude: number, longitude: number) => {
+        edited.current = true
+        setMovingPin(true)
+        setPinError(null)
+        void reverseServiceLocation(latitude, longitude)
+            .then(result => chooseSuggestion(result.data))
+            .catch(error => setPinError(getErrorMessage(error)))
+            .finally(() => setMovingPin(false))
     }
 
     const chooseSuggestion = (item: AddressSuggestion) => {
@@ -186,7 +242,27 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
                     showBackButton
                     onBack={() => navigation.goBack()}
                 />
+                {savedAddresses.data && savedAddresses.data.length > 0 ? (
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.sm, marginBottom: theme.spacing.md }}>
+                        {savedAddresses.data.map(item => {
+                            const selected = draft.address.trim() === item.address && picked?.label === item.address
+                            const name = item.is_default ? `${addressLabelName(item.label)} · Padrão` : addressLabelName(item.label)
+                            return (
+                                <MGChip
+                                    key={item.id}
+                                    label={name}
+                                    accessibilityLabel={selected ? `${name}, selecionado` : name}
+                                    selected={selected}
+                                    onPress={() => chooseSaved(item)}
+                                />
+                            )
+                        })}
+                    </View>
+                ) : null}
+                <AddressPlaceCard>
                 <MGTextField
+                    compact
+                    icon="map-pin"
                     label="Endereço do atendimento"
                     accessibilityLabel="Endereço do atendimento"
                     placeholder="Avenida Paulista, São Paulo"
@@ -250,6 +326,13 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
                         </View>
                     ) : null}
                 />
+                <CurrentLocationActions
+                    status={place.status}
+                    onPress={() => {
+                        edited.current = true
+                        void place.capture().then(found => { if (found) chooseSuggestion(found) })
+                    }}
+                />
                 {pickedPoint ? (
                     <View style={{ gap: theme.spacing.sm, marginBottom: theme.spacing.md }}>
                         {tileUrl ? (
@@ -259,25 +342,26 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
                                 radiusKm={null}
                                 label={mapLabel(pickedPoint)}
                                 tileUrl={tileUrl}
+                                onPick={movePin}
                             />
                         ) : tilesReady ? null : (
                             <FieldWait label="Localizando no mapa" />
                         )}
-                        <MGText variant="body">{pickedPoint.label}</MGText>
                         {tileUrl ? (
                             <MGText variant="caption" color="secondary" style={{ fontSize: 10, lineHeight: 12 }}>
                                 Powered by Geoapify · OpenStreetMap
                             </MGText>
                         ) : null}
+                        <MGText variant="caption" color="secondary">Toque no mapa para ajustar o ponto.</MGText>
+                        {pinError ? <MGText variant="bodySmall" color="error" accessibilityRole="alert">{pinError}</MGText> : null}
                     </View>
                 ) : (
-                    <View accessible accessibilityLabel="Mapa sem ponto" style={{ marginBottom: theme.spacing.md }}>
-                        <MGEmptyState
-                            title="Mapa sem ponto"
-                            description="Escolha um endereço sugerido para ver o ponto no mapa."
-                        />
+                    <View style={{ marginBottom: theme.spacing.md, gap: theme.spacing.sm }}>
+                        {movingPin || place.status === 'locating' ? <FieldWait label="Localizando você no mapa" /> : null}
+                        <AddressMapPlaceholder label="Escolha um endereço sugerido para ver o ponto no mapa." />
                     </View>
                 )}
+                </AddressPlaceCard>
                 <Text style={[styles.groupLabel, { color: colors.text }]}>Modalidade</Text>
                 <OptionRow
                     label="Modalidade"

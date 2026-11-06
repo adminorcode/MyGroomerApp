@@ -1,3 +1,4 @@
+import { saveScreenshot } from './harness.mjs'
 import { createRequire } from 'node:module'
 import { mkdirSync } from 'node:fs'
 import path from 'node:path'
@@ -26,7 +27,7 @@ let groomerType
 let currentPage
 
 const field = (page, name) => page.getByRole('textbox', { name, exact: true })
-async function shot(page, name) { await page.screenshot({ path: path.join(shots, `${name}.png`), fullPage: true }) }
+async function shot(page, name) { await saveScreenshot(page, path.join(shots, `${name}.png`), { fullPage: true }) }
 async function request(route, method = 'GET', body, token) {
   const response = await fetch(`http://127.0.0.1:3000/api/v1${route}`, {
     method, headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -78,7 +79,7 @@ async function verifyContrast(locator) {
 
 async function run() {
   const db = new URL(process.env.DATABASE_URL)
-  if (process.env.LOCAL_TEST_MODE !== 'true' || !['localhost', '127.0.0.1', '[::1]'].includes(db.hostname) || db.pathname !== '/mygroomer_dev') throw new Error('Recusando banco fora do ambiente local')
+  if (process.env.LOCAL_TEST_MODE !== 'true' || !['localhost', '127.0.0.1', '[::1]'].includes(db.hostname) || db.pathname !== '/mygroomer_e2e') throw new Error('Recusando banco fora do ambiente local')
   for (const url of ['http://localhost:3000/health', appUrl]) if (!(await fetch(url)).ok) throw new Error(`Servidor indisponível: ${url}`)
   await pool.query('INSERT INTO professional_types(id,name,is_active) VALUES ($1,$2,true),($3,$4,false)', [types[0], typeName, types[1], inactiveName])
   const catalog = await request('/professional-types/public')

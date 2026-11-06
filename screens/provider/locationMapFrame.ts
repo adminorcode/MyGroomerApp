@@ -4,6 +4,7 @@ export type ServiceLocationMapProps = {
   radiusKm: number | null
   label: string
   tileUrl: string
+  onPick?: (latitude: number, longitude: number) => void
 }
 
 const metersPerPixelAtEquator = 156543.03392

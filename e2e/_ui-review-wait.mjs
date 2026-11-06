@@ -1,3 +1,4 @@
+import { saveScreenshot } from './harness.mjs'
 import path from 'node:path'
 import { mkdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -29,7 +30,7 @@ try {
   const cep = page.getByRole('textbox', { name: 'CEP' })
   await cep.waitFor()
   const blocked = await page.getByLabel('Carregando').count()
-  await page.screenshot({ path: path.join(out, '16-mobile-buscando.png') })
+  await saveScreenshot(page, path.join(out, '16-mobile-buscando.png'))
   const boxes = {
     wait: await wait.boundingBox(),
     field: await address.boundingBox(),

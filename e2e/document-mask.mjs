@@ -1,3 +1,4 @@
+import { saveScreenshot } from './harness.mjs'
 import path from 'node:path'
 import { mkdirSync } from 'node:fs'
 import { evidenceFile, launchBrowser, openPage, openRegistrationWelcome, startRun } from './harness.mjs'
@@ -10,7 +11,7 @@ let browser
 let page
 const field = name => page.getByRole('textbox', { name, exact: true })
 const button = name => page.getByRole('button', { name, exact: true })
-const capture = name => page.screenshot({ path: path.join(shots, `${name}.png`), fullPage: true })
+const capture = name => saveScreenshot(page, path.join(shots, `${name}.png`), { fullPage: true })
 async function placeCaret(position) {
   await field('CPF / CNPJ').evaluate((el, caret) => { el.focus(); el.setSelectionRange(caret, caret); el.dispatchEvent(new Event('select', { bubbles: true })) }, position)
 }

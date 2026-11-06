@@ -20,4 +20,5 @@ export {
 export type { DayAvailability, WeekdayKey } from './WeeklyAvailabilityEditor'
 export { default as ProfileRoleSelector } from './ProfileRoleSelector'
 export { default as OnboardingStepper } from './OnboardingStepper'
+export { default as AddressPlaceCard, AddressMapPlaceholder } from './AddressPlaceCard'
 export type { OnboardingStep } from './OnboardingStepper'

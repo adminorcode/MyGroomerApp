@@ -67,6 +67,8 @@ export type ProfileStackParamList = ProviderEditionStackParamList & {
     BecomeAProvider: undefined
     Pets: undefined
     PetForm: { petId?: string, providerServiceId?: string } & ChosenServiceAddress
+    Addresses: undefined
+    AddressForm: { addressId?: string }
     DesignSystemShowcase: undefined
 }
 
