@@ -1,3 +1,4 @@
+import { saveScreenshot } from './harness.mjs'
 import path from 'node:path'
 import { mkdirSync } from 'node:fs'
 import { APP_NAME, appUrl, checkContrast, evidenceFile, launchBrowser, openPage, openRegistrationWelcome, startRun } from './harness.mjs'
@@ -9,7 +10,7 @@ const run = startRun({
 const { check, fail, finish } = run
 const shots = path.dirname(evidenceFile('025-nome-do-aplicativo', 'ui-review/placeholder'))
 mkdirSync(shots, { recursive: true })
-const capture = (page, name) => page.screenshot({ path: path.join(shots, `${name}.png`), fullPage: true })
+const capture = (page, name) => saveScreenshot(page, path.join(shots, `${name}.png`), { fullPage: true })
 
 try {
   for (const url of [appUrl, 'http://localhost:3000/api/v1/runtime']) {

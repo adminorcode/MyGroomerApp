@@ -3,6 +3,8 @@ import ProfileScreen from "../screens/customer/ProfileScreen";
 import BecomeAProvider from "../screens/customer/BecomeAProvider";
 import PetsScreen from "../screens/customer/PetsScreen";
 import PetFormScreen from "../screens/customer/PetFormScreen";
+import AddressesScreen from "../screens/customer/AddressesScreen";
+import AddressFormScreen from "../screens/customer/AddressFormScreen";
 import DesignSystemShowcaseScreen from "../screens/dev/DesignSystemShowcaseScreen";
 import PublicProfileScreen from "../screens/provider/PublicProfileScreen";
 import PublicProfilePreviewScreen from "../screens/provider/PublicProfilePreviewScreen";
@@ -30,6 +32,8 @@ export function ProfileStackNavigator (){
                 <Stack.Screen name="BecomeAProvider" component={BecomeAProvider} />
                 <Stack.Screen name="Pets" component={PetsScreen} />
                 <Stack.Screen name="PetForm" component={PetFormScreen} />
+                <Stack.Screen name="Addresses" component={AddressesScreen} />
+                <Stack.Screen name="AddressForm" component={AddressFormScreen} />
                 <Stack.Screen name="DesignSystemShowcase" component={DesignSystemShowcaseScreen} />
             </Stack.Navigator>
         </ServiceMenuDraftProvider>

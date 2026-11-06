@@ -1,3 +1,4 @@
+import { saveScreenshot } from './harness.mjs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -67,13 +68,13 @@ async function slotsOn(date) {
 
 async function capture(page, name) {
   mkdirSync(shotDir, { recursive: true })
-  await page.screenshot({ path: path.join(shotDir, `${name}.png`), fullPage: true })
+  await saveScreenshot(page, path.join(shotDir, `${name}.png`), { fullPage: true })
 }
 
 async function setup() {
   pool = new Pool({ connectionString: process.env.DATABASE_URL })
   const db = new URL(process.env.DATABASE_URL)
-  if (process.env.LOCAL_TEST_MODE !== 'true' || !['localhost', '127.0.0.1', '[::1]'].includes(db.hostname) || db.pathname !== '/mygroomer_dev') {
+  if (process.env.LOCAL_TEST_MODE !== 'true' || !['localhost', '127.0.0.1', '[::1]'].includes(db.hostname) || db.pathname !== '/mygroomer_e2e') {
     throw new Error('Recusando banco fora do ambiente local')
   }
   tutorToken = (await request('/auth/login', 'POST', fixtures.tutor, null)).token

@@ -1,5 +1,6 @@
 import { ReactNode, useState } from 'react'
 import { StyleSheet, TextInput, TextInputProps, View } from 'react-native'
+import MGIcon, { MGIconName } from './MGIcon'
 import MGText from './MGText'
 import { useMGTheme } from '../theme/useMGTheme'
 
@@ -11,6 +12,7 @@ export type MGTextFieldProps = TextInputProps & {
   menu?: ReactNode
   trailing?: ReactNode
   compact?: boolean
+  icon?: MGIconName
 }
 
 export default function MGTextField({
@@ -21,6 +23,7 @@ export default function MGTextField({
   menu,
   trailing,
   compact = false,
+  icon,
   accessibilityLabel: accessibilityLabelProp,
   style,
   editable = true,
@@ -45,9 +48,12 @@ export default function MGTextField({
 
   return (
     <View style={[styles.fieldGroup, { marginBottom: compact ? 0 : spacing.base, zIndex: menu ? 2 : 0 }]}>
-      <MGText variant="label" numberOfLines={compact ? 1 : undefined} style={{ marginBottom: spacing.sm }}>
-        {required ? `${label} *` : label}
-      </MGText>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.sm }}>
+        {icon ? <MGIcon name={icon} size={18} color={colors.action.primary} /> : null}
+        <MGText variant="label" numberOfLines={compact ? 1 : undefined} style={{ flexShrink: 1 }}>
+          {required ? `${label} *` : label}
+        </MGText>
+      </View>
       <View style={styles.inputSlot}>
         <TextInput
           {...props}

@@ -1,3 +1,4 @@
+import { saveScreenshot } from './harness.mjs'
 import { createRequire } from 'node:module'
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -178,13 +179,13 @@ async function run(browser) {
   await page.getByRole('button', { name: 'Perfil público' }).click()
   await page.getByText('Não foi possível conectar à API. Verifique o servidor e tente novamente.').waitFor({ timeout: 20000 })
   check('AC-01 erro do perfil', true)
-  await page.screenshot({ path: path.join(shots, '00-mobile-erro.png') })
+  await saveScreenshot(page, path.join(shots, '00-mobile-erro.png'))
   gate.fail = false
   gate.delayMs = 1200
   await page.getByRole('button', { name: 'Tentar novamente' }).click()
   await page.getByText('Carregando perfil', { exact: true }).waitFor({ timeout: 5000 })
   check('AC-01 carregando', true)
-  await page.screenshot({ path: path.join(shots, '00b-mobile-carregando.png') })
+  await saveScreenshot(page, path.join(shots, '00b-mobile-carregando.png'))
   gate.delayMs = 0
   await page.getByText('Descrição profissional', { exact: true }).waitFor({ timeout: 20000 })
 
@@ -223,9 +224,9 @@ async function run(browser) {
       && await page.getByRole('button', { name: 'Adicionar fotos' }).count() > 0
       && await page.getByRole('button', { name: 'Editar área' }).isVisible(),
   )
-  await page.screenshot({ path: path.join(shots, '01-mobile-perfil.png'), fullPage: true })
+  await saveScreenshot(page, path.join(shots, '01-mobile-perfil.png'), { fullPage: true })
   await page.getByText('Fotos / Galeria', { exact: true }).scrollIntoViewIfNeeded()
-  await page.screenshot({ path: path.join(shots, '01d-mobile-vazio.png') })
+  await saveScreenshot(page, path.join(shots, '01d-mobile-vazio.png'))
 
   await page.getByRole('button', { name: 'Editar horários' }).click()
   await page.getByText('Dias de trabalho', { exact: true }).waitFor({ timeout: 20000 })
@@ -240,13 +241,13 @@ async function run(browser) {
   await page.getByRole('button', { name: 'Salvar' }).click()
   await page.getByLabel('Sáb, 08:00 às 12:00').waitFor({ timeout: 20000 })
   check('AC-03 horários', true)
-  await page.screenshot({ path: path.join(shots, '01b-mobile-horarios.png'), fullPage: true })
+  await saveScreenshot(page, path.join(shots, '01b-mobile-horarios.png'), { fullPage: true })
 
   await page.getByRole('button', { name: 'Editar descrição' }).click()
   const descriptionField = page.getByRole('textbox', { name: 'Sua descrição' })
   await descriptionField.waitFor()
   await descriptionField.fill(newRules)
-  await page.screenshot({ path: path.join(shots, '01c-mobile-descricao.png'), fullPage: true })
+  await saveScreenshot(page, path.join(shots, '01c-mobile-descricao.png'), { fullPage: true })
   await page.route('**/api/v1/providers/me/description', route => route.abort())
   await page.getByRole('button', { name: 'Salvar' }).click()
   await page.getByText('Não foi possível conectar à API. Verifique o servidor e tente novamente.').waitFor({ timeout: 15000 })
@@ -278,7 +279,7 @@ async function run(browser) {
 
   await page.getByRole('button', { name: 'Editar perfil' }).click()
   await page.getByRole('button', { name: 'Escolher foto' }).waitFor()
-  await page.screenshot({ path: path.join(shots, '02b-mobile-foto.png'), fullPage: true })
+  await saveScreenshot(page, path.join(shots, '02b-mobile-foto.png'), { fullPage: true })
   await pickFile(page, 'Escolher foto')
   await page.locator('img[src^="blob:"]:visible').first().waitFor({ timeout: 20000 })
   check('AC-03 foto do cabeçalho', await page.locator('img[src^="blob:"]:visible').count() >= 1)
@@ -292,7 +293,7 @@ async function run(browser) {
   await page.getByRole('button', { name: 'Remover foto da galeria 1' }).waitFor({ timeout: 20000 })
   await page.locator('img[src^="blob:"]:visible').nth(1).waitFor({ timeout: 20000 })
   check('AC-05 foto incluída na galeria', await page.locator('img[src^="blob:"]:visible').count() === 2)
-  await page.screenshot({ path: path.join(shots, '02-mobile-galeria.png'), fullPage: true })
+  await saveScreenshot(page, path.join(shots, '02-mobile-galeria.png'), { fullPage: true })
 
   await checkContrast(page, page.getByText('Perfil público', { exact: true }).last(), 'tema claro em 390', check)
 
@@ -311,7 +312,7 @@ async function run(browser) {
   await page.locator('img[src^="blob:"]:visible').nth(1).waitFor({ timeout: 20000 })
   check('AC-04 prévia mostra a galeria publicada', await page.locator('img[src^="blob:"]:visible').count() === 2)
   check('AC-03 prévia mostra a descrição nova', await page.getByText(newRules, { exact: true }).count() > 0)
-  await page.screenshot({ path: path.join(shots, '03-mobile-previa.png'), fullPage: true })
+  await saveScreenshot(page, path.join(shots, '03-mobile-previa.png'), { fullPage: true })
 
   await page.getByRole('button', { name: 'Voltar' }).click()
   await page.getByRole('button', { name: 'Remover foto da galeria 1' }).click()
@@ -342,7 +343,7 @@ async function run(browser) {
   check('AC-04 busca começa sem serviço selecionado', await book.isDisabled())
   await tutor.getByRole('radio', { name: /^Banho, A partir de/ }).click()
   check('AC-04 busca agenda depois da seleção', await book.isEnabled())
-  await tutor.screenshot({ path: path.join(shots, '05-mobile-busca.png'), fullPage: true })
+  await saveScreenshot(tutor, path.join(shots, '05-mobile-busca.png'), { fullPage: true })
   await tutor.context().close()
 
   const emptyPage = await openPage(browser, { viewport: 'mobile' })
@@ -363,7 +364,7 @@ async function run(browser) {
       && await emptyPage.getByText('Nenhuma foto na galeria.', { exact: true }).count() > 0,
   )
   await emptyPage.getByText('Fotos / Galeria', { exact: true }).scrollIntoViewIfNeeded()
-  await emptyPage.screenshot({ path: path.join(shots, '01e-mobile-vazios.png') })
+  await saveScreenshot(emptyPage, path.join(shots, '01e-mobile-vazios.png'))
   await emptyPage.getByRole('button', { name: 'Visualizar como tutor' }).click()
   await emptyPage.getByText('A prévia não inicia um agendamento.', { exact: true }).waitFor({ timeout: 20000 })
   await emptyPage.getByText('Nenhum serviço disponível', { exact: true }).waitFor({ timeout: 20000 })
@@ -378,10 +379,10 @@ async function run(browser) {
   await loginProfessional(wide)
   await openOwnProfile(wide)
   await checkContrast(wide, wide.getByText('Perfil público', { exact: true }).last(), 'tema claro em 1440', check)
-  await wide.screenshot({ path: path.join(shots, '04-desktop-perfil.png'), fullPage: true })
+  await saveScreenshot(wide, path.join(shots, '04-desktop-perfil.png'), { fullPage: true })
   await wide.getByText('Fotos / Galeria', { exact: true }).scrollIntoViewIfNeeded()
   check('AC-01 galeria alcançável em 1440', await wide.getByRole('button', { name: 'Adicionar fotos' }).isVisible())
-  await wide.screenshot({ path: path.join(shots, '04b-desktop-galeria.png') })
+  await saveScreenshot(wide, path.join(shots, '04b-desktop-galeria.png'))
   await wide.context().close()
   await page.context().close()
 }

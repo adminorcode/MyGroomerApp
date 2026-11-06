@@ -1,3 +1,4 @@
+import { saveScreenshot } from './harness.mjs'
 import { mkdirSync } from 'node:fs'
 import path from 'node:path'
 import {
@@ -86,7 +87,7 @@ async function run(browser) {
   const shotDir = evidenceFile('007-groomer-public-profile', 'ui-review')
   mkdirSync(shotDir, { recursive: true })
   await carried.scrollIntoViewIfNeeded()
-  await page.screenshot({ path: path.join(shotDir, '01-mobile-local.png'), fullPage: true })
+  await saveScreenshot(page, path.join(shotDir, '01-mobile-local.png'), { fullPage: true })
   check('AC-03 Banho segue com o profissional para pet e horário', true)
 
   await page.getByRole('button', { name: 'Voltar' }).click()
@@ -110,7 +111,7 @@ async function run(browser) {
   const wideLocation = wide.getByLabel('Local do atendimento: Avenida Paulista, São Paulo')
   await wideLocation.waitFor({ timeout: 15000 })
   await wideLocation.scrollIntoViewIfNeeded()
-  await wide.screenshot({ path: path.join(shotDir, '02-desktop-local.png'), fullPage: true })
+  await saveScreenshot(wide, path.join(shotDir, '02-desktop-local.png'), { fullPage: true })
 }
 
 let browser

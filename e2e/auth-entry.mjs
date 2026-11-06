@@ -1,3 +1,4 @@
+import { saveScreenshot } from './harness.mjs'
 import path from 'node:path'
 import { mkdirSync } from 'node:fs'
 import { APP_NAME, appUrl, evidenceFile, gateRoute, launchBrowser, loginProfessional, openLogin, openPage, startRun } from './harness.mjs'
@@ -9,7 +10,7 @@ mkdirSync(shots, { recursive: true })
 let browser
 const input = (page, name) => page.getByRole('textbox', { name, exact: true })
 const button = (page, name) => page.getByRole('button', { name, exact: true })
-const capture = (page, name) => page.screenshot({ path: path.join(shots, `${name}.png`), fullPage: true })
+const capture = (page, name) => saveScreenshot(page, path.join(shots, `${name}.png`), { fullPage: true })
 async function contrast(locator) {
   return locator.evaluate(el => {
     const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)

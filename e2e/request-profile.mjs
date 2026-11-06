@@ -96,7 +96,7 @@ function openFicha(page, pet) {
 async function setup() {
   if (process.env.LOCAL_TEST_MODE !== 'true') throw new Error('LOCAL_TEST_MODE ausente')
   const url = new URL(process.env.DATABASE_URL)
-  if (!['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname) || url.pathname !== '/mygroomer_dev') {
+  if (!['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname) || url.pathname !== '/mygroomer_e2e') {
     throw new Error('Recusando banco fora do ambiente local')
   }
   const service = await pool.query('SELECT id FROM services ORDER BY name LIMIT 1')

@@ -141,6 +141,11 @@ export const autocompleteServiceLocation = async (text: string) => {
     return response.data as { data: AddressSuggestion[] }
 }
 
+export const reverseServiceLocation = async (latitude: number, longitude: number) => {
+    const response = await api.get('/providers/service-location/reverse', { params: { latitude, longitude } })
+    return response.data as { data: AddressSuggestion }
+}
+
 export const lookupServicePostalCode = async (postalCode: string) => {
     const response = await api.get('/providers/service-location/postal-code', {
         params: { postal_code: postalCode },

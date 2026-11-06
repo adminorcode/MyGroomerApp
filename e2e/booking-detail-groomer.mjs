@@ -1,3 +1,4 @@
+import { saveScreenshot } from './harness.mjs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -36,6 +37,18 @@ let tutorToken, providerToken, offer, pet, location, savedRoutine, pool
 let bookingId = null
 let browser
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function createdCard(page) {
+  const when = new Date(`${bookingDay}T12:00:00-03:00`)
+  const day = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', day: 'numeric' }).format(when)
+  const month = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', month: 'long' }).format(when)
+  return page.getByRole('button', { name: new RegExp(`^Abrir ficha de ${escapeRegExp(pet.name)},`) })
+    .filter({ hasText: `${day} de ${month}` })
+}
+
 async function request(route, method = 'GET', body, token = tutorToken) {
   const response = await fetch(base + route, {
     method,
@@ -51,12 +64,12 @@ async function request(route, method = 'GET', body, token = tutorToken) {
 
 async function capture(page, name, fullPage = true) {
   mkdirSync(shotDir, { recursive: true })
-  await page.screenshot({ path: path.join(shotDir, `${name}.png`), fullPage })
+  await saveScreenshot(page, path.join(shotDir, `${name}.png`), { fullPage })
 }
 
 async function setup() {
   const db = new URL(process.env.DATABASE_URL)
-  if (process.env.LOCAL_TEST_MODE !== 'true' || !['localhost', '127.0.0.1', '[::1]'].includes(db.hostname) || db.pathname !== '/mygroomer_dev') {
+  if (process.env.LOCAL_TEST_MODE !== 'true' || !['localhost', '127.0.0.1', '[::1]'].includes(db.hostname) || db.pathname !== '/mygroomer_e2e') {
     throw new Error('Recusando banco fora do ambiente local')
   }
   pool = new Pool({ connectionString: process.env.DATABASE_URL })
@@ -100,7 +113,7 @@ const openRequests = async page => {
 
 async function openDetailFromRequests(page) {
   await openRequests(page)
-  await page.getByRole('button', { name: /^Abrir ficha de / }).first().click()
+  await createdCard(page).click()
   await page.getByRole('button', { name: 'Ver agendamento', exact: true }).click()
   await page.getByText('Detalhes do agendamento', { exact: true }).waitFor({ timeout: 15000 })
 }
@@ -114,7 +127,7 @@ async function execute() {
   await loginProfessional(loadingPage)
   await gateRoute(loadingPage, `**/api/v1/bookings/${bookingId}`, { delayMs: 2500 })
   await openRequests(loadingPage)
-  await loadingPage.getByRole('button', { name: /^Abrir ficha de / }).first().click()
+  await createdCard(loadingPage).click()
   await loadingPage.getByRole('button', { name: 'Ver agendamento', exact: true }).click()
   check('FE-01 carregando', await loadingPage.getByLabel('Carregando detalhes do agendamento').isVisible().catch(() => false))
   await capture(loadingPage, '02-mobile-carregando')
@@ -125,7 +138,7 @@ async function execute() {
   await loginProfessional(errorPage)
   await gateRoute(errorPage, `**/api/v1/bookings/${bookingId}`, { fail: true })
   await openRequests(errorPage)
-  await errorPage.getByRole('button', { name: /^Abrir ficha de / }).first().click()
+  await createdCard(errorPage).click()
   await errorPage.getByRole('button', { name: 'Ver agendamento', exact: true }).click()
   check('FE-02 erro', await errorPage.getByText('Não foi possível carregar este agendamento.').waitFor({ timeout: 20000 }).then(() => true, () => false))
   await capture(errorPage, '03-mobile-erro')
@@ -179,7 +192,7 @@ async function execute() {
   await page.getByText('Solicitações recebidas', { exact: true }).waitFor({ timeout: 15000 })
 
   await page.getByRole('tab', { name: 'Aceitas', exact: true }).click()
-  await page.getByRole('button', { name: /^Abrir ficha de / }).first().click()
+  await createdCard(page).click()
   await page.getByRole('button', { name: 'Ver agendamento', exact: true }).click()
   await page.getByText('Detalhes do agendamento', { exact: true }).waitFor({ timeout: 15000 })
   await page.getByRole('button', { name: 'Falar com tutor' }).click()

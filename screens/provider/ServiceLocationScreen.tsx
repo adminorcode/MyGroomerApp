@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, View, ActivityIndicator } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
-import { MGButton, MGChip, MGEmptyState, MGScreen, MGText, MGTextField } from '../../design-system/components'
-import { OnboardingStepper } from '../../design-system/patterns'
+import { MGButton, MGChip, MGScreen, MGText, MGTextField } from '../../design-system/components'
+import { AddressMapPlaceholder, AddressPlaceCard, OnboardingStepper } from '../../design-system/patterns'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { useGetServiceLocation, usePreviewServiceLocation, useSaveServiceLocation } from '../../hooks/useProviders'
-import { AddressSuggestion, autocompleteServiceLocation, getMapTiles, lookupServicePostalCode } from '../../services/provider.service'
+import { AddressSuggestion, autocompleteServiceLocation, getMapTiles, lookupServicePostalCode, reverseServiceLocation } from '../../services/provider.service'
+import CurrentLocationActions from '../../components/customer/CurrentLocationActions'
+import { useCurrentPlace } from '../../hooks/useCurrentPlace'
 import ServiceLocationMap from './ServiceLocationMap'
 import { ProviderServicesStackParamList } from '../../navigation/types'
 import { getErrorMessage } from '../../utils/error'
@@ -64,6 +66,11 @@ export default function ServiceLocationScreen({ navigation, route }: Props) {
   const suggestTicket = useRef(0)
   const skipSuggest = useRef(false)
   const hideMenu = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const place = useCurrentPlace()
+  const askedGps = useRef(false)
+  const addressRef = useRef('')
+  const [movingPin, setMovingPin] = useState(false)
+  addressRef.current = address
 
   useEffect(() => {
     let active = true
@@ -154,6 +161,15 @@ export default function ServiceLocationScreen({ navigation, route }: Props) {
     return () => clearTimeout(handle)
   }, [address])
 
+  const movePin = (latitude: number, longitude: number) => {
+    setMovingPin(true)
+    setSaveError(null)
+    void reverseServiceLocation(latitude, longitude)
+      .then(result => chooseSuggestion(result.data))
+      .catch(error => setSaveError(getErrorMessage(error)))
+      .finally(() => setMovingPin(false))
+  }
+
   const chooseSuggestion = (item: AddressSuggestion) => {
     if (hideMenu.current) clearTimeout(hideMenu.current)
     skipSuggest.current = true
@@ -165,6 +181,16 @@ export default function ServiceLocationScreen({ navigation, route }: Props) {
     setCepError(null)
     setSavedNotice(false)
   }
+
+  useEffect(() => {
+    if (!hydrated || askedGps.current) return
+    askedGps.current = true
+    if (addressRef.current.trim() || pointFrom(location.data)) return
+    void place.capture().then(found => {
+      if (!found || addressRef.current.trim()) return
+      chooseSuggestion(found)
+    })
+  }, [hydrated, location.data, place])
 
   const dismissMenu = () => {
     if (hideMenu.current) clearTimeout(hideMenu.current)
@@ -269,7 +295,10 @@ export default function ServiceLocationScreen({ navigation, route }: Props) {
             onPress={() => navigation.navigate('WeeklyAvailability')}
           />
         )}
+        <AddressPlaceCard>
         <MGTextField
+          compact
+          icon="map-pin"
           label="Endereço-base"
           required
           role="combobox"
@@ -283,7 +312,7 @@ export default function ServiceLocationScreen({ navigation, route }: Props) {
           onBlur={closeMenuSoon}
           maxLength={200}
           autoCapitalize="words"
-          helperText="Digite para ver sugestões, ou informe o CEP"
+          helperText="Digite para ver sugestões, use a sua localização ou informe o CEP"
           menu={suggesting && suggestions.length === 0 ? (
             <FieldWait label="Buscando endereços" />
           ) : suggestions.length > 0 ? (
@@ -339,7 +368,15 @@ export default function ServiceLocationScreen({ navigation, route }: Props) {
             </View>
           ) : null}
         />
+        <CurrentLocationActions
+          status={place.status}
+          onPress={() => {
+            void place.capture().then(found => { if (found) chooseSuggestion(found) })
+          }}
+        />
         <MGTextField
+          compact
+          icon="building-2"
           label="CEP"
           required
           value={postalCode}
@@ -351,7 +388,10 @@ export default function ServiceLocationScreen({ navigation, route }: Props) {
           menu={postalPending ? <FieldWait label="Buscando o CEP" /> : null}
         />
         <MGTextField
+          compact
+          icon="building-2"
           label="Complemento"
+          placeholder="Apto, sala, ponto de referência"
           value={complement}
           onChangeText={value => {
             setComplement(value)
@@ -360,6 +400,31 @@ export default function ServiceLocationScreen({ navigation, route }: Props) {
           maxLength={120}
           helperText="Opcional"
         />
+        {point ? (
+          <View style={{ gap: spacing.sm }}>
+            {tileUrl ? (
+              <ServiceLocationMap
+                latitude={point.latitude}
+                longitude={point.longitude}
+                radiusKm={radiusKm}
+                label={mapLabel(point, radiusKm)}
+                tileUrl={tileUrl}
+                onPick={movePin}
+              />
+            ) : null}
+            <MGText variant="caption" color="secondary">
+              {radiusKm == null ? 'Escolha o raio para ver a área no mapa' : `Raio de ${radiusKm} km`}
+            </MGText>
+            <MGText variant="caption" color="secondary">Toque no mapa para ajustar o ponto.</MGText>
+            <MGText variant="caption" color="secondary" style={{ fontSize: 10, lineHeight: 12, marginTop: -spacing.xs }}>
+              Powered by Geoapify · OpenStreetMap
+            </MGText>
+          </View>
+        ) : preview.isFetching || movingPin || place.status === 'locating' ? (
+          <FieldWait label={place.status === 'locating' || movingPin ? 'Localizando você no mapa' : 'Localizando no mapa'} />
+        ) : (
+          <AddressMapPlaceholder label={locateError ?? 'Informe um endereço e um CEP localizáveis para ver o ponto e o círculo.'} />
+        )}
         <View style={{ gap: spacing.sm }}>
           <MGText variant="label">Raio de atendimento</MGText>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
@@ -378,35 +443,7 @@ export default function ServiceLocationScreen({ navigation, route }: Props) {
             ))}
           </View>
         </View>
-        {point ? (
-          <View style={{ gap: spacing.sm }}>
-            {tileUrl ? (
-              <ServiceLocationMap
-                latitude={point.latitude}
-                longitude={point.longitude}
-                radiusKm={radiusKm}
-                label={mapLabel(point, radiusKm)}
-                tileUrl={tileUrl}
-              />
-            ) : null}
-            <MGText variant="body">{point.label}</MGText>
-            <MGText variant="caption" color="secondary">
-              {radiusKm == null ? 'Escolha o raio para ver a área no mapa' : `Raio de ${radiusKm} km`}
-            </MGText>
-            <MGText variant="caption" color="secondary" style={{ fontSize: 10, lineHeight: 12, marginTop: -spacing.xs }}>
-              Powered by Geoapify · OpenStreetMap
-            </MGText>
-          </View>
-        ) : preview.isFetching ? (
-          <FieldWait label="Localizando no mapa" />
-        ) : (
-          <View accessible accessibilityLabel="Mapa sem ponto">
-            <MGEmptyState
-              title="Mapa sem ponto"
-              description={locateError ?? 'Informe um endereço e um CEP localizáveis para ver o ponto e o círculo.'}
-            />
-          </View>
-        )}
+        </AddressPlaceCard>
         {locateError && point ? (
           <MGText variant="bodySmall" color="error" accessibilityRole="alert">{locateError}</MGText>
         ) : null}
