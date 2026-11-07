@@ -181,7 +181,7 @@ Uso preferencial em código: `colors.text.primary`, `colors.action.primary`, `co
 
 ### 4.1. Família tipográfica
 
-A família oficial da interface é **Inter** (SIL Open Font License 1.1). Os arquivos estáticos ficam em `React App/assets/fonts/` (`Inter-Regular`, `Inter-Medium`, `Inter-SemiBold`, `Inter-Bold`) e a licença em `Inter-OFL.txt`. O logotipo continua em **Abres**.
+A família oficial da interface é **Inter** (SIL Open Font License 1.1). Os arquivos estáticos ficam em `React App/assets/fonts/` (`Inter-Regular`, `Inter-Medium`, `Inter-SemiBold`, `Inter-Bold`) e a licença em `Inter-OFL.txt`. O logotipo usa **Inter Bold 700**, como o restante da interface.
 
 | Papel | Estilos | Peso |
 |---|---|---|
@@ -194,7 +194,7 @@ A família oficial da interface é **Inter** (SIL Open Font License 1.1). Os arq
 
 O token `fonts.medium` usa Inter Medium 500 onde a interface já pedia um peso intermediário (navegação, filtros, opções). Os papéis da tabela acima usam 400, 600 e 700. No React Native o peso vem do arquivo da família (`Inter-Bold`, `Inter-SemiBold`, `Inter-Regular`), porque a plataforma não sintetiza o peso com segurança.
 
-Evitar misturar outras famílias no corpo das telas. Não usar fonte ilustrativa fora do logotipo.
+Evitar misturar outras famílias no corpo das telas. Não há fonte ilustrativa no projeto: a família é só Inter.
 
 ### 4.2. Escala tipográfica proposta (React Native, pontos lógicos)
 

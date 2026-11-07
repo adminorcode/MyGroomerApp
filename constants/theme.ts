@@ -87,7 +87,6 @@ export const darkColors = {
 export type AppColors = { [Key in keyof typeof lightColors]: string }
 
 export const fonts = {
-    logo: 'Abres',
     regular: 'Inter-Regular',
     medium: 'Inter-Medium',
     semibold: 'Inter-SemiBold',

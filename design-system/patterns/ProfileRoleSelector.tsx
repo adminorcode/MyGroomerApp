@@ -30,7 +30,6 @@ export default function ProfileRoleSelector({
         variant="display"
         style={{
           color: colors.brand.pink,
-          fontFamily: fonts.logo,
           fontSize: width < 360 ? textStyles.heading1.fontSize : textStyles.display.fontSize,
           textAlign: 'center',
         }}

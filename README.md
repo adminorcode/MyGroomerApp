@@ -71,7 +71,7 @@ Customers browse services, pick a provider, book and pay via Mobile Money or car
 | HTTP | Axios | JWT attach + global 401 logout |
 | Realtime | Socket.io client | Chat and unread message sync |
 | Auth extras | expo-auth-session + expo-web-browser | Google OAuth and Paystack checkout |
-| UI | Custom theme + Lucide icons | Brand fonts (Abres no logotipo, Inter na interface), tema claro |
+| UI | Custom theme + Lucide icons | Fonte única Inter (logotipo incluso), tema claro |
 
 ---
 

@@ -35,7 +35,6 @@ function SessionApp() {
 
 export default function App() {
   const [fontsLoaded, fontError] = useFonts({
-    [fonts.logo]: require('./assets/fonts/Abres.ttf'),
     [fonts.regular]: require('./assets/fonts/Inter-Regular.ttf'),
     [fonts.medium]: require('./assets/fonts/Inter-Medium.ttf'),
     [fonts.semibold]: require('./assets/fonts/Inter-SemiBold.ttf'),
