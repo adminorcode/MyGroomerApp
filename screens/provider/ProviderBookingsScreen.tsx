@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { ActivityIndicator, ScrollView, View } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
-import { MGButton, MGCard, MGChip, MGEmptyState, MGErrorState, MGIcon, MGText } from '../../design-system/components'
+import { MGButton, MGCard, MGChip, MGEmptyState, MGErrorState, MGIcon, MGScreen, MGText } from '../../design-system/components'
 import { AgendaAppointmentCard } from '../../design-system/patterns'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { useCreateAgendaBlock, useDeleteAgendaBlock, useProviderAgenda } from '../../hooks/useAgenda'
@@ -46,7 +46,7 @@ type Row =
   | { key: string, at: string, kind: 'manual', interval: AgendaInterval }
 
 export default function ProviderBookingsScreen({ navigation }: Props) {
-  const { colors, spacing, radius } = useMGTheme()
+  const { colors, spacing } = useMGTheme()
   const [view, setView] = useState<AgendaView>('today')
   const [filter, setFilter] = useState<AgendaFilter>('all')
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -100,15 +100,16 @@ export default function ProviderBookingsScreen({ navigation }: Props) {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.surface.canvas, alignItems: 'center' }}>
-      <View style={{ flex: 1, width: '100%', maxWidth: 720, paddingHorizontal: spacing.base, paddingTop: spacing.md }}>
-        <MGText variant="heading2" style={{ marginBottom: spacing.md }}>Agenda do groomer</MGText>
+    <MGScreen
+      header="teal"
+      headerSlot={<MGText variant="heading2" color="inverse" accessibilityRole="header">Agenda do groomer</MGText>}
+    >
+      <View style={{ flex: 1, width: '100%', maxWidth: 720, paddingTop: spacing.md }}>
         <View style={{ flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md }}>
           {VIEWS.map(item => (
             <View key={item.id} style={{ flex: 1 }}>
               <MGChip
                 label={item.label}
-                appearance="solid"
                 density="compact"
                 selected={view === item.id}
                 minHeight={44}
@@ -120,24 +121,24 @@ export default function ProviderBookingsScreen({ navigation }: Props) {
 
         {view === 'today' && agenda.data ? (
           <MGCard variant="teal" padding={spacing.md} style={{ marginBottom: spacing.md }}>
-          <View style={{ flexDirection: 'row', gap: spacing.md }}>
-            <View accessible accessibilityLabel={visitLabel(summary.visits)} style={{ flex: 1, gap: spacing.xs }}>
+            <View style={{ flexDirection: 'row', gap: spacing.md }}>
+              <View accessible accessibilityLabel={visitLabel(summary.visits)} style={{ flex: 1, gap: spacing.xs }}>
                 <MGIcon name="calendar-days" color={colors.action.secondary} />
                 <MGText variant="title">{summary.visits}</MGText>
                 <MGText variant="caption">{summary.visits === 1 ? 'atendimento' : 'atendimentos'}</MGText>
-            </View>
-            <View accessible accessibilityLabel={pendingLabel(summary.pending)} style={{ flex: 1, gap: spacing.xs }}>
-                <MGIcon name="file-text" color={colors.action.primary} />
+              </View>
+              <View accessible accessibilityLabel={pendingLabel(summary.pending)} style={{ flex: 1, gap: spacing.xs }}>
+                <MGIcon name="file-text" color={colors.feedback.warning} />
                 <MGText variant="title">{summary.pending}</MGText>
                 <MGText variant="caption">{summary.pending === 1 ? 'solicitação pendente' : 'solicitações pendentes'}</MGText>
-            </View>
-            <View accessible accessibilityLabel={summary.upcoming ? `Próximo às ${clockInSaoPaulo(summary.upcoming.scheduled_at)}, ${summary.upcoming.service_name ?? 'serviço'}` : 'Não há próximo horário'} style={{ flex: 1, gap: spacing.xs }}>
+              </View>
+              <View accessible accessibilityLabel={summary.upcoming ? `Próximo às ${clockInSaoPaulo(summary.upcoming.scheduled_at)}, ${summary.upcoming.service_name ?? 'serviço'}` : 'Não há próximo horário'} style={{ flex: 1, gap: spacing.xs }}>
                 <MGIcon name="clock-3" color={colors.action.secondary} />
                 {summary.upcoming ? <MGText variant="caption">próximo às</MGText> : null}
                 <MGText variant="title">{summary.upcoming ? clockInSaoPaulo(summary.upcoming.scheduled_at) : '—'}</MGText>
                 <MGText variant="caption" numberOfLines={2}>{summary.upcoming ? (summary.upcoming.service_name ?? 'Serviço') : 'Não há próximo horário'}</MGText>
+              </View>
             </View>
-          </View>
           </MGCard>
         ) : null}
 
@@ -196,18 +197,7 @@ export default function ProviderBookingsScreen({ navigation }: Props) {
                   const end = clockInSaoPaulo(row.interval.ends_at)
                   const title = row.kind === 'block' ? 'Horário bloqueado' : 'Encaixe manual'
                   return (
-                    <View
-                      key={row.key}
-                      style={{
-                        backgroundColor: colors.surface.default,
-                        borderColor: colors.border.default,
-                        borderWidth: 1,
-                        borderRadius: radius.lg,
-                        padding: spacing.md,
-                        marginBottom: spacing.sm,
-                        gap: spacing.sm,
-                      }}
-                    >
+                    <MGCard key={row.key} padding={spacing.md} style={{ marginBottom: spacing.sm, gap: spacing.sm }}>
                       <MGText variant="title">{title}</MGText>
                       <MGText variant="bodySmall" color="secondary">{start} – {end}</MGText>
                       {row.kind === 'block' ? (
@@ -220,25 +210,26 @@ export default function ProviderBookingsScreen({ navigation }: Props) {
                           onPress={() => { void removeBlock.mutateAsync(row.interval.id) }}
                         />
                       ) : null}
-                    </View>
+                    </MGCard>
                   )
                 })}
               </View>
             ))}
           </ScrollView>
         )}
+
+        <View style={{ paddingTop: spacing.sm, paddingBottom: spacing.base }}>
+          {blockError ? <MGText variant="caption" color="error" style={{ marginBottom: spacing.sm }}>{blockError}</MGText> : null}
+          <MGButton label="Bloquear horário" onPress={() => { setBlockError(null); setSheetOpen(true) }} />
+        </View>
+        <BlockTimeSheet
+          visible={sheetOpen}
+          initialDate={initialBlockDate(window.from, window.to)}
+          submitting={createBlock.isPending}
+          onClose={() => setSheetOpen(false)}
+          onConfirm={(starts, ends) => { void confirmBlock(starts, ends) }}
+        />
       </View>
-      <View style={{ width: '100%', maxWidth: 720, padding: spacing.base }}>
-        {blockError ? <MGText variant="caption" color="error" style={{ marginBottom: spacing.sm }}>{blockError}</MGText> : null}
-        <MGButton label="Bloquear horário" onPress={() => { setBlockError(null); setSheetOpen(true) }} />
-      </View>
-      <BlockTimeSheet
-        visible={sheetOpen}
-        initialDate={initialBlockDate(window.from, window.to)}
-        submitting={createBlock.isPending}
-        onClose={() => setSheetOpen(false)}
-        onConfirm={(starts, ends) => { void confirmBlock(starts, ends) }}
-      />
-    </View>
+    </MGScreen>
   )
 }

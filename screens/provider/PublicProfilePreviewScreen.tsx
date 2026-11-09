@@ -44,7 +44,7 @@ export default function PublicProfilePreviewScreen({ navigation }: Props) {
 
         {loading ? (
           <View style={{ alignItems: 'center', justifyContent: 'center', gap: spacing.md, paddingVertical: spacing.xxxl }} accessibilityLabel="Carregando perfil">
-            <ActivityIndicator size="large" color={colors.action.primary} />
+            <ActivityIndicator size="large" color={colors.brand.teal} />
             <MGText variant="body">Carregando perfil</MGText>
           </View>
         ) : failed || !profile ? (

@@ -50,28 +50,11 @@ const detailsRows = (
   ]
 }
 
-function PaymentCard({ price }: { price: number }) {
-  const { spacing } = useMGTheme()
-  const value = formatMoney(price)
+const paymentFootnote = 'Sujeito ao porte do pet e ao serviço escolhido.'
 
-  return (
-    <MGCard>
-      <MGText variant="heading3">Pagamento</MGText>
-      <View style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: spacing.sm,
-        marginTop: spacing.sm,
-      }}>
-        <MGText variant="body" color="secondary">Valor estimado</MGText>
-        <MGText variant="numeric" color="info" accessibilityLabel={`Valor estimado: ${value}`}>{value}</MGText>
-      </View>
-      <MGText variant="caption" color="secondary" style={{ marginTop: spacing.xs }}>
-        Sujeito ao porte do pet e ao serviço escolhido.
-      </MGText>
-    </MGCard>
-  )
+// AC-05 / CMP-01: rótulo Pagamento em caixa-alta teal. O valor estimado (priceLarge teal) fica no bloco inferior do bilhete.
+function PaymentLabel() {
+  return <MGText variant="eyebrow" color="teal">Pagamento</MGText>
 }
 
 function AvailabilityNote() {
@@ -197,14 +180,14 @@ export default function BookingRequestScreen({ navigation, route }: Props) {
               <MGText variant="body">{nextStepMessage}</MGText>
             </View>
           </View>
-          <BookingSummary title="Detalhes do serviço" rows={detailsRows(
+          <PaymentLabel />
+          <BookingSummary ticket title="Detalhes do serviço" rows={detailsRows(
             booking.provider_name,
             booking.pet_name ?? '',
             booking.service_name,
             booking.scheduled_at,
             booking.customer_location,
-          )} />
-          <PaymentCard price={booking.price} />
+          )} totalLabel="Valor estimado" totalValue={formatMoney(booking.price)} footnote={paymentFootnote} />
         </View>
       </MGScreen>
     )
@@ -219,7 +202,7 @@ export default function BookingRequestScreen({ navigation, route }: Props) {
           </View>
         )}>
         {header}
-        <View style={{ gap: spacing.sm, alignItems: 'center', padding: spacing.xl }}>
+        <View style={{ flex: 1, gap: spacing.sm, alignItems: 'center', justifyContent: 'center', padding: spacing.xl }}>
           <ActivityIndicator color={colors.action.primary} accessibilityLabel="Carregando resumo" />
           <MGText>Carregando resumo</MGText>
         </View>
@@ -241,6 +224,8 @@ export default function BookingRequestScreen({ navigation, route }: Props) {
 
   const blocked = !slotAvailable
   const alertMessage = requestError || (blocked ? slotGoneMessage : '')
+  // Sem horário disponível não há preço para mostrar: o bilhete vira resumo simples, sem bloco de valor.
+  const shownPrice = slotAvailable && slots.data ? slots.data.price : null
   return (
     <MGScreen safeArea={false} scrollable
       contentStyle={{ width: '100%', maxWidth: 720, alignSelf: 'center' }}
@@ -255,18 +240,19 @@ export default function BookingRequestScreen({ navigation, route }: Props) {
       )}>
       {header}
       <View style={{ gap: spacing.base }}>
-        <BookingSummary title="Detalhes do serviço" rows={detailsRows(
+        {shownPrice != null ? <PaymentLabel /> : null}
+        <BookingSummary ticket={shownPrice != null} title="Detalhes do serviço" rows={detailsRows(
           service.data.provider_name,
           pet?.name ?? '',
           service.data.service_name,
           scheduledAt,
           customerLocation,
-        )} />
-        {slotAvailable && slots.data ? <PaymentCard price={slots.data.price} /> : null}
+        )} {...(shownPrice != null
+          ? { totalLabel: 'Valor estimado', totalValue: formatMoney(shownPrice), footnote: paymentFootnote }
+          : {})} />
         {alertMessage ? (
           <View accessibilityRole="alert" accessibilityLiveRegion="assertive" style={{ gap: spacing.sm }}>
             <MGText color="error">{alertMessage}</MGText>
-            {blocked ? <MGText variant="bodySmall">Volte e escolha outro horário disponível.</MGText> : null}
           </View>
         ) : (
           <AvailabilityNote />

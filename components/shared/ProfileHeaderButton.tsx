@@ -2,6 +2,7 @@ import { Image, Pressable, StyleSheet, Text, StyleProp, ViewStyle } from 'react-
 import { useAuthStore } from '../../store/authStore'
 import { useTheme } from '../../context/ThemeContext'
 import { fonts } from '../../constants/theme'
+import { palette } from '../../design-system/tokens'
 
 type Props = {
     avatarUri?: string | null
@@ -32,8 +33,9 @@ export default function ProfileHeaderButton({ avatarUri, size = 44, style, onPre
                     style={[
                         styles.initial,
                         {
-                            color: colors.primaryText,
-                            backgroundColor: colors.selectionSoft,
+                            // R8: avatar do profissional é teal; o do tutor segue rosa.
+                            color: user?.role === 'provider' ? palette.onAction.primary : colors.primaryText,
+                            backgroundColor: user?.role === 'provider' ? palette.brand.teal : colors.selectionSoft,
                             fontSize: Math.round(size * 0.4),
                             lineHeight: size,
                         },

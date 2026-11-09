@@ -42,7 +42,6 @@ export default function TimeSlotPicker({
               label={slot.label}
               minHeight={48}
               density="compact"
-              appearance="solid"
               selected={selectedSlotId === slot.id}
               disabled={slot.disabled}
               onPress={slot.disabled ? undefined : () => onSelectSlot?.(slot.id)}
@@ -50,6 +49,12 @@ export default function TimeSlotPicker({
             </View>
           ))}
         </View>
+        {/* CMP-15: indisponível tem texto e estado desabilitado, não só cor. */}
+        {slots.some((slot) => slot.disabled) ? (
+          <MGText variant="caption" color="secondary">
+            Horários indisponíveis aparecem apagados e não podem ser escolhidos.
+          </MGText>
+        ) : null}
         {helperText ? (
           <MGText variant="caption" color="secondary">
             {helperText}

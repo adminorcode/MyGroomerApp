@@ -11,10 +11,13 @@ type Props = {
   onPress?: () => void
   variant?: 'filter' | 'choice'
   minHeight?: number
-  appearance?: 'outline' | 'solid'
   density?: 'regular' | 'compact'
 }
 
+/**
+ * CMP-06 / R1: a ação é sempre rosa. Selecionado = preenchimento `action.primary`
+ * com texto `onAction.primary` e check. Não selecionado = contorno `action.primaryOutline`.
+ */
 export default function MGChip({
   label,
   accessibilityLabel,
@@ -22,35 +25,27 @@ export default function MGChip({
   disabled = false,
   onPress,
   minHeight = 36,
-  appearance = 'outline',
   density = 'regular',
 }: Props) {
   const { colors, spacing, radius } = useMGTheme()
-  const solid = appearance === 'solid'
 
   const backgroundColor = disabled
     ? colors.state.disabledSurface
-    : solid && selected
+    : selected
       ? colors.action.primary
-      : selected
-        ? colors.surface.pinkSubtle
-        : colors.surface.default
+      : colors.surface.default
 
   const borderColor = disabled
     ? colors.border.default
-    : solid && selected
+    : selected
       ? colors.action.primary
-      : selected
-        ? colors.action.primaryOutline
-        : colors.border.default
+      : colors.action.primaryOutline
 
   const textColor = disabled
     ? colors.state.disabledText
-    : solid && selected
+    : selected
       ? colors.onAction.primary
-      : selected
-        ? colors.action.primaryOutline
-        : colors.text.primary
+      : colors.text.primary
 
   return (
     <Pressable
@@ -65,23 +60,22 @@ export default function MGChip({
           styles.chip,
           {
             minHeight,
-            paddingHorizontal: density === 'compact' ? spacing.xs : spacing.md,
+            // Chip compacto com check: folga mínima de 8 pt para o rótulo não encostar na borda.
+            paddingHorizontal: density === 'compact' ? spacing.sm : spacing.md,
             paddingVertical: spacing.sm,
             borderRadius: radius.pill,
             borderWidth: 1,
             backgroundColor: pressed && !disabled
-              ? solid && selected
-                ? colors.action.primaryPressed
-                : selected ? colors.surface.default : colors.surface.pinkSubtle
+              ? selected ? colors.action.primaryPressed : colors.surface.pinkSubtle
               : backgroundColor,
-            borderColor,
+            borderColor: pressed && !disabled && selected ? colors.action.primaryPressed : borderColor,
             width: density === 'compact' ? '100%' : undefined,
           },
         ] as ViewStyle[]
       }
     >
       <View style={[styles.labelRow, { gap: spacing.xs }]}>
-        {solid && selected ? <MGIcon name="check" size={14} color={textColor} /> : null}
+        {selected && !disabled ? <MGIcon name="check" size={14} color={textColor} /> : null}
         <MGText variant="label" style={{ color: textColor }} numberOfLines={1}>
           {label}
         </MGText>

@@ -3,7 +3,9 @@ import { View } from 'react-native'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { ServiceLocationMapProps, zoomForRadius } from './locationMapFrame'
 
-function mapDocument(latitude: number, longitude: number, radiusKm: number | null, pinColor: string, areaColor: string, tileUrl: string) {
+type MapPalette = { pin: string, area: string, ground: string, halo: string }
+
+function mapDocument(latitude: number, longitude: number, radiusKm: number | null, palette: MapPalette, tileUrl: string) {
   const zoom = zoomForRadius(latitude, radiusKm)
   const radius = radiusKm == null ? 0 : radiusKm * 1000
   return `<!DOCTYPE html>
@@ -12,7 +14,7 @@ function mapDocument(latitude: number, longitude: number, radiusKm: number | nul
 <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
 <style>
 html,body,#map{height:100%;margin:0}
-.leaflet-container{background:#E7EEF0}
+.leaflet-container{background:${palette.ground}}
 .leaflet-container img{max-width:none!important}
 .leaflet-control-attribution{display:none!important}
 .mg-pin{background:transparent;border:none}
@@ -23,8 +25,9 @@ html,body,#map{height:100%;margin:0}
 const latitude = ${latitude};
 const longitude = ${longitude};
 const radius = ${radius};
-const pin = ${JSON.stringify(pinColor)};
-const area = ${JSON.stringify(areaColor)};
+const pin = ${JSON.stringify(palette.pin)};
+const area = ${JSON.stringify(palette.area)};
+const halo = ${JSON.stringify(palette.halo)};
 const tiles = ${JSON.stringify(tileUrl)};
 const map = L.map('map', { zoomControl: true, zoomSnap: 0.25, zoomDelta: 0.5 });
 const tilePath = window.devicePixelRatio > 1 ? tiles.replace('.png?', '@2x.png?') : tiles;
@@ -32,7 +35,7 @@ L.tileLayer(tilePath, {
   maxZoom: 20,
   attribution: '&copy; <a href="https://www.geoapify.com/">Geoapify</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
-const pinSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36"><path fill="' + pin + '" d="M14 1C7 1 1.5 6.4 1.5 13.2 1.5 22.2 14 35 14 35s12.5-12.8 12.5-21.8C26.5 6.4 21 1 14 1z"/><circle cx="14" cy="13" r="4.5" fill="white"/></svg>';
+const pinSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36"><path fill="' + pin + '" d="M14 1C7 1 1.5 6.4 1.5 13.2 1.5 22.2 14 35 14 35s12.5-12.8 12.5-21.8C26.5 6.4 21 1 14 1z"/><circle cx="14" cy="13" r="4.5" fill="' + halo + '"/></svg>';
 L.marker([latitude, longitude], {
   interactive: false,
   icon: L.divIcon({ className: 'mg-pin', html: pinSvg, iconSize: [28, 36], iconAnchor: [14, 34] })
@@ -49,6 +52,13 @@ map.on('click', (event) => parent.postMessage({ type: 'mg-map-pick', latitude: e
 export default function ServiceLocationMap({ latitude, longitude, radiusKm, label, tileUrl, onPick }: ServiceLocationMapProps) {
   const { colors, radius } = useMGTheme()
   const frame = useRef<HTMLIFrameElement | null>(null)
+  // CMP-16 / DS §12: pino em action.primary, cobertura em teal; sem HEX literal (CMP-21).
+  const palette: MapPalette = {
+    pin: colors.action.primary,
+    area: colors.action.secondary,
+    ground: colors.surface.tealSubtle,
+    halo: colors.surface.default,
+  }
   const pick = useRef(onPick)
   pick.current = onPick
 
@@ -75,7 +85,7 @@ export default function ServiceLocationMap({ latitude, longitude, radiusKm, labe
       {createElement('iframe', {
         ref: frame,
         title: label,
-        srcDoc: mapDocument(latitude, longitude, radiusKm, colors.action.primary, colors.action.secondary, tileUrl),
+        srcDoc: mapDocument(latitude, longitude, radiusKm, palette, tileUrl),
         style: { border: 'none', width: '100%', height: '100%' },
       })}
     </View>

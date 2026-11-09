@@ -27,6 +27,30 @@ import {
 
 const GAPS: TravelGap[] = [15, 30, 45, 60, 75, 90, 105, 120]
 
+// Data exibida e digitada em DD/MM/AAAA; a API recebe AAAA-MM-DD (conversão só na borda).
+const isoToBrDate = (iso: string) => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso)
+  return match ? `${match[3]}/${match[2]}/${match[1]}` : iso
+}
+
+const maskBrDate = (text: string) => {
+  const digits = text.replace(/\D/g, '').slice(0, 8)
+  if (digits.length <= 2) return digits
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`
+}
+
+const brDateToIso = (text: string): string | null => {
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(text)
+  if (!match) return null
+  const [, day, month, year] = match
+  const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)))
+  const valid = date.getUTCFullYear() === Number(year)
+    && date.getUTCMonth() === Number(month) - 1
+    && date.getUTCDate() === Number(day)
+  return valid ? `${year}-${month}-${day}` : null
+}
+
 type Props = {
   navigation: StackNavigationProp<ProviderServicesStackParamList, 'WeeklyAvailability'>
   route: RouteProp<ProviderServicesStackParamList, 'WeeklyAvailability'>
@@ -43,7 +67,7 @@ export default function WeeklyAvailabilityScreen({ navigation, route }: Props) {
   const [focus, setFocus] = useState<WeekdayKey>('mon')
   const [saveError, setSaveError] = useState<string | null>(null)
   const [savedNotice, setSavedNotice] = useState(false)
-  const [includeDate, setIncludeDate] = useState(upcomingMonday)
+  const [includeDate, setIncludeDate] = useState(() => isoToBrDate(upcomingMonday()))
   const [includeStart, setIncludeStart] = useState('14:00')
   const [includeEnd, setIncludeEnd] = useState('14:30')
   const [includeError, setIncludeError] = useState<string | null>(null)
@@ -63,7 +87,7 @@ export default function WeeklyAvailabilityScreen({ navigation, route }: Props) {
 
   const waiting = routine.isLoading || (routine.isFetching && !routine.data)
   const persisted = draft && saved ? sameRoutine(draft, saved) : false
-  const canInclude = !!saved?.manualFit && persisted && !!includeDate.trim() && !!includeStart.trim() && !!includeEnd.trim()
+  const canInclude = !!saved?.manualFit && persisted && !!brDateToIso(includeDate) && !!includeStart.trim() && !!includeEnd.trim()
 
   const publish = async () => {
     if (!draft || save.isPending) return
@@ -100,13 +124,14 @@ export default function WeeklyAvailabilityScreen({ navigation, route }: Props) {
   }
 
   const addAppointment = async () => {
-    if (!canInclude) return
+    const isoDate = brDateToIso(includeDate)
+    if (!canInclude || !isoDate) return
     setIncludeError(null)
     setIncludeNotice(false)
     try {
       await include.mutateAsync({
-        starts_at: new Date(`${includeDate}T${includeStart}:00-03:00`).toISOString(),
-        ends_at: new Date(`${includeDate}T${includeEnd}:00-03:00`).toISOString(),
+        starts_at: new Date(`${isoDate}T${includeStart}:00-03:00`).toISOString(),
+        ends_at: new Date(`${isoDate}T${includeEnd}:00-03:00`).toISOString(),
       })
       setIncludeNotice(true)
     } catch (error) {
@@ -157,9 +182,9 @@ export default function WeeklyAvailabilityScreen({ navigation, route }: Props) {
               setDraft({ ...draft, days })
             }}
           />
-          <View style={{ gap: spacing.sm, backgroundColor: colors.surface.default, borderRadius: radius.lg, padding: spacing.base }}>
+          <View style={{ gap: spacing.sm, backgroundColor: colors.surface.default, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border.default, padding: spacing.base }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-              <MGIcon name="clock-3" size={20} color={colors.action.primary} />
+              <MGIcon name="clock-3" size={20} color={colors.action.secondary} />
               <MGText variant="heading3">Tempo entre atendimentos</MGText>
             </View>
             <MGText variant="bodySmall" color="secondary">
@@ -184,7 +209,7 @@ export default function WeeklyAvailabilityScreen({ navigation, route }: Props) {
                       minHeight: 48,
                       borderWidth: selected ? 2 : 1,
                       borderColor: selected ? colors.action.primary : colors.border.default,
-                      backgroundColor: selected ? colors.surface.pinkSubtle : colors.surface.default,
+                      backgroundColor: selected ? colors.action.primary : colors.surface.default,
                       borderRadius: radius.lg,
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -192,8 +217,8 @@ export default function WeeklyAvailabilityScreen({ navigation, route }: Props) {
                       gap: spacing.xs,
                     }}
                   >
-                    {selected ? <MGIcon name="check" size={16} color={colors.action.primary} /> : null}
-                    <MGText variant="label">{gap} min</MGText>
+                    {selected ? <MGIcon name="check" size={16} color={colors.onAction.primary} /> : null}
+                    <MGText variant="label" color={selected ? 'inverse' : 'primary'}>{gap} min</MGText>
                   </Pressable>
                 )
               })}
@@ -213,14 +238,17 @@ export default function WeeklyAvailabilityScreen({ navigation, route }: Props) {
             )}
           </View>
           <View style={{ backgroundColor: colors.surface.default, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border.default, padding: spacing.md, gap: spacing.sm }}>
+            {/* Revisão UI (027): título em uma linha; o interruptor vai para a linha própria, sem palavra órfã. */}
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
               <MGIcon name="calendar-days" size={20} color={colors.action.secondary} />
-              <MGText variant="label" numberOfLines={2} style={{ flex: 1 }}>Encaixes / fora da rotina</MGText>
-              <MGText variant="caption" numberOfLines={2} style={{ maxWidth: 96, textAlign: 'right' }}>Permitir encaixe manual</MGText>
+              <MGText variant="label" style={{ flex: 1 }}>Encaixes / fora da rotina</MGText>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm }}>
+              <MGText variant="caption">Permitir encaixe manual</MGText>
               <TrackSwitch
                 on={draft.manualFit}
                 label="Encaixe manual"
-                tone="secondary"
+                tone="primary"
                 onPress={() => {
                   setSavedNotice(false)
                   setIncludeNotice(false)
@@ -247,10 +275,11 @@ export default function WeeklyAvailabilityScreen({ navigation, route }: Props) {
                     compact
                     label="Data do encaixe"
                     value={includeDate}
-                    onChangeText={setIncludeDate}
+                    onChangeText={(text) => setIncludeDate(maskBrDate(text))}
                     autoCapitalize="none"
+                    keyboardType="numbers-and-punctuation"
                     maxLength={10}
-                    placeholder="AAAA-MM-DD"
+                    placeholder="DD/MM/AAAA"
                     style={{ fontSize: 13 }}
                     trailing={<MGIcon name="calendar-days" size={14} color={colors.text.secondary} />}
                   />
@@ -285,10 +314,9 @@ export default function WeeklyAvailabilityScreen({ navigation, route }: Props) {
                 </View>
               </View>
             ) : null}
-            <MGButton
+              <MGButton
               label="Incluir atendimento"
-              variant="teal"
-              iconLeft={<MGIcon name="plus" size={18} color={colors.onAction.secondary} />}
+              iconLeft={<MGIcon name="plus" size={18} color={colors.onAction.primary} />}
               disabled={!canInclude || include.isPending}
               loading={include.isPending}
               onPress={() => { void addAppointment() }}
@@ -297,14 +325,14 @@ export default function WeeklyAvailabilityScreen({ navigation, route }: Props) {
               <MGText variant="bodySmall" color="error" accessibilityRole="alert">{includeError}</MGText>
             ) : null}
             {includeNotice ? (
-              <MGText variant="bodySmall" accessibilityRole="alert">Atendimento incluído.</MGText>
+              <MGText variant="bodySmall" color="success" accessibilityRole="alert">Atendimento incluído.</MGText>
             ) : null}
           </View>
           {saveError ? (
             <MGText variant="bodySmall" color="error" accessibilityRole="alert">{saveError}</MGText>
           ) : null}
           {savedNotice ? (
-            <MGText variant="bodySmall" accessibilityRole="alert">Rotina salva.</MGText>
+            <MGText variant="bodySmall" color="success" accessibilityRole="alert">Rotina salva.</MGText>
           ) : null}
         </View>
       ) : null}

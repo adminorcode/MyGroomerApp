@@ -87,7 +87,7 @@ function resetDatabase() {
 export async function assertApiUsesE2eDatabase() {
   let response
   try {
-    response = await fetch('http://127.0.0.1:3000/api/v1/runtime')
+    response = await fetch(`${process.env.E2E_API_URL || 'http://127.0.0.1:3000'}/api/v1/runtime`)
   } catch {
     throw new Error('API local indisponível em :3000. Suba a API com DATABASE_URL apontando para mygroomer_e2e.')
   }

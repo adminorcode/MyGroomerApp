@@ -85,6 +85,18 @@ async function openServices(page) {
   else await button.click()
 }
 
+// O seed cria reservas de hoje a +2 dias, com duração padrão de 10 h; o encaixe usa uma data de sete ou mais dias à frente, sem reserva.
+function freeIncludeDate() {
+  const iso = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date(Date.now() + 10 * 24 * 60 * 60 * 1000))
+  const [year, month, day] = iso.split('-')
+  return `${day}/${month}/${year}`
+}
+
 async function disabled(locator) {
   return locator.evaluate(element => element.getAttribute('aria-disabled') === 'true' || element.hasAttribute('disabled'))
 }
@@ -115,7 +127,7 @@ async function run() {
 
     await loginProfessional(page)
     await openAvailability(page)
-    await page.getByText('Não foi possível conectar à API. Verifique o servidor e tente novamente.').waitFor({ timeout: 15000 })
+    await page.getByText('Não foi possível conectar. Verifique sua internet e tente novamente.').waitFor({ timeout: 15000 })
     check('erro', true)
 
     mode = 'delay'
@@ -175,6 +187,7 @@ async function run() {
     await page.getByRole('switch', { name: 'Encaixe manual' }).click()
     await review.click()
     await page.getByText('Rotina salva.', { exact: true }).waitFor({ timeout: 15000 })
+    await page.getByRole('textbox', { name: 'Data do encaixe' }).fill(freeIncludeDate())
     await page.getByRole('button', { name: 'Incluir atendimento' }).click()
     await page.getByText('Atendimento incluído.', { exact: true }).waitFor({ timeout: 15000 })
     check('AC-04', true, 'encaixe ligado inclui horário fora da rotina')

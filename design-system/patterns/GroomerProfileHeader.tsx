@@ -26,7 +26,8 @@ export default function GroomerProfileHeader({
   return (
     <View accessibilityLabel={`Profissional ${name}`} style={[styles.wrap, { gap: spacing.md }]}>
       <View style={[styles.row, { gap: spacing.md }]}>
-        <MGAvatar name={name} uri={photoUrl} kind="person" size={72} />
+        {/* CMP-11 / R3: profissional usa avatar teal sólido com inicial em branco. */}
+        <MGAvatar name={name} uri={photoUrl} kind="person" size={72} tone="teal" />
         <View style={styles.meta}>
           <MGText variant="heading2">{name}</MGText>
           <View style={[styles.row, { gap: spacing.sm, marginTop: spacing.xs, flexWrap: 'wrap' }]}>

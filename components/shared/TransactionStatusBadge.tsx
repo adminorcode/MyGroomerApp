@@ -1,36 +1,14 @@
-import { StyleSheet, Text, View } from "react-native";
-import { useTheme } from "../../context/ThemeContext";
-import { borderRadius, fonts, spacing, typography } from "../../constants/theme";
-import { TransactionStatus } from "../../types/transaction.types";
+import MGBadge, { MGBadgeTone } from '../../design-system/components/MGBadge'
+import { TransactionStatus } from '../../types/transaction.types'
 
-export default function TransactionStatusBadge({ status }: { status: TransactionStatus }) {
-    const { colors } = useTheme();
-
-    const statusConfig: Record<TransactionStatus, { label: string; color: string; background: string }> = {
-        [TransactionStatus.PENDING]: { label: 'Pendente', color: colors.warning, background: colors.warningSoft },
-        [TransactionStatus.COMPLETED]: { label: 'Concluído', color: colors.success, background: colors.successSoft },
-        [TransactionStatus.CANCELLED]: { label: 'Cancelado', color: colors.error, background: colors.errorSoft },
-    }
-
-    const { label, color, background } = statusConfig[status] ?? { label: status, color: colors.textSecondary, background: colors.surface }
-
-    return (
-        <View style={[styles.badge, { backgroundColor: background }]}>
-            <Text style={[styles.badgeText, { color }]}>{label}</Text>
-        </View>
-    )
+// CMP-18 / R6: status com semântica de feedback e texto (migrado para MGBadge).
+const TONE: Record<TransactionStatus, { label: string; tone: MGBadgeTone }> = {
+    [TransactionStatus.PENDING]: { label: 'Pendente', tone: 'pending' },
+    [TransactionStatus.COMPLETED]: { label: 'Concluído', tone: 'success' },
+    [TransactionStatus.CANCELLED]: { label: 'Cancelado', tone: 'error' },
 }
 
-const styles = StyleSheet.create({
-    badge: {
-        paddingHorizontal: spacing.sm,
-        paddingVertical: spacing.xs,
-        borderRadius: borderRadius.lg,
-        alignSelf: 'flex-start',
-    },
-    badgeText: {
-        fontSize: typography.sizes.xs,
-        fontFamily: fonts.medium,
-        textTransform: 'capitalize',
-    },
-})
+export default function TransactionStatusBadge({ status }: { status: TransactionStatus }) {
+    const config = TONE[status] ?? { label: String(status), tone: 'neutral' as MGBadgeTone }
+    return <MGBadge label={config.label} tone={config.tone} />
+}

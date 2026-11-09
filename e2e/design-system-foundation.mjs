@@ -144,12 +144,7 @@ async function runTutor(browser) {
 
   await page.getByRole('button', { name: 'Buscar um serviço' }).click()
   await fillServiceAddress(page, 'Avenida Paulista, São Paulo')
-  const banho = page.getByRole('radio', { name: /Banho/i }).first()
-  if ((await banho.count()) > 0) {
-    await banho.click()
-  }
-  await page.getByRole('button', { name: 'Buscar' }).click()
-  await page.waitForTimeout(1500)
+  await page.getByText(/A partir de|Nenhum groomer|Profissionais disponíveis/).first().waitFor({ timeout: 20000 })
   body = await textOf(page)
   const hasGroomerCard =
     body.includes('Marina') ||

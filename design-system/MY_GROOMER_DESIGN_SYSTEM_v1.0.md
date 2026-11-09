@@ -255,8 +255,8 @@ export const spacing = {
 | Gap entre label e campo | 8 pt |
 | Distância entre campos | 16 pt |
 | Barra de ação inferior | 16 pt horizontal; respeitar safe area |
-| Altura visual de botão principal | 52 pt; alvo de toque no mínimo 48 pt |
-| Altura visual de input | mínimo 52 pt |
+| Altura visual de botão principal | 40 pt |
+| Altura visual de input | mínimo 40 pt |
 | Ícone padrão | 20–24 pt |
 | Área tocável de `IconButton` | mínimo 48 × 48 pt |
 | Avatar de lista | 56–72 pt |
@@ -291,7 +291,7 @@ export const radius = {
 | Uso | Token |
 |---|---|
 | Campo e chip | `radius.md` ou `radius.pill` (chips) |
-| Botão | `radius.lg` |
+| Botão geral | `radius.lg`; ação explícita de card segue cápsula de 7.6 |
 | Cards padrão | `radius.lg` |
 | Cards hero / info | `radius.xl` |
 | Modal | `radius.xxl` |
@@ -386,6 +386,8 @@ Cada componente compartilhado deve expor **variantes semânticas**, estado acess
 
 ### 7.2. Botões
 
+Para ações explícitas em cards, aplicar também o contrato de reuso de 7.6: geometria de Ver perfil em Quem atende, mantendo a variante semântica apropriada. Não copiar overrides locais para cada consumidor.
+
 | Variante | Aparência | Uso |
 |---|---|---|
 | `primary` | `action.primary` / `onAction.primary` | Continuar, solicitar, confirmar, aceitar |
@@ -443,6 +445,16 @@ Regras de implementação:
 **Atenção:** os nomes acima são **contratos visuais sugeridos**. O domínio/backend pode definir o enum canônico; mapear via adapter e não duplicar regras na UI. Não exibir `Verificado` somente porque o profissional completou cadastro.
 
 ---
+
+### 7.6. Reuso consolidado a partir de Quem atende
+
+Decisão de 08/11/2026: Quem atende é a referência de estética/UX para as pílulas de filtros, ações explícitas de cards e os elementos reaproveitáveis identificados em [REUSE_AND_VALIDATION.md](REUSE_AND_VALIDATION.md). Esse documento integra este guia e define RUV-01..12 e RV-01..12.
+
+- Ações explícitas de cards seguem a geometria de Ver perfil: cápsula, altura mínima48 e padding horizontal16, com texto/cores/sombra pelos tokens. Primary/secondary/tertiary/destructive preservam a hierarquia, não se tornam todos primários.
+- Pílulas compactas de filtros diferenciam aberto de aplicado e se ligam a um painel com comportamento definido. Compactar a aparência não diminui o alvo efetivo de toque do projeto.
+- Estender os componentes existentes; separar primitivas, composição e regras do domínio. Primeiro implementar/testar o contrato compartilhado, depois migrar os consumidores; não presumir que os nomes/props propostos já existem.
+- As tabelas deste guia incluem contratos planejados. Conferir sempre o código e os exports: por exemplo, MGButton ainda não expõe tamanho/forma e a variante declarada de MGChip ainda não altera sua implementação nesta revisão.
+- A referência não transforma todo card em botão nem congela o header em planejamento separado. A adoção e a regressão dos consumidores são incrementais e registradas.
 
 ## 8. PADRÕES COMPOSTOS (FEATURE COMPONENTS)
 
@@ -909,7 +921,7 @@ export function MGPrimaryButton({ label, onPress, disabled = false, loading = fa
 
 const styles = StyleSheet.create({
   button: {
-    minHeight: 52,
+    minHeight: 40,
     borderRadius: radius.lg,
     paddingHorizontal: spacing.base,
     justifyContent: 'center',
@@ -964,6 +976,8 @@ A referência visual foi pensada para celular retrato, mas a implementação pre
 ## 19. PADRÕES DE TESTES E QUALIDADE
 
 ### 19.1. Mínimo por componente
+
+Para criação, extração ou evolução de componente reutilizável, cumprir também a matriz RV-01..12 de [REUSE_AND_VALIDATION.md](REUSE_AND_VALIDATION.md): contrato real, variantes/estados, alvo efetivo, semântica renderizada, teclado/foco, reflow, contraste e fluxos dos consumidores. A declaração de uma prop no JSX não substitui sua observação no DOM/árvore acessível.
 
 - Teste de renderização da variante padrão.
 - Pressed/disabled/loading e callback de toque.

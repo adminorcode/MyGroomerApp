@@ -11,6 +11,7 @@ import { fonts, layout, spacing, borderRadius } from '../constants/theme'
 import { ProfileStackNavigator } from './ProfileStackNavigator'
 import MessageTabIcon from '../components/shared/MessageTabIcon'
 import AppHeader from '../components/shared/AppHeader'
+import TabIconPill from './TabIconPill'
 
 const Tab = createBottomTabNavigator<CustomerTabParamList>()
 
@@ -20,12 +21,18 @@ export default function CustomerNavigator() {
 
     return (
         <Tab.Navigator
-            layout={({ children, navigation }) => (
-                <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top']}>
-                    <AppHeader onProfilePress={() => navigation.navigate('ProfileTab')} />
-                    <View style={styles.tabs}>{children}</View>
-                </SafeAreaView>
-            )}
+            layout={({ children, navigation, state }) => {
+                const focused = state.routes[state.index]
+                const nested = focused.state
+                const nestedRoute = nested?.routes[nested.index ?? 0]?.name
+                const hideGreeting = focused.name === 'HomeTab' && nestedRoute === 'TutorSearch'
+                return (
+                    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top']}>
+                        {hideGreeting ? null : <AppHeader onProfilePress={() => navigation.navigate('ProfileTab')} />}
+                        <View style={styles.tabs}>{children}</View>
+                    </SafeAreaView>
+                )
+            }}
             screenOptions={{
                 headerShown: false,
                 tabBarActiveTintColor: colors.primaryText,
@@ -52,7 +59,7 @@ export default function CustomerNavigator() {
                 component={HomeStackNavigator}
                 options={{
                     tabBarLabel: 'Início',
-                    tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
+                    tabBarIcon: ({ color, size, focused }) => <TabIconPill focused={focused}><Home color={color} size={size} /></TabIconPill>,
                 }}
             />
             <Tab.Screen
@@ -60,7 +67,7 @@ export default function CustomerNavigator() {
                 component={BookingsStackNavigator}
                 options={{
                     tabBarLabel: 'Agendamentos',
-                    tabBarIcon: ({ color, size }) => <BookMinus color={color} size={size} />,
+                    tabBarIcon: ({ color, size, focused }) => <TabIconPill focused={focused}><BookMinus color={color} size={size} /></TabIconPill>,
                 }}
             />
             <Tab.Screen
@@ -68,8 +75,10 @@ export default function CustomerNavigator() {
                 component={MessagesStackNavigator}
                 options={{
                     tabBarLabel: 'Mensagens',
-                    tabBarIcon: ({ color, size }) => (
-                        <MessageTabIcon color={color} size={size} />
+                    tabBarIcon: ({ color, size, focused }) => (
+                        <TabIconPill focused={focused}>
+                            <MessageTabIcon color={color} size={size} />
+                        </TabIconPill>
                     ),
                 }}
             />

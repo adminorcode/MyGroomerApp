@@ -1,9 +1,8 @@
 import { useEffect } from 'react'
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
 import axios from 'axios'
-import { Check } from 'lucide-react-native'
 import MGArtwork from '../../design-system/components/MGArtwork'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -14,12 +13,11 @@ import { useCreatePet, usePet, useUpdatePet } from '../../hooks/usePets'
 import { toPetBody } from '../../services/pet.service'
 import { petFormSchema, PetFormInput, PetFormValues } from '../../validators/pet.validator'
 import { PET_SIZES, PET_SPECIES, PetSize, PetSpecies } from '../../types/pet.types'
-import { useTheme } from '../../context/ThemeContext'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
-import { MGButton, MGChip, MGErrorState, MGText, MGTextField } from '../../design-system/components'
+import { MGButton, MGChip, MGErrorState, MGIcon, MGText, MGTextField } from '../../design-system/components'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
-import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
+import { spacing } from '../../constants/theme'
 import { getErrorMessage } from '../../utils/error'
 
 type PetFormParams = {
@@ -54,7 +52,7 @@ export default function PetFormScreen({ navigation, route }: Props) {
     const params = (route.params ?? {}) as PetFormParams
     const petId = params.petId
     const providerServiceId = params.providerServiceId
-    const { colors } = useTheme()
+    const { colors } = useMGTheme()
     const existing = usePet(petId)
     const { mutateAsync: createPet, isPending: isCreating } = useCreatePet()
     const { mutateAsync: updatePet, isPending: isUpdating } = useUpdatePet()
@@ -118,8 +116,10 @@ export default function PetFormScreen({ navigation, route }: Props) {
     if (petId && existing.isLoading) {
         return (
             <ScreenContainer>
+                <ScreenHeader title="Editar pet" showBackButton onBack={() => navigation.goBack()} />
                 <View style={styles.centered}>
-                    <ActivityIndicator accessibilityLabel="Carregando pet" size="large" color={colors.primary} />
+                    <ActivityIndicator accessibilityLabel="Carregando pet" size="large" color={colors.action.primary} />
+                    <MGText>Carregando pet</MGText>
                 </View>
             </ScreenContainer>
         )
@@ -129,7 +129,7 @@ export default function PetFormScreen({ navigation, route }: Props) {
         return (
             <ScreenContainer>
                 <ScreenHeader title="Editar pet" showBackButton onBack={() => navigation.goBack()} />
-                <MGErrorState message="Não foi possível carregar este pet." />
+                <MGErrorState message="Não foi possível carregar este pet." onRetry={() => { void existing.refetch() }} />
             </ScreenContainer>
         )
     }
@@ -147,12 +147,12 @@ export default function PetFormScreen({ navigation, route }: Props) {
                     showBackButton
                     onBack={() => navigation.goBack()}
                 />
-                <View style={[styles.photo, { backgroundColor: colors.selectionSoft }]}>
+                <View style={[styles.photo, { backgroundColor: colors.surface.pinkSubtle }]}>
                     <MGArtwork name="pet-placeholder" width={52} height={52} />
                 </View>
-                <Text style={[styles.photoNote, { color: colors.textSecondary }]}>
+                <MGText variant="bodySmall" color="secondary" style={styles.photoNote}>
                     A foto é opcional. O pet pode ser salvo sem ela.
-                </Text>
+                </MGText>
                 <Controller
                     control={control}
                     name="name"
@@ -297,7 +297,6 @@ function HealthSection({
                                     label={option.label}
                                     accessibilityLabel={option.label}
                                     selected={value === option.value}
-                                    appearance="solid"
                                     minHeight={52}
                                     onPress={() => onChange(option.value)}
                                 />
@@ -325,17 +324,18 @@ function ChoiceField({
     control: ReturnType<typeof useForm<PetFormInput, unknown, PetFormValues>>['control']
     name: 'species' | 'size'
 }) {
-    const { colors } = useTheme()
+    const { colors, radius } = useMGTheme()
     return (
         <Controller
             control={control}
             name={name}
             render={({ field: { value, onChange } }) => (
                 <View style={styles.choiceGroup}>
-                    <Text style={[styles.choiceLabel, { color: colors.text }]}>{label}</Text>
+                    <MGText variant="label" style={styles.choiceLabel}>{label}</MGText>
                     <View style={styles.choices}>
                         {options.map((option) => {
                             const selected = value === option.value
+                            // CMP-06 / R1: selecionado = action.primary com texto branco; não selecionado = contorno rosa.
                             return (
                                 <Pressable
                                     key={option.value}
@@ -347,23 +347,26 @@ function ChoiceField({
                                     style={[
                                         styles.choice,
                                         {
-                                            backgroundColor: selected ? colors.selectionSoft : colors.background,
-                                            borderColor: error ? colors.error : selected ? colors.primary : colors.border,
+                                            borderRadius: radius.pill,
+                                            backgroundColor: selected ? colors.action.primary : colors.surface.default,
+                                            borderColor: error ? colors.feedback.error : colors.action.primaryOutline,
                                         },
                                     ]}
                                 >
-                                    {selected && <Check size={16} color={colors.primary} />}
-                                    <Text style={[styles.choiceText, { color: colors.text }]}>{option.label}</Text>
+                                    {selected && <MGIcon name="check" size={14} color={colors.onAction.primary} />}
+                                    <MGText variant="label" color={selected ? 'inverse' : 'primary'}>{option.label}</MGText>
                                 </Pressable>
                             )
                         })}
                     </View>
-                    {!!error && <Text style={[styles.choiceError, { color: colors.error }]}>{error}</Text>}
+                    {!!error && <MGText variant="caption" color="error" style={styles.choiceError}>{error}</MGText>}
                 </View>
             )}
         />
     )
 }
+
+const PHOTO_SIZE = 96
 
 const styles = StyleSheet.create({
     scroll: {
@@ -373,19 +376,19 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+        gap: spacing.sm,
     },
     photo: {
-        width: 96,
-        height: 96,
-        borderRadius: borderRadius.full,
+        // CMP-12: placeholder circular — largura = altura e raio = metade do lado.
+        width: PHOTO_SIZE,
+        height: PHOTO_SIZE,
+        borderRadius: PHOTO_SIZE / 2,
         alignItems: 'center',
         justifyContent: 'center',
         alignSelf: 'center',
     },
     photoNote: {
         textAlign: 'center',
-        fontSize: typography.sizes.sm,
-        fontFamily: fonts.regular,
         marginTop: spacing.sm,
         marginBottom: spacing.lg,
     },
@@ -393,8 +396,6 @@ const styles = StyleSheet.create({
         marginBottom: spacing.base,
     },
     choiceLabel: {
-        fontSize: typography.sizes.sm,
-        fontFamily: fonts.semibold,
         marginBottom: spacing.sm,
     },
     choices: {
@@ -406,20 +407,13 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         justifyContent: 'center',
         minHeight: 52,
-        borderWidth: 2,
-        borderRadius: borderRadius.md,
+        borderWidth: 1,
         paddingHorizontal: spacing.md,
         flexDirection: 'row',
         alignItems: 'center',
         gap: spacing.xs,
     },
-    choiceText: {
-        fontSize: typography.sizes.md,
-        fontFamily: fonts.medium,
-    },
     choiceError: {
-        fontSize: typography.sizes.sm,
-        fontFamily: fonts.regular,
         marginTop: spacing.xs,
     },
 })

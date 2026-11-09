@@ -22,7 +22,8 @@ export default function MGBadge({ label, tone = 'neutral', icon }: Props) {
   const { colors, spacing, radius } = useMGTheme()
 
   const toneStyles: Record<MGBadgeTone, { color: string; background: string }> = {
-    pending: { color: colors.action.primaryOutline, background: colors.surface.pinkSubtle },
+    // R6: status usa semântica de feedback com texto; a cor da marca não codifica status.
+    pending: { color: colors.feedback.warning, background: colors.feedback.warningSurface },
     confirmed: { color: colors.feedback.success, background: colors.feedback.successSurface },
     info: { color: colors.text.primary, background: colors.feedback.infoSurface },
     success: { color: colors.feedback.success, background: colors.feedback.successSurface },

@@ -63,15 +63,15 @@ function formatAge(years?: number | null) {
   return `${years} anos`
 }
 
-type SectionProps = { icon: Parameters<typeof MGIcon>[0]['name'], title: string, children: ReactNode }
+type SectionProps = { icon: Parameters<typeof MGIcon>[0]['name'], title: string, iconColor?: string, children: ReactNode }
 
-function ProfileSection({ icon, title, children }: SectionProps) {
+function ProfileSection({ icon, title, iconColor, children }: SectionProps) {
   const { colors, spacing } = useMGTheme()
   return (
     <View role="group" accessibilityLabel={title} style={{ marginBottom: spacing.md }}>
       <MGCard padding={spacing.md}>
         <View style={[styles.sectionHead, { gap: spacing.sm, marginBottom: spacing.md }]}>
-          <MGIcon name={icon} size={20} color={colors.action.primary} />
+          <MGIcon name={icon} size={20} color={iconColor ?? colors.action.primary} />
           <MGText variant="title">{title}</MGText>
         </View>
         {children}
@@ -80,14 +80,14 @@ function ProfileSection({ icon, title, children }: SectionProps) {
   )
 }
 
-type FactProps = { icon: LucideIcon, label: string, value: string, style?: StyleProp<ViewStyle> }
+type FactProps = { icon: LucideIcon, label: string, value: string, iconColor?: string, style?: StyleProp<ViewStyle> }
 
-function ProfileFact({ icon: Icon, label, value, style }: FactProps) {
+function ProfileFact({ icon: Icon, label, value, iconColor, style }: FactProps) {
   const { colors, spacing } = useMGTheme()
   const missing = value === 'Não informado' || value === 'Não informada' || value === 'Nenhuma observação'
   return (
     <View style={[styles.fact, { gap: spacing.sm }, style]}>
-      <Icon size={18} color={colors.action.primary} />
+      <Icon size={18} color={iconColor ?? colors.action.primary} />
       <View style={{ flex: 1, gap: 2 }}>
         <MGText variant="caption" color="secondary">{label}</MGText>
         <MGText variant="body" color={missing ? 'secondary' : 'primary'}>{value}</MGText>
@@ -188,26 +188,29 @@ export default function ProviderRequestProfileScreen({ navigation, route }: Prop
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
     >
-      <MGCard padding={spacing.md} style={{ marginBottom: spacing.md }}>
+      {/* CMP-04 / R2: bloco do pet em rosa suave; texto primário sobre pinkSubtle (R5). */}
+      <MGCard variant="pink" padding={spacing.md} style={{ marginBottom: spacing.md }}>
         <View style={[styles.hero, { gap: spacing.md }]}>
-          <MGAvatar uri={pet?.photo_url} name={petName} kind="pet" size={72} />
+          <View style={[styles.avatarRing, { backgroundColor: colors.surface.default }]}>
+            <MGAvatar uri={pet?.photo_url} name={petName} kind="pet" size={72} />
+          </View>
           <View style={{ flex: 1, gap: spacing.xs }}>
             <View style={styles.heroTitle}>
               <MGText variant="title" style={{ flex: 1 }}>{petName}</MGText>
               <MGBadge label={status.label} tone={status.tone} />
             </View>
-            <MGText variant="bodySmall" color="secondary">Tutor: {data.customer.name.trim() || 'Tutor não informado'}</MGText>
+            <MGText variant="bodySmall">Tutor: {data.customer.name.trim() || 'Tutor não informado'}</MGText>
             <View style={[styles.line, { gap: spacing.sm }]}>
               <MGIcon name="scissors" size={16} color={colors.action.primary} />
               <MGText variant="bodySmall" style={{ flex: 1 }}>{data.booking.service_name || 'Serviço'}</MGText>
             </View>
             <View style={[styles.line, { gap: spacing.sm }]}>
-              <MGIcon name="calendar-days" size={16} color={colors.action.primary} />
+              <MGIcon name="calendar-days" size={16} color={colors.brand.teal} />
               <MGText variant="bodySmall" style={{ flex: 1 }}>{requestDateLabel(data.booking.scheduled_at)}</MGText>
             </View>
             <View style={[styles.line, { gap: spacing.sm }]}>
-              <MGIcon name="map-pin" size={16} color={colors.text.secondary} />
-              <MGText variant="bodySmall" color="secondary" style={{ flex: 1 }}>{shown(data.booking.customer_location)}</MGText>
+              <MGIcon name="map-pin" size={16} color={colors.brand.teal} />
+              <MGText variant="bodySmall" style={{ flex: 1 }}>{shown(data.booking.customer_location)}</MGText>
             </View>
           </View>
         </View>
@@ -232,13 +235,13 @@ export default function ProviderRequestProfileScreen({ navigation, route }: Prop
         ) : <MGText variant="body">Pet não informado</MGText>}
       </ProfileSection>
 
-      <ProfileSection icon="badge-check" title="Dados do tutor">
+      <ProfileSection icon="badge-check" title="Dados do tutor" iconColor={colors.brand.teal}>
         <View style={[styles.twoColumns, { gap: spacing.md }]}>
           <View style={styles.column}>
             <ProfileFact icon={Phone} label="Telefone" value={data.customer.phone_number ? formatDisplayPhone(data.customer.phone_number) : 'Não informado'} />
           </View>
           <View style={styles.column}>
-            <ProfileFact icon={MapPin} label="Endereço" value={shown(data.booking.customer_location)} />
+            <ProfileFact icon={MapPin} iconColor={colors.brand.teal} label="Endereço" value={shown(data.booking.customer_location)} />
           </View>
         </View>
         <MGText variant="body" style={{ marginTop: spacing.md }}>{previousLabel(data.customer.previous_bookings_with_provider)}</MGText>
@@ -325,7 +328,8 @@ export default function ProviderRequestProfileScreen({ navigation, route }: Prop
               <View key={item.booking_id} style={{ gap: spacing.xs }}>
                 <View style={[styles.heroTitle, { gap: spacing.sm }]}>
                   <MGText variant="body" style={{ flex: 1 }}>{requestDateLabel(item.completed_at)}</MGText>
-                  {item.own ? <MGBadge label="Você" tone="pending" /> : null}
+                  {/* R6: "Você" identifica o próprio atendimento; não é status, então não usa a cor de pendência. */}
+                  {item.own ? <MGBadge label="Você" tone="info" /> : null}
                 </View>
                 <MGText variant="body">{item.service_name}</MGText>
                 <MGText variant="bodySmall" color="secondary">{item.provider_name}</MGText>
@@ -347,6 +351,7 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center' },
   back: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
   hero: { flexDirection: 'row', alignItems: 'flex-start' },
+  avatarRing: { borderRadius: 999, padding: 3 },
   heroTitle: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
   line: { flexDirection: 'row', alignItems: 'flex-start' },
   sectionHead: { flexDirection: 'row', alignItems: 'center' },

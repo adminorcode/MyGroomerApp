@@ -8,7 +8,7 @@ import { HomeStackParamList } from '../../navigation/types'
 import { useGetProviderServiceById } from '../../hooks/useProviders'
 import { usePets } from '../../hooks/usePets'
 import PetPicker from '../../components/customer/PetPicker'
-import { MGButton, MGCard, MGErrorState, MGIcon, MGIconButton, MGScreen, MGText, MGTextField } from '../../design-system/components'
+import { MGAvatar, MGButton, MGCard, MGErrorState, MGIcon, MGIconButton, MGScreen, MGText, MGTextField } from '../../design-system/components'
 import { TimeSlotPicker } from '../../design-system/patterns'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { getBookingSlots } from '../../services/booking.service'
@@ -104,9 +104,8 @@ export default function BookServiceScreen({ navigation, route }: Props) {
         {header}
         <MGCard>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-            <View style={{ width: 48, height: 48, borderRadius: radius.md, backgroundColor: colors.surface.tealSubtle, alignItems: 'center', justifyContent: 'center' }}>
-              <MGIcon name="paw-print" color={colors.action.secondary} size={28} />
-            </View>
+            {/* CMP-11 / R3: profissional em avatar teal sólido, com texto branco. */}
+            <MGAvatar name={service.data.provider_name} kind="person" size={48} tone="teal" />
           <View style={{ gap: spacing.xs, flex: 1, minWidth: 0 }}>
             <MGText variant="heading3" accessibilityLabel={`Profissional: ${service.data.provider_name}`}>{service.data.provider_name}</MGText>
             <MGText color="info" accessibilityLabel={`Serviço: ${service.data.service_name}`}>{service.data.service_name}</MGText>
@@ -146,7 +145,7 @@ export default function BookServiceScreen({ navigation, route }: Props) {
               const selected = day === date
               return (
                 <Pressable key={day} accessibilityRole="radio" accessibilityLabel={bookingDateLabel(day, { weekday: 'long', day: 'numeric', month: 'long' })}
-                  accessibilityState={{ selected }} onPress={() => changeDate(day)}
+                  accessibilityState={{ selected }} aria-selected={selected} onPress={() => changeDate(day)}
                   style={({ pressed }) => ({
                     flex: 1, minHeight: 80, padding: spacing.sm, borderRadius: radius.lg, borderWidth: 1,
                     borderColor: selected ? colors.action.primary : colors.border.default,

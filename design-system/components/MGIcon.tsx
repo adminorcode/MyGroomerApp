@@ -1,12 +1,16 @@
 import { View } from 'react-native'
 import {
   ArrowLeft,
+  ArrowUpDown,
   BadgeCheck,
   Bath,
   Bell,
   Building2,
   CalendarDays,
+  Image as ImageIcon,
   Check,
+  ChevronDown,
+  ChevronUp,
   ChevronLeft,
   ChevronRight,
   Clock3,
@@ -14,6 +18,12 @@ import {
   Droplets,
   Ellipsis,
   FileText,
+  Heart,
+  House,
+  ShowerHead,
+  Zap,
+  LayoutGrid,
+  Star,
   LocateFixed,
   LucideIcon,
   MapPin,
@@ -32,6 +42,7 @@ export type MGIconName =
   | 'droplets'
   | 'map-pin'
   | 'calendar-days'
+  | 'image'
   | 'clock-3'
   | 'badge-check'
   | 'bell'
@@ -39,7 +50,10 @@ export type MGIconName =
   | 'sliders-horizontal'
   | 'plus'
   | 'arrow-left'
+  | 'arrow-up-down'
   | 'check'
+  | 'chevron-down'
+  | 'chevron-up'
   | 'chevron-left'
   | 'chevron-right'
   | 'coffee'
@@ -49,6 +63,12 @@ export type MGIconName =
   | 'locate'
   | 'bath'
   | 'sparkles'
+  | 'heart'
+  | 'star'
+  | 'grid'
+  | 'house'
+  | 'shower-head'
+  | 'zap'
 
 const ICONS: Record<MGIconName, LucideIcon> = {
   'paw-print': PawPrint,
@@ -56,6 +76,7 @@ const ICONS: Record<MGIconName, LucideIcon> = {
   droplets: Droplets,
   'map-pin': MapPin,
   'calendar-days': CalendarDays,
+  image: ImageIcon,
   'clock-3': Clock3,
   'badge-check': BadgeCheck,
   bell: Bell,
@@ -63,7 +84,10 @@ const ICONS: Record<MGIconName, LucideIcon> = {
   'sliders-horizontal': SlidersHorizontal,
   plus: Plus,
   'arrow-left': ArrowLeft,
+  'arrow-up-down': ArrowUpDown,
   check: Check,
+  'chevron-down': ChevronDown,
+  'chevron-up': ChevronUp,
   'chevron-left': ChevronLeft,
   'chevron-right': ChevronRight,
   coffee: Coffee,
@@ -73,6 +97,12 @@ const ICONS: Record<MGIconName, LucideIcon> = {
   locate: LocateFixed,
   bath: Bath,
   sparkles: Sparkles,
+  heart: Heart,
+  star: Star,
+  grid: LayoutGrid,
+  house: House,
+  'shower-head': ShowerHead,
+  zap: Zap,
 }
 
 type Props = {
@@ -81,6 +111,8 @@ type Props = {
   color?: string
   decorative?: boolean
   accessibilityLabel?: string
+  strokeWidth?: number
+  fill?: string
 }
 
 export default function MGIcon({
@@ -89,6 +121,8 @@ export default function MGIcon({
   color,
   decorative = true,
   accessibilityLabel,
+  strokeWidth,
+  fill = 'none',
 }: Props) {
   const { colors } = useMGTheme()
   const Icon = ICONS[name]
@@ -103,7 +137,7 @@ export default function MGIcon({
       accessibilityLabel={decorative ? undefined : accessibilityLabel ?? name}
       accessibilityRole={decorative ? undefined : 'image'}
     >
-      <Icon size={size} color={color ?? colors.text.primary} />
+      <Icon size={size} color={color ?? colors.text.primary} strokeWidth={strokeWidth} fill={fill} />
     </View>
   )
 }

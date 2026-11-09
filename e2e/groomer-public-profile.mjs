@@ -29,11 +29,6 @@ async function expectBooking(page, serviceName) {
 async function openProfile(page) {
   await page.getByRole('button', { name: 'Buscar um serviço' }).click()
   await fillServiceAddress(page, 'Avenida Paulista, São Paulo')
-  const selected = page.getByRole('radio', { name: 'Banho, selecionado' })
-  if (await selected.count() === 0) {
-    await page.getByRole('radio', { name: 'Banho', exact: true }).click()
-  }
-  await page.getByRole('button', { name: 'Buscar' }).click()
   await page.getByRole('button', { name: /Groomer de Teste/ }).click()
 }
 
@@ -78,7 +73,7 @@ async function run(browser) {
   check('AC-03 serviço selecionado libera o agendamento', await book.isEnabled())
   await book.click()
   await expectBooking(page, 'Banho')
-  const carried = page.getByLabel('Local do atendimento: Avenida Paulista, São Paulo')
+  const carried = page.getByLabel(/^Local do atendimento: Avenida Paulista/)
   await carried.waitFor()
   check(
     'AC-05 endereço da busca segue para o agendamento',
@@ -108,7 +103,7 @@ async function run(browser) {
   check('AC-04 desktop também começa sem seleção', await wide.getByRole('button', { name: 'Agendar serviço' }).isDisabled())
   await wide.getByRole('radio', { name: /^Banho, A partir de/ }).click()
   await wide.getByRole('button', { name: 'Agendar serviço' }).click()
-  const wideLocation = wide.getByLabel('Local do atendimento: Avenida Paulista, São Paulo')
+  const wideLocation = wide.getByLabel(/^Local do atendimento: Avenida Paulista/)
   await wideLocation.waitFor({ timeout: 15000 })
   await wideLocation.scrollIntoViewIfNeeded()
   await saveScreenshot(wide, path.join(shotDir, '02-desktop-local.png'), { fullPage: true })

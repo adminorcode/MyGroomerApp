@@ -6,10 +6,13 @@ type TypeStyle = {
   fontSize: number
   lineHeight: number
   fontWeight: '400' | '600' | '700'
+  letterSpacing?: number
+  textTransform?: 'uppercase'
+  tabularNums?: boolean
 }
 
-function style(fontSize: number, lineHeight: number, fontWeight: TypeStyle['fontWeight']): TypeStyle {
-  return { fontSize, lineHeight, fontWeight }
+function style(fontSize: number, lineHeight: number, fontWeight: TypeStyle['fontWeight'], extra: Partial<TypeStyle> = {}): TypeStyle {
+  return { fontSize, lineHeight, fontWeight, ...extra }
 }
 
 export const textStyles = {
@@ -24,4 +27,10 @@ export const textStyles = {
   caption: style(12, 18, '400'),
   button: style(16, 22, '600'),
   numeric: style(24, 30, '700'),
+  // CMP-01 — rótulo de seção em caixa-alta (tracking 0,12em), decisão Q4 do plano 027.
+  eyebrow: style(12, 16, '600', { letterSpacing: 1.44, textTransform: 'uppercase' }),
+  // CMP-01 — preço em destaque (40/44 Bold, tracking -0,02em, números tabulares). Desvio do DS aprovado em Q4.
+  priceLarge: style(40, 44, '700', { letterSpacing: -0.8, tabularNums: true }),
+  // CMP-02 — logotipo Inter Bold 700, 30/36, tracking -0,02em.
+  logotype: style(30, 36, '700', { letterSpacing: -0.6 }),
 } as const

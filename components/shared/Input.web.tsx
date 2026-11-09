@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
-    minHeight: 52,
+    minHeight: 40,
     fontSize: textStyles.body.fontSize,
     fontFamily: fonts.regular,
   },
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     overflow: 'hidden',
-    minHeight: 52,
+    minHeight: 40,
   },
   passwordInput: { flex: 1, minWidth: 0, padding: spacing.md, fontFamily: fonts.regular, fontSize: textStyles.body.fontSize },
 })

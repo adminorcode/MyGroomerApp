@@ -89,15 +89,17 @@ export default function WeeklyAvailabilityEditor({ value, onChange, issues, focu
 
   return (
     <View style={{ gap: spacing.lg }}>
-      <View style={[styles.sectionHead, { gap: spacing.sm }]}>
+      {/* Revisão UI (027): a dica fica abaixo do título, alinhada à esquerda; à direita quebrava com palavra órfã em 390 pt. */}
+      <View style={{ gap: spacing.xs }}>
         <View style={[styles.sectionTitle, { gap: spacing.sm }]}>
           <MGIcon name="calendar-days" size={20} color={colors.action.primary} />
           <MGText variant="heading3">Dias de trabalho</MGText>
         </View>
-        <MGText variant="caption" color="secondary" style={styles.sectionHint}>
+        <MGText variant="caption" color="secondary">
           Selecione os dias que você atende.
         </MGText>
       </View>
+      {/* Revisão UI (027): sete chips com check não cabem em uma linha com folga de 8 pt em 390 pt; grade de 4 + 3. */}
       <View style={[styles.days, { gap: spacing.xs }]}>
         {DAYS.map((item) => {
           const enabled = !!value[item.key]?.enabled
@@ -105,7 +107,6 @@ export default function WeeklyAvailabilityEditor({ value, onChange, issues, focu
             <View key={item.key} style={styles.daySlot}>
               <MGChip
                 label={item.label}
-                appearance="solid"
                 density="compact"
                 minHeight={48}
                 selected={enabled}
@@ -143,7 +144,7 @@ export default function WeeklyAvailabilityEditor({ value, onChange, issues, focu
 
         {current.enabled ? (
           <View style={{ gap: spacing.md }}>
-            <View ref={anchorRef} collapsable={false} style={[styles.schedule, { backgroundColor: colors.surface.default, borderRadius: radius.lg, padding: spacing.md }]}>
+            <View ref={anchorRef} collapsable={false} style={[styles.schedule, { backgroundColor: colors.surface.tealSubtle, borderRadius: radius.lg, padding: spacing.md }]}>
             <View style={{ gap: spacing.sm }}>
               <View style={[styles.sectionTitle, { gap: spacing.sm }]}>
                 <MGIcon name="clock-3" size={18} color={colors.text.secondary} />
@@ -182,7 +183,7 @@ export default function WeeklyAvailabilityEditor({ value, onChange, issues, focu
             <View style={{ height: 1, backgroundColor: colors.border.default, marginVertical: spacing.md }} />
             <View style={{ gap: spacing.sm }}>
               <View style={[styles.sectionTitle, { gap: spacing.sm }]}>
-                <MGIcon name="coffee" size={18} color={colors.text.secondary} />
+                <MGIcon name="coffee" size={18} color={colors.action.secondary} />
                 <MGText variant="label">Intervalo (opcional)</MGText>
               </View>
               <View style={[styles.times, { gap: spacing.sm }]}>
@@ -262,9 +263,9 @@ export default function WeeklyAvailabilityEditor({ value, onChange, issues, focu
               const entry = value[item.key]
               const range = entry.start && entry.end ? `${entry.start} às ${entry.end}` : 'Horário incompleto'
               return (
-                <View key={item.key} style={[styles.otherCard, { backgroundColor: colors.surface.default, borderColor: colors.border.default, borderRadius: radius.lg, padding: spacing.md, gap: spacing.xs }]}>
+                <View key={item.key} style={[styles.otherCard, { backgroundColor: colors.surface.tealSubtle, borderColor: colors.surface.tealSubtle, borderRadius: radius.lg, padding: spacing.md, gap: spacing.xs }]}>
                   <View style={[styles.otherTop, { gap: spacing.sm }]}>
-                    <MGIcon name="clock-3" size={16} color={colors.action.primary} />
+                    <MGIcon name="clock-3" size={16} color={colors.action.secondary} />
                     <MGText variant="label" style={styles.applyLabel}>{item.title}</MGText>
                     <Pressable
                       accessibilityRole="button"
@@ -275,7 +276,7 @@ export default function WeeklyAvailabilityEditor({ value, onChange, issues, focu
                       <MGIcon name="ellipsis" size={18} color={colors.text.secondary} />
                     </Pressable>
                   </View>
-                  <MGText variant="caption" color="secondary">{range}</MGText>
+                  <MGText variant="caption" color="primary">{range}</MGText>
                 </View>
               )
             })}
@@ -341,9 +342,10 @@ const styles = StyleSheet.create({
   },
   days: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
   },
   daySlot: {
-    flex: 1,
+    width: '23%',
   },
   focusCard: {},
   focusHead: {

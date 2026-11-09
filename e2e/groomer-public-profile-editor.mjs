@@ -156,14 +156,9 @@ async function openOwnProfile(page) {
   await page.getByText('Descrição profissional', { exact: true }).waitFor({ timeout: 20000 })
 }
 
-async function openSearchProfile(page, serviceName = 'Banho') {
+async function openSearchProfile(page) {
   await page.getByRole('button', { name: 'Buscar um serviço' }).click()
   await fillServiceAddress(page, 'Avenida Paulista, São Paulo')
-  const selected = page.getByRole('radio', { name: `${serviceName}, selecionado` })
-  if (await selected.count() === 0) {
-    await page.getByRole('radio', { name: serviceName, exact: true }).click()
-  }
-  await page.getByRole('button', { name: 'Buscar' }).click()
   await page.getByRole('button', { name: /Groomer de Teste/ }).click()
 }
 
@@ -177,7 +172,7 @@ async function run(browser) {
 
   gate.fail = true
   await page.getByRole('button', { name: 'Perfil público' }).click()
-  await page.getByText('Não foi possível conectar à API. Verifique o servidor e tente novamente.').waitFor({ timeout: 20000 })
+  await page.getByText('Não foi possível conectar. Verifique sua internet e tente novamente.').waitFor({ timeout: 20000 })
   check('AC-01 erro do perfil', true)
   await saveScreenshot(page, path.join(shots, '00-mobile-erro.png'))
   gate.fail = false
@@ -250,7 +245,7 @@ async function run(browser) {
   await saveScreenshot(page, path.join(shots, '01c-mobile-descricao.png'), { fullPage: true })
   await page.route('**/api/v1/providers/me/description', route => route.abort())
   await page.getByRole('button', { name: 'Salvar' }).click()
-  await page.getByText('Não foi possível conectar à API. Verifique o servidor e tente novamente.').waitFor({ timeout: 15000 })
+  await page.getByText('Não foi possível conectar. Verifique sua internet e tente novamente.').waitFor({ timeout: 15000 })
   check(
     'AC-03 falha ao salvar a descrição mantém o texto',
     await descriptionField.inputValue() === newRules
@@ -277,7 +272,7 @@ async function run(browser) {
   await page.getByText(/A partir de R\$\s?95,00/).waitFor({ timeout: 25000 })
   check('AC-03 serviços', true)
 
-  await page.getByRole('button', { name: 'Editar perfil' }).click()
+  await page.getByRole('button', { name: 'Editar foto' }).click()
   await page.getByRole('button', { name: 'Escolher foto' }).waitFor()
   await saveScreenshot(page, path.join(shots, '02b-mobile-foto.png'), { fullPage: true })
   await pickFile(page, 'Escolher foto')
@@ -301,7 +296,7 @@ async function run(browser) {
   await page.getByText('A prévia não inicia um agendamento.', { exact: true }).waitFor({ timeout: 20000 })
   check(
     'AC-04 prévia sem controles de edição',
-    await page.getByRole('button', { name: 'Editar perfil' }).count() === 0
+    await page.getByRole('button', { name: 'Editar foto' }).count() === 0
       && await page.getByRole('button', { name: 'Editar descrição' }).count() === 0
       && await page.getByRole('button', { name: 'Editar área' }).count() === 0
       && await page.getByRole('button', { name: 'Editar serviços' }).count() === 0

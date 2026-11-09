@@ -60,6 +60,8 @@ export type CoverageSearchParams = {
     address: string
     service_id?: string
     category_id?: string
+    /** Nome do profissional, tipo profissional ou serviço (busca livre). */
+    q?: string
     latitude?: number
     longitude?: number
 }
@@ -107,15 +109,33 @@ export type PublicPhotoInput = {
     base64: string
 }
 
+/** Um groomer dentro do raio, com todos os serviços que atendem ao filtro. */
 export type CoverageProvider = {
+    /** Id da oferta de menor preço (usado para abrir o perfil). */
     id: string
     provider_id: string
     service_id: string
     service_name: string
     name: string
+    profile_picture?: string | null
+    /** Menor preço entre os serviços listados. */
     price: number | string
     average_rating: number | string
     review_count: number
     distance_km: number
     radius_km: number
+    professional_types: string[]
+    services: CoverageService[]
+    is_verified?: boolean
+    is_favorite?: boolean
+    attends_at_home?: boolean
+    available_today?: boolean
+    next_available_on?: string | null
+}
+
+export type CoverageService = {
+    id: string
+    service_id: string | null
+    service_name: string
+    price: number | string
 }

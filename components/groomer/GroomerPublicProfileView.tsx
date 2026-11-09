@@ -28,11 +28,11 @@ export default function GroomerPublicProfileView({ profile, mode, selectedServic
   return (
     <View style={{ gap: spacing.lg }}>
       {!photoUrl && !profile.photo_id && mode === 'booking' ? (
-        <View style={{ backgroundColor: colors.surface.pinkSubtle, borderRadius: radius.xl, alignItems: 'center', padding: spacing.base }}>
+        <View style={{ backgroundColor: colors.surface.tealSubtle, borderRadius: radius.xl, alignItems: 'center', padding: spacing.base }}>
           <MGArtwork name="poodle" width={192} height={160} />
         </View>
       ) : null}
-      <MGCard>
+      {/* Cabeçalho já é o destaque teal (avatar CMP-11): sem cartão branco por fora. */}
       <GroomerProfileHeader
         name={profile.name}
         photoUrl={photoUrl}
@@ -40,7 +40,6 @@ export default function GroomerPublicProfileView({ profile, mode, selectedServic
         ratingLabel={profileRatingLabel(profile.average_rating, profile.review_count)}
         specialties={services.map(service => service.name)}
       />
-      </MGCard>
 
       <Section icon="paw-print" title="Regras de atendimento">
         <MGText variant="body" color={description ? 'primary' : 'secondary'}>
@@ -103,7 +102,8 @@ export default function GroomerPublicProfileView({ profile, mode, selectedServic
                 }}
               >
                 <MGText variant="title" style={{ flex: 1 }}>{service.name}</MGText>
-                <MGText variant="body" color="brand" style={{ fontWeight: '700' }}>
+                {/* R3: valor do atendimento em teal, sobre branco (R5). */}
+                <MGText variant="body" color="teal" style={{ fontWeight: '700' }}>
                   A partir de {formatMoney(service.price)}
                 </MGText>
               </View>
@@ -124,7 +124,7 @@ export default function GroomerPublicProfileView({ profile, mode, selectedServic
         )}
       </Section>
 
-      <Section icon="calendar-days" title="Fotos / Galeria">
+      <Section icon="image" title="Fotos / Galeria">
         <ProfileGallery
           photoIds={(profile.gallery ?? []).map(photo => photo.id)}
           emptyTitle="Nenhuma foto publicada."
@@ -143,7 +143,7 @@ export default function GroomerPublicProfileView({ profile, mode, selectedServic
 }
 
 function Section({ icon, title, children }: {
-  icon: 'paw-print' | 'map-pin' | 'scissors' | 'clock-3' | 'calendar-days'
+  icon: 'paw-print' | 'map-pin' | 'scissors' | 'clock-3' | 'calendar-days' | 'image'
   title: string
   children: ReactNode
 }) {
@@ -152,7 +152,8 @@ function Section({ icon, title, children }: {
     <MGCard>
     <View style={{ gap: spacing.sm }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-        <MGIcon name={icon} size={20} color={colors.action.primary} />
+        {/* R3: seções de operação e atendimento do profissional em teal. */}
+        <MGIcon name={icon} size={20} color={colors.brand.teal} />
         <MGText variant="heading3" style={{ flex: 1 }}>{title}</MGText>
       </View>
       {children}
@@ -209,12 +210,14 @@ function ServiceOption({ service, selected, onSelect }: {
         borderRadius: radius.lg,
         borderWidth: selected ? 2 : 1,
         borderColor: selected ? colors.action.primary : colors.border.default,
-        backgroundColor: selected ? colors.surface.pinkSubtle : colors.surface.default,
+        // R1: seleção é ação rosa, com texto branco (mesma regra do chip selecionado, CMP-06).
+        backgroundColor: selected ? colors.action.primary : colors.surface.default,
         gap: spacing.sm,
       }}
     >
-      <MGText variant="title" style={{ flex: 1 }}>{service.name}</MGText>
-      <MGText variant="body" color="brand" style={{ fontFamily: fonts.bold }}>{price}</MGText>
+      <MGText variant="title" color={selected ? 'inverse' : 'primary'} style={{ flex: 1 }}>{service.name}</MGText>
+      {/* R3 teal sobre branco; sobre a seleção rosa o preço vai em branco (R1/R5). */}
+      <MGText variant="body" color={selected ? 'inverse' : 'teal'} style={{ fontFamily: fonts.bold }}>{price}</MGText>
     </Pressable>
   )
 }

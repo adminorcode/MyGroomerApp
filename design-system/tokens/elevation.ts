@@ -4,16 +4,16 @@ import { palette } from './colors'
 // My Groomer Design System v1.0 — seção 5.4.
 // Native uses shadow* + elevation; web uses boxShadow (shadow* is deprecated there).
 
-function shadow(opacity: number, radius: number, elevation: number, height: number): ViewStyle {
+function shadow(opacity: number, radius: number, elevation: number, height: number, rgb = '37, 61, 66', color: string = palette.brand.ink): ViewStyle {
   if (Platform.OS === 'web') {
     return {
       // RN Web accepts boxShadow; cast keeps ViewStyle happy across platforms.
-      boxShadow: `0px ${height}px ${radius}px rgba(37, 61, 66, ${opacity})`,
+      boxShadow: `0px ${height}px ${radius}px rgba(${rgb}, ${opacity})`,
     } as ViewStyle
   }
 
   return {
-    shadowColor: palette.brand.ink,
+    shadowColor: color,
     shadowOpacity: opacity,
     shadowOffset: { width: 0, height },
     shadowRadius: radius,
@@ -26,4 +26,6 @@ export const elevation = {
   low: shadow(0.08, 6, 2, 2),
   medium: shadow(0.12, 12, 4, 4),
   overlay: shadow(0.2, 24, 8, 8),
+  // CMP-03 — sombra do CTA primário: 0 6 14 com a cor de action.primary (#C64878) a 22%.
+  actionPrimary: shadow(0.22, 14, 4, 6, '198, 72, 120', palette.action.primary),
 } as const

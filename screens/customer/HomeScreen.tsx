@@ -1,15 +1,13 @@
-import { View, Text, ActivityIndicator, ScrollView, StyleSheet, Pressable } from 'react-native'
+import { View, ActivityIndicator, StyleSheet, Pressable } from 'react-native'
 import { useFetchCategories } from '../../hooks/useCategory'
-import { useTheme } from '../../context/ThemeContext'
 import { HomeStackParamList } from '../../navigation/types'
 import { StackNavigationProp } from '@react-navigation/stack'
-import { MGEmptyState, MGErrorState, MGText } from '../../design-system/components'
+import { MGEmptyState, MGErrorState, MGScreen, MGText } from '../../design-system/components'
 import MGArtwork from '../../design-system/components/MGArtwork'
-import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
+import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { ArrowRight, SearchIcon } from 'lucide-react-native'
 import CategoryTile from '../../components/shared/CategoryTile'
 import SectionHeader from '../../components/shared/SectionHeader'
-import ScreenContainer from '../../components/shared/ScreenContainer'
 
 type HomeScreenNavigationProp = StackNavigationProp<HomeStackParamList, 'Home'>
 
@@ -19,82 +17,125 @@ type Props = {
 
 export default function HomeScreen({navigation}: Props) {
   const {data, isLoading, isError, refetch} = useFetchCategories()
-  const {colors} = useTheme()
+  const { colors, spacing, radius } = useMGTheme()
+
+  // CMP-05 / R4: faixa teal de cabeçalho (hub). A saudação já fica no AppHeader global acima, não é repetida aqui.
+  const searchSlot = (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Buscar um serviço"
+      onPress={() => navigation.navigate('TutorSearch')}
+      style={({ pressed }) => [
+        styles.search,
+        {
+          backgroundColor: colors.surface.default,
+          borderColor: colors.border.default,
+          borderRadius: radius.md,
+          paddingHorizontal: spacing.base,
+          gap: spacing.md,
+          opacity: pressed ? 0.92 : 1,
+        },
+      ]}
+    >
+      <SearchIcon color={colors.text.secondary} size={20} />
+      <MGText variant="body" color="secondary">Buscar um serviço...</MGText>
+    </Pressable>
+  )
 
   return (
-    <ScreenContainer>
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Buscar um serviço"
-            onPress={() => navigation.navigate('TutorSearch')}
-            style={[styles.searchContainer, {backgroundColor: colors.selectionSoft, borderColor: colors.border, marginTop:spacing.md}]}
-        >
-        <SearchIcon color={colors.primary} size={20} />
-        <Text style={[styles.searchText, {color: colors.text}]}>Buscar um serviço...</Text>
-        </Pressable>
+    <MGScreen scrollable header="teal" headerSlot={searchSlot} contentStyle={{ paddingTop: spacing.base }}>
+      {/* CMP-04 / R2 / CMP-01: destaque rosa de 20 pt, eyebrow rosa-texto, título 22/28, ilustração em bloco. */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Explorar profissionais"
+        onPress={() => navigation.navigate('TutorSearch')}
+        style={({ pressed }) => [
+          styles.hero,
+          {
+            backgroundColor: colors.surface.pinkSubtle,
+            borderRadius: radius.xl,
+            padding: spacing.lg,
+            marginTop: spacing.sm,
+            marginBottom: spacing.lg,
+            opacity: pressed ? 0.92 : 1,
+          },
+        ]}
+      >
+        <View style={[styles.heroRow, { gap: spacing.md }]}>
+          <View style={[styles.heroCopy, { gap: spacing.sm }]}>
+            <MGText variant="eyebrow" color="brand">Atendimento em domicílio</MGText>
+            {/* &nbsp; evita a linha com só "pet" (viúva); o texto e o check exato permanecem iguais. */}
+            <MGText variant="heading2" style={styles.heroTitle}>Um cuidado especial para seu&nbsp;pet</MGText>
+            <View style={[styles.heroAction, { gap: spacing.xs, marginTop: spacing.xs }]}>
+              <MGText variant="label" color="brand">Explorar profissionais</MGText>
+              <ArrowRight size={18} color={colors.action.primaryText} />
+            </View>
+          </View>
+          <View style={[styles.artBlock, { backgroundColor: colors.surface.default, borderRadius: radius.lg, padding: spacing.sm }]}>
+            <MGArtwork name="poodle" width={72} height={88} />
+          </View>
+        </View>
+      </Pressable>
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Explorar profissionais"
-          onPress={() => navigation.navigate('TutorSearch')}
-          style={({ pressed }) => [styles.hero, { backgroundColor: pressed ? colors.secondaryPressed : colors.secondary }]}
-        >
-          <MGText variant="heading3" color="inverse">Um cuidado especial para seu pet</MGText>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <View style={styles.heroCopy}>
-            <MGText variant="bodySmall" color="inverse">Encontre atendimento em domicílio, em poucos passos.</MGText>
-            <View style={styles.heroAction}>
-              <MGText variant="label" color="inverse">Explorar profissionais</MGText>
-              <ArrowRight size={18} color={colors.onSecondary} />
-            </View>
-          </View>
-          <MGArtwork name="poodle" width={72} height={88} />
-          </View>
-        </Pressable>
-        <SectionHeader title="Categorias"/>
-        {isLoading ? (
-            <ActivityIndicator accessibilityLabel="Carregando categorias" size="large" color={colors.primary} />
-        ) : isError ? (
-            <MGErrorState
-                message="Não foi possível carregar as categorias."
-                onRetry={() => refetch()}
+      <SectionHeader title="Categorias" variant="eyebrow" />
+      {isLoading ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <ActivityIndicator accessibilityLabel="Carregando categorias" color={colors.action.primary} />
+          <MGText variant="bodySmall" color="secondary">Carregando categorias</MGText>
+        </View>
+      ) : isError ? (
+        <MGErrorState
+          message="Não foi possível carregar as categorias."
+          onRetry={() => refetch()}
+        />
+      ) : (
+        <View style={[styles.categories, { gap: spacing.md }]}>
+          {data?.length ? data.map((item: { id: string, name: string }) => (
+            <CategoryTile
+              key={item.id}
+              name={item.name}
+              onPress={() => navigation.navigate('TutorSearch', { categoryId: item.id })}
             />
-        ) : (
-            <View style={styles.categories}>
-              {data?.length ? data.map((item: { id: string, name: string }) => (
-                    <CategoryTile
-                        key={item.id}
-                        name={item.name}
-                        onPress={() => navigation.navigate('Services', {categoryId: item.id, categoryName: item.name})}
-                    />
-                )) : <MGEmptyState title="Nenhuma categoria" description="Os serviços disponíveis aparecerão aqui." />}
-            </View>
-        )}
-      </ScrollView>
-    </ScreenContainer>
+          )) : <MGEmptyState title="Nenhuma categoria" description="Os serviços disponíveis aparecerão aqui." />}
+        </View>
+      )}
+    </MGScreen>
   )
 }
 
 const styles = StyleSheet.create({
-  scroll: { paddingBottom: spacing.xl },
-  hero: { gap: spacing.sm, padding: spacing.lg, borderRadius: borderRadius.lg, marginTop: spacing.sm, marginBottom: spacing.lg },
-  heroCopy: { flex: 1, gap: spacing.md, minWidth: 0 },
-  heroAction: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: spacing.xs, marginTop: spacing.xs },
-  categories: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
-  searchText: {
-    fontSize: typography.sizes.md,
-    fontFamily: fonts.regular,
-  },
-  searchContainer: {
-    marginBottom: spacing.sm,
+  search: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
     minHeight: 52,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    borderWidth: 1,
+  },
+  hero: {
+    flexDirection: 'column',
+  },
+  heroRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  heroCopy: {
+    flex: 1,
+    minWidth: 0,
+  },
+  heroTitle: {
+    lineHeight: 28,
+  },
+  heroAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  artBlock: {
+    flexShrink: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  categories: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
 })

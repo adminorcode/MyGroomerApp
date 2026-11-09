@@ -12,7 +12,7 @@ export default function MGBrand({ compact = false }: { compact?: boolean }) {
       <View style={{ width: size, height: size, borderRadius: radius.lg, backgroundColor: colors.brand.pink, alignItems: 'center', justifyContent: 'center' }}>
         <MGArtwork name="brand-symbol" width={size} />
       </View>
-      <MGText variant={compact ? 'heading3' : 'heading1'} style={{ textAlign: 'center' }}>{APP_NAME}</MGText>
+      <MGText variant={compact ? 'heading3' : 'logotype'} style={{ textAlign: 'center' }}>{APP_NAME}</MGText>
     </View>
   )
 }

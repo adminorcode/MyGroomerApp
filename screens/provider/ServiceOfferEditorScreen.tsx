@@ -14,7 +14,7 @@ type Props = {
 }
 
 export default function ServiceOfferEditorScreen({ navigation, route }: Props) {
-  const { colors, spacing } = useMGTheme()
+  const { colors, spacing, radius } = useMGTheme()
   const draft = useServiceMenuDraft()
   const offer = draft.state?.offers.find(item => item.key === route.params.draftKey)
 
@@ -37,21 +37,7 @@ export default function ServiceOfferEditorScreen({ navigation, route }: Props) {
     <MGScreen
       safeArea={false}
       scrollable
-      footer={(
-        <View style={{ gap: spacing.sm }}>
-          {!offer.id ? (
-            <MGButton
-              label={`Remover ${title}`}
-              variant="destructive"
-              onPress={() => {
-                draft.removeOffer(offer.key)
-                navigation.goBack()
-              }}
-            />
-          ) : null}
-          <MGButton label="Concluir" onPress={() => navigation.goBack()} />
-        </View>
-      )}
+      footer={<MGButton label="Concluir" onPress={() => navigation.goBack()} />}
     >
       <View style={{ gap: spacing.md, paddingTop: spacing.md, width: '100%', maxWidth: 720, alignSelf: 'center' }}>
         <MGText variant="heading2">{offer.service_id ? title : 'Novo serviço'}</MGText>
@@ -113,8 +99,8 @@ export default function ServiceOfferEditorScreen({ navigation, route }: Props) {
         </View>
         </MGCard>
         <MGCard>
+        {/* Revisão UI (027): campos sem ícone, como Nome, Preço e Duração; ícones mistos no mesmo formulário saem. */}
         <MGTextField
-          icon="file-text"
           label="Descrição"
           value={offer.description}
           onChangeText={text => draft.updateOffer(offer.key, { description: text })}
@@ -139,7 +125,6 @@ export default function ServiceOfferEditorScreen({ navigation, route }: Props) {
               required
             />
             <MGTextField
-              icon="clock-3"
               label={`Duração ${SIZE_LABELS[size].toLowerCase()}`}
               value={offer.durations[size]}
               onChangeText={text => draft.updateOffer(offer.key, {
@@ -159,16 +144,33 @@ export default function ServiceOfferEditorScreen({ navigation, route }: Props) {
             {SIZE_KEYS.map(size => {
               const price = parseMoney(offer.prices[size])
               const duration = parseMinutes(offer.durations[size])
+              // R5: o valor em teal fica sobre superfície branca; o bloco tealSubtle segue com texto primário.
               return (
-                <View key={size} style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: spacing.xs }}>
-                  <MGText variant="bodySmall">{SIZE_LABELS[size]}</MGText>
-                  <MGText variant="bodySmall">{price.ok && price.value != null ? formatMoney(price.value) : 'Preço não informado'} · {duration.ok && duration.value != null ? `${duration.value} min` : 'Duração não informada'}</MGText>
+                <View key={size} style={{ backgroundColor: colors.surface.default, borderRadius: radius.md, padding: spacing.md, gap: spacing.xs }}>
+                  <MGText variant="label">{SIZE_LABELS[size]}</MGText>
+                  {price.ok && price.value != null ? (
+                    <MGText variant="numeric" color="teal">{formatMoney(price.value)}</MGText>
+                  ) : (
+                    <MGText variant="bodySmall">Preço não informado</MGText>
+                  )}
+                  <MGText variant="bodySmall">{duration.ok && duration.value != null ? `${duration.value} min` : 'Duração não informada'}</MGText>
                 </View>
               )
             })}
             <MGText variant="caption">Concluir mantém as alterações no cardápio. Salve o cardápio para publicá-las.</MGText>
           </View>
         </MGCard>
+        {/* Revisão UI (027): a remoção sai do rodapé fixo, onde disputava com o CTA rosa; fica no fim do formulário. */}
+        {!offer.id ? (
+          <MGButton
+            label={`Remover ${title}`}
+            variant="destructive"
+            onPress={() => {
+              draft.removeOffer(offer.key)
+              navigation.goBack()
+            }}
+          />
+        ) : null}
       </View>
     </MGScreen>
   )

@@ -4,8 +4,6 @@ import { ActivityIndicator, Pressable, ScrollView, StyleProp, StyleSheet, View, 
 import {
   Bone,
   Cake,
-  Clock3,
-  Coins,
   Dog,
   FileText,
   LucideIcon,
@@ -27,7 +25,7 @@ import {
   useOpenBookingConversation,
 } from '../../hooks/useBooking'
 import { MGButton, MGCard, MGErrorState, MGIcon, MGText } from '../../design-system/components'
-import { BookingStatusBadge } from '../../design-system/patterns'
+import { BookingStatusBadge, BookingSummary } from '../../design-system/patterns'
 import MGAvatar from '../../design-system/components/MGAvatar'
 import { BookingStatus } from '../../types/booking.types'
 import { formatMoney } from '../../utils/formatMoney'
@@ -74,7 +72,7 @@ function formatScheduledSummary(value: string) {
     day: 'numeric',
     month: 'long',
   }).format(date)
-  return `${isToday ? 'Hoje' : longDate}, ${time} (${longDate})`
+  return isToday ? `Hoje, ${time} (${longDate})` : `${longDate}, ${time}`
 }
 
 function formatDuration(minutes?: number | null) {
@@ -112,13 +110,13 @@ function DetailSection({ icon, title, children }: SectionProps) {
   )
 }
 
-type FactProps = { icon: LucideIcon, label: string, value: string, style?: StyleProp<ViewStyle> }
+type FactProps = { icon: LucideIcon, label: string, value: string, iconColor?: string, style?: StyleProp<ViewStyle> }
 
-function DetailFact({ icon: Icon, label, value, style }: FactProps) {
+function DetailFact({ icon: Icon, label, value, iconColor, style }: FactProps) {
   const { colors, spacing } = useMGTheme()
   return (
     <View style={[styles.fact, { gap: spacing.sm }, style]}>
-      <Icon size={18} color={colors.action.primary} />
+      <Icon size={18} color={iconColor ?? colors.action.primary} />
       <View style={{ flex: 1, gap: 2 }}>
         <MGText variant="caption" color="secondary">{label}</MGText>
         <MGText variant="body">{value}</MGText>
@@ -161,7 +159,7 @@ export default function ProviderBookingDetailScreen({ navigation, route }: Props
     if (isError || !data) {
         return (
             <View style={{ flex: 1, backgroundColor: colors.surface.canvas, alignItems: 'center' }}>
-                <View style={{ flex: 1, width: '100%', maxWidth: 720, paddingHorizontal: spacing.base }}>
+                <View style={{ flex: 1, width: '100%', maxWidth: 720 }}>
                     {screenHeader}
                     <View style={[styles.centered, { paddingHorizontal: spacing.lg }]}>
                         <MGErrorState message="Não foi possível carregar este agendamento." onRetry={() => { void refetch() }} />
@@ -222,17 +220,20 @@ export default function ProviderBookingDetailScreen({ navigation, route }: Props
                   <MGText variant="title">{petName}</MGText>
                   <BookingStatusBadge status={data.booking_status} />
                 </View>
-                <MGText variant="bodySmall" color="secondary">Tutor: {tutor}</MGText>
+                <View style={[styles.tutorLine, { gap: spacing.sm }]}>
+                  <MGAvatar name={tutor} size={28} />
+                  <MGText variant="bodySmall" color="secondary" style={{ flex: 1 }}>Tutor: {tutor}</MGText>
+                </View>
                 <View style={[styles.line, { gap: spacing.sm }]}>
                   <MGIcon name="scissors" size={16} color={colors.action.primary} />
                   <MGText variant="bodySmall" style={{ flex: 1 }}>{data.service_name}</MGText>
                 </View>
                 <View style={[styles.line, { gap: spacing.sm }]}>
-                  <MGIcon name="calendar-days" size={16} color={colors.action.primary} />
+                  <MGIcon name="calendar-days" size={16} color={colors.brand.teal} />
                   <MGText variant="bodySmall" style={{ flex: 1 }}>{formatScheduledSummary(data.scheduled_at)}</MGText>
                 </View>
                 <View style={[styles.line, { gap: spacing.sm }]}>
-                  <MGIcon name="map-pin" size={16} color={colors.text.secondary} />
+                  <MGIcon name="map-pin" size={16} color={colors.brand.teal} />
                   <MGText variant="bodySmall" color="secondary" style={{ flex: 1 }}>{data.customer_location}</MGText>
                 </View>
               </View>
@@ -254,22 +255,24 @@ export default function ProviderBookingDetailScreen({ navigation, route }: Props
                 <DetailFact icon={Phone} label="Telefone" value={formatDisplayPhone(data.customer_phone)} />
               </View>
               <View style={styles.column}>
-                <DetailFact icon={MapPin} label="Endereço" value={data.customer_location?.trim() || 'Endereço não informado'} />
+                <DetailFact icon={MapPin} iconColor={colors.brand.teal} label="Endereço" value={data.customer_location?.trim() || 'Endereço não informado'} />
               </View>
             </View>
           </DetailSection>
 
-          <DetailSection icon="scissors" title="Serviço solicitado">
-            <View style={[styles.twoColumns, { gap: spacing.md }]}>
-              <View style={styles.column}>
-                <DetailFact icon={FileText} label="Serviço" value={data.service_name} />
-              </View>
-              <View style={[styles.column, { gap: spacing.md }]}>
-                <DetailFact icon={Clock3} label="Duração estimada" value={formatDuration(data.duration_minutes)} />
-                <DetailFact icon={Coins} label="Valor" value={formatMoney(data.price)} />
-              </View>
-            </View>
-          </DetailSection>
+          {/* CMP-08 / R7: bilhete de valor no detalhe do agendamento; o total usa priceLarge teal sobre branco. */}
+          <View style={{ marginBottom: spacing.md }}>
+            <BookingSummary
+              title="Serviço solicitado"
+              rows={[
+                { label: 'Serviço', value: data.service_name },
+                { label: 'Duração estimada', value: formatDuration(data.duration_minutes) },
+              ]}
+              totalLabel="Valor estimado"
+              totalValue={formatMoney(data.price)}
+              ticket
+            />
+          </View>
 
           {actionError ? (
             <MGText variant="bodySmall" color="error" accessibilityRole="alert" style={{ marginBottom: spacing.md }}>{actionError}</MGText>
@@ -316,17 +319,17 @@ export default function ProviderBookingDetailScreen({ navigation, route }: Props
                 variant="secondary"
                 iconLeft={<MGIcon name="calendar-days" size={18} color={colors.action.primaryOutline} />}
                 fullWidth={false}
-                style={styles.halfButton}
+                style={[styles.halfButton, { paddingHorizontal: spacing.sm }]}
                 onPress={() => setSheetOpen(true)}
                 disabled={changeStatus.isPending}
               />
             ) : null}
             <MGButton
               label="Falar com tutor"
-              variant="teal"
-              iconLeft={<MessageCircle size={18} color={colors.onAction.secondary} />}
+              variant="secondary"
+              iconLeft={<MessageCircle size={18} color={colors.action.primaryOutline} />}
               fullWidth={false}
-              style={styles.halfButton}
+              style={[styles.halfButton, { paddingHorizontal: spacing.sm }]}
               onPress={() => { void handleChat() }}
               loading={openConversation.isPending}
               disabled={openConversation.isPending || changeStatus.isPending}
@@ -338,9 +341,9 @@ export default function ProviderBookingDetailScreen({ navigation, route }: Props
               accessibilityRole="button"
               onPress={() => { void runStatus(BookingStatus.CANCELLED) }}
               disabled={changeStatus.isPending}
-              style={{ alignItems: 'center', paddingVertical: spacing.sm }}
+              style={{ alignItems: 'center', justifyContent: 'center', minHeight: 44, paddingVertical: spacing.sm }}
             >
-              <MGText variant="body" color="brand">Recusar agendamento</MGText>
+              <MGText variant="body" color="error">Recusar agendamento</MGText>
             </Pressable>
           ) : null}
         </ScrollView>
@@ -364,6 +367,7 @@ const styles = StyleSheet.create({
   hero: { flexDirection: 'row', alignItems: 'flex-start' },
   heroTitle: { alignItems: 'flex-start', gap: 8 },
   line: { flexDirection: 'row', alignItems: 'flex-start' },
+  tutorLine: { flexDirection: 'row', alignItems: 'center' },
   sectionHead: { flexDirection: 'row', alignItems: 'center' },
   grid: { flexDirection: 'row', flexWrap: 'wrap' },
   twoColumns: { flexDirection: 'row', alignItems: 'flex-start' },

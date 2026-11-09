@@ -98,7 +98,7 @@ export default function RequestCard({
         <View style={[styles.footer, { gap: spacing.md }]}>
           <View style={styles.price}>
             <MGText variant="caption" color="secondary">Valor estimado</MGText>
-            <MGText variant="title">{price == null ? 'Valor não informado' : formatMoney(price)}</MGText>
+            <MGText variant="title" color={price == null ? 'primary' : 'teal'}>{price == null ? 'Valor não informado' : formatMoney(price)}</MGText>
           </View>
           {canRespond ? (
             <View style={[styles.actions, { gap: spacing.sm }]}>

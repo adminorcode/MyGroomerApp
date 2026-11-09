@@ -5,8 +5,8 @@ import { fileURLToPath } from 'node:url'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 
-export const appUrl = 'http://localhost:8081'
-export const apiUrl = 'http://127.0.0.1:3000'
+export const appUrl = process.env.E2E_APP_URL || 'http://localhost:8081'
+export const apiUrl = process.env.E2E_API_URL || 'http://127.0.0.1:3000'
 
 const brandSource = readFileSync(new URL('../constants/brand.ts', import.meta.url), 'utf8')
 
@@ -105,29 +105,103 @@ export async function loginProfessional(page, account = fixtures.groomer) {
   await page.getByText('Agenda do groomer').waitFor({ timeout: 20000 })
 }
 
+const apiBase = `${apiUrl}/api/v1`
+
+async function apiCall(route, token, method = 'GET', payload) {
+  const response = await fetch(apiBase + route, {
+    method,
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: payload === undefined ? undefined : JSON.stringify(payload),
+  })
+  const text = await response.text()
+  const body = text ? JSON.parse(text) : null
+  if (!response.ok) throw new Error(`${method} ${route} ${response.status} ${text}`)
+  return body
+}
+
+async function apiToken(account = fixtures.tutor) {
+  const response = await fetch(`${apiBase}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: account.email, password: account.password }),
+  })
+  const body = await response.json()
+  if (!response.ok) throw new Error(`login ${account.email}`)
+  return body.token
+}
+
+/**
+ * Plano 028: a busca não digita mais o endereço. O helper torna `address` o endereço salvo padrão do tutor
+ * (cria se faltar, com coordenadas da sugestão da API), recarrega o app e abre "Buscar um serviço".
+ * Ao terminar, a tela de busca mostra o endereço salvo.
+ */
 export async function fillServiceAddress(page, address) {
-  const field = page.getByRole('combobox', { name: 'Endereço do atendimento' })
-  await field.waitFor({ timeout: 15000 })
-  await field.fill('')
-  const pending = page.waitForResponse(
-    (response) => response.url().includes('/service-location/autocomplete'),
-    { timeout: 15000 },
-  )
-  await field.fill(address)
-  await pending
-  await field.blur()
-  await page.getByRole('listbox').waitFor({ state: 'hidden', timeout: 5000 })
-  await page.getByRole('progressbar', { name: 'Buscando endereços' }).waitFor({ state: 'hidden', timeout: 5000 })
+  // Usa o token do tutor logado na página (alguns specs criam tutores próprios).
+  const stored = await page.evaluate(() => localStorage.getItem('auth-store'))
+  const token = JSON.parse(stored ?? '{}')?.state?.token ?? await apiToken()
+  // Geocodificador externo pode responder 503 por instabilidade: tenta de novo antes de falhar.
+  let suggestions = null
+  for (let attempt = 0; attempt < 4 && !suggestions?.length; attempt += 1) {
+    try {
+      suggestions = (await apiCall(`/providers/service-location/autocomplete?text=${encodeURIComponent(address)}`, token)).data
+    } catch (error) {
+      if (attempt === 3) throw error
+      await new Promise(resolve => setTimeout(resolve, 2000 * (attempt + 1)))
+    }
+  }
+  // Prefere a sugestão que contém o nome digitado (ex.: 'Rua Vital Brasil'); senão, a primeira.
+  const typed = address.split(',')[0].trim().toLowerCase()
+  const suggestion = suggestions?.find(item => item.label.toLowerCase().includes(typed)) ?? suggestions?.[0]
+  if (!suggestion) throw new Error(`Sem sugestão de endereço para: ${address}`)
+  const saved = (await apiCall('/customer-addresses', token)).data ?? []
+  const existing = saved.find((item) => item.address === suggestion.label)
+  if (existing) {
+    await apiCall(`/customer-addresses/${existing.id}`, token, 'PATCH', { is_default: true })
+  } else {
+    await apiCall('/customer-addresses', token, 'POST', {
+      label: 'other',
+      address: suggestion.label,
+      latitude: suggestion.latitude,
+      longitude: suggestion.longitude,
+      is_default: true,
+    })
+  }
+  // Volta à Home do início (o reload preservaria a tela atual, que pode não ser a Home).
+  await page.goto(appUrl, { waitUntil: 'domcontentloaded' })
+  await page.getByText(/^Olá/).waitFor({ timeout: 20000 })
+  await page.getByRole('button', { name: 'Buscar um serviço' }).click()
+  try {
+    await page.getByText(suggestion.label, { exact: false }).waitFor({ timeout: 15000 })
+  } catch (error) {
+    const shown = (await page.locator('body').innerText().catch(() => '')).replace(/\s+/g, ' ').slice(0, 300)
+    throw new Error(`Busca sem o endereço salvo "${suggestion.label}". Tela: ${shown}\n${error.message}`)
+  }
+  // Rótulo do endereço escolhido: é o que a busca, o cartão e o resumo mostram.
+  return suggestion.label
+}
+
+/** Abre o painel de filtros da busca, se ainda estiver fechado. */
+export async function openCoverageFilters(page) {
+  const services = page.getByRole('radiogroup', { name: 'Serviço' })
+  if (await services.count() === 0) {
+    await page.getByRole('button', { name: /^Filtros/ }).click()
+  }
+  await services.waitFor({ timeout: 15000 })
 }
 
 export async function gateRoute(page, pattern, gate) {
   await page.route(pattern, async (route) => {
-    if (gate.fail) {
-      await route.abort()
-      return
+    // Repetições automáticas do cliente podem chegar a uma rota já tratada: ignora sem derrubar o processo.
+    try {
+      if (gate.fail) {
+        await route.abort()
+        return
+      }
+      if (gate.delayMs > 0) await new Promise((resolve) => setTimeout(resolve, gate.delayMs))
+      await route.continue()
+    } catch (error) {
+      if (!/already handled/i.test(String(error?.message))) throw error
     }
-    if (gate.delayMs > 0) await new Promise((resolve) => setTimeout(resolve, gate.delayMs))
-    await route.continue()
   })
 }
 

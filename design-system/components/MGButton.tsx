@@ -32,19 +32,24 @@ export default function MGButton({
   style,
   ...props
 }: MGButtonProps) {
-  const { colors, spacing, radius } = useMGTheme()
+  const { colors, spacing, radius, elevation } = useMGTheme()
   const blocked = disabled || loading
+  // CMP-03: só o primário em repouso recebe a sombra tingida; pressed e bloqueado ficam sem sombra.
+  const shadowStyle: ViewStyle | null = variant === 'primary' && !blocked ? elevation.actionPrimary : null
 
   const contentColor = (pressed: boolean) => {
     if (blocked) return colors.state.disabledText
     if (variant === 'secondary' || variant === 'tertiary') return colors.action.primaryOutline
-    if (variant === 'destructive') return colors.onAction.error
+    if (variant === 'destructive') return colors.feedback.error
     if (variant === 'teal') return colors.onAction.secondary
     return colors.onAction.primary
   }
 
   const variantStyle = (pressed: boolean): ViewStyle => {
     if (blocked) {
+      // Revisão UI (027): link e contorno desabilitados não viram caixa cinza com borda.
+      if (variant === 'tertiary') return { backgroundColor: 'transparent', borderWidth: 0 }
+      if (variant === 'secondary') return { backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.border.default }
       return {
         backgroundColor: colors.state.disabledSurface,
         borderWidth: 1,
@@ -69,9 +74,11 @@ export default function MGButton({
           backgroundColor: pressed ? colors.action.secondaryPressed : colors.action.secondary,
         }
       case 'destructive':
+        // R1: ação destrutiva não concorre com o CTA rosa; contorno e texto em erro.
         return {
-          backgroundColor: pressed ? colors.feedback.error : colors.feedback.error,
-          opacity: pressed ? 0.9 : 1,
+          backgroundColor: pressed ? colors.feedback.errorSurface : 'transparent',
+          borderWidth: 1,
+          borderColor: colors.feedback.error,
         }
       case 'primary':
       default:
@@ -91,13 +98,14 @@ export default function MGButton({
       style={({ pressed }) => [
         styles.base,
         {
-          minHeight: 52,
+          minHeight: 40,
           borderRadius: radius.lg,
           paddingHorizontal: spacing.base,
           columnGap: spacing.sm,
         },
         fullWidth && styles.fullWidth,
         variantStyle(pressed),
+        !pressed && shadowStyle,
         style as ViewStyle,
       ]}
       {...props}

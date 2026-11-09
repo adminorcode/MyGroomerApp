@@ -15,10 +15,10 @@ import { BookingsStackParamList } from '../../navigation/types'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
 import StarRating from '../../components/shared/StarRating'
-import { MGButton, MGIcon, MGTextField } from '../../design-system/components'
+import { MGButton, MGIcon, MGText, MGTextField } from '../../design-system/components'
 import MGArtwork from '../../design-system/components/MGArtwork'
-import { useTheme } from '../../context/ThemeContext'
-import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
+import { useMGTheme } from '../../design-system/theme/useMGTheme'
+import { fonts, spacing, typography } from '../../constants/theme'
 
 type ReviewScreenNavigationProps = StackNavigationProp<BookingsStackParamList, 'ReviewBooking'>
 type ReviewScreenRouteProps = RouteProp<BookingsStackParamList, 'ReviewBooking'>
@@ -29,24 +29,31 @@ type Props = {
 }
 
 const ReviewScreen = ({ navigation, route }: Props) => {
-  const { colors } = useTheme()
+  const { colors, radius } = useMGTheme()
   const { bookingId, serviceName, providerName } = route.params
   const { mutateAsync, isPending } = useCreateReviews()
 
   const [rating, setRating] = useState(0)
   const [comment, setComment] = useState('')
+  // Mesmos textos dos alertas, visíveis na tela: o erro não depende de diálogo do sistema.
+  const [formError, setFormError] = useState<string | null>(null)
 
   const contextText = serviceName
     ? `Como foi ${serviceName}${providerName ? ` com ${providerName}` : ''}?`
     : 'Como foi sua experiência?'
 
   const handleSubmit = async () => {
+    setFormError(null)
     if (rating <= 0) {
-      AppAlert.alert('Nota obrigatória', 'Toque em pelo menos uma estrela para avaliar.')
+      const message = 'Toque em pelo menos uma estrela para avaliar.'
+      setFormError(message)
+      AppAlert.alert('Nota obrigatória', message)
       return
     }
     if (!comment.trim()) {
-      AppAlert.alert('Comentário obrigatório', 'Conte em poucas palavras como foi o atendimento.')
+      const message = 'Conte em poucas palavras como foi o atendimento.'
+      setFormError(message)
+      AppAlert.alert('Comentário obrigatório', message)
       return
     }
 
@@ -54,7 +61,9 @@ const ReviewScreen = ({ navigation, route }: Props) => {
       await mutateAsync({ booking_id: bookingId, rating, comment: comment.trim() })
       navigation.goBack()
     } catch (error) {
-      AppAlert.alert('Não foi possível enviar', 'Algo deu errado ao enviar a avaliação. Tente novamente.')
+      const message = 'Algo deu errado ao enviar a avaliação. Tente novamente.'
+      setFormError(message)
+      AppAlert.alert('Não foi possível enviar', message)
       console.error(error)
     }
   }
@@ -78,15 +87,15 @@ const ReviewScreen = ({ navigation, route }: Props) => {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps='handled'
         >
-          {/* Rating — focal point */}
+          {/* Rating — focal point. R2: ilustração e pet em bloco rosa. */}
           <View style={styles.ratingSection}>
-            <View style={[styles.illustration, { backgroundColor: colors.selectionSoft }]}>
+            <View style={[styles.illustration, { backgroundColor: colors.surface.pinkSubtle, borderRadius: radius.xl }]}>
               <MGArtwork name="puppy" width={116} height={116} />
-              <View style={styles.bathIcon}><MGIcon name="bath" size={32} color={colors.secondary} /></View>
+              <View style={styles.bathIcon}><MGIcon name="bath" size={32} color={colors.action.primary} /></View>
             </View>
-            <Text style={[styles.ratingLabel, { color: colors.text }]}>{contextText}</Text>
+            <Text style={[styles.ratingLabel, { color: colors.text.primary }]}>{contextText}</Text>
             <View style={styles.starsWrapper}>
-              <StarRating rating={rating} onRatingChange={setRating} size={40} />
+              <StarRating rating={rating} onRatingChange={value => { setRating(value); setFormError(null) }} size={40} />
             </View>
           </View>
 
@@ -95,7 +104,7 @@ const ReviewScreen = ({ navigation, route }: Props) => {
             label="Sua avaliação"
             accessibilityLabel="Sua avaliação"
             value={comment}
-            onChangeText={setComment}
+            onChangeText={text => { setComment(text); setFormError(null) }}
             placeholder='Conte o que mais chamou atenção...'
             multiline
             numberOfLines={5}
@@ -103,6 +112,11 @@ const ReviewScreen = ({ navigation, route }: Props) => {
             style={styles.input}
           />
         </ScrollView>
+
+        {/* Fora da rolagem: o erro fica sempre acima do CTA, com respiro, em qualquer posição de rolagem. */}
+        {formError ? (
+          <MGText variant="bodySmall" color="error" accessibilityRole="alert" style={styles.formError}>{formError}</MGText>
+        ) : null}
 
         <MGButton
           label='Enviar avaliação'
@@ -129,7 +143,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
     gap: spacing.lg,
   },
-  illustration: { width: 152, height: 136, borderRadius: borderRadius.full, alignItems: 'center', justifyContent: 'center' },
+  illustration: { width: 152, height: 136, alignItems: 'center', justifyContent: 'center' },
   bathIcon: { position: 'absolute', bottom: 0, right: spacing.sm },
   ratingLabel: {
     fontSize: typography.sizes.lg,
@@ -140,13 +154,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  label: {
-    fontSize: typography.sizes.md,
-    fontFamily: fonts.medium,
-    marginBottom: spacing.sm,
-  },
   input: {
     minHeight: 120,
+  },
+  formError: {
+    marginTop: spacing.sm,
+    marginBottom: spacing.md,
   },
   submitButton: {
     marginBottom: spacing.lg,
@@ -154,4 +167,3 @@ const styles = StyleSheet.create({
 })
 
 export default ReviewScreen
-

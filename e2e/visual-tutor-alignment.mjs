@@ -1,4 +1,4 @@
-import { evidenceFile, gateRoute, launchBrowser, loginTutor, openPage, saveScreenshot, startRun } from './harness.mjs'
+import { appUrl, evidenceFile, fillServiceAddress, gateRoute, launchBrowser, loginTutor, openCoverageFilters, openPage, saveScreenshot, startRun } from './harness.mjs'
 import { assertLayoutInWindow, captureScroll } from './visual-helpers.mjs'
 
 const plan = '022-screen-reference-alignment'
@@ -24,6 +24,10 @@ try {
   const categories = { delayMs: 1500, fail: false }
   await gateRoute(page, '**/api/v1/categories', categories)
   await loginTutor(page)
+  // Plano 028: a busca precisa de endereço escolhido. Define o padrão e volta à Home para o fluxo abaixo.
+  await fillServiceAddress(page, 'Avenida Paulista, São Paulo')
+  await page.goto(appUrl, { waitUntil: 'domcontentloaded' })
+  await page.getByText(/^Olá/).waitFor({ timeout: 20000 })
   await page.getByLabel('Carregando categorias').waitFor()
   check('VIS-07 categorias carregam sem esconder a busca', await page.getByRole('button', { name: 'Buscar um serviço' }).isEnabled())
   await page.getByRole('button', { name: 'Banho e Tosa', exact: true }).waitFor({ timeout: 15000 })
@@ -44,17 +48,19 @@ try {
   await fit(page, 'home')
 
   await page.getByRole('button', { name: 'Banho e Tosa', exact: true }).click()
-  await page.getByRole('button', { name: 'Banho', exact: true }).waitFor()
-  check('VIS-03 lista de serviços mantém o catálogo real', await page.getByRole('button', { name: 'Tosa', exact: true }).count() === 1)
+  await openCoverageFilters(page)
+  await page.getByRole('radio', { name: 'Banho', exact: true }).waitFor()
+  check('VIS-03 lista de serviços mantém o catálogo real', await page.getByRole('radio', { name: 'Tosa', exact: true }).count() === 1)
   await fit(page, 'servicos')
-  await page.getByRole('button', { name: 'Banho', exact: true }).click()
-  await page.getByRole('combobox', { name: 'Endereço do atendimento' }).waitFor()
-  await activeText(page, 'Profissionais disponíveis').waitFor()
+  await page.getByRole('radio', { name: 'Banho', exact: true }).click()
+  await page.getByRole('radio', { name: 'Banho, selecionado', exact: true }).waitFor()
   check('VIS-03 serviço escolhido permanece selecionado', await page.getByRole('radio', { name: 'Banho, selecionado', exact: true }).count() === 1)
   await shot(page, 'busca-inicial')
-  await page.getByRole('button', { name: 'Buscar', exact: true }).click()
+  if (await page.getByRole('button', { name: 'Trocar endereço', exact: true }).count()) {
+    await activeText(page, 'Profissionais disponíveis').waitFor({ timeout: 20000 })
+  }
   // A conta sem endereço padrão requer um local; quando houver padrão, a busca usa esse local real.
-  check('VIS-07 busca mantém campo e seleção utilizáveis', await page.getByRole('combobox', { name: 'Endereço do atendimento' }).isEnabled())
+  check('VIS-07 busca mantém seleção utilizável', await page.getByRole('radio', { name: 'Banho, selecionado', exact: true }).isEnabled())
 
   await page.getByRole('button', { name: 'Abrir perfil' }).click()
   const petsGate = { fail: true, delayMs: 0 }

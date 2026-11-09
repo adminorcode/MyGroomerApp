@@ -65,11 +65,12 @@ async function run() {
   check('AC-03 telefone não abre em Gana', !/Ghana|\+233|\bGH\b/.test(body) && !/Ghana|\+233/.test(placeholder ?? ''))
 
   await signIn(page, tutor)
-  await page.getByText('Categorias').waitFor()
+  await page.getByRole('heading', { name: 'Categorias', exact: true }).waitFor()
   body = await textOf(page)
   check('AC-01 abas em português', body.includes('Início') && body.includes('Agendamentos') && body.includes('Mensagens'))
   check('AC-05 cards fixos em inglês e GHS ausentes', !/Premium Car Wash|Deep Home Cleaning|Office Cleaning|From GHS/.test(body))
-  check('AC-05 home restante em português', body.includes('Buscar um serviço...') && body.includes('Categorias') && body.includes('Banho e Tosa'))
+  // Seção 'Categorias' usa caixa-alta por CSS (eyebrow, plano 027): comparação sem diferenciar maiúsculas.
+  check('AC-05 home restante em português', body.includes('Buscar um serviço...') && /categorias/i.test(body) && body.includes('Banho e Tosa'))
   check('AC-02 home sem GHS', !/\bGHS\b/.test(body))
 
   await page.route('**/api/v1/bookings**', route => route.abort())
@@ -78,7 +79,7 @@ async function run() {
   check('AC-06 erro de agendamentos em português', true)
   await page.unroute('**/api/v1/bookings**')
   await page.reload({ waitUntil: 'domcontentloaded' })
-  await page.getByText('Categorias').waitFor({ timeout: 20000 })
+  await page.getByRole('heading', { name: 'Categorias', exact: true }).waitFor({ timeout: 20000 })
 
   let delayed = false
   await page.route('**/api/v1/bookings**', async route => {
@@ -109,7 +110,7 @@ async function run() {
   body = await textOf(page)
   check('AC-04 data do detalhe em pt-BR', dateOk(body))
   check('AC-02 preço do detalhe em real', moneyOk(body))
-  check('AC-01 detalhe em português', body.includes('Agendado') && body.includes('Local') && body.includes('Preço'))
+  check('AC-01 detalhe em português', body.includes('Agendado') && body.includes('Local') && body.includes('Valor estimado'))
 
   page.once('dialog', async dialog => {
     check('AC-01 confirmação de saída', dialog.message().includes('Tem certeza de que quer sair?'))
@@ -140,10 +141,10 @@ async function run() {
   body = await textOf(mobile)
   check('AC-01 login no celular escuro', body.includes('Entrar') && body.includes('E-mail'))
   await signIn(mobile, tutor)
-  await mobile.getByText('Categorias').waitFor()
+  await mobile.getByRole('heading', { name: 'Categorias', exact: true }).waitFor()
   body = await textOf(mobile)
-  check('AC-05 home no celular escuro sem GHS', !/\bGHS\b|Premium Car Wash/.test(body) && body.includes('Categorias'))
-  const homeColor = await mobile.getByText('Categorias').evaluate(node => getComputedStyle(node).color)
+  check('AC-05 home no celular escuro sem GHS', !/\bGHS\b|Premium Car Wash/.test(body) && /categorias/i.test(body))
+  const homeColor = await mobile.getByRole('heading', { name: 'Categorias', exact: true }).evaluate(node => getComputedStyle(node).color)
   check('AC-06 texto da home escura permanece visível', homeColor !== 'rgba(0, 0, 0, 0)' && homeColor !== 'transparent', homeColor)
   await mobile.context().close()
   console.log(JSON.stringify({ passed: session.failures.length === 0, failures: session.failures }))

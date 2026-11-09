@@ -33,7 +33,7 @@ export default function AvailabilityStepper() {
                     left: 0,
                     right: '50%',
                     height: 2,
-                    backgroundColor: colors.action.primary,
+                    backgroundColor: index <= currentIndex ? colors.brand.teal : colors.border.default,
                   }}
                 />
               ) : null}
@@ -44,7 +44,7 @@ export default function AvailabilityStepper() {
                     left: '50%',
                     right: 0,
                     height: 2,
-                    backgroundColor: colors.action.primary,
+                    backgroundColor: index < currentIndex ? colors.brand.teal : colors.border.default,
                   }}
                 />
               ) : null}
@@ -53,7 +53,7 @@ export default function AvailabilityStepper() {
                   width: 28,
                   height: 28,
                   borderRadius: 14,
-                  backgroundColor: colors.action.primary,
+                  backgroundColor: done ? colors.brand.teal : current ? colors.action.primary : colors.surface.default, borderWidth: done || current ? 0 : 1, borderColor: colors.border.default,
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
@@ -61,11 +61,11 @@ export default function AvailabilityStepper() {
                 {done ? (
                   <MGIcon name="check" size={16} color={colors.onAction.primary} />
                 ) : (
-                  <MGText variant="label" style={{ color: colors.onAction.primary }}>{index + 1}</MGText>
+                  <MGText variant="label" style={{ color: done || current ? colors.onAction.primary : colors.text.secondary }}>{index + 1}</MGText>
                 )}
               </View>
             </View>
-            <MGText variant="caption" color={current ? 'brand' : 'secondary'} numberOfLines={1}>
+            <MGText variant="caption" color={current ? 'brand' : done ? 'teal' : 'secondary'} numberOfLines={1}>
               {step.label}
             </MGText>
           </View>

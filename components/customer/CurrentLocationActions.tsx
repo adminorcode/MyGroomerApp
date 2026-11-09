@@ -23,12 +23,12 @@ export default function CurrentLocationActions({ status, onPress }: Props) {
             />
             {status === 'denied' ? (
                 <MGText variant="bodySmall" color="secondary">
-                    A localização atual não foi permitida. Escolha o endereço na busca.
+                    A localização atual não foi permitida.
                 </MGText>
             ) : null}
             {status === 'unavailable' ? (
                 <MGText variant="bodySmall" color="error" accessibilityRole="alert">
-                    Não foi possível localizar você agora. Escolha o endereço na busca.
+                    Não foi possível localizar você agora.
                 </MGText>
             ) : null}
         </View>

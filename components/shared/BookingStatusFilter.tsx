@@ -1,7 +1,7 @@
-import { ScrollView, Pressable, Text, StyleSheet } from 'react-native'
-import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
-import { useTheme } from '../../context/ThemeContext'
+import { ScrollView, StyleSheet } from 'react-native'
 import { BookingStatus } from '../../types/booking.types'
+import { MGChip } from '../../design-system/components'
+import { spacing } from '../../design-system/tokens'
 
 export type BookingStatusFilterOption = {
     label: string
@@ -24,9 +24,11 @@ type Props = {
     options?: BookingStatusFilterOption[]
 }
 
+/**
+ * Filtro por status da lista de agendamentos (R1: selecionado sempre em `action.primary`).
+ * Usa MGChip, que aplica a regra de ação rosa e o texto branco no estado selecionado.
+ */
 export default function BookingStatusFilter({ selected, onSelect, options = BOOKING_STATUS_FILTERS }: Props) {
-    const { colors } = useTheme()
-
     return (
         <ScrollView
             horizontal
@@ -34,31 +36,14 @@ export default function BookingStatusFilter({ selected, onSelect, options = BOOK
             style={styles.scroll}
             contentContainerStyle={styles.content}
         >
-            {options.map((option) => {
-                const isActive = selected === option.value
-                return (
-                    <Pressable
-                        key={option.label}
-                        onPress={() => onSelect(option.value)}
-                        style={[
-                            styles.chip,
-                            {
-                                backgroundColor: isActive ? colors.selection : colors.surface,
-                                borderColor: isActive ? colors.selection : colors.border,
-                            },
-                        ]}
-                    >
-                        <Text
-                            style={[
-                                styles.chipText,
-                                { color: isActive ? colors.onSelection : colors.textSecondary },
-                            ]}
-                        >
-                            {option.label}
-                        </Text>
-                    </Pressable>
-                )
-            })}
+            {options.map((option) => (
+                <MGChip
+                    key={option.label}
+                    label={option.label}
+                    selected={selected === option.value}
+                    onPress={() => onSelect(option.value)}
+                />
+            ))}
         </ScrollView>
     )
 }
@@ -70,15 +55,5 @@ const styles = StyleSheet.create({
     content: {
         gap: spacing.sm,
         paddingVertical: spacing.sm,
-    },
-    chip: {
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm,
-        borderRadius: borderRadius.full,
-        borderWidth: 1,
-    },
-    chipText: {
-        fontSize: typography.sizes.sm,
-        fontFamily: fonts.medium,
     },
 })

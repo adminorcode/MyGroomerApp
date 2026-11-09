@@ -67,8 +67,11 @@ export default function ServiceMenuScreen({ navigation, route }: Props) {
     ? menuIssue(draft.state.offers, new Set(draft.state.types.map(type => type.id)))
     : null
 
+  // Decisão (027): o cardápio exige ao menos um serviço para publicar.
+  const empty = !draft.state || draft.state.offers.length === 0
+
   const publish = async () => {
-    if (!draft.state || issue) return
+    if (!draft.state || empty || issue) return
     setSaveError(null)
     try {
       const result = await save.mutateAsync(toMenuPayload(draft.state.offers))
@@ -103,7 +106,7 @@ export default function ServiceMenuScreen({ navigation, route }: Props) {
             <MGButton
               label={fromProfile ? 'Salvar' : 'Continuar'}
               onPress={() => { void publish() }}
-              disabled={!!issue || save.isPending || !draft.state}
+              disabled={!!issue || empty || save.isPending}
               loading={save.isPending}
             />
           </View>

@@ -66,7 +66,8 @@ try {
   const chip = button(authenticated, 'Filtro')
   await chip.scrollIntoViewIfNeeded()
   colors = await pair(chip, 'Filtro')
-  check('PA-02 seleção suave preserva texto AA', colors.background === 'rgb(252, 229, 237)' && colors.contrast >= 4.5, JSON.stringify(colors))
+  // CMP-06 (plano 027): chip selecionado é sempre action.primary com texto branco (R1). Substitui a seleção suave do 022.
+  check('PA-02 chip selecionado usa action.primary com texto branco AA', colors.background === 'rgb(198, 72, 120)' && colors.foreground === 'rgb(255, 255, 255)' && colors.contrast >= 4.5, JSON.stringify(colors))
   check('PA-03 componentes visíveis sem candidatos de contraste', (await inspectRenderedText(authenticated)).candidates.length === 0)
   await shot(authenticated, 'selection')
   await chip.hover()
