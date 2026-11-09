@@ -4,6 +4,7 @@ import {
   evidenceFile,
   fillServiceAddress,
   launchBrowser,
+  openCoverageFilters,
   loginProfessional,
   loginTutor,
   openPage,
@@ -138,7 +139,7 @@ async function run() {
 
     await loginProfessional(page)
     await openServices(page)
-    await page.getByText('Não foi possível conectar à API. Verifique o servidor e tente novamente.').waitFor({ timeout: 15000 })
+    await page.getByText('Não foi possível conectar. Verifique sua internet e tente novamente.').waitFor({ timeout: 15000 })
     check('erro do cardápio', true)
 
     mode = 'delay'
@@ -216,8 +217,8 @@ async function run() {
     await loginTutor(tutor)
     await tutor.getByRole('button', { name: 'Buscar um serviço' }).click()
     await fillServiceAddress(tutor, 'Avenida Paulista, São Paulo')
+    await openCoverageFilters(tutor)
     await tutor.getByRole('radio', { name: 'Banho', exact: true }).click()
-    await tutor.getByRole('button', { name: 'Buscar' }).click()
     await tutor.getByText('Nenhum groomer atende este endereço.').waitFor({ timeout: 15000 })
     check('AC-01 serviço desativado some para o tutor', !(await tutor.locator('body').innerText()).includes('Groomer de Teste'))
     await tutor.context().close()

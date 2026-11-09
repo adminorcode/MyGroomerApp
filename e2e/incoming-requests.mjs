@@ -285,7 +285,7 @@ async function execute() {
   const answerGate = { fail: true, delayMs: 0 }
   await gateRoute(page, '**/api/v1/bookings/*/status', answerGate)
   await article(page, 'p3').getByRole('button', { name: /^Aceitar solicitação de / }).click()
-  await page.getByRole('alert').filter({ hasText: 'Não foi possível conectar à API' }).waitFor({ timeout: 15000 })
+  await page.getByRole('alert').filter({ hasText: 'Não foi possível conectar. Verifique sua internet' }).waitFor({ timeout: 15000 })
   check('FE-05 falha ao responder mostra o erro e mantém o pedido pendente',
     await article(page, 'p3').isVisible()
     && await article(page, 'p3').getByRole('button', { name: /^Aceitar solicitação de / }).isEnabled()

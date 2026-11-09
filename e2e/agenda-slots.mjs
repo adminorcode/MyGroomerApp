@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { randomUUID } from 'node:crypto'
 import { mkdirSync } from 'node:fs'
 import { evidenceFile, fillServiceAddress, launchBrowser, openPage, loginTutor, gateRoute, startRun } from './harness.mjs'
+let chosenLabel = ''
 
 const require = createRequire(import.meta.url)
 const apiRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../API')
@@ -41,9 +42,7 @@ async function capture(page, name, locator) {
 async function openBooking(page) {
   await loginTutor(page, { email: tutorEmail, password: 'admin' })
   await page.getByRole('button', { name: 'Buscar um serviço' }).click()
-  await fillServiceAddress(page, 'Avenida Paulista, São Paulo')
-  if (!await page.getByRole('radio', { name: 'Banho, selecionado' }).count()) await page.getByRole('radio', { name: 'Banho', exact: true }).click()
-  await page.getByRole('button', { name: 'Buscar', exact: true }).click()
+  chosenLabel = await fillServiceAddress(page, 'Avenida Paulista, São Paulo')
   await page.getByRole('button', { name: new RegExp(professionalName) }).click()
   await page.getByRole('radio', { name: /^Banho, A partir de/ }).click()
   await page.getByRole('button', { name: 'Agendar serviço', exact: true }).click()
@@ -106,7 +105,7 @@ async function execute() {
   gate.delayMs = 1800
   await page.getByRole('radio',{name:/^Luna horários/}).click()
   await page.getByText('Buscando horários…',{exact:true}).waitFor()
-  check('AC-02 carregamento parcial mantém o local da busca',await page.getByLabel('Local do atendimento: Avenida Paulista, São Paulo').isVisible())
+  check('AC-02 carregamento parcial mantém o local da busca',await page.getByLabel(`Local do atendimento: ${chosenLabel}`).isVisible())
   await capture(page,'loading',page.getByText('Buscando horários…',{exact:true}))
   gate.delayMs = 0
   await page.getByRole('button',{name:'09:00',exact:true}).waitFor()

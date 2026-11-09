@@ -204,7 +204,8 @@ async function execute() {
   await page.getByText('O fim precisa ser depois do início.', { exact: true }).waitFor()
   check('AC-06 fim anterior desabilita', await confirm.isDisabled())
   await capture(page, 'block-invalid')
-  await page.getByRole('textbox', { name: 'Data', exact: true }).fill(free.date)
+  // A folha exibe e digita a data como DD/MM/AAAA (a API recebe ISO).
+  await page.getByRole('textbox', { name: 'Data', exact: true }).fill(free.date.split('-').reverse().join('/'))
   await page.getByRole('textbox', { name: 'Início', exact: true }).fill(range.start)
   await page.getByRole('textbox', { name: 'Fim', exact: true }).fill(range.end)
   check('AC-06 intervalo válido habilita', await confirm.isEnabled())

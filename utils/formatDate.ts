@@ -7,7 +7,7 @@ export function formatDateTime(value?: string | Date) {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
-        hour: 'numeric',
+        hour: '2-digit',
         minute: '2-digit',
     })
 }

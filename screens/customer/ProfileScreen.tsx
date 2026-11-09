@@ -1,13 +1,12 @@
 import { AppAlert } from '../../utils/alert'
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { ChevronRight, IdCard, LogOut, MapPin, PawPrint, Store } from 'lucide-react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
+import { ChevronRight, IdCard, LogOut, LucideIcon, MapPin, PawPrint, Store } from 'lucide-react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { ProfileStackParamList } from '../../navigation/types'
 import { useAuthStore } from '../../store/authStore'
-import { useTheme } from '../../context/ThemeContext'
-import ScreenContainer from '../../components/shared/ScreenContainer'
-import ScreenHeader from '../../components/shared/ScreenHeader'
-import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
+import { MGAvatar, MGCard, MGScreen, MGText } from '../../design-system/components'
+import { useMGTheme } from '../../design-system/theme/useMGTheme'
+import { radius, spacing } from '../../design-system/tokens'
 
 type ProfileScreenNavigationProps = StackNavigationProp<ProfileStackParamList, 'Profile'>
 
@@ -15,9 +14,50 @@ type Props = {
   navigation: ProfileScreenNavigationProps
 }
 
+type MenuItemProps = {
+  label: string
+  description?: string
+  icon?: LucideIcon
+  iconBackground?: string
+  iconColor?: string
+  onPress: () => void
+}
+
+function MenuItem({ label, description, icon: Icon, iconBackground, iconColor, onPress }: MenuItemProps) {
+  const { colors } = useMGTheme()
+
+  return (
+    <MGCard onPress={onPress} accessibilityLabel={label} style={styles.menuCard}>
+      <View style={styles.menuRow}>
+        {Icon ? (
+          <View style={[styles.menuIcon, { backgroundColor: iconBackground }]}>
+            <Icon size={20} color={iconColor} />
+          </View>
+        ) : null}
+        <View style={styles.menuText}>
+          <MGText variant="title">{label}</MGText>
+          {description ? (
+            <MGText variant="bodySmall" color="secondary">
+              {description}
+            </MGText>
+          ) : null}
+        </View>
+        <ChevronRight size={20} color={colors.text.secondary} />
+      </View>
+    </MGCard>
+  )
+}
+
 export default function ProfileScreen({ navigation }: Props) {
-  const { colors } = useTheme()
+  const { colors } = useMGTheme()
   const { logout, user } = useAuthStore()
+
+  // R8 + R2/R3: o papel autenticado define a cor do avatar, da etiqueta e dos ícones do menu.
+  const isProvider = user?.role === 'provider'
+  const roleTone = isProvider ? 'teal' : 'pink'
+  const roleSurface = isProvider ? colors.surface.tealSubtle : colors.surface.pinkSubtle
+  const roleIconBackground = isProvider ? colors.surface.tealSubtle : colors.surface.pinkSubtle
+  const roleIconColor = isProvider ? colors.brand.teal : colors.action.primaryText
 
   const handleLogout = () => {
     AppAlert.alert(
@@ -30,143 +70,86 @@ export default function ProfileScreen({ navigation }: Props) {
     )
   }
 
-  const initial = user?.name?.charAt(0).toUpperCase() ?? '?'
-
   return (
-    <ScreenContainer>
-      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: spacing.lg }}>
-      <ScreenHeader title='Perfil' description='Gerencie sua conta' />
+    <MGScreen scrollable contentStyle={{ paddingBottom: spacing.lg }}>
+      <View style={styles.header}>
+        <MGText variant="heading2" accessibilityRole="header">
+          Perfil
+        </MGText>
+        <MGText variant="bodySmall" color="secondary">
+          Gerencie sua conta
+        </MGText>
+      </View>
 
       <View style={styles.profileSection}>
-        <View style={[styles.avatar, { backgroundColor: colors.selectionSoft }]}>
-          <Text style={[styles.avatarText, { color: colors.primaryText }]}>{initial}</Text>
-        </View>
+        <MGAvatar name={user?.name ?? '?'} size={88} tone={roleTone} />
 
-        <Text style={[styles.name, { color: colors.text }]}>{user?.name ?? 'Usuário desconhecido'}</Text>
-        <Text style={[styles.email, { color: colors.textSecondary }]}>{user?.email}</Text>
+        <MGText variant="heading3" style={styles.centerText}>
+          {user?.name ?? 'Usuário desconhecido'}
+        </MGText>
+        <MGText variant="bodySmall" color="secondary" style={styles.centerText}>
+          {user?.email}
+        </MGText>
 
         {user?.role && (
-          <View style={[styles.rolePill, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Text style={[styles.roleText, { color: colors.textSecondary }]}>{user.role === 'provider' ? 'Profissional' : user.role === 'customer' ? 'Tutor' : 'Administrador'}</Text>
+          <View style={[styles.rolePill, { backgroundColor: roleSurface }]}>
+            <MGText variant="label" style={styles.centerText}>
+              {user.role === 'provider' ? 'Profissional' : user.role === 'customer' ? 'Tutor' : 'Administrador'}
+            </MGText>
           </View>
         )}
       </View>
 
       {user?.role === 'provider' && (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Perfil público"
+        <MenuItem
+          label="Perfil público"
+          description="Veja e edite o que o tutor encontra na busca"
+          icon={IdCard}
+          iconBackground={roleIconBackground}
+          iconColor={roleIconColor}
           onPress={() => navigation.navigate('PublicProfile')}
-          style={({ pressed }) => [
-            styles.actionRow,
-            { backgroundColor: colors.surface, borderColor: colors.border },
-            pressed && styles.pressed,
-          ]}
-        >
-          <View style={[styles.actionIcon, { backgroundColor: colors.selectionSoft }]}>
-            <IdCard size={20} color={colors.primary} />
-          </View>
-          <View style={styles.actionTextWrapper}>
-            <Text style={[styles.actionTitle, { color: colors.text }]}>Perfil público</Text>
-            <Text style={[styles.actionSubtitle, { color: colors.textSecondary }]}>
-              Veja e edite o que o tutor encontra na busca
-            </Text>
-          </View>
-          <ChevronRight size={20} color={colors.textSecondary} />
-        </Pressable>
+        />
       )}
 
       {user?.role === 'customer' && (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Meus pets"
+        <MenuItem
+          label="Meus pets"
+          description="Cadastre e reutilize os pets nos agendamentos"
+          icon={PawPrint}
+          iconBackground={roleIconBackground}
+          iconColor={roleIconColor}
           onPress={() => navigation.navigate('Pets')}
-          style={({ pressed }) => [
-            styles.actionRow,
-            { backgroundColor: colors.surface, borderColor: colors.border },
-            pressed && styles.pressed,
-          ]}
-        >
-          <View style={[styles.actionIcon, { backgroundColor: colors.selectionSoft }]}>
-            <PawPrint size={20} color={colors.primary} />
-          </View>
-          <View style={styles.actionTextWrapper}>
-            <Text style={[styles.actionTitle, { color: colors.text }]}>Meus pets</Text>
-            <Text style={[styles.actionSubtitle, { color: colors.textSecondary }]}>
-              Cadastre e reutilize os pets nos agendamentos
-            </Text>
-          </View>
-          <ChevronRight size={20} color={colors.textSecondary} />
-        </Pressable>
+        />
       )}
 
       {user?.role === 'customer' && (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Endereços"
+        <MenuItem
+          label="Endereços"
+          description="Casa, trabalho e outros locais de atendimento"
+          icon={MapPin}
+          iconBackground={roleIconBackground}
+          iconColor={roleIconColor}
           onPress={() => navigation.navigate('Addresses')}
-          style={({ pressed }) => [
-            styles.actionRow,
-            { backgroundColor: colors.surface, borderColor: colors.border },
-            pressed && styles.pressed,
-          ]}
-        >
-          <View style={[styles.actionIcon, { backgroundColor: colors.selectionSoft }]}>
-            <MapPin size={20} color={colors.primary} />
-          </View>
-          <View style={styles.actionTextWrapper}>
-            <Text style={[styles.actionTitle, { color: colors.text }]}>Endereços</Text>
-            <Text style={[styles.actionSubtitle, { color: colors.textSecondary }]}>
-              Casa, trabalho e outros locais de atendimento
-            </Text>
-          </View>
-          <ChevronRight size={20} color={colors.textSecondary} />
-        </Pressable>
+        />
       )}
 
       {user?.role !== 'provider' && (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Quero ser groomer"
+        <MenuItem
+          label="Quero ser groomer"
+          description="Ofereça seus serviços e acompanhe os rendimentos"
+          icon={Store}
+          iconBackground={colors.surface.pinkSubtle}
+          iconColor={colors.action.primaryText}
           onPress={() => navigation.navigate('BecomeAProvider')}
-          style={({ pressed }) => [
-            styles.actionRow,
-            { backgroundColor: colors.surface, borderColor: colors.border },
-            pressed && styles.pressed,
-          ]}
-        >
-          <View style={[styles.actionIcon, { backgroundColor: colors.selectionSoft }]}>
-            <Store size={20} color={colors.primary} />
-          </View>
-          <View style={styles.actionTextWrapper}>
-            <Text style={[styles.actionTitle, { color: colors.text }]}>Quero ser groomer</Text>
-            <Text style={[styles.actionSubtitle, { color: colors.textSecondary }]}>
-              Ofereça seus serviços e acompanhe os rendimentos
-            </Text>
-          </View>
-          <ChevronRight size={20} color={colors.textSecondary} />
-        </Pressable>
+        />
       )}
 
       {__DEV__ ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Design System"
+        <MenuItem
+          label="Design System"
+          description="Showcase de componentes (somente desenvolvimento)"
           onPress={() => navigation.navigate('DesignSystemShowcase')}
-          style={({ pressed }) => [
-            styles.actionRow,
-            { backgroundColor: colors.surface, borderColor: colors.border },
-            pressed && styles.pressed,
-          ]}
-        >
-          <View style={styles.actionTextWrapper}>
-            <Text style={[styles.actionTitle, { color: colors.text }]}>Design System</Text>
-            <Text style={[styles.actionSubtitle, { color: colors.textSecondary }]}>
-              Showcase de componentes (somente desenvolvimento)
-            </Text>
-          </View>
-          <ChevronRight size={20} color={colors.textSecondary} />
-        </Pressable>
+        />
       ) : null}
 
       <View style={styles.spacer} />
@@ -177,84 +160,57 @@ export default function ProfileScreen({ navigation }: Props) {
         onPress={handleLogout}
         style={({ pressed }) => [
           styles.logoutButton,
-          { borderColor: colors.error },
+          { borderColor: colors.feedback.error, backgroundColor: colors.surface.default },
           pressed && styles.pressed,
         ]}
       >
-        <LogOut size={20} color={colors.error} />
-        <Text style={[styles.logoutText, { color: colors.error }]}>Sair</Text>
+        <LogOut size={20} color={colors.feedback.error} />
+        <MGText variant="button" color="error">
+          Sair
+        </MGText>
       </Pressable>
-      </ScrollView>
-    </ScreenContainer>
+    </MGScreen>
   )
 }
 
 const styles = StyleSheet.create({
+  header: {
+    marginTop: spacing.lg,
+    gap: spacing.xs,
+  },
   profileSection: {
     alignItems: 'center',
     marginTop: spacing.xl,
     marginBottom: spacing.base,
+    gap: spacing.xs,
   },
-  avatar: {
-    width: 88,
-    height: 88,
-    borderRadius: borderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.md,
-  },
-  avatarText: {
-    fontSize: typography.sizes.xxl,
-    fontFamily: fonts.semibold,
-  },
-  name: {
-    fontSize: typography.sizes.lg,
-    fontFamily: fonts.semibold,
-  },
-  email: {
-    fontSize: typography.sizes.md,
-    fontFamily: fonts.regular,
-    marginTop: spacing.xs,
+  centerText: {
+    textAlign: 'center',
   },
   rolePill: {
     marginTop: spacing.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
+    borderRadius: radius.pill,
   },
-  roleText: {
-    fontSize: typography.sizes.sm,
-    fontFamily: fonts.medium,
-    textTransform: 'capitalize',
+  menuCard: {
+    marginTop: spacing.md,
   },
-  actionRow: {
+  menuRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    borderWidth: 1,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
-    marginTop: spacing.md,
   },
-  actionIcon: {
+  menuIcon: {
     width: 40,
     height: 40,
-    borderRadius: borderRadius.full,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  actionTextWrapper: {
+  menuText: {
     flex: 1,
-  },
-  actionTitle: {
-    fontSize: typography.sizes.md,
-    fontFamily: fonts.semibold,
-  },
-  actionSubtitle: {
-    fontSize: typography.sizes.sm,
-    fontFamily: fonts.regular,
-    marginTop: spacing.xs,
+    gap: spacing.xs,
   },
   spacer: {
     flex: 1,
@@ -266,17 +222,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.sm,
     borderWidth: 1,
-    borderRadius: borderRadius.lg,
-    paddingVertical: spacing.sm + 4,
-    minHeight: 48,
+    borderRadius: radius.lg,
+    minHeight: 52,
     marginBottom: spacing.lg,
-  },
-  logoutText: {
-    fontSize: typography.sizes.md,
-    fontFamily: fonts.semibold,
   },
   pressed: {
     opacity: 0.85,
   },
 })
-

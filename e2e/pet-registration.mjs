@@ -1,4 +1,4 @@
-import { evidenceFile, fillServiceAddress, launchBrowser, openPage, openLogin, openRegistrationWelcome, startRun } from './harness.mjs'
+import { evidenceFile, fillServiceAddress, launchBrowser, openCoverageFilters, openPage, openLogin, openRegistrationWelcome, startRun } from './harness.mjs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -142,10 +142,10 @@ async function run() {
 
   await page.getByText('Início', { exact: true }).click()
   await page.getByText('Banho e Tosa', { exact: true }).click()
+  await openCoverageFilters(page)
   await page.getByText('Banho', { exact: true }).click()
-  await page.getByText('Informe o endereço do atendimento para ver quem atende.').waitFor()
+  await page.getByText('Escolha um endereço para ver quem atende.').first().waitFor()
   await fillServiceAddress(page, 'Avenida Paulista, São Paulo')
-  await page.getByRole('button', { name: 'Buscar' }).click()
   await page.getByRole('button', { name: /Groomer de Teste/ }).click()
   await page.getByRole('radio', { name: /^Banho, A partir de/ }).click()
   await page.getByRole('button', { name: 'Agendar serviço' }).click()

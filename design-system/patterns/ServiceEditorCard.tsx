@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native'
 import MGBadge from '../components/MGBadge'
 import MGButton from '../components/MGButton'
 import MGCard from '../components/MGCard'
+import MGIcon from '../components/MGIcon'
 import MGText from '../components/MGText'
 import { useMGTheme } from '../theme/useMGTheme'
 
@@ -34,39 +35,64 @@ export default function ServiceEditorCard({
   onEdit,
   onToggleActive,
 }: Props) {
-  const { spacing, fonts } = useMGTheme()
-  const priceLine = [
+  const { colors, spacing, radius } = useMGTheme()
+  const priceEntries = [
     prices?.small ? `Pequeno ${prices.small}` : null,
     prices?.medium ? `Médio ${prices.medium}` : null,
     prices?.large ? `Grande ${prices.large}` : null,
-  ]
-    .filter(Boolean)
-    .join(' · ')
+  ].filter((entry): entry is string => Boolean(entry))
 
   return (
     <MGCard>
-      <View style={[styles.header, { gap: spacing.sm, marginBottom: spacing.sm }]}>
-        <MGText variant="title" style={{ flex: 1 }}>
-          {name}
-        </MGText>
+      {/* CMP-11 / R3: destaque do profissional em tealSubtle, com avatar teal sólido e texto primário. */}
+      <View
+        style={[
+          styles.header,
+          {
+            gap: spacing.sm,
+            marginBottom: spacing.md,
+            padding: spacing.md,
+            borderRadius: radius.md,
+            backgroundColor: colors.surface.tealSubtle,
+          },
+        ]}
+      >
+        <View style={[styles.avatar, { backgroundColor: colors.brand.teal }]}>
+          <MGIcon name="scissors" size={20} color={colors.text.inverse} />
+        </View>
+        <View style={[styles.titleBlock, { gap: spacing.xs }]}>
+          <MGText variant="title">{name}</MGText>
+          {typeLabel ? (
+            <MGText variant="bodySmall">
+              {`Tipo: ${typeLabel}`}
+            </MGText>
+          ) : null}
+        </View>
+        {/* R6: status com semântica de feedback e texto, não depende da cor da marca. */}
         <MGBadge label={active ? 'Ativo' : 'Inativo'} tone={active ? 'success' : 'neutral'} />
       </View>
-      {typeLabel ? (
-        <MGText variant="bodySmall" color="secondary">
-          {`Tipo: ${typeLabel}`}
-        </MGText>
-      ) : null}
       {durationLabel ? (
         <MGText variant="bodySmall" color="secondary">
           Duração: {durationLabel}
         </MGText>
       ) : null}
-      {priceLine ? (
-        <MGText variant="bodySmall" style={{ marginTop: spacing.xs, fontFamily: fonts.bold }}>
-          {priceLine}
-        </MGText>
+      {priceEntries.length ? (
+        <View style={[styles.prices, { columnGap: spacing.md, rowGap: spacing.xs, marginTop: spacing.xs }]}>
+          {/* R3: preço por porte em teal, sobre superfície branca. */}
+          {priceEntries.map(entry => (
+            <MGText key={entry} variant="label" color="teal">
+              {entry}
+            </MGText>
+          ))}
+        </View>
       ) : null}
+      {/* Revisão UI (027): ações empilhadas em largura total; em duas colunas o rótulo quebrava em 390 pt. Editar (CTA) vem primeiro. */}
       <View style={[styles.actions, { gap: spacing.sm, marginTop: spacing.md }]}>
+        {onEdit ? (
+          <View style={styles.action}>
+            <MGButton label={editLabel ?? 'Editar'} onPress={onEdit} />
+          </View>
+        ) : null}
         {onToggleActive ? (
           <View style={styles.action}>
             <MGButton
@@ -74,11 +100,6 @@ export default function ServiceEditorCard({
               variant="secondary"
               onPress={onToggleActive}
             />
-          </View>
-        ) : null}
-        {onEdit ? (
-          <View style={styles.action}>
-            <MGButton label={editLabel ?? 'Editar'} onPress={onEdit} />
           </View>
         ) : null}
       </View>
@@ -91,10 +112,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  actions: {
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  titleBlock: {
+    flex: 1,
+    minWidth: 0,
+  },
+  prices: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  actions: {
+    flexDirection: 'column',
   },
   action: {
-    flex: 1,
+    width: '100%',
   },
 })

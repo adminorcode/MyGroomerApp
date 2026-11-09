@@ -1,570 +1,645 @@
-import { useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { Check } from 'lucide-react-native'
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { AccessibilityInfo, ActivityIndicator, Animated, Easing, NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, StyleSheet, Switch, useWindowDimensions, View } from 'react-native'
+import { ChevronLeft } from 'lucide-react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { RouteProp } from '@react-navigation/core'
 import { HomeStackParamList } from '../../navigation/types'
 import { useFetchCategories } from '../../hooks/useCategory'
 import { useGetAllServices } from '../../hooks/useServices'
 import { useCoverageSearch } from '../../hooks/useProviders'
-import { CoverageSearchParams } from '../../types/provider.types'
-import { AddressSuggestion, autocompleteServiceLocation, getMapTiles, reverseServiceLocation } from '../../services/provider.service'
-import ServiceLocationMap from '../provider/ServiceLocationMap'
+import { CoverageProvider, CoverageSearchParams } from '../../types/provider.types'
 import CurrentLocationActions from '../../components/customer/CurrentLocationActions'
 import { useCurrentPlace } from '../../hooks/useCurrentPlace'
 import { useCustomerAddresses } from '../../hooks/useCustomerAddresses'
 import { addressLabelName, CustomerAddress } from '../../services/customerAddress.service'
-import { useTheme } from '../../context/ThemeContext'
+import { addFavoriteProvider, removeFavoriteProvider } from '../../services/favorite.service'
+import { APP_NAME } from '../../constants/brand'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
-import ScreenContainer from '../../components/shared/ScreenContainer'
-import ScreenHeader from '../../components/shared/ScreenHeader'
-import { MGButton, MGChip, MGEmptyState, MGErrorState, MGText, MGTextField } from '../../design-system/components'
-import { AddressMapPlaceholder, AddressPlaceCard, GroomerSearchCard } from '../../design-system/patterns'
-import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
+import { MGIconName } from '../../design-system/components/MGIcon'
+import { spacing } from '../../design-system/tokens'
+import { MGButton, MGChip, MGEmptyState, MGErrorState, MGIcon, MGScreen, MGText, MGTextField } from '../../design-system/components'
+import { GroomerSearchCard } from '../../design-system/patterns'
 import { formatMoney } from '../../utils/formatMoney'
 import { formatRating } from '../../utils/formatRating'
 import { getErrorMessage } from '../../utils/error'
+import SearchFilterPanel from '../../components/customer/search/SearchFilterPanel'
+import { filterSearchProviders, SearchFilterValues, SearchPanel, SearchSort } from '../../components/customer/search/searchFilters'
 
 type Props = {
     navigation: StackNavigationProp<HomeStackParamList, 'TutorSearch'>
     route: RouteProp<HomeStackParamList, 'TutorSearch'>
 }
 
-type Draft = {
-    address: string
-    categoryId: string
-    serviceId: string
-}
-
 type Option = { id: string, name: string }
+type ChosenAddress = { id?: string, address: string, latitude: number, longitude: number }
+type Tab = 'groomers' | 'servicos'
+type ServiceGroup = { id: string, name: string, providers: CoverageProvider[], minPrice: number }
+const PAGE_SIZE = 15
 
-type PickedPoint = { latitude: number, longitude: number, label: string }
-
-function mapLabel(point: PickedPoint) {
-    return `Mapa do atendimento. ${point.label}.`
+function fromSaved(item: CustomerAddress): ChosenAddress {
+    return { id: item.id, address: item.address, latitude: item.latitude, longitude: item.longitude }
 }
 
+function countLabel(count: number) {
+    return count === 1 ? '1 groomer' : `${count} groomers`
+}
+
+function categoryIcon(name: string): MGIconName {
+    if (/tosa/i.test(name) && /banho/i.test(name)) return 'scissors'
+    if (/tosa/i.test(name)) return 'scissors'
+    if (/banho/i.test(name)) return 'shower-head'
+    if (/higiene/i.test(name)) return 'paw-print'
+    return 'ellipsis'
+}
+
+function saoPauloDate(instant: Date) {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit' }).format(instant)
+}
+
+function availabilityCopy(item: CoverageProvider) {
+    if (item.available_today) return 'Disponível hoje'
+    if (!item.next_available_on) return undefined
+    const today = saoPauloDate(new Date())
+    const tomorrow = saoPauloDate(new Date(new Date(`${today}T12:00:00-03:00`).getTime() + 24 * 60 * 60 * 1000))
+    if (item.next_available_on === tomorrow) return 'Próxima disponibilidade: amanhã'
+    const label = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', day: 'numeric', month: 'short' })
+        .format(new Date(`${item.next_available_on}T12:00:00-03:00`))
+    return `Próxima disponibilidade: ${label}`
+}
+
+function useDebounced(value: string, delay: number) {
+    const [debounced, setDebounced] = useState(value)
+    useEffect(() => {
+        const handle = setTimeout(() => setDebounced(value), delay)
+        return () => clearTimeout(handle)
+    }, [value, delay])
+    return debounced
+}
+
+/**
+ * Quem atende (plano 028): a ordem segue a referência clara.
+ * Modalidade, ordenação, preço, avaliação e raio abrem cada um o seu painel.
+ */
 export default function TutorSearchScreen({ navigation, route }: Props) {
-    const { colors } = useTheme()
     const theme = useMGTheme()
+    const { width } = useWindowDimensions()
     const categories = useFetchCategories()
-    const [draft, setDraft] = useState<Draft>({
-        address: '',
-        categoryId: route.params?.categoryId ?? '',
-        serviceId: route.params?.serviceId ?? '',
-    })
-    const [formError, setFormError] = useState({ address: '', filter: '' })
+    const [categoryId, setCategoryId] = useState(route.params?.categoryId ?? '')
+    const [serviceId, setServiceId] = useState(route.params?.serviceId ?? '')
+    const [text, setText] = useState('')
+    const [tab, setTab] = useState<Tab>('groomers')
+    const [chosen, setChosen] = useState<ChosenAddress | null>(null)
+    const [changing, setChanging] = useState(false)
+    const [panel, setPanel] = useState<SearchPanel | null>(null)
+    const [onlyToday, setOnlyToday] = useState(false)
+    const [sortKey, setSortKey] = useState<SearchSort>('relevance')
+    const [minPrice, setMinPrice] = useState<number | null>(null)
+    const [maxPrice, setMaxPrice] = useState<number | null>(null)
+    const [onlyReviewed, setOnlyReviewed] = useState(false)
+    const [minRating, setMinRating] = useState<number | null>(null)
+    const [maxKm, setMaxKm] = useState<number | null>(null)
     const [query, setQuery] = useState<CoverageSearchParams | null>(null)
-    const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([])
-    const [suggesting, setSuggesting] = useState(false)
-    const [picked, setPicked] = useState<PickedPoint | null>(null)
-    const [tileUrl, setTileUrl] = useState<string | null>(null)
-    const [tilesReady, setTilesReady] = useState(false)
-    const services = useGetAllServices(draft.categoryId || undefined)
+    const [openServiceId, setOpenServiceId] = useState<string | null>(null)
+    const [shown, setShown] = useState(PAGE_SIZE)
+    const [favorites, setFavorites] = useState<Record<string, boolean>>({})
+    const debouncedText = useDebounced(text, 300)
+    const totalRef = useRef(0)
+    const scrollReady = useRef(false)
+
+    const catalog = useGetAllServices()
     const search = useCoverageSearch(query)
     const savedAddresses = useCustomerAddresses()
     const place = useCurrentPlace()
-    const suggestTicket = useRef(0)
-    const skipSuggest = useRef(false)
-    const hideMenu = useRef<ReturnType<typeof setTimeout> | null>(null)
-    const edited = useRef(false)
     const seeded = useRef(false)
-    const addressRef = useRef('')
-    const [movingPin, setMovingPin] = useState(false)
-    const [pinError, setPinError] = useState<string | null>(null)
-    addressRef.current = draft.address
 
     useEffect(() => {
-        if (!savedAddresses.isSuccess || seeded.current) return
-        seeded.current = true
-        const preferred = savedAddresses.data?.find(item => item.is_default)
+        if (!savedAddresses.isSuccess || chosen) return
+        const preferred = savedAddresses.data?.find(item => item.is_default) ?? savedAddresses.data?.[0]
         if (preferred) {
-            edited.current = true
-            skipSuggest.current = true
-            setDraft(current => ({ ...current, address: preferred.address }))
-            setPicked({ latitude: preferred.latitude, longitude: preferred.longitude, label: preferred.address })
+            setChosen(fromSaved(preferred))
             return
         }
+        if (seeded.current) return
+        seeded.current = true
         void place.capture().then(found => {
-            if (!found || edited.current || addressRef.current.trim()) return
-            skipSuggest.current = true
-            setDraft(current => ({ ...current, address: found.address }))
-            setPicked({ latitude: found.latitude, longitude: found.longitude, label: found.address })
+            if (found) setChosen({ address: found.address, latitude: found.latitude, longitude: found.longitude })
         })
-    }, [savedAddresses.isSuccess, savedAddresses.data, place])
+    }, [savedAddresses.isSuccess, savedAddresses.data, chosen, place])
+
+    useEffect(() => {
+        if (!chosen) return
+        const trimmed = debouncedText.trim()
+        const next: CoverageSearchParams = {
+            address: chosen.address,
+            latitude: chosen.latitude,
+            longitude: chosen.longitude,
+            service_id: serviceId || undefined,
+            category_id: categoryId || undefined,
+            q: trimmed || undefined,
+        }
+        setQuery(current => {
+            if (
+                current
+                && current.address === next.address
+                && current.latitude === next.latitude
+                && current.longitude === next.longitude
+                && current.service_id === next.service_id
+                && current.category_id === next.category_id
+                && current.q === next.q
+            ) return current
+            return next
+        })
+        setOpenServiceId(null)
+    }, [chosen, categoryId, serviceId, debouncedText])
+
+    const chooseAddress = (item: ChosenAddress) => {
+        setChosen(item)
+        setChanging(false)
+    }
+
+    const providers = search.data?.providers ?? []
+    const filterValues: SearchFilterValues = { categoryId, serviceId, minPrice, maxPrice, minRating, onlyReviewed, maxKm, sortKey }
+    const filtered = useMemo(() => filterSearchProviders(providers, { categoryId, serviceId, minPrice, maxPrice, minRating, onlyReviewed, maxKm, sortKey }, onlyToday), [providers, categoryId, serviceId, onlyToday, minPrice, maxPrice, minRating, onlyReviewed, maxKm, sortKey])
+
+    const groups = useMemo<ServiceGroup[]>(() => {
+        const byId = new Map<string, ServiceGroup>()
+        for (const provider of filtered) {
+            for (const service of provider.services) {
+                if (!service.service_id) continue
+                const price = Number(service.price)
+                const current = byId.get(service.service_id)
+                if (current) {
+                    current.providers.push(provider)
+                    current.minPrice = Math.min(current.minPrice, price)
+                } else {
+                    byId.set(service.service_id, { id: service.service_id, name: service.service_name, providers: [provider], minPrice: price })
+                }
+            }
+        }
+        return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
+    }, [filtered])
+
+    const categoryOptions = (categories.data ?? []) as Option[]
+    // Atalhos usam IDs reais do catálogo; não criam modalidades sem oferta.
+    const categoryNames = new Set(categoryOptions.map(item => item.name.toLocaleLowerCase('pt-BR')))
+    const serviceShortcuts = ((catalog.data ?? []) as Option[]).filter(item => !categoryNames.has(item.name.toLocaleLowerCase('pt-BR')))
+    const savedList = savedAddresses.data ?? []
+    const filterCount = [Boolean(categoryId), Boolean(serviceId), minPrice != null || maxPrice != null, minRating != null || onlyReviewed, maxKm != null, onlyToday].filter(Boolean).length
+    const filterLabel = filterCount === 0 ? 'Filtros' : filterCount === 1 ? 'Filtros, 1 aplicado' : `Filtros, ${filterCount} aplicados`
+    const viewing = openServiceId ? groups.find(group => group.id === openServiceId) ?? null : null
+    const groomerItems = viewing ? viewing.providers : filtered
+    const listItems = tab === 'servicos' && !viewing ? groups : groomerItems
+    const resultKey = `${tab}|${viewing?.id ?? ''}|${onlyToday}|${sortKey}|${minPrice ?? ''}|${maxPrice ?? ''}|${minRating ?? ''}|${onlyReviewed}|${maxKm ?? ''}|${query?.address ?? ''}|${query?.category_id ?? ''}|${query?.service_id ?? ''}|${query?.q ?? ''}|${filtered.length}|${groups.length}`
+    totalRef.current = listItems.length
+
+    useEffect(() => {
+        setShown(PAGE_SIZE)
+    }, [resultKey])
+
+    const visibleGroomers = groomerItems.slice(0, shown)
+    const visibleGroups = groups.slice(0, shown)
+
+    const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+        const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent
+        if (!scrollReady.current) {
+            scrollReady.current = true
+            return
+        }
+        if (contentOffset.y < 48) return
+        const remaining = contentSize.height - layoutMeasurement.height - contentOffset.y
+        if (remaining > 320) return
+        setShown(current => current >= totalRef.current ? current : Math.min(totalRef.current, current + PAGE_SIZE))
+    }
+
+    const togglePanel = (next: SearchPanel) => {
+        setPanel(current => current === next ? null : next)
+    }
+
+    const chooseCategory = (id: string) => {
+        setCategoryId(id)
+        setServiceId('')
+    }
+
+    const applyPanel = (value: SearchFilterValues) => {
+        if (panel === 'preco') { setMinPrice(value.minPrice); setMaxPrice(value.maxPrice) }
+        if (panel === 'avaliacao') { setMinRating(value.minRating); setOnlyReviewed(value.onlyReviewed) }
+        if (panel === 'raio') setMaxKm(value.maxKm)
+        if (panel === 'ordenar') setSortKey(value.sortKey)
+        if (panel === 'filtros') { setCategoryId(value.categoryId); setServiceId(value.serviceId) }
+        setOpenServiceId(null)
+        setPanel(null)
+    }
+
+    const isFavorite = (item: CoverageProvider) => favorites[item.provider_id] ?? item.is_favorite === true
+
+    const toggleFavorite = (item: CoverageProvider) => {
+        const next = !isFavorite(item)
+        setFavorites(current => ({ ...current, [item.provider_id]: next }))
+        const request = next ? addFavoriteProvider(item.provider_id) : removeFavoriteProvider(item.provider_id)
+        void request.catch(() => setFavorites(current => ({ ...current, [item.provider_id]: !next })))
+    }
+
+    return (
+        <MGScreen header="plain">
+            <View style={styles.flex}>
+                <View style={styles.header}>
+                <View style={styles.headerRow}>
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel="Voltar"
+                        hitSlop={theme.spacing.sm}
+                        onPress={() => navigation.goBack()}
+                        style={({ pressed }) => [styles.backButton, { opacity: pressed ? 0.6 : 1 }]}
+                    >
+                        <ChevronLeft size={24} color={theme.colors.text.primary} />
+                    </Pressable>
+                    <View style={styles.headerText}>
+                        <MGText variant="heading2" accessibilityRole="header">Quem atende</MGText>
+                    </View>
+                    <View style={styles.brand} accessible accessibilityRole="image" accessibilityLabel={APP_NAME}>
+                        <MGIcon name="paw-print" size={28} color={theme.colors.brand.pink} />
+                        {width >= 360 ? <MGText variant="label">{APP_NAME}</MGText> : null}
+                    </View>
+                </View>
+                <MGText variant="bodySmall" color="secondary" style={styles.subtitle}>Encontre groomers e serviços na sua região</MGText>
+                </View>
+                <ScrollView
+                    testID="explorar-scroll"
+                    style={styles.flex}
+                    keyboardShouldPersistTaps="handled"
+                    contentContainerStyle={styles.scroll}
+                    onScroll={onScroll}
+                    scrollEventThrottle={16}
+                >
+                    <View style={[styles.addressCard, { backgroundColor: theme.colors.surface.default, borderColor: theme.colors.border.default, borderRadius: theme.radius.lg }]}>
+                        {chosen ? (
+                            <>
+                                <View style={styles.addressRow}>
+                                    <MGIcon name="map-pin" size={18} color={theme.colors.action.primaryText} />
+                                    <MGText variant="bodySmall" numberOfLines={2} style={styles.addressText}>{chosen.address}</MGText>
+                                    <Pressable
+                                        accessibilityRole="button"
+                                        accessibilityLabel={changing ? 'Fechar troca de endereço' : 'Trocar endereço'}
+                                        accessibilityState={{ expanded: changing }}
+                                        onPress={() => setChanging(current => !current)}
+                                        hitSlop={theme.spacing.md}
+                                        style={({ pressed }) => [styles.changeLink, { opacity: pressed ? 0.6 : 1 }]}
+                                    >
+                                        <MGText variant="label" color="brand">{changing ? 'Fechar' : 'Trocar'}</MGText>
+                                        <MGIcon name="chevron-right" size={16} color={theme.colors.action.primaryText} />
+                                    </Pressable>
+                                </View>
+                                {changing ? (
+                                    <View style={{ gap: theme.spacing.sm, marginTop: theme.spacing.sm }}>
+                                        {savedList.length > 0 ? (
+                                            <View style={styles.wrap}>
+                                                {savedList.map(item => {
+                                                    const selected = chosen.id === item.id
+                                                    const name = item.is_default ? `${addressLabelName(item.label)} · Padrão` : addressLabelName(item.label)
+                                                    return (
+                                                        <MGChip
+                                                            key={item.id}
+                                                            label={name}
+                                                            accessibilityLabel={selected ? `${name}, selecionado` : name}
+                                                            selected={selected}
+                                                            onPress={() => chooseAddress(fromSaved(item))}
+                                                        />
+                                                    )
+                                                })}
+                                            </View>
+                                        ) : null}
+                                        <CurrentLocationActions
+                                            status={place.status}
+                                            onPress={() => {
+                                                void place.capture().then(found => {
+                                                    if (found) chooseAddress({ address: found.address, latitude: found.latitude, longitude: found.longitude })
+                                                })
+                                            }}
+                                        />
+                                    </View>
+                                ) : null}
+                            </>
+                        ) : (
+                            <View style={{ gap: theme.spacing.sm }}>
+                                <MGText variant="bodySmall" color="secondary">
+                                    {place.status === 'locating' ? 'Localizando você…' : 'Escolha um endereço para ver quem atende.'}
+                                </MGText>
+                                {place.status === 'idle' || place.status === 'denied' || place.status === 'unavailable' ? (
+                                    <CurrentLocationActions
+                                        status={place.status}
+                                        onPress={() => {
+                                            void place.capture().then(found => {
+                                                if (found) chooseAddress({ address: found.address, latitude: found.latitude, longitude: found.longitude })
+                                            })
+                                        }}
+                                    />
+                                ) : null}
+                                {savedList.length === 0 && place.status !== 'locating' ? (
+                                    <MGButton
+                                        label="Cadastrar endereço"
+                                        variant="tertiary"
+                                        fullWidth={false}
+                                        onPress={() => navigation.getParent()?.navigate('ProfileTab', { screen: 'Addresses' })}
+                                    />
+                                ) : null}
+                            </View>
+                        )}
+                    </View>
+
+                    <MGTextField
+                        compact
+                        hideLabel
+                        icon="search"
+                        label="Profissional, serviço ou tipo de atendimento"
+                        accessibilityLabel="Profissional, serviço ou tipo de atendimento"
+                        placeholder="Profissional ou serviço"
+                        value={text}
+                        onChangeText={setText}
+                        maxLength={100}
+                        style={{ minHeight: 48, borderWidth: 1, borderRadius: theme.radius.lg }}
+                    />
+
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categories}>
+                        <CategoryTile name="Todos" icon="grid" selected={!categoryId && !serviceId} onPress={() => chooseCategory('')} />
+                        {categoryOptions.map(option => (
+                            <CategoryTile
+                                key={option.id}
+                                name={option.name}
+                                icon={categoryIcon(option.name)}
+                                selected={categoryId === option.id && !serviceId}
+                                onPress={() => chooseCategory(option.id)}
+                            />
+                        ))}
+                        {serviceShortcuts.map(option => (
+                            <CategoryTile key={`service-${option.id}`} name={option.name} icon={categoryIcon(option.name)} selected={serviceId === option.id} onPress={() => { setCategoryId(''); setServiceId(option.id) }} />
+                        ))}
+                    </ScrollView>
+
+                    <View style={[styles.todayRow, styles.addressCard, { backgroundColor: theme.colors.surface.default, borderColor: theme.colors.border.default, borderRadius: theme.radius.lg, paddingHorizontal: theme.spacing.sm, paddingVertical: theme.spacing.sm }]}>
+                        <MGIcon name="calendar-days" size={20} color={theme.colors.text.primary} />
+                        <MGText variant="bodySmall" style={{ flex: 1 }}>Ver apenas disponíveis hoje</MGText>
+                        <Switch
+                            accessibilityLabel="Ver apenas disponíveis hoje"
+                            value={onlyToday}
+                            onValueChange={value => { setOnlyToday(value); setOpenServiceId(null) }}
+                            trackColor={{ false: theme.colors.border.default, true: theme.colors.action.primary }}
+                            thumbColor={theme.colors.surface.default}
+                        />
+                    </View>
+
+                    <View role="tablist" accessibilityLabel="Como explorar" style={[styles.tabs, { borderBottomColor: theme.colors.border.default }]}>
+                        <TabButton label={`Groomers (${filtered.length})`} accessibilityLabel="Groomers" selected={tab === 'groomers'} onPress={() => { setTab('groomers'); setOpenServiceId(null) }} />
+                        <TabButton label="Serviços" selected={tab === 'servicos'} onPress={() => setTab('servicos')} />
+                    </View>
+
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll} contentContainerStyle={styles.pills}>
+                        <Pill label={filterLabel} icon="sliders-horizontal" selected={panel === 'filtros'} onPress={() => togglePanel('filtros')} />
+                        <Pill label="Ordenar" icon="arrow-up-down" caret active={sortKey !== 'relevance'} selected={panel === 'ordenar'} onPress={() => togglePanel('ordenar')} />
+                        <Pill label="Preço" caret active={minPrice != null || maxPrice != null} selected={panel === 'preco'} onPress={() => togglePanel('preco')} />
+                        <Pill label="Avaliação" icon="star" caret active={minRating != null || onlyReviewed} selected={panel === 'avaliacao'} onPress={() => togglePanel('avaliacao')} />
+                        <Pill label="Raio" icon="map-pin" caret active={maxKm != null} selected={panel === 'raio'} onPress={() => togglePanel('raio')} />
+                    </ScrollView>
+
+                    {panel ? (
+                        <SlideDown open>
+                            <SearchFilterPanel key={panel} panel={panel} value={filterValues}
+                                categories={categoryOptions} categoriesLoading={categories.isLoading} categoriesError={categories.isError}
+                                onRetryCategories={() => { void categories.refetch() }} address={chosen?.address}
+                                onApply={applyPanel} onCancel={() => setPanel(null)} />
+                        </SlideDown>
+                    ) : null}
+
+                    <View style={styles.results}>
+                        {search.data && search.isFetching ? <View style={styles.refreshing} accessibilityLiveRegion="polite"><ActivityIndicator size="small" color={theme.colors.action.primary} /><MGText variant="caption" color="secondary">Atualizando resultados…</MGText></View> : null}
+                        {query === null ? null : !search.data && search.isPaused && !search.isFetching ? (
+                            <MGErrorState message="Não foi possível conectar. Verifique sua internet e tente novamente." onRetry={() => search.refetch()} />
+                        ) : !search.data && (search.isFetching || !search.isError) ? (
+                            <View style={styles.status} accessibilityLabel="Buscando groomers">
+                                <MGText variant="body" style={styles.message}>Buscando groomers</MGText>
+                            </View>
+                        ) : search.isError && !search.data ? (
+                            <MGErrorState message={getErrorMessage(search.error)} onRetry={() => search.refetch()} />
+                        ) : filtered.length === 0 ? (
+                            <MGEmptyState title="Nenhum groomer encontrado" description="Nenhum groomer atende este endereço." />
+                        ) : tab === 'groomers' || viewing ? (
+                            <>
+                                {viewing ? (
+                                    <>
+                                        <Pressable accessibilityRole="button" accessibilityLabel="Voltar aos serviços" onPress={() => setOpenServiceId(null)} style={styles.backLink}>
+                                            <MGIcon name="chevron-left" size={18} color={theme.colors.action.primaryText} />
+                                            <MGText variant="label" color="brand">Serviços</MGText>
+                                        </Pressable>
+                                        <MGText variant="heading3">{viewing.name}</MGText>
+                                        <MGText variant="bodySmall" color="secondary" style={{ marginBottom: theme.spacing.md }}>
+                                            {countLabel(viewing.providers.length)} atendem no seu endereço
+                                        </MGText>
+                                    </>
+                                ) : null}
+                                {visibleGroomers.map(item => (
+                                    <ProviderCard
+                                        key={item.provider_id}
+                                        item={item}
+                                        favorite={isFavorite(item)}
+                                        onFavorite={() => toggleFavorite(item)}
+                                        onPress={() => openProfile(item)}
+                                    />
+                                ))}
+                            </>
+                        ) : (
+                            <>
+                                {visibleGroups.map(group => (
+                                    <Pressable
+                                        key={group.id}
+                                        accessibilityRole="button"
+                                        accessibilityLabel={`${group.name}, ${countLabel(group.providers.length)}, a partir de ${formatMoney(group.minPrice)}`}
+                                        onPress={() => setOpenServiceId(group.id)}
+                                        style={({ pressed }) => [styles.serviceCard, { backgroundColor: theme.colors.surface.default, borderColor: theme.colors.border.default, opacity: pressed ? 0.92 : 1 }]}
+                                    >
+                                        <View style={{ flex: 1, gap: theme.spacing.xs }}>
+                                            <MGText variant="title">{group.name}</MGText>
+                                            <MGText variant="bodySmall" color="secondary">{countLabel(group.providers.length)}</MGText>
+                                            <MGText variant="bodySmall" color="teal" style={{ fontFamily: theme.fonts.bold }}>{`A partir de ${formatMoney(group.minPrice)}`}</MGText>
+                                        </View>
+                                        <MGIcon name="chevron-right" size={20} color={theme.colors.text.secondary} />
+                                    </Pressable>
+                                ))}
+                                <MGText variant="caption" color="secondary" style={{ marginTop: theme.spacing.sm }}>
+                                    Serviços sem groomer no seu raio não aparecem aqui.
+                                </MGText>
+                            </>
+                        )}
+                    </View>
+                </ScrollView>
+            </View>
+        </MGScreen>
+    )
+
+    function openProfile(item: CoverageProvider) {
+        if (!query) return
+        navigation.navigate('GroomerProfile', {
+            providerServiceId: item.id,
+            customerLocation: query.address,
+            ...(query.latitude != null && query.longitude != null
+                ? { customerLatitude: query.latitude, customerLongitude: query.longitude }
+                : {}),
+        })
+    }
+}
+
+function ProviderCard({ item, favorite, onFavorite, onPress }: { item: CoverageProvider, favorite: boolean, onFavorite: () => void, onPress: () => void }) {
+    const rating = formatRating(item.average_rating)
+    return (
+        <GroomerSearchCard
+            variant="discovery"
+            name={item.name}
+            services={item.services.map(service => service.service_name)}
+            priceLabel={formatMoney(item.price)}
+            ratingLabel={rating === 'Sem avaliações' ? undefined : rating}
+            reviewCount={item.review_count}
+            distanceLabel={`${Number(item.distance_km).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km`}
+            photoUrl={item.profile_picture}
+            verified={item.is_verified === true}
+            availabilityLabel={availabilityCopy(item)}
+            homeLabel={item.attends_at_home ? 'Atendimento domiciliar' : undefined}
+            favorite={favorite}
+            onFavorite={onFavorite}
+            onPress={onPress}
+        />
+    )
+}
+
+function CategoryTile({ name, icon, selected, onPress }: { name: string, icon: MGIconName, selected: boolean, onPress: () => void }) {
+    const { colors, radius, spacing: gap } = useMGTheme()
+    return (
+        <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={selected ? `${name}, selecionado` : name}
+            accessibilityState={{ selected }}
+            onPress={onPress}
+            style={({ pressed }) => [
+                styles.category,
+                {
+                    borderRadius: radius.lg,
+                    backgroundColor: selected ? colors.brand.pinkLight : colors.surface.pinkSubtle,
+                    opacity: pressed ? 0.92 : 1,
+                    padding: gap.sm,
+                },
+            ]}
+        >
+            <MGIcon name={icon} size={26} color={colors.action.primaryText} />
+            <MGText variant="bodySmall" numberOfLines={2} style={{ color: colors.text.primary, textAlign: 'center' }}>{name}</MGText>
+        </Pressable>
+    )
+}
+
+function Pill({ label, icon, caret = false, selected, active = false, onPress }: { label: string, icon?: MGIconName, caret?: boolean, selected: boolean, active?: boolean, onPress: () => void }) {
+    const { colors, radius } = useMGTheme()
+    const visible = label.replace(/, (\d+) aplicados?$/, ' ($1)')
+    return (
+        <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={label}
+            accessibilityHint={active ? 'Seleção aplicada. Abra para revisar ou alterar.' : 'Abre as opções. Confirme as mudanças em Aplicar.'}
+            accessibilityState={{ expanded: selected }}
+            onPress={onPress}
+            style={({ pressed }) => [
+                styles.pill,
+                {
+                    borderRadius: radius.pill,
+                    borderColor: selected || active ? colors.action.primaryOutline : colors.border.default,
+                    backgroundColor: selected || active ? colors.surface.pinkSubtle : colors.surface.default,
+                    opacity: pressed ? 0.92 : 1,
+                },
+            ]}
+        >
+            {icon ? <MGIcon name={icon} size={16} color={colors.text.primary} /> : null}
+            <MGText variant="caption" style={{ color: colors.text.primary }}>{visible}</MGText>
+            {caret ? <MGIcon name={selected ? "chevron-up" : "chevron-down"} size={14} color={colors.action.primaryText} /> : null}
+        </Pressable>
+    )
+}
+
+function TabButton({ label, accessibilityLabel, selected, onPress }: { label: string, accessibilityLabel?: string, selected: boolean, onPress: () => void }) {
+    const { colors } = useMGTheme()
+    return (
+        <Pressable
+            role="tab"
+            accessibilityRole="tab"
+            accessibilityLabel={accessibilityLabel ?? label}
+            aria-selected={selected}
+            accessibilityState={{ selected }}
+            onPress={onPress}
+            style={[styles.tab, { borderBottomColor: selected ? colors.action.primary : 'transparent' }]}
+        >
+            <MGText variant="label" style={{ color: selected ? colors.action.primaryText : colors.text.secondary }}>{label}</MGText>
+        </Pressable>
+    )
+}
+
+function SlideDown({ open, children }: { open: boolean, children: ReactNode }) {
+    const [mounted, setMounted] = useState(open)
+    const [reduceMotion, setReduceMotion] = useState(false)
+    const progress = useRef(new Animated.Value(open ? 1 : 0)).current
+    const translateY = useRef(progress.interpolate({ inputRange: [0, 1], outputRange: [-12, 0] })).current
 
     useEffect(() => {
         let active = true
-        void getMapTiles()
-            .then(result => { if (active) setTileUrl(result.data.url) })
-            .catch(() => { if (active) setTileUrl(null) })
-            .finally(() => { if (active) setTilesReady(true) })
-        return () => { active = false }
+        AccessibilityInfo.isReduceMotionEnabled().then(value => { if (active) setReduceMotion(value) })
+        const subscription = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduceMotion)
+        return () => { active = false; subscription.remove() }
     }, [])
 
     useEffect(() => {
-        const ticket = suggestTicket.current + 1
-        suggestTicket.current = ticket
-        if (skipSuggest.current) {
-            skipSuggest.current = false
-            setSuggestions([])
-            setSuggesting(false)
-            return
-        }
-        const text = draft.address.trim()
-        if (text.length < 3) {
-            setSuggestions([])
-            setSuggesting(false)
-            return
-        }
-        setSuggesting(true)
-        const handle = setTimeout(() => {
-            void autocompleteServiceLocation(text)
-                .then(result => {
-                    if (suggestTicket.current !== ticket) return
-                    setSuggestions(result.data)
-                })
-                .catch(() => {
-                    if (suggestTicket.current === ticket) setSuggestions([])
-                })
-                .finally(() => {
-                    if (suggestTicket.current === ticket) setSuggesting(false)
-                })
-        }, 300)
-        return () => clearTimeout(handle)
-    }, [draft.address])
-
-    const pickedPoint = picked && picked.label === draft.address.trim() ? picked : null
-
-    const publish = (next: Draft) => {
-        const address = next.address.trim()
-        const addressError = address.length >= 3 ? '' : 'Endereço do atendimento obrigatório'
-        const filterError = next.serviceId || next.categoryId ? '' : 'Selecione um serviço ou uma modalidade'
-        setFormError({ address: addressError, filter: filterError })
-        if (addressError || filterError) {
-            setQuery(null)
-            return
-        }
-        const point = picked && picked.label === address ? picked : null
-        setQuery({
-            address,
-            service_id: next.serviceId || undefined,
-            category_id: next.categoryId || undefined,
-            ...(point ? { latitude: point.latitude, longitude: point.longitude } : {}),
+        if (open) setMounted(true)
+        const animation = Animated.timing(progress, {
+            toValue: open ? 1 : 0,
+            duration: reduceMotion ? 0 : 180,
+            easing: Easing.out(Easing.cubic),
+            useNativeDriver: false,
         })
-    }
+        animation.start(({ finished }) => { if (finished && !open) setMounted(false) })
+        return () => animation.stop()
+    }, [open, progress, reduceMotion])
 
-    const changeAddress = (address: string) => {
-        edited.current = true
-        suggestTicket.current += 1
-        setDraft(current => ({ ...current, address }))
-        setPicked(null)
-        setQuery(null)
-        setSuggestions([])
-        setFormError(current => ({ ...current, address: '' }))
-    }
-
-    const chooseSaved = (item: CustomerAddress) => {
-        edited.current = true
-        if (hideMenu.current) clearTimeout(hideMenu.current)
-        skipSuggest.current = true
-        suggestTicket.current += 1
-        setSuggestions([])
-        setSuggesting(false)
-        setDraft(current => ({ ...current, address: item.address }))
-        setPicked({ latitude: item.latitude, longitude: item.longitude, label: item.address })
-        setQuery(null)
-        setPinError(null)
-        setFormError(current => ({ ...current, address: '' }))
-    }
-
-    const movePin = (latitude: number, longitude: number) => {
-        edited.current = true
-        setMovingPin(true)
-        setPinError(null)
-        void reverseServiceLocation(latitude, longitude)
-            .then(result => chooseSuggestion(result.data))
-            .catch(error => setPinError(getErrorMessage(error)))
-            .finally(() => setMovingPin(false))
-    }
-
-    const chooseSuggestion = (item: AddressSuggestion) => {
-        if (hideMenu.current) clearTimeout(hideMenu.current)
-        skipSuggest.current = true
-        suggestTicket.current += 1
-        setSuggestions([])
-        setSuggesting(false)
-        setDraft(current => ({ ...current, address: item.address }))
-        setPicked({ latitude: item.latitude, longitude: item.longitude, label: item.address })
-        setQuery(null)
-        setFormError(current => ({ ...current, address: '' }))
-    }
-
-    const dismissMenu = () => {
-        if (hideMenu.current) clearTimeout(hideMenu.current)
-        suggestTicket.current += 1
-        setSuggestions([])
-        setSuggesting(false)
-    }
-
-    const closeMenuSoon = () => {
-        if (hideMenu.current) clearTimeout(hideMenu.current)
-        hideMenu.current = setTimeout(dismissMenu, 250)
-    }
-
-    const selectCategory = (categoryId: string) => {
-        const next = {
-            ...draft,
-            categoryId: draft.categoryId === categoryId ? '' : categoryId,
-            serviceId: '',
-        }
-        setDraft(next)
-        if (query) publish(next)
-    }
-
-    const selectService = (serviceId: string) => {
-        const next = { ...draft, serviceId: draft.serviceId === serviceId ? '' : serviceId }
-        setDraft(next)
-        if (query) publish(next)
-    }
-
-    const categoryOptions = (categories.data ?? []) as Option[]
-    const serviceOptions = ((services.data ?? []) as Option[]).filter(item => item.id && item.name)
-    const menuOpen = suggestions.length > 0
-
+    if (!mounted) return null
     return (
-        <ScreenContainer>
-            <KeyboardAwareScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scroll}>
-                <ScreenHeader
-                    title="Quem atende"
-                    description="O raio de cada groomer decide quem aparece"
-                    showBackButton
-                    onBack={() => navigation.goBack()}
-                />
-                {savedAddresses.data && savedAddresses.data.length > 0 ? (
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.sm, marginBottom: theme.spacing.md }}>
-                        {savedAddresses.data.map(item => {
-                            const selected = draft.address.trim() === item.address && picked?.label === item.address
-                            const name = item.is_default ? `${addressLabelName(item.label)} · Padrão` : addressLabelName(item.label)
-                            return (
-                                <MGChip
-                                    key={item.id}
-                                    label={name}
-                                    accessibilityLabel={selected ? `${name}, selecionado` : name}
-                                    selected={selected}
-                                    onPress={() => chooseSaved(item)}
-                                />
-                            )
-                        })}
-                    </View>
-                ) : null}
-                <AddressPlaceCard>
-                <MGTextField
-                    compact
-                    icon="map-pin"
-                    label="Endereço do atendimento"
-                    accessibilityLabel="Endereço do atendimento"
-                    placeholder="Avenida Paulista, São Paulo"
-                    role="combobox"
-                    aria-expanded={menuOpen}
-                    accessibilityState={{ expanded: menuOpen }}
-                    value={draft.address}
-                    onChangeText={changeAddress}
-                    onFocus={() => {
-                        if (hideMenu.current) clearTimeout(hideMenu.current)
-                    }}
-                    onBlur={closeMenuSoon}
-                    error={formError.address}
-                    autoCapitalize="words"
-                    maxLength={200}
-                    helperText={formError.address ? undefined : 'Digite para ver sugestões'}
-                    menu={suggesting && suggestions.length === 0 ? (
-                        <FieldWait label="Buscando endereços" />
-                    ) : menuOpen ? (
-                        <View
-                            style={{
-                                maxHeight: 240,
-                                backgroundColor: theme.colors.surface.default,
-                                borderRadius: theme.radius.md,
-                                borderWidth: 1,
-                                borderColor: theme.colors.border.default,
-                                overflow: 'hidden',
-                                zIndex: 1,
-                                ...theme.elevation.overlay,
-                            }}
-                        >
-                                <ScrollView
-                                    keyboardShouldPersistTaps="handled"
-                                    nestedScrollEnabled
-                                    style={{ maxHeight: 240, backgroundColor: theme.colors.surface.default }}
-                                    role={'listbox' as 'list'}
-                                >
-                                    {suggestions.map((item, index) => (
-                                        <Pressable
-                                            key={`${item.latitude}-${item.longitude}-${item.label}`}
-                                            role="option"
-                                            accessibilityLabel={item.label}
-                                            onPressIn={() => {
-                                                if (hideMenu.current) clearTimeout(hideMenu.current)
-                                            }}
-                                            onPress={() => chooseSuggestion(item)}
-                                            style={({ pressed }) => ({
-                                                minHeight: 48,
-                                                justifyContent: 'center',
-                                                paddingHorizontal: theme.spacing.md,
-                                                paddingVertical: theme.spacing.sm,
-                                                backgroundColor: pressed ? theme.colors.surface.pinkSubtle : theme.colors.surface.default,
-                                                borderTopWidth: index === 0 ? 0 : StyleSheet.hairlineWidth,
-                                                borderTopColor: theme.colors.border.default,
-                                            })}
-                                        >
-                                            <MGText variant="body">{item.label}</MGText>
-                                        </Pressable>
-                                    ))}
-                                </ScrollView>
-                        </View>
-                    ) : null}
-                />
-                <CurrentLocationActions
-                    status={place.status}
-                    onPress={() => {
-                        edited.current = true
-                        void place.capture().then(found => { if (found) chooseSuggestion(found) })
-                    }}
-                />
-                {pickedPoint ? (
-                    <View style={{ gap: theme.spacing.sm, marginBottom: theme.spacing.md }}>
-                        {tileUrl ? (
-                            <ServiceLocationMap
-                                latitude={pickedPoint.latitude}
-                                longitude={pickedPoint.longitude}
-                                radiusKm={null}
-                                label={mapLabel(pickedPoint)}
-                                tileUrl={tileUrl}
-                                onPick={movePin}
-                            />
-                        ) : tilesReady ? null : (
-                            <FieldWait label="Localizando no mapa" />
-                        )}
-                        {tileUrl ? (
-                            <MGText variant="caption" color="secondary" style={{ fontSize: 10, lineHeight: 12 }}>
-                                Powered by Geoapify · OpenStreetMap
-                            </MGText>
-                        ) : null}
-                        <MGText variant="caption" color="secondary">Toque no mapa para ajustar o ponto.</MGText>
-                        {pinError ? <MGText variant="bodySmall" color="error" accessibilityRole="alert">{pinError}</MGText> : null}
-                    </View>
-                ) : (
-                    <View style={{ marginBottom: theme.spacing.md, gap: theme.spacing.sm }}>
-                        {movingPin || place.status === 'locating' ? <FieldWait label="Localizando você no mapa" /> : null}
-                        <AddressMapPlaceholder label="Escolha um endereço sugerido para ver o ponto no mapa." />
-                    </View>
-                )}
-                </AddressPlaceCard>
-                <Text style={[styles.groupLabel, { color: colors.text }]}>Modalidade</Text>
-                <OptionRow
-                    label="Modalidade"
-                    options={categoryOptions}
-                    selectedId={draft.categoryId}
-                    onSelect={selectCategory}
-                />
-
-                <Text style={[styles.groupLabel, { color: colors.text }]}>Serviço</Text>
-                <OptionRow
-                    label="Serviço"
-                    options={serviceOptions}
-                    selectedId={draft.serviceId}
-                    onSelect={selectService}
-                />
-                {formError.filter ? <Text style={[styles.error, { color: colors.error }]}>{formError.filter}</Text> : null}
-                {(categories.isLoading || services.isLoading) ? (
-                    <Text style={[styles.message, { color: colors.textSecondary }]}>Carregando filtros</Text>
-                ) : null}
-                {(categories.isError || services.isError) ? (
-                    <MGErrorState
-                        message="Não foi possível carregar os filtros."
-                        onRetry={() => {
-                            categories.refetch()
-                            services.refetch()
-                        }}
-                    />
-                ) : null}
-
-                <MGButton label="Buscar" onPress={() => publish(draft)} loading={search.isFetching && !search.data} />
-
-                <View style={styles.results}>
-                    <MGText variant="heading3" style={{ marginBottom: theme.spacing.md }}>Profissionais disponíveis</MGText>
-                    {query === null ? (
-                        <MGEmptyState
-                            title="Busque quem atende"
-                            description={
-                                draft.serviceId || draft.categoryId
-                                    ? 'Informe o endereço do atendimento para ver quem atende.'
-                                    : 'Informe o endereço e escolha um serviço ou uma modalidade.'
-                            }
-                        />
-                    ) : !search.data && search.isPaused ? (
-                        <MGErrorState
-                            message="Não foi possível conectar à API. Verifique o servidor e tente novamente."
-                            onRetry={() => search.refetch()}
-                        />
-                    ) : !search.data && !search.isError ? (
-                        <View style={styles.status} accessibilityLabel="Buscando groomers">
-                            <ActivityIndicator size="large" color={colors.primary} />
-                            <Text style={[styles.message, { color: colors.text }]}>Buscando groomers</Text>
-                        </View>
-                    ) : search.isError && !search.data ? (
-                        <MGErrorState
-                            message={getErrorMessage(search.error)}
-                            onRetry={() => search.refetch()}
-                        />
-                    ) : search.data && search.data.providers.length === 0 ? (
-                        <MGEmptyState
-                            title="Nenhum groomer encontrado"
-                            description="Nenhum groomer atende este endereço."
-                        />
-                    ) : (
-                        search.data?.providers.map(item => {
-                            const rating = formatRating(item.average_rating)
-                            const price = `A partir de ${formatMoney(item.price)}`
-                            return (
-                                <GroomerSearchCard
-                                    key={item.id}
-                                    name={item.name}
-                                    priceLabel={price}
-                                    coverageLabel={item.service_name}
-                                    ratingLabel={rating === 'Sem avaliações' ? undefined : rating}
-                                    showChevron
-                                    onPress={() => {
-                                        if (!query) return
-                                        navigation.navigate('GroomerProfile', {
-                                            providerServiceId: item.id,
-                                            customerLocation: query.address,
-                                            ...(query.latitude != null && query.longitude != null
-                                                ? { customerLatitude: query.latitude, customerLongitude: query.longitude }
-                                                : {}),
-                                        })
-                                    }}
-                                />
-                            )
-                        })
-                    )}
-                </View>
-            </KeyboardAwareScrollView>
-        </ScreenContainer>
-    )
-}
-
-function FieldWait({ label }: { label: string }) {
-    const { colors, radius, spacing: gap, elevation } = useMGTheme()
-    return (
-        <View
-            accessibilityRole="progressbar"
-            accessibilityLabel={label}
-            style={{
-                minHeight: 48,
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: gap.sm,
-                paddingHorizontal: gap.md,
-                backgroundColor: colors.surface.default,
-                borderRadius: radius.md,
-                borderWidth: 1,
-                borderColor: colors.border.default,
-                ...elevation.low,
-            }}
-        >
-            <ActivityIndicator size="small" color={colors.action.primary} />
-            <MGText variant="body">{label}</MGText>
-        </View>
-    )
-}
-
-function OptionRow({ label, options, selectedId, onSelect }: {
-    label: string
-    options: Option[]
-    selectedId: string
-    onSelect: (id: string) => void
-}) {
-    const { colors } = useTheme()
-    return (
-        <ScrollView
-            horizontal
-            accessibilityRole="radiogroup"
-            accessibilityLabel={label}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.options}
-        >
-            {options.map(option => {
-                const selected = option.id === selectedId
-                return (
-                    <Pressable
-                        key={option.id}
-                        accessibilityRole="radio"
-                        accessibilityState={{ selected, checked: selected }}
-                        aria-checked={selected}
-                        accessibilityLabel={selected ? `${option.name}, selecionado` : option.name}
-                        onPress={() => onSelect(option.id)}
-                        style={[
-                            styles.option,
-                            {
-                                borderColor: selected ? colors.focus : colors.border,
-                                backgroundColor: selected ? colors.selectionSoft : colors.surface,
-                                borderWidth: selected ? 2 : 1,
-                            },
-                        ]}
-                    >
-                        {selected ? <Check size={16} color={colors.text} /> : null}
-                        <Text style={[styles.optionText, { color: colors.text }]}>{option.name}</Text>
-                    </Pressable>
-                )
-            })}
-        </ScrollView>
+        <Animated.View accessibilityElementsHidden={!open} importantForAccessibility={open ? 'auto' : 'no-hide-descendants'} style={{ transform: [{ translateY }] }}>
+            {children}
+        </Animated.View>
     )
 }
 
 const styles = StyleSheet.create({
-    scroll: {
-        paddingBottom: spacing.xl,
-    },
-    groupLabel: {
-        fontFamily: fonts.semibold,
-        fontSize: typography.sizes.sm,
-        marginBottom: spacing.sm,
-    },
-    options: {
-        gap: spacing.sm,
-        paddingBottom: spacing.md,
-    },
-    option: {
-        minHeight: 48,
-        borderRadius: borderRadius.md,
-        paddingHorizontal: spacing.md,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.xs,
-    },
-    optionText: {
-        fontFamily: fonts.medium,
-        fontSize: typography.sizes.sm,
-    },
-    error: {
-        fontFamily: fonts.regular,
-        fontSize: typography.sizes.sm,
-        marginBottom: spacing.md,
-    },
-    results: {
-        marginTop: spacing.lg,
-        minHeight: 120,
-    },
-    status: {
-        alignItems: 'center',
-        gap: spacing.md,
-    },
-    message: {
-        fontFamily: fonts.regular,
-        fontSize: typography.sizes.md,
-        textAlign: 'center',
-    },
+    flex: { flex: 1 },
+    header: { paddingVertical: spacing.sm, gap: spacing.xs },
+    headerRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+    backButton: { minWidth: 48, minHeight: 48, alignItems: 'center', justifyContent: 'center' },
+    headerText: { flex: 1, gap: spacing.xxs },
+    brand: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, maxWidth: 112 },
+    subtitle: { paddingHorizontal: spacing.sm },
+    scroll: { paddingBottom: spacing.xl },
+    addressCard: { borderWidth: 1, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, marginBottom: spacing.md },
+    addressRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    addressText: { flex: 1 },
+    changeLink: { flexDirection: 'row', alignItems: 'center', minHeight: 48 },
+    wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+    categories: { gap: spacing.sm, paddingVertical: spacing.md },
+    category: { width: 76, minHeight: 80, alignItems: 'center', justifyContent: 'center', gap: spacing.xs },
+    todayRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 48 },
+    tabs: { flexDirection: 'row', borderBottomWidth: 1, marginBottom: spacing.md },
+    tab: { flex: 1, minHeight: 48, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 3 },
+    filterScroll: { flexGrow: 0, marginBottom: spacing.sm },
+    pills: { flexDirection: 'row', gap: spacing.sm, paddingBottom: spacing.xs },
+    pill: { minHeight: 48, paddingVertical: spacing.xs, paddingHorizontal: spacing.md, borderWidth: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+    panel: { borderWidth: 1, padding: spacing.md, marginBottom: spacing.md },
+    groupLabel: { marginBottom: spacing.sm },
+    options: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, paddingBottom: spacing.md },
+    option: { minHeight: 48, paddingHorizontal: spacing.md, flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+    clearFilters: { minHeight: 48, justifyContent: 'center', alignSelf: 'flex-start' },
+    results: { marginTop: spacing.sm, minHeight: 120 },
+    serviceCard: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 16, padding: spacing.base, marginBottom: spacing.sm },
+    backLink: { flexDirection: 'row', alignItems: 'center', minHeight: 44, gap: spacing.xs, marginBottom: spacing.sm },
+    status: { alignItems: 'center', gap: spacing.md },
+    refreshing: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingBottom: spacing.sm },
+    message: { textAlign: 'center' },
 })

@@ -1,9 +1,10 @@
 import { createRequire } from 'node:module'
 import { randomUUID } from 'node:crypto'
 import path from 'node:path'
-import { evidenceFile, fillServiceAddress, gateRoute, launchBrowser, loginProfessional, loginTutor, openPage, startRun } from './harness.mjs'
+import { evidenceFile, fillServiceAddress, gateRoute, launchBrowser, loginProfessional, loginTutor, openCoverageFilters, openPage, startRun } from './harness.mjs'
 import { activeText, capture, fit, navigateRegistered, plan } from './visual-helpers.mjs'
 import { inspectRenderedText } from './visual-audit.mjs'
+let chosenLabel = ''
 
 const run = startRun({ command: 'node --import ./e2e/preload.mjs e2e/visual-discovery-alignment.mjs', evidence: evidenceFile(plan, 'visual-discovery-alignment.log') })
 const { check } = run
@@ -37,17 +38,17 @@ try {
   const page = await openPage(browser)
   await loginTutor(page)
   await page.getByRole('button', { name: 'Buscar um serviço', exact: true }).click()
-  await fillServiceAddress(page, 'Avenida Paulista, São Paulo')
-  await page.getByRole('radio', { name: 'Banho', exact: true }).click()
+  chosenLabel = await fillServiceAddress(page, 'Avenida Paulista, São Paulo')
   const gate = { fail: true, delayMs: 0 }
   await gateRoute(page, '**/api/v1/providers/coverage**', gate)
-  await page.getByRole('button', { name: 'Buscar', exact: true }).click()
+  await openCoverageFilters(page)
+  await page.getByRole('radio', { name: 'Banho', exact: true }).click()
   await page.getByRole('button', { name: 'Tentar novamente', exact: true }).waitFor({ timeout: 20000 })
   await capture(page, 'discovery-search-error')
   gate.fail = false; gate.delayMs = 1000
   await page.getByRole('button', { name: 'Tentar novamente', exact: true }).click()
   await page.getByLabel('Buscando groomers', { exact: true }).waitFor()
-  check('VIS-07 busca recupera erro sem bloquear o endereço', await page.getByRole('combobox', { name: 'Endereço do atendimento', exact: true }).isEnabled())
+  check('VIS-07 busca recupera erro sem bloquear o endereço', await page.getByRole('button', { name: 'Trocar endereço', exact: true }).isEnabled())
   const professional = page.getByRole('button', { name: new RegExp(professionalName) })
   await professional.waitFor({ timeout: 15000 })
   gate.delayMs = 0
@@ -81,14 +82,15 @@ try {
   await page.getByRole('button', { name: 'Revisar solicitação', exact: true }).click()
   await activeText(page, 'Resumo do agendamento').waitFor()
   await page.getByLabel('Pet: Josefino', { exact: true }).and(page.locator(':not([aria-hidden="true"] *)')).waitFor()
-  await page.getByLabel('Local: Avenida Paulista, São Paulo', { exact: true }).and(page.locator(':not([aria-hidden="true"] *)')).waitFor()
-  check('VIS-04 resumo mantém preço do pet e endereço reais', await page.getByLabel('Pet: Josefino', { exact: true }).and(page.locator(':not([aria-hidden="true"] *)')).count() === 1 && await page.getByLabel('Local: Avenida Paulista, São Paulo', { exact: true }).and(page.locator(':not([aria-hidden="true"] *)')).count() === 1)
+  await page.getByLabel(`Local: ${chosenLabel}`, { exact: true }).and(page.locator(':not([aria-hidden="true"] *)')).waitFor()
+  check('VIS-04 resumo mantém preço do pet e endereço reais', await page.getByLabel('Pet: Josefino', { exact: true }).and(page.locator(':not([aria-hidden="true"] *)')).count() === 1 && await page.getByLabel(`Local: ${chosenLabel}`, { exact: true }).and(page.locator(':not([aria-hidden="true"] *)')).count() === 1)
   await fit(page, check, 'discovery-summary', { scroll: true })
   await page.getByRole('button', { name: 'Voltar', exact: true }).click()
   await page.getByRole('button', { name: 'Voltar', exact: true }).click()
   await page.getByRole('button', { name: 'Voltar', exact: true }).click()
-  await navigateRegistered(page, 'ServiceProviders', { serviceId: '10000000-0000-4000-8000-000000000005', serviceName: 'Banho' })
-  await page.getByRole('button', { name: /Groomer de Teste/ }).waitFor()
+  await navigateRegistered(page, 'TutorSearch', { serviceId: '10000000-0000-4000-8000-000000000005' })
+  await fillServiceAddress(page, 'Avenida Paulista, São Paulo')
+  await page.getByRole('button', { name: /Groomer de Teste/ }).waitFor({ timeout: 20000 })
   await fit(page, check, 'discovery-legacy-providers')
 
   const provider = await openPage(browser)

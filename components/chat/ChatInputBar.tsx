@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, TextInput, View } from 'react-native'
+import { useState } from 'react'
+import { Pressable, StyleSheet, TextInput, TextStyle, View } from 'react-native'
 import { SendHorizontal } from 'lucide-react-native'
 import { useTheme } from '../../context/ThemeContext'
 import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
@@ -13,18 +14,22 @@ type Props = {
 export default function ChatInputBar({ value, onChangeText, onSend, disabled }: Props) {
     const { colors } = useTheme()
     const hasText = value.trim().length > 0
+    const [focused, setFocused] = useState(false)
 
     return (
         <View style={styles.container}>
-            <View style={[styles.inputWrapper, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            {/* Revisão UI (027): foco no contorno do campo (2 pt, action.focus, como MGTextField), sem o contorno nativo do navegador. */}
+            <View style={[styles.inputWrapper, { backgroundColor: colors.surface, borderColor: focused ? colors.focus : colors.border, borderWidth: focused ? 2 : 1 }]}>
 
                 <TextInput
                     accessibilityLabel="Mensagem"
-                    style={[styles.input, { color: colors.text }]}
+                    style={[styles.input, { color: colors.text, outline: 'none' } as TextStyle]}
                     placeholder="Mensagem"
                     placeholderTextColor={colors.textSecondary}
                     value={value}
                     onChangeText={onChangeText}
+                    onFocus={() => setFocused(true)}
+                    onBlur={() => setFocused(false)}
                     multiline
                 />
 
@@ -67,7 +72,7 @@ const styles = StyleSheet.create({
         gap: spacing.sm,
         paddingHorizontal: spacing.md,
         paddingVertical: spacing.xs + 2,
-        borderRadius: borderRadius.full,
+        borderRadius: borderRadius.md,
         borderWidth: 1,
     },
     input: {

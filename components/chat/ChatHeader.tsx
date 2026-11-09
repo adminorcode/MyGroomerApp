@@ -13,7 +13,8 @@ type Props = {
     onVideoCall?: () => void
 }
 
-export default function ChatHeader({ name, avatarUri, status, onBack, onCall, onVideoCall }: Props) {
+/** R8: avatar do interlocutor é teal quando é profissional, rosa quando é tutor. */
+export default function ChatHeader({ name, avatarUri, status, onBack, onCall, onVideoCall, avatarTone = 'pink' }: Props & { avatarTone?: 'pink' | 'teal' }) {
     const { colors } = useTheme()
 
     return (
@@ -22,7 +23,7 @@ export default function ChatHeader({ name, avatarUri, status, onBack, onCall, on
                 <ChevronLeft size={26} color={colors.text} />
             </Pressable>
 
-            <MGAvatar name={name} uri={avatarUri} size={40} />
+            <MGAvatar name={name} uri={avatarUri} size={40} tone={avatarTone} />
 
             <View style={styles.info}>
                 <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>

@@ -14,8 +14,11 @@ export type MGTextVariant =
   | 'caption'
   | 'button'
   | 'numeric'
+  | 'eyebrow'
+  | 'priceLarge'
+  | 'logotype'
 
-export type MGTextColor = 'primary' | 'secondary' | 'inverse' | 'brand' | 'error' | 'success' | 'warning' | 'info'
+export type MGTextColor = 'primary' | 'secondary' | 'inverse' | 'brand' | 'teal' | 'error' | 'success' | 'warning' | 'info'
 
 type Props = Omit<TextProps, 'children'> & {
   children: ReactNode
@@ -38,6 +41,7 @@ export default function MGText({
     secondary: colors.text.secondary,
     inverse: colors.text.inverse,
     brand: colors.action.primaryText,
+    teal: colors.brand.teal,
     error: colors.feedback.error,
     success: colors.feedback.success,
     warning: colors.feedback.warning,
@@ -61,6 +65,9 @@ export default function MGText({
           lineHeight: type.lineHeight,
           fontFamily: family,
           color: colorMap[color],
+          ...(type.letterSpacing !== undefined ? { letterSpacing: type.letterSpacing } : null),
+          ...(type.textTransform ? { textTransform: type.textTransform } : null),
+          ...(type.tabularNums ? { fontVariant: ['tabular-nums' as const] } : null),
         },
         style,
       ]}

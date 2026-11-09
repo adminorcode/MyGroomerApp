@@ -1,5 +1,5 @@
 import { AppAlert } from '../../utils/alert'
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
 import { CompositeNavigationProp } from '@react-navigation/native'
@@ -7,14 +7,14 @@ import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
 import { BookingsStackParamList, RootParamList } from '../../navigation/types'
 import { useChangeBookingStatus, useGetBookingById } from '../../hooks/useBooking'
-import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
-import { useTheme } from '../../context/ThemeContext'
-import StatusBadge from '../../components/shared/StatusBadge'
 import { CalendarClock, Hash, MapPin, Clock, PawPrint } from 'lucide-react-native'
 import { petSizeLabel, petSpeciesLabel } from '../../types/pet.types'
 import { DetailRow } from '../../components/shared/DetailRow'
-import { MGButton, MGErrorState, MGIcon } from '../../design-system/components'
+import { MGAvatar, MGButton, MGCard, MGErrorState, MGIcon, MGText } from '../../design-system/components'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
+import { radius, spacing } from '../../design-system/tokens'
+import BookingStatusBadge from '../../design-system/patterns/BookingStatusBadge'
+import BookingSummary from '../../design-system/patterns/BookingSummary'
 import { BookingStatus } from '../../types/booking.types'
 import { formatDateTime } from '../../utils/formatDate'
 import { useCreateConversation } from '../../hooks/useConversations'
@@ -35,8 +35,7 @@ type Props = {
 
 const BookingDetail = ({ navigation, route }: Props) => {
     const { bookingId } = route.params
-    const { colors } = useTheme()
-    const { elevation } = useMGTheme()
+    const { colors } = useMGTheme()
     const runtime = useRuntime()
     const { data, isLoading, isError, refetch } = useGetBookingById(bookingId)
     const {mutateAsync, isPending} = useChangeBookingStatus()
@@ -52,8 +51,10 @@ const BookingDetail = ({ navigation, route }: Props) => {
     if(isLoading){
         return (
         <ScreenContainer>
+            <ScreenHeader title="Detalhe do agendamento" showBackButton onBack={() => navigation.goBack()} />
             <View style={styles.centered}>
-                <ActivityIndicator accessibilityLabel="Carregando agendamento" size="large" color={colors.primary} />
+                <ActivityIndicator accessibilityLabel="Carregando agendamento" size="large" color={colors.action.primary} />
+                <MGText>Carregando agendamento</MGText>
             </View>
         </ScreenContainer>
         )
@@ -110,46 +111,55 @@ const BookingDetail = ({ navigation, route }: Props) => {
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
                 >
-                    {/* Header: service name + status */}
-                    <View style={[styles.card, elevation.low, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-                        <View style={{ width: 52, height: 52, borderRadius: borderRadius.md, backgroundColor: colors.infoSoft, alignItems: 'center', justifyContent: 'center' }}>
-                            <MGIcon name={/banho/i.test(data.service_name) ? 'bath' : /tosa/i.test(data.service_name) ? 'scissors' : 'paw-print'} size={28} color={colors.secondary} />
-                        </View>
-                        <View style={{ flex: 1, minWidth: 0 }}>
+                    {/* Cabeçalho: serviço, status e profissional (R3: avatar do profissional em teal) */}
+                    <MGCard style={styles.block}>
                         <View style={styles.headerRow}>
-                            <Text style={[styles.serviceName, { color: colors.text }]}>
-                                {data.service_name}
-                            </Text>
-                            <StatusBadge status={data.booking_status} />
+                            <View style={[styles.serviceIcon, { backgroundColor: colors.surface.pinkSubtle }]}>
+                                <MGIcon name={/banho/i.test(data.service_name) ? 'bath' : /tosa/i.test(data.service_name) ? 'scissors' : 'paw-print'} size={28} color={colors.brand.pink} />
+                            </View>
+                            <View style={styles.headerText}>
+                                <View style={styles.titleRow}>
+                                    <MGText variant="heading3" style={styles.serviceName}>
+                                        {data.service_name}
+                                    </MGText>
+                                    <BookingStatusBadge status={data.booking_status} />
+                                </View>
+                                <View style={styles.providerRow}>
+                                    <MGAvatar name={data.provider_name} tone="teal" size={28} />
+                                    <MGText variant="bodySmall" color="secondary" style={styles.flex}>
+                                        {`por ${data.provider_name}`}
+                                    </MGText>
+                                </View>
+                            </View>
                         </View>
-                        <Text style={[styles.providerName, { color: colors.textSecondary }]}>
-                            por {data.provider_name}
-                        </Text>
-                        </View>
-                        </View>
+                    </MGCard>
 
-                        <View style={[styles.priceRow, { borderTopColor: colors.border }]}>
-                            <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>Preço</Text>
-                            <Text style={[styles.price, { color: colors.primaryText }]}>{formatMoney(data.price)}</Text>
-                        </View>
+                    {/* CMP-08 / R7 / AC-06: valor do atendimento em bilhete (só no detalhe do agendamento) */}
+                    <View style={styles.block}>
+                        <BookingSummary
+                            title="Pagamento"
+                            rows={[]}
+                            totalLabel="Valor estimado"
+                            totalValue={formatMoney(data.price)}
+                            ticket
+                        />
                     </View>
 
                     {/* Details */}
-                    <View style={[styles.card, elevation.low, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                    <MGCard style={styles.block}>
                         <DetailRow
-                            icon={<CalendarClock size={18} color={colors.primary} />}
+                            icon={<CalendarClock size={18} color={colors.text.secondary} />}
                             label="Agendado"
                             value={formatDateTime(data.scheduled_at)}
                         />
                         <DetailRow
-                            icon={<MapPin size={18} color={colors.primary} />}
+                            icon={<MapPin size={18} color={colors.brand.teal} />}
                             label="Local"
                             value={data.customer_location}
                         />
                         {data.pet_name ? (
                             <DetailRow
-                                icon={<PawPrint size={18} color={colors.primary} />}
+                                icon={<PawPrint size={18} color={colors.brand.pink} />}
                                 label="Pet"
                                 value={[
                                     data.pet_name,
@@ -160,17 +170,17 @@ const BookingDetail = ({ navigation, route }: Props) => {
                             />
                         ) : null}
                         <DetailRow
-                            icon={<Hash size={18} color={colors.primary} />}
+                            icon={<Hash size={18} color={colors.text.secondary} />}
                             label="Referência"
                             value={`#${data.id.slice(0, 8).toUpperCase()}`}
                         />
                         <DetailRow
-                            icon={<Clock size={18} color={colors.primary} />}
+                            icon={<Clock size={18} color={colors.text.secondary} />}
                             label="Solicitado em"
                             value={formatDateTime(data.created_at)}
                             isLast
                         />
-                    </View>
+                    </MGCard>
 
                     {/* Action Buttons */}
                     <View style={styles.actionContainer}>
@@ -193,9 +203,9 @@ const BookingDetail = ({ navigation, route }: Props) => {
                                     />
 
                                 </>
-                            ) 
+                            )
                         }
-                        { 
+                        {
                             canReview && (
                                 <>
                                     <MGButton
@@ -216,7 +226,7 @@ const BookingDetail = ({ navigation, route }: Props) => {
                                     fullWidth={false}
                                     />
                                 </>
-                            ) 
+                            )
                         }
                         {
                             hasReview && (
@@ -226,6 +236,7 @@ const BookingDetail = ({ navigation, route }: Props) => {
                                     variant='secondary'
                                     onPress={() => navigation.navigate('ReviewDetail', {
                                         reviewId: data.review_id!,
+                                        providerName: data.provider_name,
                                     })}
                                     />
                                 </>
@@ -251,14 +262,28 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: spacing.lg,
+        gap: spacing.sm,
     },
-    card: {
-        padding: spacing.base,
-        borderRadius: borderRadius.lg,
-        borderWidth: 1,
+    block: {
         marginBottom: spacing.lg,
     },
     headerRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.md,
+    },
+    serviceIcon: {
+        width: 52,
+        height: 52,
+        borderRadius: radius.md,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    headerText: {
+        flex: 1,
+        minWidth: 0,
+    },
+    titleRow: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         alignItems: 'center',
@@ -268,29 +293,15 @@ const styles = StyleSheet.create({
     serviceName: {
         flex: 1,
         minWidth: 80,
-        fontSize: typography.sizes.lg,
-        fontFamily: fonts.semibold,
     },
-    providerName: {
-        fontSize: typography.sizes.sm,
-        fontFamily: fonts.regular,
-        marginTop: spacing.xs,
-    },
-    priceRow: {
+    providerRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        borderTopWidth: 1,
-        marginTop: spacing.md,
-        paddingTop: spacing.md,
+        gap: spacing.sm,
+        marginTop: spacing.xs,
     },
-    priceLabel: {
-        fontSize: typography.sizes.md,
-        fontFamily: fonts.regular,
-    },
-    price: {
-        fontSize: typography.sizes.lg,
-        fontFamily: fonts.bold,
+    flex: {
+        flex: 1,
     },
     actionContainer:{
         display:'flex',

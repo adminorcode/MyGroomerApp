@@ -1,5 +1,9 @@
 import { ReactNode, useState } from 'react'
-import { StyleSheet, TextInput, TextInputProps, View } from 'react-native'
+import { StyleSheet, TextInput, TextInputProps, TextStyle, View } from 'react-native'
+
+// O foco é indicado pela borda de 2 pt (plano 027); o contorno nativo do navegador não entra.
+// outlineStyle é propriedade só do RN-Web: o cast evita o tipo nativo de TextStyle.
+const WEB_FOCUS_RESET = { outlineStyle: 'none' } as unknown as TextStyle
 import MGIcon, { MGIconName } from './MGIcon'
 import MGText from './MGText'
 import { useMGTheme } from '../theme/useMGTheme'
@@ -12,6 +16,7 @@ export type MGTextFieldProps = TextInputProps & {
   menu?: ReactNode
   trailing?: ReactNode
   compact?: boolean
+  hideLabel?: boolean
   icon?: MGIconName
 }
 
@@ -23,6 +28,7 @@ export default function MGTextField({
   menu,
   trailing,
   compact = false,
+  hideLabel = false,
   icon,
   accessibilityLabel: accessibilityLabelProp,
   style,
@@ -48,13 +54,20 @@ export default function MGTextField({
 
   return (
     <View style={[styles.fieldGroup, { marginBottom: compact ? 0 : spacing.base, zIndex: menu ? 2 : 0 }]}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.sm }}>
-        {icon ? <MGIcon name={icon} size={18} color={colors.action.primary} /> : null}
-        <MGText variant="label" numberOfLines={compact ? 1 : undefined} style={{ flexShrink: 1 }}>
-          {required ? `${label} *` : label}
-        </MGText>
-      </View>
+      {hideLabel ? null : (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.sm }}>
+          {icon ? <MGIcon name={icon} size={18} color={colors.action.primary} /> : null}
+          <MGText variant="label" numberOfLines={compact ? 1 : undefined} style={{ flexShrink: 1 }}>
+            {required ? `${label} *` : label}
+          </MGText>
+        </View>
+      )}
       <View style={styles.inputSlot}>
+        {hideLabel && icon ? (
+          <View style={styles.leading} pointerEvents="none">
+            <MGIcon name={icon} size={18} color={colors.text.secondary} />
+          </View>
+        ) : null}
         <TextInput
           {...props}
           value={controlledValue}
@@ -72,12 +85,14 @@ export default function MGTextField({
           }}
           placeholderTextColor={colors.text.secondary}
           style={[
+            WEB_FOCUS_RESET,
             {
               borderWidth: 2,
               borderRadius: radius.md,
               paddingHorizontal: spacing.md,
+              paddingLeft: hideLabel && icon ? spacing.xl + spacing.md : spacing.md,
               paddingRight: trailing ? spacing.xl + spacing.sm : spacing.md,
-              minHeight: 52,
+              minHeight: 40,
               fontSize: textStyles.body.fontSize,
               fontFamily: fonts.regular,
               borderColor,
@@ -87,7 +102,7 @@ export default function MGTextField({
             style,
           ]}
         />
-        {trailing ? <View style={styles.trailing} pointerEvents="none">{trailing}</View> : null}
+        {trailing ? <View style={styles.trailing} pointerEvents="box-none">{trailing}</View> : null}
         {menu ? <View style={[styles.menu, { marginTop: spacing.xs }]}>{menu}</View> : null}
       </View>
       {error ? (
@@ -113,8 +128,16 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 12,
     top: 0,
-    height: 52,
+    height: 40,
     justifyContent: 'center',
+  },
+  leading: {
+    position: 'absolute',
+    left: 14,
+    top: 0,
+    height: 40,
+    justifyContent: 'center',
+    zIndex: 1,
   },
   menu: {
     position: 'absolute',

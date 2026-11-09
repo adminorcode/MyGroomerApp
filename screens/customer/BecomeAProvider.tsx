@@ -1,5 +1,6 @@
 import { AppAlert } from '../../utils/alert'
-import { View, Text, Pressable, StyleSheet } from 'react-native'
+import { useState } from 'react'
+import { View, Pressable, StyleSheet } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import ScreenHeader from '../../components/shared/ScreenHeader'
 import { StackNavigationProp } from '@react-navigation/stack'
@@ -7,12 +8,13 @@ import { ProfileStackParamList } from '../../navigation/types'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { providerSchema } from '../../validators/provider.validator'
-import { useTheme } from '../../context/ThemeContext'
 import { MomoProvider, PayoutMethod } from '../../types/provider.types'
 import { useRegisterAsProvider } from '../../hooks/useProviders'
 import { BoamePhoneInput } from '../../components/shared/Input'
-import { MGButton, MGTextField } from '../../design-system/components'
-import { borderRadius, fonts, layout, spacing, typography } from '../../constants/theme'
+import { MGButton, MGCard, MGText, MGTextField } from '../../design-system/components'
+import { useMGTheme } from '../../design-system/theme/useMGTheme'
+import { layout } from '../../constants/theme'
+import { spacing } from '../../design-system/tokens'
 import z from 'zod'
 import MGArtwork from '../../design-system/components/MGArtwork'
 
@@ -44,13 +46,14 @@ type OptionSelectorProps<T extends string> = {
 }
 
 function OptionSelector<T extends string>({ label, options, value, onChange, error }: OptionSelectorProps<T>) {
-    const { colors } = useTheme()
+    const { colors, radius } = useMGTheme()
     return (
         <View style={styles.selectorGroup}>
-            <Text style={[styles.selectorLabel, { color: colors.primaryText }]}>{label}</Text>
+            <MGText variant="label" style={styles.selectorLabel}>{label}</MGText>
             <View style={styles.selectorRow}>
                 {options.map((option) => {
                     const isSelected = value === option.value
+                    // R1: opção selecionada é ação e fica em action.primary com texto onAction.primary.
                     return (
                         <Pressable
                             key={option.value}
@@ -60,31 +63,31 @@ function OptionSelector<T extends string>({ label, options, value, onChange, err
                             onPress={() => onChange(option.value)}
                             style={[
                                 styles.option,
-                                { borderColor: colors.border },
-                                isSelected && { borderColor: colors.selection, backgroundColor: colors.selection },
+                                { borderRadius: radius.lg, borderColor: isSelected ? colors.action.primary : colors.border.default },
+                                isSelected && { backgroundColor: colors.action.primary },
                             ]}
                         >
-                            <Text
-                                style={[
-                                    styles.optionText,
-                                    { color: colors.text },
-                                    isSelected && { color: colors.onSelection },
-                                ]}
+                            <MGText
+                                variant="button"
+                                style={{ textAlign: 'center', color: isSelected ? colors.onAction.primary : colors.text.primary }}
                             >
                                 {option.label}
-                            </Text>
+                            </MGText>
                         </Pressable>
                     )
                 })}
             </View>
-            {error && <Text style={[styles.error, { color: colors.error }]}>{error}</Text>}
+            {error && <MGText variant="caption" color="error" style={styles.error}>{error}</MGText>}
         </View>
     )
 }
 
+const SUBMIT_FAILED_MESSAGE = 'Não foi possível concluir o cadastro de groomer. Tente novamente.'
+
 const BecomeAProvider = ({ navigation }: Props) => {
     const { mutateAsync, isPending } = useRegisterAsProvider()
-    const { colors } = useTheme()
+    const { colors } = useMGTheme()
+    const [submitError, setSubmitError] = useState<string | null>(null)
     const { control, handleSubmit, watch, formState: { errors } } = useForm<ProviderFormValues>({
         resolver: zodResolver(providerSchema),
         defaultValues: {
@@ -100,17 +103,19 @@ const BecomeAProvider = ({ navigation }: Props) => {
     const payoutMethod = watch('payout_method')
 
     const onSubmit: SubmitHandler<ProviderFormValues> = async (data) => {
+        setSubmitError(null)
         try {
             await mutateAsync(data)
             AppAlert.alert('Bem-vindo!', 'Você agora é groomer.')
         } catch (error) {
-            AppAlert.alert('Falha no cadastro', 'Não foi possível concluir o cadastro de groomer. Tente novamente.')
+            // Falha no envio fica na própria tela, junto do CTA; o alerta nativo não aparece na web.
+            setSubmitError(SUBMIT_FAILED_MESSAGE)
         }
     }
 
     return (
         <KeyboardAwareScrollView
-            style={{ backgroundColor: colors.background }}
+            style={{ backgroundColor: colors.surface.canvas }}
             contentContainerStyle={styles.container}
             keyboardShouldPersistTaps='handled'
             extraScrollHeight={20}
@@ -123,10 +128,15 @@ const BecomeAProvider = ({ navigation }: Props) => {
                 onBack={() => navigation.goBack()}
             />
 
-            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.selectionSoft, borderRadius: borderRadius.lg, padding: spacing.base, gap: spacing.sm }}>
-                <View style={{ flex: 1 }}><Text style={{ fontFamily: fonts.semibold, color: colors.text }}>Ofereça seus serviços</Text><Text style={{ fontFamily: fonts.regular, color: colors.text }}>Preencha seus dados para continuar.</Text></View>
-                <MGArtwork name="professional" width={80} />
-            </View>
+            {/* Bloco de convite: destaque 20 pt em tealSubtle com texto text.primary (R3, R5). */}
+            <MGCard variant='teal' shape='hero' style={styles.invite}>
+                <View style={styles.inviteText}>
+                    <MGText variant='title' color='primary'>Ofereça seus serviços</MGText>
+                    <MGText variant='bodySmall' color='primary'>Preencha seus dados para continuar.</MGText>
+                </View>
+                <MGArtwork name='professional' width={80} />
+            </MGCard>
+
             <View style={styles.form}>
                 <Controller
                     control={control}
@@ -229,6 +239,9 @@ const BecomeAProvider = ({ navigation }: Props) => {
                     )}
                 />
 
+                {submitError ? (
+                    <MGText variant='bodySmall' color='error' accessibilityRole='alert'>{submitError}</MGText>
+                ) : null}
                 <MGButton
                     label='Cadastrar como groomer'
                     loading={isPending}
@@ -248,16 +261,23 @@ const styles = StyleSheet.create({
         paddingHorizontal: layout.screenPadding,
         paddingBottom: spacing.xxl,
     },
+    invite: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.sm,
+    },
+    inviteText: {
+        flex: 1,
+        gap: spacing.xxs,
+    },
     form: {
         gap: spacing.sm,
         marginTop: spacing.md,
     },
     selectorGroup: {
-        marginBottom: 12,
+        marginBottom: spacing.md,
     },
     selectorLabel: {
-        fontSize: typography.sizes.sm,
-        fontFamily: fonts.regular,
         marginBottom: spacing.sm,
     },
     selectorRow: {
@@ -265,21 +285,16 @@ const styles = StyleSheet.create({
         gap: spacing.sm,
     },
     option: {
-        minHeight: 48,
+        minHeight: 52,
         flex: 1,
         alignItems: 'center',
-        paddingVertical: spacing.sm + 4,
+        justifyContent: 'center',
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.md,
         borderWidth: 1,
-        borderRadius: borderRadius.lg,
-    },
-    optionText: {
-        fontSize: typography.sizes.md,
-        fontFamily: fonts.medium,
     },
     error: {
-        fontSize: typography.sizes.xs,
-        fontFamily: fonts.regular,
-        marginTop: 4,
+        marginTop: spacing.xs,
     },
 })
 

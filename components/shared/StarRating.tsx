@@ -1,6 +1,6 @@
 import { View, Pressable, StyleSheet } from 'react-native'
 import { StarIcon } from 'lucide-react-native'
-import { useTheme } from '../../context/ThemeContext'
+import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { spacing } from '../../constants/theme'
 
 type StarRatingProps = {
@@ -11,22 +11,25 @@ type StarRatingProps = {
 }
 
 const StarRating = ({ rating, onRatingChange, size = 28, readOnly = false }: StarRatingProps) => {
-    const { colors } = useTheme()
+    const { colors } = useMGTheme()
     return (
         <View style={styles.starsContainer} accessibilityRole={readOnly ? 'image' : 'radiogroup'} accessibilityLabel={readOnly ? `${rating} de 5 estrelas` : 'Sua nota'}>
-            {[1, 2, 3, 4, 5].map((star) => (
-                <Pressable key={star} accessible={!readOnly} accessibilityRole={readOnly ? undefined : 'radio'} accessibilityLabel={`${star} ${star === 1 ? 'estrela' : 'estrelas'}`} accessibilityState={readOnly ? undefined : { checked: rating === star }} aria-checked={readOnly ? undefined : rating === star} disabled={readOnly || !onRatingChange} style={({ pressed }) => ({ minWidth: readOnly ? size : 48, minHeight: readOnly ? size : 48, alignItems: 'center', justifyContent: 'center', opacity: pressed ? 0.6 : 1 })} onPress={() => onRatingChange?.(star)}>
-                    <StarIcon
-                        size={size}
-                        color={colors.primary}
-                        fill={star <= rating ? colors.primary : 'transparent'}
-                    />
-                </Pressable>
-            ))}
+            {[1, 2, 3, 4, 5].map((star) => {
+                // R1: estrela selecionada é sempre action.primary. As não selecionadas ficam em neutro para o estado não depender só da cor.
+                const selected = star <= rating
+                return (
+                    <Pressable key={star} accessible={!readOnly} accessibilityRole={readOnly ? undefined : 'radio'} accessibilityLabel={`${star} ${star === 1 ? 'estrela' : 'estrelas'}`} accessibilityState={readOnly ? undefined : { checked: rating === star }} aria-checked={readOnly ? undefined : rating === star} disabled={readOnly || !onRatingChange} style={({ pressed }) => ({ minWidth: readOnly ? size : 48, minHeight: readOnly ? size : 48, alignItems: 'center', justifyContent: 'center', opacity: pressed ? 0.6 : 1 })} onPress={() => onRatingChange?.(star)}>
+                        <StarIcon
+                            size={size}
+                            color={selected ? colors.action.primary : colors.text.secondary}
+                            fill={selected ? colors.action.primary : 'transparent'}
+                        />
+                    </Pressable>
+                )
+            })}
         </View>
     )
 }
-
 
 const styles = StyleSheet.create({
     starsContainer:{

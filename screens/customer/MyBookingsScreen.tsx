@@ -4,13 +4,15 @@ import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
 import { BookingsStackParamList } from '../../navigation/types'
 import { StackNavigationProp } from '@react-navigation/stack'
-import { useTheme } from '../../context/ThemeContext'
 import { useGetBookings } from '../../hooks/useBooking'
-import { spacing } from '../../constants/theme'
-import { BookingCard } from '../../components/shared/BookingCard'
 import BookingStatusFilter from '../../components/shared/BookingStatusFilter'
 import { BookingStatus } from '../../types/booking.types'
-import { MGEmptyState, MGErrorState } from '../../design-system/components'
+import { MGAvatar, MGCard, MGEmptyState, MGErrorState, MGIcon, MGText } from '../../design-system/components'
+import BookingStatusBadge from '../../design-system/patterns/BookingStatusBadge'
+import { useMGTheme } from '../../design-system/theme/useMGTheme'
+import { spacing } from '../../design-system/tokens'
+import { formatDateTime } from '../../utils/formatDate'
+import { formatMoney } from '../../utils/formatMoney'
 
 type MyBookingsScreenNavigationProp = StackNavigationProp<BookingsStackParamList, 'MyBookings'>
 
@@ -18,9 +20,8 @@ type Props = {
     navigation: MyBookingsScreenNavigationProp
 }
 
-
 export default function MyBookingsScreen({navigation}: Props) {
-    const {colors} = useTheme()
+    const { colors, fonts } = useMGTheme()
     const [statusFilter, setStatusFilter] = useState<BookingStatus | undefined>(undefined)
     const {data:bookings, isLoading, isError, refetch} = useGetBookings(statusFilter)
 
@@ -35,7 +36,8 @@ export default function MyBookingsScreen({navigation}: Props) {
 
         { isLoading ? (
             <View style={styles.centered}>
-            <ActivityIndicator accessibilityLabel="Carregando agendamentos" size="large" color={colors.primary} />
+            <ActivityIndicator accessibilityLabel="Carregando agendamentos" size="large" color={colors.action.primary} />
+            <MGText>Carregando agendamentos</MGText>
             </View>
         ) : isError ? (
             <View style={styles.centered}>
@@ -48,18 +50,44 @@ export default function MyBookingsScreen({navigation}: Props) {
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
             renderItem={({ item }) => (
-                <BookingCard
-                service_name={item.service_name}
-                provider_name={item.provider_name}
-                price={item.price}
-                scheduled_at={item.scheduled_at}
-                customer_location={item.customer_location}
-                booking_status={item.booking_status}
-                showChevron
-                onPress={() => navigation.navigate('BookingDetail', {
+                <MGCard onPress={() => navigation.navigate('BookingDetail', {
                     bookingId: item.id,
-                })}
-                />
+                })}>
+                    <View style={styles.row}>
+                        <View style={styles.content}>
+                            <View style={styles.titleRow}>
+                                <MGText variant="title" numberOfLines={2} style={styles.serviceName}>
+                                    {item.service_name}
+                                </MGText>
+                                <BookingStatusBadge status={item.booking_status} />
+                            </View>
+                            <View style={styles.providerRow}>
+                                <MGAvatar name={item.provider_name} tone="teal" size={28} />
+                                <MGText variant="bodySmall" color="secondary" numberOfLines={1} style={styles.flex}>
+                                    {`por ${item.provider_name}`}
+                                </MGText>
+                            </View>
+                            {item.price != null ? (
+                                <MGText variant="bodySmall" color="teal" style={{ fontFamily: fonts.bold }}>
+                                    {formatMoney(item.price)}
+                                </MGText>
+                            ) : null}
+                            <View style={styles.infoRow}>
+                                <MGIcon name="calendar-days" size={16} color={colors.text.secondary} />
+                                <MGText variant="bodySmall" color="secondary" numberOfLines={1} style={styles.flex}>
+                                    {formatDateTime(item.scheduled_at)}
+                                </MGText>
+                            </View>
+                            <View style={styles.infoRow}>
+                                <MGIcon name="map-pin" size={16} color={colors.brand.teal} />
+                                <MGText variant="bodySmall" color="secondary" numberOfLines={2} style={styles.flex}>
+                                    {item.customer_location}
+                                </MGText>
+                            </View>
+                        </View>
+                        <MGIcon name="chevron-right" size={20} color={colors.text.secondary} />
+                    </View>
+                </MGCard>
             )}
             ListEmptyComponent={
                 <MGEmptyState
@@ -84,7 +112,7 @@ const styles = StyleSheet.create({
     },
     listContent: {
       flexGrow: 1,
-      gap: spacing.xs,
+      gap: spacing.sm,
       paddingBottom: spacing.xl,
     },
     centered: {
@@ -92,5 +120,40 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       justifyContent: 'center',
       paddingHorizontal: spacing.lg,
+      gap: spacing.sm,
+    },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    content: {
+      flex: 1,
+      minWidth: 0,
+      gap: spacing.xs,
+    },
+    titleRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: spacing.sm,
+    },
+    serviceName: {
+      flex: 1,
+      minWidth: 80,
+    },
+    providerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    infoRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    flex: {
+      flex: 1,
     },
   })

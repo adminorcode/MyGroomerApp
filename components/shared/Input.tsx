@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderRadius: borderRadius.md,
         paddingHorizontal: spacing.md,
-        minHeight: 52,
+        minHeight: 40,
         fontSize: textStyles.body.fontSize,
         fontFamily: fonts.regular,
     },
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderRadius: borderRadius.md,
         paddingHorizontal: spacing.md,
-        minHeight: 52,
+        minHeight: 40,
     },
     passwordInput: {
         flex: 1,
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
         width: '100%',
         borderWidth: 2,
         borderRadius: borderRadius.md,
-        minHeight: 52,
+        minHeight: 40,
     },
     phoneTextContainer: {
         borderRadius: borderRadius.md,

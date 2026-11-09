@@ -142,7 +142,7 @@ export default function PublicProfileScreen({ navigation }: Props) {
 
       {loading ? (
         <View style={{ alignItems: 'center', justifyContent: 'center', gap: spacing.md, paddingVertical: spacing.xxxl }} accessibilityLabel="Carregando perfil">
-          <ActivityIndicator size="large" color={colors.action.primary} />
+          <ActivityIndicator size="large" color={colors.brand.teal} />
           <MGText variant="body">Carregando perfil</MGText>
         </View>
       ) : profileQuery.isError || !profile ? (
@@ -159,7 +159,7 @@ export default function PublicProfileScreen({ navigation }: Props) {
               borderRadius: radius.xl,
               borderWidth: 1,
               borderColor: colors.border.default,
-              backgroundColor: colors.surface.pinkSubtle,
+              backgroundColor: colors.surface.tealSubtle,
               overflow: 'hidden',
             }}
           >
@@ -171,48 +171,50 @@ export default function PublicProfileScreen({ navigation }: Props) {
               ratingLabel={profileRatingLabel(profile.average_rating, profile.review_count)}
               specialties={profile.services.map(service => service.name)}
             />
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-              <View style={{ flexGrow: 1, flexBasis: '45%' }}>
-                <MGButton label="Editar perfil" variant="secondary" onPress={() => setEditingPhoto((current) => !current)} />
-              </View>
-              <View style={{ flexGrow: 1, flexBasis: '45%' }}>
-                <MGButton label="Visualizar como tutor" onPress={() => navigation.navigate('PublicProfilePreview')} />
-              </View>
+          </View>
+          {/* Ações fora do bloco teal: rosa-texto só sobre branco ou pinkSubtle (R5). */}
+          <View style={{ gap: spacing.sm }}>
+            {/* Ações empilhadas em largura total: "Visualizar como tutor" não quebra em duas linhas em 390 pt. */}
+            <View style={{ gap: spacing.sm }}>
+              <MGButton label="Editar foto" variant="secondary" onPress={() => setEditingPhoto((current) => !current)} />
+              <MGButton label="Visualizar como tutor" onPress={() => navigation.navigate('PublicProfilePreview')} />
             </View>
             {editingPhoto ? (
-              <View style={{ gap: spacing.sm }}>
-                <MGText variant="bodySmall" color="secondary">
-                  A foto redonda aparece no cabeçalho do perfil público. JPG ou PNG, até 10 MB.
-                </MGText>
-                <MGButton
-                  label="Escolher foto"
-                  variant="secondary"
-                  onPress={() => { void choosePhoto() }}
-                  loading={savePhoto.isPending}
-                  disabled={waitingPhoto}
-                />
-                {profile.photo_id ? (
+              <MGCard>
+                <View style={{ gap: spacing.sm }}>
+                  <MGText variant="bodySmall" color="secondary">
+                    A foto redonda aparece no cabeçalho do perfil público. JPG ou PNG, até 10 MB.
+                  </MGText>
                   <MGButton
-                    label="Remover foto"
-                    variant="destructive"
-                    onPress={() => { void clearPhoto() }}
-                    loading={removePhoto.isPending}
+                    label="Escolher foto"
+                    variant="secondary"
+                    onPress={() => { void choosePhoto() }}
+                    loading={savePhoto.isPending}
                     disabled={waitingPhoto}
                   />
-                ) : null}
-                {photoError ? (
-                  <MGText variant="bodySmall" color="error" accessibilityRole="alert">{photoError}</MGText>
-                ) : null}
-                <MGButton
-                  label="Cancelar"
-                  variant="tertiary"
-                  onPress={() => {
-                    setEditingPhoto(false)
-                    setPhotoError(null)
-                  }}
-                  disabled={waitingPhoto}
-                />
-              </View>
+                  {profile.photo_id ? (
+                    <MGButton
+                      label="Remover foto"
+                      variant="destructive"
+                      onPress={() => { void clearPhoto() }}
+                      loading={removePhoto.isPending}
+                      disabled={waitingPhoto}
+                    />
+                  ) : null}
+                  {photoError ? (
+                    <MGText variant="bodySmall" color="error" accessibilityRole="alert">{photoError}</MGText>
+                  ) : null}
+                  <MGButton
+                    label="Cancelar"
+                    variant="tertiary"
+                    onPress={() => {
+                      setEditingPhoto(false)
+                      setPhotoError(null)
+                    }}
+                    disabled={waitingPhoto}
+                  />
+                </View>
+              </MGCard>
             ) : null}
           </View>
 
@@ -296,9 +298,10 @@ export default function PublicProfileScreen({ navigation }: Props) {
             ) : (
               <View style={{ gap: spacing.sm }}>
                 {profile.services.map(service => (
-                  <View key={service.id} style={{ gap: spacing.xxs, padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.surface.pinkSubtle }}>
+                  <View key={service.id} style={{ gap: spacing.xxs, padding: spacing.md, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border.default, backgroundColor: colors.surface.default }}>
                     <MGText variant="title">{service.name}</MGText>
-                    <MGText variant="body" color="brand" style={{ fontFamily: fonts.bold }}>
+                    {/* R3: preço do atendimento em teal, sobre branco (R5). */}
+                    <MGText variant="body" color="teal" style={{ fontFamily: fonts.bold }}>
                       A partir de {formatMoney(service.price)}
                     </MGText>
                   </View>
@@ -324,7 +327,7 @@ export default function PublicProfileScreen({ navigation }: Props) {
             )}
           </Section>
 
-          <Section icon="calendar-days" title="Fotos / Galeria">
+          <Section icon="image" title="Fotos / Galeria">
             <ProfileGallery
               photoIds={(profile.gallery ?? []).map(photo => photo.id)}
               canAdd={profile.gallery?.length !== MAX_GALLERY_PHOTOS}
@@ -359,7 +362,8 @@ function Section({ icon, title, actionLabel, onAction, children }: {
     <MGCard>
     <View style={{ gap: spacing.sm }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-        <MGIcon name={icon} size={20} color={colors.action.primary} />
+        {/* R3: seções do profissional em teal. */}
+        <MGIcon name={icon} size={20} color={colors.brand.teal} />
         <MGText variant="heading3" style={{ flex: 1 }}>{title}</MGText>
         {actionLabel && onAction ? (
           <MGButton
@@ -368,7 +372,7 @@ function Section({ icon, title, actionLabel, onAction, children }: {
             variant="secondary"
             fullWidth={false}
             onPress={onAction}
-            style={{ minHeight: 48, paddingHorizontal: spacing.md }}
+            style={{ paddingHorizontal: spacing.md }}
           />
         ) : null}
       </View>

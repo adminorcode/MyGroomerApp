@@ -105,7 +105,6 @@ async function leaveServices(page) {
 
 async function searchTutor(page, address) {
   await fillServiceAddress(page, address)
-  await page.getByRole('button', { name: 'Buscar' }).click()
 }
 
 async function run() {
@@ -124,7 +123,7 @@ async function run() {
 
     await loginProfessional(page)
     await leaveServices(page)
-    await page.getByText('Não foi possível conectar à API. Verifique o servidor e tente novamente.').waitFor({ timeout: 15000 })
+    await page.getByText('Não foi possível conectar. Verifique sua internet e tente novamente.').waitFor({ timeout: 15000 })
     check('erro', true)
 
     mode = 'delay'
@@ -276,7 +275,6 @@ async function run() {
     const tutor = await openPage(browser, { viewport: 'mobile' })
     await loginTutor(tutor)
     await tutor.getByRole('button', { name: 'Buscar um serviço' }).click()
-    await tutor.getByRole('radio', { name: 'Banho', exact: true }).click()
     await searchTutor(tutor, 'Avenida Paulista, São Paulo')
     await tutor.getByText('Groomer de Teste').waitFor({ timeout: 15000 })
     check('AC-05', true, 'a base entra no raio')

@@ -26,9 +26,10 @@ export default function OnboardingStepper({ steps, currentStepId }: Props) {
       style={[styles.row, { gap: spacing.sm }]}
     >
       {steps.map((step, index) => {
+        // CMP-19: passo atual em rosa (R1), concluídos em teal (R3), pendentes em contorno.
         const done = index < currentIndex
         const current = index === currentIndex
-        const tone = done || current ? colors.action.primary : colors.border.default
+        const tone = current ? colors.action.primary : done ? colors.brand.teal : colors.border.default
         return (
           <View key={step.id} style={[styles.step, { gap: spacing.xs, flex: 1 }]}>
             <View
@@ -40,7 +41,7 @@ export default function OnboardingStepper({ steps, currentStepId }: Props) {
             />
             <MGText
               variant="caption"
-              color={current ? 'brand' : 'secondary'}
+              color={current ? 'brand' : done ? 'teal' : 'secondary'}
               numberOfLines={1}
             >
               {step.label}

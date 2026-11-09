@@ -52,7 +52,8 @@ export default function AddressFormScreen({ navigation, route }: Props) {
     const [movingPin, setMovingPin] = useState(false)
     const [confirmDelete, setConfirmDelete] = useState(false)
     const suggestTicket = useRef(0)
-    const skipSuggest = useRef(false)
+    // Texto que foi preenchido por escolha (edição ou sugestão) e não deve disparar busca. Compara o texto, não a ordem dos efeitos.
+    const skipSuggestText = useRef<string | null>(null)
     const hideMenu = useRef<ReturnType<typeof setTimeout> | null>(null)
     const addressRef = useRef('')
     const askedGps = useRef(false)
@@ -73,7 +74,7 @@ export default function AddressFormScreen({ navigation, route }: Props) {
             setHydrated(true)
             return
         }
-        skipSuggest.current = true
+        skipSuggestText.current = current.address
         setLabel(current.label)
         setAddress(current.address)
         setComplement(current.complement ?? '')
@@ -94,8 +95,8 @@ export default function AddressFormScreen({ navigation, route }: Props) {
     useEffect(() => {
         const ticket = suggestTicket.current + 1
         suggestTicket.current = ticket
-        if (skipSuggest.current) {
-            skipSuggest.current = false
+        if (skipSuggestText.current !== null && address === skipSuggestText.current) {
+            skipSuggestText.current = null
             setSuggestions([])
             setSuggesting(false)
             return
@@ -125,7 +126,7 @@ export default function AddressFormScreen({ navigation, route }: Props) {
 
     const applySuggestion = (item: AddressSuggestion) => {
         if (hideMenu.current) clearTimeout(hideMenu.current)
-        skipSuggest.current = true
+        skipSuggestText.current = item.address === addressRef.current ? null : item.address
         suggestTicket.current += 1
         setSuggestions([])
         setSuggesting(false)
@@ -253,9 +254,7 @@ export default function AddressFormScreen({ navigation, route }: Props) {
                             autoCapitalize="words"
                             maxLength={200}
                             helperText="Digite para ver sugestões"
-                            menu={suggesting && suggestions.length === 0 ? (
-                                <Wait label="Buscando endereços" />
-                            ) : menuOpen ? (
+                            menu={menuOpen ? (
                                 <View style={{
                                     maxHeight: 128,
                                     backgroundColor: colors.surface.default,
@@ -290,6 +289,8 @@ export default function AddressFormScreen({ navigation, route }: Props) {
                                 </View>
                             ) : null}
                         />
+                        {/* Espera das sugestões fica no fluxo, sob o campo: não cobre "Usar minha localização" nem o resto da tela. */}
+                        {suggesting && suggestions.length === 0 ? <Wait label="Buscando endereços" /> : null}
                         <CurrentLocationActions
                             status={place.status}
                             onPress={() => {
@@ -345,9 +346,9 @@ export default function AddressFormScreen({ navigation, route }: Props) {
                                 style={{ minHeight: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md }}
                             >
                                 <MGText>{makeDefault ? 'Padrão marcado' : 'Marcar como padrão'}</MGText>
-                                <View style={{ width: 48, height: 28, borderRadius: radius.pill, padding: spacing.xxs, alignItems: makeDefault ? 'flex-end' : 'flex-start', backgroundColor: makeDefault ? colors.action.secondary : colors.state.disabledSurface }}>
+                                <View style={{ width: 48, height: 28, borderRadius: radius.pill, padding: spacing.xxs, alignItems: makeDefault ? 'flex-end' : 'flex-start', backgroundColor: makeDefault ? colors.action.primary : colors.state.disabledSurface }}>
                                     <View style={{ width: 24, height: 24, borderRadius: radius.pill, backgroundColor: colors.surface.default, alignItems: 'center', justifyContent: 'center' }}>
-                                        {makeDefault ? <MGIcon name="check" size={16} color={colors.action.secondary} /> : null}
+                                        {makeDefault ? <MGIcon name="check" size={16} color={colors.action.primary} /> : null}
                                     </View>
                                 </View>
                             </Pressable>

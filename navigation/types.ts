@@ -36,8 +36,6 @@ export type ChosenServiceAddress = {
 export type HomeStackParamList = {
     Home: undefined
     TutorSearch: { serviceId?: string, categoryId?: string } | undefined
-    Services: {categoryId: string, categoryName: string}
-    ServiceProviders: {serviceId: string, serviceName: string}
     GroomerProfile: { providerServiceId: string } & ChosenServiceAddress
     BookService: { providerServiceId: string, petId?: string } & ChosenServiceAddress
     BookingRequest: { providerServiceId: string, petId: string, scheduledAt: string } & ChosenServiceAddress
@@ -48,7 +46,7 @@ export type BookingsStackParamList = {
     MyBookings: undefined
     BookingDetail: { bookingId: string }
     ReviewBooking: {bookingId: string, serviceName?: string, providerName?: string}
-    ReviewDetail: { reviewId: string }
+    ReviewDetail: { reviewId: string, providerName?: string }
 }
 
 export type ProfileEditOrigin = { origin?: 'profile' } | undefined

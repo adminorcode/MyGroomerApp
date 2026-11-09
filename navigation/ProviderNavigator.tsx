@@ -13,6 +13,7 @@ import ProviderServicesStackNavigator from './ProviderServicesStackNavigator'
 import MessagesStackNavigator from './MessagesStackNavigator'
 import MessageTabIcon from '../components/shared/MessageTabIcon'
 import AppHeader from '../components/shared/AppHeader'
+import TabIconPill from './TabIconPill'
 import { useState } from 'react'
 import { useRegistrationNavigation } from '../store/registrationNavigation'
 import { useAuthStore } from '../store/authStore'
@@ -75,8 +76,8 @@ export default function ProviderNavigator() {
                 options={{
                     tabBarLabel: tabLabel('Agenda'),
                     tabBarAccessibilityLabel: 'Agenda',
-                    tabBarIcon: ({ color, size }) => (
-                        <CalendarDays color={color} size={size} />
+                    tabBarIcon: ({ color, size, focused }) => (
+                        <TabIconPill focused={focused}><CalendarDays color={color} size={size} /></TabIconPill>
                     ),
                 }}
             />
@@ -87,7 +88,7 @@ export default function ProviderNavigator() {
                 options={{
                     tabBarLabel: tabLabel('Solicitações'),
                     tabBarAccessibilityLabel: 'Solicitações',
-                    tabBarIcon: ({ color, size }) => <Bell color={color} size={size} />,
+                    tabBarIcon: ({ color, size, focused }) => <TabIconPill focused={focused}><Bell color={color} size={size} /></TabIconPill>,
                 }}
             />
 
@@ -97,7 +98,7 @@ export default function ProviderNavigator() {
                 options={{
                     tabBarLabel: tabLabel('Serviços'),
                     tabBarAccessibilityLabel: 'Serviços',
-                    tabBarIcon: ({ color, size }) => <Scissors color={color} size={size} />,
+                    tabBarIcon: ({ color, size, focused }) => <TabIconPill focused={focused}><Scissors color={color} size={size} /></TabIconPill>,
                 }}
             />
 
@@ -107,7 +108,7 @@ export default function ProviderNavigator() {
                 options={{
                     tabBarLabel: tabLabel('Rendimentos'),
                     tabBarAccessibilityLabel: 'Rendimentos',
-                    tabBarIcon: ({ color, size }) => <Wallet color={color} size={size} />,
+                    tabBarIcon: ({ color, size, focused }) => <TabIconPill focused={focused}><Wallet color={color} size={size} /></TabIconPill>,
                 }}
             />
 
@@ -117,8 +118,8 @@ export default function ProviderNavigator() {
                 options={{
                     tabBarLabel: tabLabel('Mensagens'),
                     tabBarAccessibilityLabel: 'Mensagens',
-                    tabBarIcon: ({ color, size }) => (
-                        <MessageTabIcon color={color} size={size} />
+                    tabBarIcon: ({ color, size, focused }) => (
+                        <TabIconPill focused={focused}><MessageTabIcon color={color} size={size} /></TabIconPill>
                     ),
                 }}
             />

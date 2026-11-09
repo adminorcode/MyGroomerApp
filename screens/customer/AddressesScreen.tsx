@@ -1,7 +1,6 @@
-import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native'
+import { ActivityIndicator, ScrollView, View } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
-import { ChevronRight } from 'lucide-react-native'
-import { MGButton, MGEmptyState, MGErrorState, MGIcon, MGText } from '../../design-system/components'
+import { MGButton, MGCard, MGEmptyState, MGErrorState, MGIcon, MGText } from '../../design-system/components'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
@@ -41,22 +40,11 @@ export default function AddressesScreen({ navigation }: Props) {
                     {addresses.data && addresses.data.length > 0 ? (
                         <>
                             {addresses.data.map(item => (
-                                <Pressable
+                                <MGCard
                                     key={item.id}
-                                    accessibilityRole="button"
-                                    accessibilityLabel={`${addressLabelName(item.label)}. ${item.address}${item.is_default ? '. Padrão' : ''}`}
                                     onPress={() => openForm(item.id)}
-                                    style={({ pressed }) => ({
-                                        minHeight: 72,
-                                        padding: spacing.base,
-                                        borderRadius: radius.lg,
-                                        borderWidth: 1,
-                                        borderColor: colors.border.default,
-                                        backgroundColor: pressed ? colors.state.pressedSurface : colors.surface.default,
-                                        flexDirection: 'row',
-                                        alignItems: 'center',
-                                        gap: spacing.sm,
-                                    })}
+                                    accessibilityLabel={`${addressLabelName(item.label)}. ${item.address}${item.is_default ? '. Padrão' : ''}`}
+                                    style={{ minHeight: 72, flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
                                 >
                                     <View style={{ width: 40, height: 40, borderRadius: radius.md, backgroundColor: colors.surface.pinkSubtle, alignItems: 'center', justifyContent: 'center' }}>
                                         <MGIcon name={item.label === 'work' ? 'building-2' : 'map-pin'} color={colors.action.primary} />
@@ -67,8 +55,8 @@ export default function AddressesScreen({ navigation }: Props) {
                                         {item.complement ? <MGText variant="bodySmall" color="secondary">{item.complement}</MGText> : null}
                                         {item.is_default ? <MGText variant="caption" color="info">Padrão</MGText> : null}
                                     </View>
-                                    <ChevronRight size={20} color={colors.text.secondary} />
-                                </Pressable>
+                                    <MGIcon name="chevron-right" size={20} color={colors.text.secondary} />
+                                </MGCard>
                             ))}
                             <MGButton label="Cadastrar endereço" onPress={() => openForm()} />
                         </>

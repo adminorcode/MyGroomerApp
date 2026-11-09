@@ -1,11 +1,11 @@
-import { View, Text, StyleSheet, ActivityIndicator, FlatList } from 'react-native'
+import { View, StyleSheet, ActivityIndicator, FlatList } from 'react-native'
 import { ArrowDownLeft } from 'lucide-react-native'
-import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
+import { spacing } from '../../design-system/tokens'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
 import TransactionStatusBadge from '../../components/shared/TransactionStatusBadge'
-import { MGCard, MGEmptyState, MGErrorState, MGIcon, MGText } from '../../design-system/components'
-import { useTheme } from '../../context/ThemeContext'
+import { MGBadge, MGCard, MGEmptyState, MGErrorState, MGIcon, MGText } from '../../design-system/components'
+import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { useGetProviderEarnings } from '../../hooks/useProviders'
 import { ProviderTransaction } from '../../types/transaction.types'
 import { formatMoney } from '../../utils/formatMoney'
@@ -22,50 +22,54 @@ function formatDate(value: string) {
 }
 
 export default function Earnings() {
-  const { colors } = useTheme()
+  // Rendimentos é superfície do profissional: valor e ícones em teal (R3).
+  const { colors, radius } = useMGTheme()
   const { data, isLoading, isError, refetch } = useGetProviderEarnings()
 
   const renderSummary = () => (
-    <MGCard style={{ marginBottom: spacing.lg }}>
-      <View style={{ gap: spacing.sm }}>
-        <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Total recebido</Text>
-        <Text style={[styles.summaryValue, { color: colors.secondary }]}>
-          {formatMoney(data?.totalEarned ?? 0)}
-        </Text>
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm }}>
-        <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Pendente</Text>
-        <Text style={[styles.summaryLabel, { color: colors.primaryText, backgroundColor: colors.selectionSoft, borderRadius: borderRadius.pill, paddingHorizontal: spacing.sm, paddingVertical: spacing.xs }]}>
-          {formatMoney(data?.pending ?? 0)}
-        </Text>
-      </View>
+    <MGCard shape="hero" style={styles.summary}>
+      <MGText variant="label" color="secondary">Total recebido</MGText>
+      <MGText variant="numeric" color="teal">
+        {formatMoney(data?.totalEarned ?? 0)}
+      </MGText>
+      {/* R6: pendente é status de alerta com texto, não saldo disponível para saque. */}
+      <View style={styles.pendingRow}>
+        <MGBadge label="Pendente" tone="pending" />
+        <View>
+          <MGText variant="caption" color="secondary">Valor pendente</MGText>
+          <MGText variant="title" color="primary">
+            {formatMoney(data?.pending ?? 0)}
+          </MGText>
+        </View>
       </View>
     </MGCard>
   )
 
   const renderTransaction = ({ item }: { item: ProviderTransaction }) => (
-    <MGCard style={{ marginBottom: spacing.sm }}>
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-      <View style={[styles.txIcon, { backgroundColor: colors.selectionSoft }]}>
-        <ArrowDownLeft size={20} color={colors.primary} />
-      </View>
-
-      <View style={styles.txContent}>
-        <View style={styles.txHeader}>
-          <Text style={[styles.txTitle, { color: colors.text }]} numberOfLines={1}>
-            {item.service_name ?? 'Repasse'}
-          </Text>
-          <Text style={[styles.txAmount, { color: colors.text }]} numberOfLines={1}>
-            {formatMoney(item.amount)}
-          </Text>
+    <MGCard style={styles.transaction}>
+      <View style={styles.transactionRow}>
+        <View style={[styles.txIcon, { backgroundColor: colors.surface.tealSubtle, borderRadius: radius.pill }]}>
+          <ArrowDownLeft size={20} color={colors.brand.teal} />
         </View>
 
-        <Text style={[styles.txSubtitle, { color: colors.textSecondary }]} numberOfLines={1}>
-          {item.customer_name ? `De ${item.customer_name}` : 'Tutor'} · {formatDate(item.created_at)}
-        </Text>
+        <View style={styles.txContent}>
+          <View style={styles.txHeader}>
+            <MGText variant="title" color="primary" numberOfLines={2} style={styles.txTitle}>
+              {item.service_name ?? 'Repasse'}
+            </MGText>
+            <MGText variant="title" color="teal" numberOfLines={1}>
+              {formatMoney(item.amount)}
+            </MGText>
+          </View>
 
-        <TransactionStatusBadge status={item.transaction_status} />
+          {/* Data inteira visível: quebra em duas linhas em vez de reticências no meio da data. */}
+          <MGText variant="bodySmall" color="secondary" numberOfLines={2}>
+            {item.customer_name ? `De ${item.customer_name}` : 'Tutor'} · {formatDate(item.created_at)}
+          </MGText>
+
+          <TransactionStatusBadge status={item.transaction_status} />
+        </View>
       </View>
-    </View>
     </MGCard>
   )
 
@@ -78,7 +82,7 @@ export default function Earnings() {
 
       {isLoading ? (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={colors.primary} />
+          <ActivityIndicator accessibilityLabel="Carregando rendimentos" size="large" color={colors.brand.teal} />
         </View>
       ) : isError ? (
         <View style={styles.centered}>
@@ -87,8 +91,8 @@ export default function Earnings() {
       ) : (
         <>
           {renderSummary()}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.md }}>
-            <MGIcon name="file-text" color={colors.primary} size={20} />
+          <View style={styles.sectionHeader}>
+            <MGIcon name="file-text" color={colors.brand.teal} size={20} />
             <MGText variant="title">Histórico de repasses</MGText>
           </View>
           <FlatList
@@ -121,18 +125,33 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingBottom: spacing.xl,
   },
-  summaryLabel: {
-    fontSize: typography.sizes.sm,
-    fontFamily: fonts.medium,
+  summary: {
+    marginBottom: spacing.lg,
+    gap: spacing.sm,
   },
-  summaryValue: {
-    fontSize: typography.sizes.xl,
-    fontFamily: fonts.bold,
+  pendingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  transaction: {
+    marginBottom: spacing.sm,
+  },
+  transactionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
   },
   txIcon: {
     width: 40,
     height: 40,
-    borderRadius: borderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -148,16 +167,6 @@ const styles = StyleSheet.create({
   },
   txTitle: {
     flex: 1,
-    fontSize: typography.sizes.md,
-    fontFamily: fonts.semibold,
-  },
-  txAmount: {
-    fontSize: typography.sizes.md,
-    fontFamily: fonts.bold,
-  },
-  txSubtitle: {
-    fontSize: typography.sizes.sm,
-    fontFamily: fonts.regular,
   },
   centered: {
     flex: 1,

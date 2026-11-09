@@ -1,17 +1,16 @@
 import { StyleSheet, View } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { AuthStackParamList } from "../../navigation/types";
-import { spacing, typography } from "../../constants/theme";
 import { MGButton, MGText, MGTextField } from "../../design-system/components";
+import MGBrand from '../../design-system/components/MGBrand';
+import { useMGTheme } from '../../design-system/theme/useMGTheme';
 import { forgotPasswordSchema } from "../../validators/auth.validator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import z from "zod";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useForgotPasswordMutation } from "../../hooks/useAuth";
-import { useTheme } from "../../context/ThemeContext";
 import { getErrorMessage } from "../../utils/error";
-import MGBrand from '../../design-system/components/MGBrand';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 type ForgotPasswordNavigationProp = StackNavigationProp<AuthStackParamList, "ForgotPassword">;
@@ -20,13 +19,49 @@ type Props = {
     navigation: ForgotPasswordNavigationProp;
 };
 
+type Spacing = ReturnType<typeof useMGTheme>['spacing'];
+
+function createStyles(spacing: Spacing) {
+    return StyleSheet.create({
+        container: {
+            flexGrow: 1,
+            alignItems: "center",
+            paddingHorizontal: spacing.xl,
+            paddingTop: spacing.xl,
+            paddingBottom: spacing.huge,
+        },
+        content: { width: '100%', maxWidth: 448 },
+        brand: { alignItems: 'center', marginBottom: spacing.xxl },
+        title: {
+            marginBottom: spacing.md,
+        },
+        help: {
+            width: "100%",
+            maxWidth: 448,
+            marginBottom: spacing.lg,
+        },
+        form: {
+            width: "100%",
+            maxWidth: 448,
+            gap: spacing.sm,
+        },
+        feedback: {
+            marginTop: spacing.xs,
+        },
+        backLink: {
+            marginTop: spacing.lg,
+        },
+    });
+}
+
 export default function ForgotPasswordScreen({ navigation }: Props) {
     const { control, handleSubmit, formState: { errors } } = useForm<z.infer<typeof forgotPasswordSchema>>({
         resolver: zodResolver(forgotPasswordSchema),
         defaultValues: { email: "" },
     });
     const { mutate, isPending, error, isSuccess, data } = useForgotPasswordMutation();
-    const { colors } = useTheme();
+    const { colors, spacing } = useMGTheme();
+    const styles = createStyles(spacing);
 
     const handleForgot: SubmitHandler<z.infer<typeof forgotPasswordSchema>> = (values) => {
         mutate(values.email);
@@ -35,9 +70,9 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
     const waitingForEmail = isSuccess && !data?.reset_token;
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top', 'left', 'right']}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: colors.surface.canvas }} edges={['top', 'left', 'right']}>
         <KeyboardAwareScrollView
-            contentContainerStyle={[styles.container, { backgroundColor: colors.background }]}
+            contentContainerStyle={[styles.container, { backgroundColor: colors.surface.canvas }]}
             keyboardShouldPersistTaps="handled"
             extraScrollHeight={20}
             enableOnAndroid
@@ -71,12 +106,12 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
                 />
                 <MGButton label="Enviar" loading={isPending} onPress={handleSubmit(handleForgot)} />
                 {waitingForEmail && (
-                    <MGText accessibilityRole="alert" variant="bodySmall" style={styles.help}>
+                    <MGText accessibilityRole="alert" variant="bodySmall" color="success" style={styles.feedback}>
                         {data?.message ?? "E-mail de redefinição de senha enviado"}
                     </MGText>
                 )}
                 {error && (
-                    <MGText accessibilityRole="alert" color="error" style={styles.error}>
+                    <MGText accessibilityRole="alert" variant="bodySmall" color="error" style={styles.feedback}>
                         {getErrorMessage(error)}
                     </MGText>
                 )}
@@ -87,35 +122,3 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flexGrow: 1,
-        alignItems: "center",
-        paddingHorizontal: spacing.xl,
-        paddingTop: spacing.xl,
-        paddingBottom: spacing.huge,
-    },
-    content: { width: '100%', maxWidth: 448 },
-    brand: { alignItems: 'center', marginBottom: spacing.xxl },
-    title: {
-        marginBottom: spacing.md,
-    },
-    help: {
-        width: "100%",
-        maxWidth: 448,
-        marginBottom: spacing.lg,
-    },
-    form: {
-        width: "100%",
-        maxWidth: 448,
-        gap: spacing.sm,
-    },
-    error: {
-        fontSize: typography.sizes.sm,
-        marginTop: spacing.xs,
-    },
-    backLink: {
-        marginTop: spacing.lg,
-    },
-});

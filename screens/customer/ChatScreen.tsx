@@ -6,17 +6,15 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  Text,
   View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
-import { useTheme } from '../../context/ThemeContext'
 import { useSocket } from '../../context/SocketContext'
 import { useAuthStore } from '../../store/authStore'
 import { useUnreadStore } from '../../store/unreadStore'
-import { fonts, layout, spacing, typography } from '../../constants/theme'
+import { layout } from '../../constants/theme'
 import { useGetConversationMessages, useGetConversations, useMarkConversationRead } from '../../hooks/useConversations'
 import { Message } from '../../types/conversation.types'
 import { RootParamList } from '../../navigation/types'
@@ -24,8 +22,9 @@ import ChatHeader from '../../components/chat/ChatHeader'
 import ChatInputBar from '../../components/chat/ChatInputBar'
 import MessageBubble from '../../components/chat/MessageBubble'
 import ChatDateSeparator, { formatDateLabel } from '../../components/chat/ChatDateSeparator'
-import { MGErrorState } from '../../design-system/components'
-import ScreenHeader from '../../components/shared/ScreenHeader'
+import { MGErrorState, MGText } from '../../design-system/components'
+import { useMGTheme } from '../../design-system/theme/useMGTheme'
+import { spacing } from '../../design-system/tokens'
 
 type ChatScreenNavigationProp = StackNavigationProp<RootParamList, 'Chat'>
 type ChatScreenRouteProp = RouteProp<RootParamList, 'Chat'>
@@ -57,15 +56,17 @@ function buildListItems(messages: Message[]): ListItem[] {
 }
 
 const ChatScreen = ({ navigation, route }: Props) => {
-  const { colors } = useTheme()
+  const { colors } = useMGTheme()
   const { socket, isConnected } = useSocket()
   const currentUserId = useAuthStore((state) => state.user?.id)
+  // R8: a bolha própria segue o papel autenticado (tutor rosa, profissional teal).
+  const currentRole = useAuthStore((state) => state.user?.role) === 'provider' ? 'provider' : 'customer'
   const { otherName, conversationId } = route.params
   
   const { data: conversationMessages, isLoading, isError, hasNextPage, fetchNextPage, refetch } = useGetConversationMessages(conversationId)
   const [draft, setDraft] = useState('')
   const conversationClient = useGetConversations()
-
+  
   const { mutate: markRead } = useMarkConversationRead()
 
   const historyMessages = conversationMessages ?? [] // server message history
@@ -132,6 +133,7 @@ const ChatScreen = ({ navigation, route }: Props) => {
         content={item.message.content}
         timestamp={item.message.created_at}
         isOwn={isOwn}
+        ownRole={currentRole}
         isSeen={item.message.is_seen}
         isEdited={item.message.is_edited}
       />
@@ -139,11 +141,14 @@ const ChatScreen = ({ navigation, route }: Props) => {
   }
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.surface.canvas }]} edges={['top', 'bottom']}>
       <View style={styles.headerWrapper}>
-        <ScreenHeader title="Conversa" />
+        <MGText variant="heading2" accessibilityRole="header" style={styles.title}>
+          Conversa
+        </MGText>
         <ChatHeader
           name={otherName ?? 'Conversa'}
+          avatarTone={currentRole === 'provider' ? 'pink' : 'teal'}
           onBack={() => navigation.goBack()}
         />
       </View>
@@ -155,7 +160,7 @@ const ChatScreen = ({ navigation, route }: Props) => {
       >
         {isLoading ? (
           <View style={styles.centered}>
-            <ActivityIndicator size="large" color={colors.primary} />
+            <ActivityIndicator accessibilityLabel="Carregando conversa" size="large" color={colors.action.primary} />
           </View>
         ) : isError ? (
           <View style={styles.centered}>
@@ -174,16 +179,16 @@ const ChatScreen = ({ navigation, route }: Props) => {
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={
               <View style={styles.centered}>
-                <Text style={[styles.message, { color: colors.textSecondary }]}>
+                <MGText variant="body" color="secondary" style={styles.message}>
                   Nenhuma mensagem ainda. Diga olá!
-                </Text>
+                </MGText>
               </View>
             }
           />
         )}
 
         <View style={styles.inputWrapper}>
-          {!isConnected && <Text style={{ color: colors.textSecondary }}>Conectando ao chat...</Text>}
+          {!isConnected && <MGText variant="bodySmall" color="secondary">Conectando ao chat...</MGText>}
           <ChatInputBar value={draft} onChangeText={setDraft} onSend={handleSend} disabled={!isConnected} />
         </View>
       </KeyboardAvoidingView>
@@ -204,6 +209,9 @@ const styles = StyleSheet.create({
   headerWrapper: {
     paddingHorizontal: layout.screenPadding,
   },
+  title: {
+    marginVertical: spacing.lg,
+  },
   list: {
     flex: 1,
   },
@@ -222,8 +230,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
   },
   message: {
-    fontSize: typography.sizes.md,
-    fontFamily: fonts.regular,
     textAlign: 'center',
   },
 })

@@ -29,7 +29,7 @@ const providerId = randomUUID(), tutorId = randomUUID(), professionalId = random
 const suffix = randomUUID()
 const tutorEmail = `request-ui-${suffix}@mygroomer.test`, providerEmail = `request-pro-${suffix}@mygroomer.test`
 const professionalName = 'Profissional de solicitação e cuidados pet em domicílio'
-const address = 'Avenida Paulista, São Paulo'
+let address = 'Avenida Paulista, São Paulo'
 const slotGone = 'Este horário não está mais disponível. Escolha outro horário.'
 const nextStep = 'O profissional precisa aceitar. Nenhuma cobrança foi feita.'
 const detailsTitle = 'Detalhes do serviço'
@@ -77,11 +77,7 @@ async function capture(page, name, locator) {
 
 async function openTimeScreen(page) {
   await page.getByRole('button', { name: 'Buscar um serviço' }).click()
-  await fillServiceAddress(page, address)
-  if (!await page.getByRole('radio', { name: 'Banho, selecionado' }).count()) {
-    await page.getByRole('radio', { name: 'Banho', exact: true }).click()
-  }
-  await page.getByRole('button', { name: 'Buscar', exact: true }).click()
+  address = await fillServiceAddress(page, address)
   await page.getByRole('button', { name: new RegExp(professionalName) }).click()
   await page.getByRole('radio', { name: /^Banho, A partir de/ }).click()
   await page.getByRole('button', { name: 'Agendar serviço', exact: true }).click()

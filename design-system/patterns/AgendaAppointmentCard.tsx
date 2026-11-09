@@ -95,11 +95,13 @@ export default function AgendaAppointmentCard({
           },
         ]}
       >
-        <MGText variant="title" style={{ width: 64 }}>{time}</MGText>
+        {/* CMP-13: coluna de horário em teal, 22/28 Bold, números tabulares. */}
+        <MGText style={{ width: 76, marginRight: spacing.xs, fontSize: 22, lineHeight: 28, fontFamily: fonts.bold, color: colors.brand.teal, fontVariant: ['tabular-nums'] }}>{time}</MGText>
         <View style={[styles.content, { gap: spacing.xs }]}>
           <View style={[styles.header, { gap: spacing.sm }]}>
             {pet_photo_url ? <MGAvatar uri={pet_photo_url} name={pet} kind="pet" size={44} /> : null}
-            <MGText variant="title" numberOfLines={1} style={{ flex: 1 }}>{pet}</MGText>
+            {/* CMP-13 / AC-12: nome do pet não é truncado; quebra de linha em vez de reticências. */}
+            <MGText variant="title" style={{ flex: 1, flexShrink: 1 }}>{pet}</MGText>
             {status ? <MGBadge label={status.label} tone={status.tone} /> : <BookingStatusBadge status={booking_status} />}
           </View>
           <MGText variant="bodySmall" color="secondary" numberOfLines={1}>Tutor: {tutor}</MGText>

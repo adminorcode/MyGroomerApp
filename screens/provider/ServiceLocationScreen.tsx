@@ -59,6 +59,7 @@ export default function ServiceLocationScreen({ navigation, route }: Props) {
   const [cepError, setCepError] = useState<string | null>(null)
   const [postalPending, setPostalPending] = useState(false)
   const [tileUrl, setTileUrl] = useState<string | null>(null)
+  const [tilesReady, setTilesReady] = useState(false)
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([])
   const [suggesting, setSuggesting] = useState(false)
   const [picked, setPicked] = useState<LocatedPoint | null>(null)
@@ -78,6 +79,7 @@ export default function ServiceLocationScreen({ navigation, route }: Props) {
     void getMapTiles()
       .then(result => { if (active) setTileUrl(result.data.url) })
       .catch(() => { if (active) setTileUrl(null) })
+      .finally(() => { if (active) setTilesReady(true) })
     return () => { active = false }
   }, [])
 
@@ -410,12 +412,19 @@ export default function ServiceLocationScreen({ navigation, route }: Props) {
                 tileUrl={tileUrl}
                 onPick={movePin}
               />
-            ) : null}
+            ) : tilesReady ? (
+              <AddressMapPlaceholder
+                accessibilityLabel="Mapa indisponível"
+                label="O mapa não carregou. O ponto continua no endereço escolhido."
+              />
+            ) : (
+              <FieldWait label="Localizando no mapa" />
+            )}
             <MGText variant="caption" color="secondary">
               {radiusKm == null ? 'Escolha o raio para ver a área no mapa' : `Raio de ${radiusKm} km`}
             </MGText>
             <MGText variant="caption" color="secondary">Toque no mapa para ajustar o ponto.</MGText>
-            <MGText variant="caption" color="secondary" style={{ fontSize: 10, lineHeight: 12, marginTop: -spacing.xs }}>
+            <MGText variant="caption" color="secondary">
               Powered by Geoapify · OpenStreetMap
             </MGText>
           </View>

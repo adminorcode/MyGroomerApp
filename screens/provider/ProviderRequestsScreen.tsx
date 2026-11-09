@@ -3,7 +3,7 @@ import { useFocusEffect } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { ProviderRequestsStackParamList } from '../../navigation/types'
 import { ActivityIndicator, ScrollView, View } from 'react-native'
-import { MGCard, MGEmptyState, MGErrorState, MGIcon, MGText } from '../../design-system/components'
+import { MGCard, MGEmptyState, MGErrorState, MGIcon, MGScreen, MGText } from '../../design-system/components'
 import { RequestCard } from '../../design-system/patterns'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { RequestResponse, useProviderRequests, useRespondToRequest } from '../../hooks/useRequests'
@@ -54,9 +54,11 @@ export default function ProviderRequestsScreen({ navigation }: Props) {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.surface.canvas, alignItems: 'center' }}>
-      <View style={{ flex: 1, width: '100%', maxWidth: 720, paddingHorizontal: spacing.base, paddingTop: spacing.md }}>
-        <MGText variant="heading2" accessibilityRole="header" style={{ marginBottom: spacing.md }}>Solicitações recebidas</MGText>
+    <MGScreen
+      header="teal"
+      headerSlot={<MGText variant="heading2" color="inverse" accessibilityRole="header">Solicitações recebidas</MGText>}
+    >
+      <View style={{ flex: 1, width: '100%', maxWidth: 720, paddingTop: spacing.md }}>
         <View style={{ marginBottom: spacing.md }}>
           <RequestGroupTabs value={group} onChange={changeGroup} />
         </View>
@@ -117,6 +119,6 @@ export default function ProviderRequestsScreen({ navigation }: Props) {
           </ScrollView>
         )}
       </View>
-    </View>
+    </MGScreen>
   )
 }

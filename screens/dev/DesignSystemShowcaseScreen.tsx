@@ -50,6 +50,12 @@ const SAMPLE_PET: Pet = {
   special_care: null,
 }
 
+const SAMPLE_ROWS = [
+  { label: 'Pet', value: 'Luna' },
+  { label: 'Serviço', value: 'Banho e tosa' },
+  { label: 'Groomer', value: 'Marina' },
+]
+
 type Props = {
   navigation: StackNavigationProp<ProfileStackParamList, 'DesignSystemShowcase'>
 }
@@ -66,6 +72,7 @@ export default function DesignSystemShowcaseScreen({ navigation }: Props) {
           accessibilityLabel="Voltar"
           icon={<MGIcon name="arrow-left" />}
           onPress={() => navigation.goBack()}
+          style={{ alignSelf: 'flex-start' }}
         />
 
         <MGText variant="heading1">Design System</MGText>
@@ -81,6 +88,9 @@ export default function DesignSystemShowcaseScreen({ navigation }: Props) {
         <MGText variant="body">Corpo de texto padrão</MGText>
         <MGText variant="label">Rótulo</MGText>
         <MGText variant="numeric">R$ 120</MGText>
+        {/* CMP-01: eyebrow (caixa-alta, teal sobre canvas) e preço em destaque (priceLarge, teal sobre canvas). */}
+        <MGText variant="eyebrow" color="teal">Exemplo</MGText>
+        <MGText variant="priceLarge" color="teal">R$ 89</MGText>
         <MGText variant="caption" color="secondary">
           Caption secundário
         </MGText>
@@ -117,7 +127,11 @@ export default function DesignSystemShowcaseScreen({ navigation }: Props) {
             Superfície branca com raio lg
           </MGText>
         </MGCard>
+        {/* CMP-04: destaque rosa (raio 20) e teal (tonalidade tealSubtle, texto text.primary). */}
         <MGCard variant="pink">
+          <MGText variant="title">Card destaque</MGText>
+        </MGCard>
+        <MGCard variant="teal">
           <MGText variant="title">Card destaque</MGText>
         </MGCard>
         <View style={styles.row}>
@@ -137,6 +151,8 @@ export default function DesignSystemShowcaseScreen({ navigation }: Props) {
         <View style={styles.row}>
           <MGAvatar name="Ana Tutor" kind="person" />
           <MGAvatar name="Luna" kind="pet" />
+          {/* CMP-11: profissional em avatar teal sólido com texto inverso. */}
+          <MGAvatar name="Marina" kind="person" tone="teal" />
           <MGIcon name="scissors" />
           <MGIcon name="paw-print" />
         </View>
@@ -190,11 +206,14 @@ export default function DesignSystemShowcaseScreen({ navigation }: Props) {
           helperText="Slots da API entram aqui quando disponíveis"
         />
         <BookingSummary
-          rows={[
-            { label: 'Pet', value: 'Luna' },
-            { label: 'Serviço', value: 'Banho e tosa' },
-            { label: 'Groomer', value: 'Marina' },
-          ]}
+          rows={SAMPLE_ROWS}
+          totalLabel="Total estimado"
+          totalValue="R$ 120,00"
+        />
+        {/* CMP-08 / R7: bilhete em dois blocos com recorte; total em priceLarge. */}
+        <BookingSummary
+          ticket
+          rows={SAMPLE_ROWS}
           totalLabel="Total estimado"
           totalValue="R$ 120,00"
         />

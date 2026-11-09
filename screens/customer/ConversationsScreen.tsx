@@ -1,13 +1,10 @@
-import { View, Text, StyleSheet, ActivityIndicator, FlatList, Pressable } from 'react-native'
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native'
 import { CompositeNavigationProp } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
-import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
-import { MGAvatar, MGErrorState } from '../../design-system/components'
+import { MGAvatar, MGCard, MGErrorState, MGScreen, MGText } from '../../design-system/components'
 import MGArtwork from '../../design-system/components/MGArtwork'
-import { elevation } from '../../constants/theme'
-import ScreenContainer from '../../components/shared/ScreenContainer'
-import ScreenHeader from '../../components/shared/ScreenHeader'
-import { useTheme } from '../../context/ThemeContext'
+import { useMGTheme } from '../../design-system/theme/useMGTheme'
+import { radius, spacing } from '../../design-system/tokens'
 import { useGetConversations } from '../../hooks/useConversations'
 import { useAuthStore } from '../../store/authStore'
 import { ConversationListItem } from '../../types/conversation.types'
@@ -40,9 +37,10 @@ function formatTime(value?: string | null) {
 }
 
 export default function ConversationsScreen({ navigation }: Props) {
-  const { colors } = useTheme()
-  const {user} = useAuthStore()
+  const { colors } = useMGTheme()
+  const { user } = useAuthStore()
   const { data: conversations, isLoading, isError, refetch } = useGetConversations()
+  const description = user?.role === 'provider' ? 'Converse com os tutores' : 'Converse com os profissionais'
 
   const renderConversation = ({ item }: { item: ConversationListItem }) => {
     const isCustomer = item.customer_id === user?.id
@@ -50,47 +48,58 @@ export default function ConversationsScreen({ navigation }: Props) {
     const otherProfile = isCustomer ? item.provider_profile : item.customer_profile
 
     return (
-      <Pressable
-        accessibilityRole="button"
+      <MGCard
         accessibilityLabel={`Conversa com ${otherName}`}
         onPress={() => navigation.navigate('Chat', { conversationId: item.id, otherName })}
-        style={({ pressed }) => [styles.row, elevation.low, { backgroundColor: colors.surface, borderColor: colors.border, opacity: pressed ? 0.7 : 1 }]}
+        style={styles.row}
       >
-        <MGAvatar name={otherName} uri={otherProfile} size={48} />
+        {/* R8: o interlocutor profissional usa avatar teal; o tutor, rosa. */}
+        <MGAvatar name={otherName} uri={otherProfile} size={48} tone={isCustomer ? 'teal' : 'pink'} />
 
         <View style={styles.rowContent}>
           <View style={styles.rowHeader}>
-            <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
+            <MGText variant="title" numberOfLines={1} style={styles.name}>
               {otherName}
-            </Text>
-            <Text style={[styles.time, { color: colors.textSecondary }]}>
+            </MGText>
+            <MGText variant="caption" color="secondary">
               {formatTime(item.last_message_at)}
-            </Text>
+            </MGText>
           </View>
 
-          <View style={[styles.previewContainer]}>
-            <Text style={[styles.preview, { color: colors.textSecondary }]} numberOfLines={1}>
+          <View style={styles.previewContainer}>
+            <MGText variant="bodySmall" color="secondary" numberOfLines={1} style={styles.preview}>
               {item.last_message ?? 'Nenhuma mensagem ainda'}
-            </Text>
-            
-              { item.unread_count > 0 &&
-                (<Text style={{color:colors.onPrimary, backgroundColor:colors.primary, paddingHorizontal:spacing.sm, borderRadius:borderRadius.full}}>
-                {item.unread_count}
-                </Text>)
-              }
+            </MGText>
+            {item.unread_count > 0 && (
+              <View style={[styles.unread, { backgroundColor: colors.action.primary }]}>
+                <MGText variant="label" color="inverse">
+                  {item.unread_count}
+                </MGText>
+              </View>
+            )}
           </View>
         </View>
-      </Pressable>
+      </MGCard>
     )
   }
 
   return (
-    <ScreenContainer>
-      <ScreenHeader title="Mensagens" description={user?.role === 'provider' ? 'Converse com os tutores' : 'Converse com os profissionais'} />
-
+    <MGScreen
+      header="teal"
+      headerSlot={
+        <View style={styles.headerSlot}>
+          <MGText variant="heading2" color="inverse" accessibilityRole="header">
+            Mensagens
+          </MGText>
+          <MGText variant="bodySmall" color="inverse">
+            {description}
+          </MGText>
+        </View>
+      }
+    >
       {isLoading ? (
         <View style={styles.centered}>
-          <ActivityIndicator accessibilityLabel="Carregando conversas" size="large" color={colors.primary} />
+          <ActivityIndicator accessibilityLabel="Carregando conversas" size="large" color={colors.action.primary} />
         </View>
       ) : isError ? (
         <View style={styles.centered}>
@@ -105,48 +114,36 @@ export default function ConversationsScreen({ navigation }: Props) {
           renderItem={renderConversation}
           ListEmptyComponent={
             <View style={styles.centered}>
-              <Text style={[styles.message, { color: colors.textSecondary }]}>
+              <MGText variant="body" color="secondary" style={styles.message}>
                 Nenhuma conversa ainda. Comece pelo agendamento.
-              </Text>
+              </MGText>
             </View>
           }
           ListFooterComponent={user?.role === 'provider' && (conversations?.length ?? 0) <= 3 ? <View style={{ flexDirection: 'row', justifyContent: 'center', paddingTop: spacing.xxxl, paddingBottom: spacing.base }}><MGArtwork name="puppy" width={112} /><MGArtwork name="cat" width={100} /></View> : null}
           keyExtractor={(item) => item.id}
         />
       )}
-    </ScreenContainer>
+    </MGScreen>
   )
 }
 
 const styles = StyleSheet.create({
+  headerSlot: {
+    gap: spacing.xs,
+  },
   list: {
     flex: 1,
   },
   listContent: {
     flexGrow: 1,
+    paddingTop: spacing.base,
     paddingBottom: spacing.xl,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: spacing.base,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    marginBottom: spacing.sm,
     gap: spacing.md,
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: borderRadius.full,
-  },
-  avatarFallback: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarInitial: {
-    fontSize: typography.sizes.lg,
-    fontFamily: fonts.semibold,
+    marginBottom: spacing.sm,
   },
   rowContent: {
     flex: 1,
@@ -160,25 +157,24 @@ const styles = StyleSheet.create({
   },
   name: {
     flex: 1,
-    fontSize: typography.sizes.md,
-    fontFamily: fonts.semibold,
   },
-  time: {
-    fontSize: typography.sizes.xs,
-    fontFamily: fonts.regular,
+  previewContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
   },
   preview: {
-    fontSize: typography.sizes.sm,
-    fontFamily: fonts.regular,
     flex: 1,
     minWidth: 0,
   },
-  previewContainer:{
-    flexDirection:'row',
-    display:'flex',
-    justifyContent:'space-between',
-    alignItems:'center',
-    gap:spacing.sm
+  unread: {
+    minWidth: 24,
+    height: 24,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.sm,
   },
   centered: {
     flex: 1,
@@ -188,8 +184,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xl,
   },
   message: {
-    fontSize: typography.sizes.md,
-    fontFamily: fonts.regular,
     textAlign: 'center',
   },
 })

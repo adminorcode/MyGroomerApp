@@ -25,7 +25,7 @@ export function ProfessionalRegistrationStepScreen({ navigation }: RegistrationP
     menuDraft.refreshTypes(menu.data.types)
     navigation.navigate('ServiceMenu')
   }
-  return <ProfessionalRegistrationForm authenticated onBack={() => navigation.goBack()} onExit={() => {
+  return <ProfessionalRegistrationForm authenticated tealHeader onBack={() => navigation.goBack()} onExit={() => {
     useRegistrationNavigation.getState().setUserId(null)
     navigation.getParent()?.navigate('BookingsTab')
   }} onContinue={continueRegistration} />

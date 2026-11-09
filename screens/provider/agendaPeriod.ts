@@ -95,7 +95,8 @@ export function dayHeading(ymd: string, today: string): string {
 const TIME = /^([01]\d|2[0-3]):([0-5]\d)$/
 
 export function blockRangeError(date: string, start: string, end: string): string | null {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return 'Informe a data no formato AAAA-MM-DD.'
+  // Recebe a data já convertida para ISO; quando a conversão falha, o valor exibido é o digitado (DD/MM/AAAA).
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return 'Informe a data no formato DD/MM/AAAA.'
   const startMatch = TIME.exec(start)
   const endMatch = TIME.exec(end)
   if (!startMatch || Number(startMatch[2]) % 15 !== 0) return 'O início usa intervalos de 15 minutos.'

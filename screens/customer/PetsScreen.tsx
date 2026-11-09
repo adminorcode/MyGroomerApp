@@ -2,10 +2,10 @@ import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { ProfileStackParamList } from '../../navigation/types'
 import { usePets } from '../../hooks/usePets'
-import { useTheme } from '../../context/ThemeContext'
+import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
-import { MGButton, MGEmptyState, MGErrorState } from '../../design-system/components'
+import { MGButton, MGEmptyState, MGErrorState, MGText } from '../../design-system/components'
 import PetCard from '../../components/customer/PetCard'
 import { spacing } from '../../constants/theme'
 
@@ -14,7 +14,7 @@ type Props = {
 }
 
 export default function PetsScreen({ navigation }: Props) {
-    const { colors } = useTheme()
+    const { colors } = useMGTheme()
     const { data, isLoading, isError, refetch } = usePets()
 
     return (
@@ -27,7 +27,8 @@ export default function PetsScreen({ navigation }: Props) {
             />
             {isLoading ? (
                 <View style={styles.centered}>
-                    <ActivityIndicator accessibilityLabel="Carregando pets" size="large" color={colors.primary} />
+                    <ActivityIndicator accessibilityLabel="Carregando pets" size="large" color={colors.action.primary} />
+                    <MGText>Carregando pets</MGText>
                 </View>
             ) : isError ? (
                 <View style={styles.centered}>
@@ -71,6 +72,7 @@ export default function PetsScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
     centered: {
         flex: 1,
+        alignItems: 'center',
         justifyContent: 'center',
         gap: spacing.md,
     },

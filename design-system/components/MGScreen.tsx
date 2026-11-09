@@ -10,6 +10,12 @@ type Props = {
   scrollable?: boolean
   safeArea?: boolean
   background?: 'canvas' | 'default'
+  /**
+   * CMP-05 / R4: `teal` mostra a faixa de cabeçalho teal com `headerSlot` (saudação, busca…).
+   * Só nos hubs (Início, Busca, Agenda, Solicitações, Conversas). Formulários e transações ficam em `plain`.
+   */
+  header?: 'plain' | 'teal'
+  headerSlot?: ReactNode
   footer?: ReactNode
   loading?: boolean
   error?: string | null
@@ -23,6 +29,8 @@ export default function MGScreen({
   scrollable = false,
   safeArea = true,
   background = 'canvas',
+  header = 'plain',
+  headerSlot,
   footer,
   loading = false,
   error,
@@ -32,6 +40,7 @@ export default function MGScreen({
 }: Props) {
   const { colors, spacing } = useMGTheme()
   const bg = background === 'default' ? colors.surface.default : colors.surface.canvas
+  const isTealHeader = header === 'teal'
 
   const body = loading ? (
     <View style={styles.centered} accessibilityLabel="Carregando">
@@ -57,12 +66,25 @@ export default function MGScreen({
     <View style={[{ flex: 1, paddingHorizontal: spacing.base, width: '100%', maxWidth: layout.contentMaxWidth, alignSelf: 'center' }, contentStyle]}>{children}</View>
   )
 
+  const tealBand = isTealHeader ? (
+    <View
+      style={[
+        styles.tealBand,
+        { backgroundColor: colors.brand.teal, paddingHorizontal: spacing.base, paddingBottom: spacing.lg, paddingTop: spacing.base },
+      ]}
+    >
+      <View style={{ width: '100%', maxWidth: layout.contentMaxWidth, alignSelf: 'center' }}>{headerSlot}</View>
+    </View>
+  ) : null
+
   const content = (
     <View style={[styles.root, { backgroundColor: bg }]}>
+      {tealBand}
       {body}
       {footer ? (
-        <View style={[styles.footer, { padding: spacing.base, borderTopColor: colors.border.default, width: '100%', maxWidth: layout.contentMaxWidth, alignSelf: 'center', backgroundColor: colors.surface.default }]}>
-          {footer}
+        // Revisão UI (027): a faixa do rodapé ocupa a largura toda; só o conteúdo segue a coluna máxima.
+        <View style={[styles.footer, { borderTopColor: colors.border.default, backgroundColor: colors.surface.default }]}>
+          <View style={{ padding: spacing.base, width: '100%', maxWidth: layout.contentMaxWidth, alignSelf: 'center' }}>{footer}</View>
         </View>
       ) : null}
     </View>
@@ -79,6 +101,7 @@ export default function MGScreen({
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  tealBand: {},
   centered: {
     flex: 1,
     alignItems: 'center',
