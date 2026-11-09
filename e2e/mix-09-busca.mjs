@@ -103,9 +103,8 @@ async function flow(browser) {
   // --- Cabeçalho e filtros recolhidos (tela 09) ---
   const heading = page.getByText('Quem atende', { exact: true }).first()
   const headingColor = await heading.evaluate(el => getComputedStyle(el).color)
-  const TEXT = 'rgb(37, 61, 66)'
-  check('Q1 cabeçalho de busca é claro, sem faixa teal', await enclosingBackground(heading) !== TEAL, await enclosingBackground(heading))
-  check('Q1 título Quem atende usa texto principal', headingColor === TEXT, headingColor)
+  check('H-04 faixa teal no título Quem atende', await enclosingBackground(heading) === TEAL, await enclosingBackground(heading))
+  check('H-04 título Quem atende em branco sobre teal', headingColor === WHITE && ratio(headingColor, TEAL) >= 4.5, `${headingColor} ${ratio(headingColor, TEAL).toFixed(2)}`)
   check('Q1 botão Voltar tem rótulo acessível na faixa', await page.getByRole('button', { name: 'Voltar', exact: true }).count() === 1)
   check('AC-08 filtros começam fechados', await page.getByRole('radio', { name: 'Modalidade' }).count() === 0 && await page.getByText('Modalidade', { exact: true }).count() === 0)
   check('AC-02 a lista não depende do botão Buscar', await page.getByRole('button', { name: 'Buscar', exact: true }).count() === 0)

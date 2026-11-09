@@ -9,14 +9,24 @@ type Props = {
     size?: number
     style?: StyleProp<ViewStyle>
     onPress: () => void
+    /** Barra colorida: disco branco para a inicial rosa ou verde continuar legível. */
+    onColor?: boolean
 }
 
-export default function ProfileHeaderButton({ avatarUri, size = 44, style, onPress }: Props) {
+export default function ProfileHeaderButton({ avatarUri, size = 44, style, onPress, onColor = false }: Props) {
     const { colors } = useTheme()
     const user = useAuthStore((state) => state.user)
 
     const initial = user?.name?.charAt(0).toUpperCase() ?? '?'
     const dimensions = { width: size, height: size, borderRadius: size / 2 }
+    const provider = user?.role === 'provider'
+    const initialColor = provider ? palette.brand.teal : palette.action.primaryText
+    const backgroundColor = onColor
+        ? palette.surface.default
+        : provider ? palette.brand.teal : colors.selectionSoft
+    const textColor = onColor
+        ? initialColor
+        : provider ? palette.onAction.primary : colors.primaryText
 
     return (
         <Pressable
@@ -24,7 +34,7 @@ export default function ProfileHeaderButton({ avatarUri, size = 44, style, onPre
             hitSlop={8}
             accessibilityRole="button"
             accessibilityLabel="Abrir perfil"
-            style={[styles.base, dimensions, { borderColor: colors.border }, style]}
+            style={[styles.base, dimensions, { borderColor: onColor ? palette.surface.default : colors.border }, style]}
         >
             {avatarUri ? (
                 <Image source={{ uri: avatarUri }} style={dimensions} />
@@ -33,9 +43,8 @@ export default function ProfileHeaderButton({ avatarUri, size = 44, style, onPre
                     style={[
                         styles.initial,
                         {
-                            // R8: avatar do profissional é teal; o do tutor segue rosa.
-                            color: user?.role === 'provider' ? palette.onAction.primary : colors.primaryText,
-                            backgroundColor: user?.role === 'provider' ? palette.brand.teal : colors.selectionSoft,
+                            color: textColor,
+                            backgroundColor,
                             fontSize: Math.round(size * 0.4),
                             lineHeight: size,
                         },

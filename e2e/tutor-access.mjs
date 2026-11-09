@@ -93,7 +93,7 @@ async function run() {
   await page.getByRole('textbox', { name: 'E-mail' }).fill(email)
   await page.getByRole('textbox', { name: 'Senha' }).fill(password)
   await page.getByRole('button', { name: 'Entrar', exact: true }).click()
-  await page.getByText(/^Olá/).waitFor({ timeout: 20000 })
+  await page.getByRole('button', { name: 'Abrir perfil', exact: true }).waitFor({ timeout: 20000 })
   check('AC-04 conta nova entra', true)
 
   page.once('dialog', (dialog) => dialog.accept())
@@ -114,7 +114,7 @@ async function run() {
   await page.getByText('E-mail ou senha inválidos').waitFor({ timeout: 20000 })
   await page.getByRole('textbox', { name: 'Senha' }).fill(nextPassword)
   await page.getByRole('button', { name: 'Entrar', exact: true }).click()
-  await page.getByText(/^Olá/).waitFor({ timeout: 20000 })
+  await page.getByRole('button', { name: 'Abrir perfil', exact: true }).waitFor({ timeout: 20000 })
   check('AC-04 senha redefinida entra e a antiga é recusada', true)
 
 }

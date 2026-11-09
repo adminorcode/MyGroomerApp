@@ -138,9 +138,9 @@ async function runTutor(browser) {
   await page.getByRole('textbox', { name: 'E-mail' }).fill(tutor.email)
   await page.getByRole('textbox', { name: 'Senha' }).fill(tutor.password)
   await page.getByRole('button', { name: 'Entrar' }).click()
-  await page.getByText(/^Olá/).waitFor({ timeout: 20000 })
+  await page.getByRole('button', { name: 'Abrir perfil', exact: true }).waitFor({ timeout: 20000 })
   body = await textOf(page)
-  check('AC-12 home do tutor', /Olá/.test(body) && body.includes('Início'))
+  check('AC-12 home do tutor', body.includes('Início') && await page.getByRole('button', { name: 'Abrir perfil', exact: true }).isVisible())
 
   await page.getByRole('button', { name: 'Buscar um serviço' }).click()
   await fillServiceAddress(page, 'Avenida Paulista, São Paulo')

@@ -44,11 +44,6 @@ export function RuntimeProvider({ children }: { children: ReactNode }) {
 
   return (
     <RuntimeContext.Provider value={runtime.data}>
-      {runtime.data.localTest && (
-        <View style={{ padding: 10, backgroundColor: colors.surface, borderBottomWidth: 1, borderColor: colors.border }}>
-          <Text style={{ color: colors.text, textAlign: 'center' }}>Ambiente de teste local — pagamentos e e-mails reais desativados.</Text>
-        </View>
-      )}
       {children}
     </RuntimeContext.Provider>
   )

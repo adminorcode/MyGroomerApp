@@ -1,4 +1,4 @@
-import { evidenceFile, gateRoute, launchBrowser, loginTutor, openCoverageFilters, openPage, saveScreenshot, startRun } from './harness.mjs'
+import { APP_NAME, evidenceFile, gateRoute, launchBrowser, loginTutor, openCoverageFilters, openPage, saveScreenshot, startRun } from './harness.mjs'
 
 const plan = '027-mistura-acolhedora-editorial'
 const run = startRun({
@@ -105,7 +105,7 @@ try {
 
   const search = await inspect(named(page, 'button', 'Buscar um serviço'), readStyle)
   check('Q1 faixa teal de cabeçalho com busca branca no Início', Boolean(search) && search.tealAncestor && search.effective === WHITE, JSON.stringify(search))
-  check('CMP-05 saudação aparece só no cabeçalho global, sem duplicar na faixa', await countVisible(page.getByText(/^Olá/)) === 1)
+  check('H-01 marca aparece uma vez no topo, sem saudação Olá', await countVisible(page.getByText(APP_NAME, { exact: true })) === 1 && await countVisible(page.getByText(/^Olá/)) === 0)
 
   const hero = named(page, 'button', 'Explorar profissionais')
   const heroStyle = await inspect(hero, readStyle)

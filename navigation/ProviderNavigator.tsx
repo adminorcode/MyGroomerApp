@@ -1,6 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { View, StyleSheet, Text, useWindowDimensions } from 'react-native'
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Text, useWindowDimensions } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Bell, CalendarDays, Wallet, Scissors } from 'lucide-react-native'
 import { useTheme } from '../context/ThemeContext'
 import { fonts, layout, spacing, borderRadius } from '../constants/theme'
@@ -12,7 +12,6 @@ import ProviderRequestsStackNavigator from './ProviderRequestsStackNavigator'
 import ProviderServicesStackNavigator from './ProviderServicesStackNavigator'
 import MessagesStackNavigator from './MessagesStackNavigator'
 import MessageTabIcon from '../components/shared/MessageTabIcon'
-import AppHeader from '../components/shared/AppHeader'
 import TabIconPill from './TabIconPill'
 import { useState } from 'react'
 import { useRegistrationNavigation } from '../store/registrationNavigation'
@@ -40,15 +39,6 @@ export default function ProviderNavigator() {
                     if (route.name !== 'ServicesTab') useRegistrationNavigation.getState().setUserId(null)
                 },
             })}
-            layout={({ children, navigation }) => (
-                <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top']}>
-                    <AppHeader onProfilePress={() => {
-                        useRegistrationNavigation.getState().setUserId(null)
-                        navigation.navigate('ProfileTab')
-                    }} />
-                    <View style={styles.tabs}>{children}</View>
-                </SafeAreaView>
-            )}
             screenOptions={{
                 headerShown: false,
                 tabBarActiveTintColor: colors.primaryText,
@@ -135,8 +125,3 @@ export default function ProviderNavigator() {
         </Tab.Navigator>
     )
 }
-
-const styles = StyleSheet.create({
-    safe: { flex: 1 },
-    tabs: { flex: 1 },
-})

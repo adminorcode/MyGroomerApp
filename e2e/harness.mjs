@@ -94,7 +94,7 @@ export async function loginTutor(page, account = fixtures.tutor) {
   await page.getByRole('textbox', { name: 'E-mail' }).fill(account.email)
   await page.getByRole('textbox', { name: 'Senha' }).fill(account.password)
   await page.getByRole('button', { name: 'Entrar' }).click()
-  await page.getByText(/^Olá/).waitFor({ timeout: 20000 })
+  await page.getByRole('button', { name: 'Abrir perfil', exact: true }).waitFor({ timeout: 20000 })
 }
 
 export async function loginProfessional(page, account = fixtures.groomer) {
@@ -168,7 +168,7 @@ export async function fillServiceAddress(page, address) {
   }
   // Volta à Home do início (o reload preservaria a tela atual, que pode não ser a Home).
   await page.goto(appUrl, { waitUntil: 'domcontentloaded' })
-  await page.getByText(/^Olá/).waitFor({ timeout: 20000 })
+  await page.getByRole('button', { name: 'Abrir perfil', exact: true }).waitFor({ timeout: 20000 })
   await page.getByRole('button', { name: 'Buscar um serviço' }).click()
   try {
     await page.getByText(suggestion.label, { exact: false }).waitFor({ timeout: 15000 })

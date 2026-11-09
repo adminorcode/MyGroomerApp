@@ -24,6 +24,7 @@ import MessageBubble from '../../components/chat/MessageBubble'
 import ChatDateSeparator, { formatDateLabel } from '../../components/chat/ChatDateSeparator'
 import { MGErrorState, MGText } from '../../design-system/components'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
+import { useAuthenticatedChrome } from '../../navigation/authenticatedChrome'
 import { spacing } from '../../design-system/tokens'
 
 type ChatScreenNavigationProp = StackNavigationProp<RootParamList, 'Chat'>
@@ -57,6 +58,7 @@ function buildListItems(messages: Message[]): ListItem[] {
 
 const ChatScreen = ({ navigation, route }: Props) => {
   const { colors } = useMGTheme()
+  const chrome = useAuthenticatedChrome()
   const { socket, isConnected } = useSocket()
   const currentUserId = useAuthStore((state) => state.user?.id)
   // R8: a bolha própria segue o papel autenticado (tutor rosa, profissional teal).
@@ -141,7 +143,7 @@ const ChatScreen = ({ navigation, route }: Props) => {
   }
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.surface.canvas }]} edges={['top', 'bottom']}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.surface.canvas }]} edges={chrome ? ['bottom'] : ['top', 'bottom']}>
       <View style={styles.headerWrapper}>
         <MGText variant="heading2" accessibilityRole="header" style={styles.title}>
           Conversa

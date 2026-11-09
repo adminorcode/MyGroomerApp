@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
-import { AccessibilityInfo, ActivityIndicator, Animated, Easing, NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, StyleSheet, Switch, useWindowDimensions, View } from 'react-native'
+import { AccessibilityInfo, ActivityIndicator, Animated, Easing, NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native'
 import { ChevronLeft } from 'lucide-react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
@@ -13,7 +13,6 @@ import { useCurrentPlace } from '../../hooks/useCurrentPlace'
 import { useCustomerAddresses } from '../../hooks/useCustomerAddresses'
 import { addressLabelName, CustomerAddress } from '../../services/customerAddress.service'
 import { addFavoriteProvider, removeFavoriteProvider } from '../../services/favorite.service'
-import { APP_NAME } from '../../constants/brand'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { MGIconName } from '../../design-system/components/MGIcon'
 import { spacing } from '../../design-system/tokens'
@@ -77,12 +76,11 @@ function useDebounced(value: string, delay: number) {
 }
 
 /**
- * Quem atende (plano 028): a ordem segue a referência clara.
- * Modalidade, ordenação, preço, avaliação e raio abrem cada um o seu painel.
+ * Quem atende (plano 028): a marca fica no topo autenticado.
+ * A faixa teal traz voltar e o título. Modalidade, ordenação, preço, avaliação e raio abrem cada um o seu painel.
  */
 export default function TutorSearchScreen({ navigation, route }: Props) {
     const theme = useMGTheme()
-    const { width } = useWindowDimensions()
     const categories = useFetchCategories()
     const [categoryId, setCategoryId] = useState(route.params?.categoryId ?? '')
     const [serviceId, setServiceId] = useState(route.params?.serviceId ?? '')
@@ -239,30 +237,27 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
         void request.catch(() => setFavorites(current => ({ ...current, [item.provider_id]: !next })))
     }
 
+    const discoveryBand = (
+        <View style={styles.headerRow}>
+            <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Voltar"
+                hitSlop={theme.spacing.sm}
+                onPress={() => navigation.goBack()}
+                style={({ pressed }) => [styles.backButton, { opacity: pressed ? 0.6 : 1 }]}
+            >
+                <ChevronLeft size={24} color={theme.colors.text.inverse} />
+            </Pressable>
+            <View style={styles.headerText}>
+                <MGText variant="heading2" color="inverse" accessibilityRole="header">Quem atende</MGText>
+                <MGText variant="bodySmall" color="inverse">Profissionais que atendem no seu endereço</MGText>
+            </View>
+        </View>
+    )
+
     return (
-        <MGScreen header="plain">
+        <MGScreen header="teal" headerSlot={discoveryBand}>
             <View style={styles.flex}>
-                <View style={styles.header}>
-                <View style={styles.headerRow}>
-                    <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel="Voltar"
-                        hitSlop={theme.spacing.sm}
-                        onPress={() => navigation.goBack()}
-                        style={({ pressed }) => [styles.backButton, { opacity: pressed ? 0.6 : 1 }]}
-                    >
-                        <ChevronLeft size={24} color={theme.colors.text.primary} />
-                    </Pressable>
-                    <View style={styles.headerText}>
-                        <MGText variant="heading2" accessibilityRole="header">Quem atende</MGText>
-                    </View>
-                    <View style={styles.brand} accessible accessibilityRole="image" accessibilityLabel={APP_NAME}>
-                        <MGIcon name="paw-print" size={28} color={theme.colors.brand.pink} />
-                        {width >= 360 ? <MGText variant="label">{APP_NAME}</MGText> : null}
-                    </View>
-                </View>
-                <MGText variant="bodySmall" color="secondary" style={styles.subtitle}>Encontre groomers e serviços na sua região</MGText>
-                </View>
                 <ScrollView
                     testID="explorar-scroll"
                     style={styles.flex}
@@ -611,12 +606,9 @@ function SlideDown({ open, children }: { open: boolean, children: ReactNode }) {
 
 const styles = StyleSheet.create({
     flex: { flex: 1 },
-    header: { paddingVertical: spacing.sm, gap: spacing.xs },
     headerRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
     backButton: { minWidth: 48, minHeight: 48, alignItems: 'center', justifyContent: 'center' },
     headerText: { flex: 1, gap: spacing.xxs },
-    brand: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, maxWidth: 112 },
-    subtitle: { paddingHorizontal: spacing.sm },
     scroll: { paddingBottom: spacing.xl },
     addressCard: { borderWidth: 1, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, marginBottom: spacing.md },
     addressRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },

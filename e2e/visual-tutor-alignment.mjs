@@ -27,7 +27,7 @@ try {
   // Plano 028: a busca precisa de endereço escolhido. Define o padrão e volta à Home para o fluxo abaixo.
   await fillServiceAddress(page, 'Avenida Paulista, São Paulo')
   await page.goto(appUrl, { waitUntil: 'domcontentloaded' })
-  await page.getByText(/^Olá/).waitFor({ timeout: 20000 })
+  await page.getByRole('button', { name: 'Abrir perfil', exact: true }).waitFor({ timeout: 20000 })
   await page.getByLabel('Carregando categorias').waitFor()
   check('VIS-07 categorias carregam sem esconder a busca', await page.getByRole('button', { name: 'Buscar um serviço' }).isEnabled())
   await page.getByRole('button', { name: 'Banho e Tosa', exact: true }).waitFor({ timeout: 15000 })

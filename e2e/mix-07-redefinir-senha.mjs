@@ -184,8 +184,8 @@ try {
   await field(page, 'E-mail').fill(email)
   await field(page, 'Senha').fill(NEW_PASSWORD)
   await button(page, 'Entrar').click()
-  await page.getByText(/^Olá/).first().waitFor({ timeout: 20000 })
-  check('AC-13 a nova senha permite entrar na conta', await page.getByText(/^Olá/).first().isVisible())
+  await page.getByRole('button', { name: 'Abrir perfil', exact: true }).first().waitFor({ timeout: 20000 })
+  check('AC-13 a nova senha permite entrar na conta', await page.getByRole('button', { name: 'Abrir perfil', exact: true }).first().isVisible())
 } catch (error) {
   run.fail(error)
 } finally {
