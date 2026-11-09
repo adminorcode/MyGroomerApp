@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import MGErrorState from './MGErrorState'
 import { useMGTheme } from '../theme/useMGTheme'
 import { layout } from '../../constants/theme'
+import { useAuthenticatedChrome } from '../../navigation/authenticatedChrome'
 
 type Props = {
   children: ReactNode
@@ -39,6 +40,8 @@ export default function MGScreen({
   scrollRef,
 }: Props) {
   const { colors, spacing } = useMGTheme()
+  const chrome = useAuthenticatedChrome()
+  const edges = chrome ? (['left', 'right'] as const) : (['top', 'left', 'right'] as const)
   const bg = background === 'default' ? colors.surface.default : colors.surface.canvas
   const isTealHeader = header === 'teal'
 
@@ -93,7 +96,7 @@ export default function MGScreen({
   if (!safeArea) return content
 
   return (
-    <SafeAreaView style={[styles.root, { backgroundColor: bg }]} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={[styles.root, { backgroundColor: bg }]} edges={edges}>
       {content}
     </SafeAreaView>
   )

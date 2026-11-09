@@ -1,3 +1,5 @@
+import { NavigatorScreenParams } from '@react-navigation/native'
+
 export type AuthStackParamList = {
     Welcome: undefined
     Login: undefined
@@ -13,18 +15,11 @@ export type ChatParams = {
     otherName?: string
 }
 
-export type RootParamList = {
-    Auth: undefined
-    Provider: undefined
-    Customer: undefined
-    Chat: ChatParams
-}
-
 export type CustomerTabParamList = {
     HomeTab: undefined
     BookingsTab: undefined
     MessagesTab: undefined
-    ProfileTab: undefined
+    ProfileTab: NavigatorScreenParams<ProfileStackParamList> | undefined
 }
 
 export type ChosenServiceAddress = {
@@ -74,13 +69,20 @@ export type MessagesStackParamList = {
     Conversations: undefined
 }
 
+export type RootParamList = {
+    Auth: undefined
+    Provider: NavigatorScreenParams<ProviderTabParamList> | undefined
+    Customer: NavigatorScreenParams<CustomerTabParamList> | undefined
+    Chat: ChatParams
+}
+
 export type ProviderTabParamList = {
     BookingsTab: undefined
     RequestsTab: undefined
     ServicesTab: undefined
     EarningsTab: undefined
     MessagesTab: undefined
-    ProfileTab: undefined
+    ProfileTab: NavigatorScreenParams<ProfileStackParamList> | undefined
 }
 
 export type ProviderBookingsStackParamList = {

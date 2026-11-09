@@ -80,6 +80,7 @@ async function loginAccount(page, email, ready) {
   await page.getByRole('textbox', { name: 'E-mail' }).fill(email)
   await page.getByRole('textbox', { name: 'Senha' }).fill('admin')
   await page.getByRole('button', { name: 'Entrar' }).click()
+  await page.getByRole('button', { name: 'Abrir perfil', exact: true }).waitFor({ timeout: 20000 })
   await page.getByText(ready).waitFor({ timeout: 20000 })
 }
 
@@ -194,7 +195,7 @@ async function execute() {
   }
 
   const tutorPage = await openPage(browser)
-  await loginAccount(tutorPage, emails.tutor, /^Olá/)
+  await loginAccount(tutorPage, emails.tutor, 'Início')
   await tutorPage.getByRole('button', { name: 'Abrir perfil' }).click()
   await tutorPage.getByRole('button', { name: 'Meus pets' }).click()
   await tutorPage.getByRole('button', { name: 'Editar Luna' }).click()

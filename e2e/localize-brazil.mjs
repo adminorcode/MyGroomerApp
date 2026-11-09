@@ -31,7 +31,7 @@ async function signIn(page, account) {
   await page.getByRole('textbox', { name: 'E-mail' }).fill(account.email)
   await page.getByRole('textbox', { name: 'Senha' }).fill(account.password)
   await page.getByText('Entrar', { exact: true }).click()
-  await page.getByText(/^Olá/).waitFor({ timeout: 20000 })
+  await page.getByRole('button', { name: 'Abrir perfil', exact: true }).waitFor({ timeout: 20000 })
 }
 
 async function run() {

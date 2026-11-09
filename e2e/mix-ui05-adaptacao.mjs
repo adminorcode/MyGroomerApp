@@ -122,7 +122,7 @@ try {
   await focusKeepsAction(page, page.getByRole('combobox', { name: 'Endereço', exact: true }).last(), 'Salvar endereço', 'UI-05 formulário de endereço')
 
   await page.goto(appUrl, { waitUntil: 'domcontentloaded' })
-  await page.getByText(/^Olá/).waitFor({ timeout: 20000 })
+  await page.getByRole('button', { name: 'Abrir perfil', exact: true }).waitFor({ timeout: 20000 })
   await page.getByRole('button', { name: 'Buscar um serviço', exact: true }).click()
   await page.getByRole('button', { name: /^Filtros/ }).waitFor({ timeout: 20000 })
   await resize(page, 320, 760)

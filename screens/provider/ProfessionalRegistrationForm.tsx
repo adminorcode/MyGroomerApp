@@ -212,7 +212,7 @@ export default function ProfessionalRegistrationForm({ authenticated = false, te
   )
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.surface.canvas }} edges={authenticated && !tealHeader ? ['bottom', 'left', 'right'] : ['top', 'bottom', 'left', 'right']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.surface.canvas }} edges={authenticated ? ['bottom', 'left', 'right'] : ['top', 'bottom', 'left', 'right']}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : Platform.OS === 'android' ? 'height' : undefined}>
         <MGScreen safeArea={false} scrollable header={tealHeader ? 'teal' : 'plain'} headerSlot={tealHeader ? titleRow : undefined} loading={initializing || awaitingAccount} error={authenticated && registration.isError ? getErrorMessage(registration.error) : null} onRetry={() => { void registration.refetch() }} footer={footer} contentStyle={{ paddingHorizontal: compact ? spacing.base : spacing.xl }}>
           <View style={{ width: '100%', maxWidth: 720, alignSelf: 'center', gap: spacing.xl, paddingTop: spacing.base }}>
