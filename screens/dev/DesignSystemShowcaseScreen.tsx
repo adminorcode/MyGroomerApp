@@ -7,6 +7,7 @@ import {
   MGButton,
   MGCard,
   MGChip,
+  MGDisclosure,
   MGDivider,
   MGEmptyState,
   MGErrorState,
@@ -63,6 +64,7 @@ type Props = {
 export default function DesignSystemShowcaseScreen({ navigation }: Props) {
   const { spacing, colors, radius } = useMGTheme()
   const [chipOn, setChipOn] = useState(true)
+  const [panelOpen, setPanelOpen] = useState(false)
   const [field, setField] = useState('')
 
   return (
@@ -144,6 +146,18 @@ export default function DesignSystemShowcaseScreen({ navigation }: Props) {
           <MGChip label="Desligado" selected={false} onPress={() => undefined} />
           <MGChip label="Desabilitado" disabled />
         </View>
+        <MGButton
+          label={panelOpen ? 'Fechar painel' : 'Abrir painel'}
+          variant="secondary"
+          fullWidth={false}
+          onPress={() => setPanelOpen(open => !open)}
+          accessibilityState={{ expanded: panelOpen }}
+        />
+        <MGDisclosure open={panelOpen}>
+          <MGCard>
+            <MGText variant="body">Painel com entrada curta. A altura não anima.</MGText>
+          </MGCard>
+        </MGDisclosure>
 
         <MGDivider />
 

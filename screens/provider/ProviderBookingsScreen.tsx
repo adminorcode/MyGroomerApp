@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { ActivityIndicator, ScrollView, View } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
-import { MGButton, MGCard, MGChip, MGEmptyState, MGErrorState, MGIcon, MGScreen, MGText } from '../../design-system/components'
+import { MGButton, MGCard, MGChip, MGDisclosure, MGDisclosureChevron, MGEmptyState, MGErrorState, MGIcon, MGScreen, MGText } from '../../design-system/components'
 import { AgendaAppointmentCard } from '../../design-system/patterns'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { useCreateAgendaBlock, useDeleteAgendaBlock, useProviderAgenda } from '../../hooks/useAgenda'
@@ -144,9 +144,18 @@ export default function ProviderBookingsScreen({ navigation }: Props) {
 
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm, marginBottom: spacing.sm }}>
           <MGText variant="title" style={{ flex: 1 }}>{window.label}</MGText>
-          <MGButton label="Filtrar" variant="secondary" fullWidth={false} onPress={() => setFiltersOpen(open => !open)} accessibilityState={{ expanded: filtersOpen }} />
+          <MGButton
+            label="Filtrar"
+            variant="secondary"
+            fullWidth={false}
+            onPress={() => setFiltersOpen(open => !open)}
+            accessibilityState={{ expanded: filtersOpen }}
+            aria-expanded={filtersOpen}
+            aria-controls={filtersOpen ? 'agenda-filter-panel' : undefined}
+            iconRight={<MGDisclosureChevron expanded={filtersOpen} size={16} color={colors.action.primaryOutline} />}
+          />
         </View>
-        {filtersOpen ? (
+        <MGDisclosure open={filtersOpen} nativeID="agenda-filter-panel">
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.md }}>
             {FILTERS.map(item => (
               <MGChip
@@ -158,7 +167,7 @@ export default function ProviderBookingsScreen({ navigation }: Props) {
               />
             ))}
           </View>
-        ) : null}
+        </MGDisclosure>
 
         {loading ? (
           <View accessibilityRole="progressbar" accessibilityLabel="Carregando agenda" style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>

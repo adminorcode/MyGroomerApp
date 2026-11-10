@@ -11,6 +11,7 @@ import {
   MGButton,
   MGCard,
   MGEmptyState,
+  MGEnter,
   MGErrorState,
   MGIcon,
   MGText,
@@ -19,6 +20,7 @@ import {
 import MGAvatar from '../../design-system/components/MGAvatar'
 import { useRequestProfile, useSaveAnamnesisNote } from '../../hooks/useRequestProfile'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
+import { motion } from '../../design-system/tokens'
 import { petSizeLabel, petSpeciesLabel } from '../../types/pet.types'
 import { RequestProfile } from '../../types/requestProfile.types'
 import { formatMoney } from '../../utils/formatMoney'
@@ -281,7 +283,9 @@ export default function ProviderRequestProfileScreen({ navigation, route }: Prop
               <MGText variant="bodySmall" color="error" accessibilityRole="alert" style={{ marginBottom: spacing.sm }}>{saveError}</MGText>
             ) : null}
             {saved ? (
-              <MGText variant="bodySmall" color="success" accessibilityRole="alert" style={{ marginBottom: spacing.sm }}>Nota salva.</MGText>
+              <MGEnter duration={motion.success}>
+                <MGText variant="bodySmall" color="success" accessibilityRole="alert" style={{ marginBottom: spacing.sm }}>Nota salva.</MGText>
+              </MGEnter>
             ) : null}
             <MGButton
               label="Salvar nota"

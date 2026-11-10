@@ -3,9 +3,10 @@ import ProviderSetupIntro from './ProviderSetupIntro'
 import { Pressable, ScrollView, View } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
-import { MGButton, MGIcon, MGScreen, MGText, MGTextField } from '../../design-system/components'
+import { MGButton, MGEnter, MGIcon, MGScreen, MGText, MGTextField } from '../../design-system/components'
 import { WeeklyAvailabilityEditor, WeekdayKey } from '../../design-system/patterns'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
+import { motion } from '../../design-system/tokens'
 import {
   useAddManualAppointment,
   useGetWeeklyAvailability,
@@ -325,14 +326,18 @@ export default function WeeklyAvailabilityScreen({ navigation, route }: Props) {
               <MGText variant="bodySmall" color="error" accessibilityRole="alert">{includeError}</MGText>
             ) : null}
             {includeNotice ? (
-              <MGText variant="bodySmall" color="success" accessibilityRole="alert">Atendimento incluído.</MGText>
+              <MGEnter duration={motion.success}>
+                <MGText variant="bodySmall" color="success" accessibilityRole="alert">Atendimento incluído.</MGText>
+              </MGEnter>
             ) : null}
           </View>
           {saveError ? (
             <MGText variant="bodySmall" color="error" accessibilityRole="alert">{saveError}</MGText>
           ) : null}
           {savedNotice ? (
-            <MGText variant="bodySmall" color="success" accessibilityRole="alert">Rotina salva.</MGText>
+            <MGEnter duration={motion.success}>
+              <MGText variant="bodySmall" color="success" accessibilityRole="alert">Rotina salva.</MGText>
+            </MGEnter>
           ) : null}
         </View>
       ) : null}

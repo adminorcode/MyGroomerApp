@@ -1,5 +1,6 @@
 import { StyleSheet, View } from 'react-native'
 import MGButton from './MGButton'
+import MGEnter from './MGEnter'
 import MGText from './MGText'
 import { useMGTheme } from '../theme/useMGTheme'
 
@@ -17,6 +18,7 @@ export default function MGErrorState({
   const { spacing } = useMGTheme()
 
   return (
+    <MGEnter>
     <View style={[styles.wrap, { gap: spacing.md, padding: spacing.base }]}>
       <MGText variant="heading3" color="error" style={styles.center}>
         Algo deu errado
@@ -34,6 +36,7 @@ export default function MGErrorState({
         />
       ) : null}
     </View>
+    </MGEnter>
   )
 }
 

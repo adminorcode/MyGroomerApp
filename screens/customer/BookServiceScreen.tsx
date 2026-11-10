@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, View } from 'react-native'
+import { useEffect, useRef, useState } from 'react'
+import { ActivityIndicator, Animated, KeyboardAvoidingView, Platform, Pressable, View } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
 import { useQuery } from '@tanstack/react-query'
@@ -11,6 +11,9 @@ import PetPicker from '../../components/customer/PetPicker'
 import { MGAvatar, MGButton, MGCard, MGErrorState, MGIcon, MGIconButton, MGScreen, MGText, MGTextField } from '../../design-system/components'
 import { TimeSlotPicker } from '../../design-system/patterns'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
+import { useReduceMotion } from '../../design-system/theme/useReduceMotion'
+import { useSelectionProgress } from '../../design-system/theme/useSelectionProgress'
+import { motion, motionEasing } from '../../design-system/tokens'
 import { getBookingSlots } from '../../services/booking.service'
 import { formatMoney } from '../../utils/formatMoney'
 import { getErrorMessage } from '../../utils/error'
@@ -141,25 +144,14 @@ export default function BookServiceScreen({ navigation, route }: Props) {
               icon={<ChevronRight size={20} color={colors.text.primary} />} style={{ minHeight: 48, minWidth: 48 }} />
           </View>
           <View accessibilityRole="radiogroup" accessibilityLabel="Dia do atendimento" style={{ flexDirection: 'row', gap: spacing.sm }}>
-            {days.map(day => {
-              const selected = day === date
-              return (
-                <Pressable key={day} accessibilityRole="radio" accessibilityLabel={bookingDateLabel(day, { weekday: 'long', day: 'numeric', month: 'long' })}
-                  accessibilityState={{ selected }} aria-selected={selected} onPress={() => changeDate(day)}
-                  style={({ pressed }) => ({
-                    flex: 1, minHeight: 80, padding: spacing.sm, borderRadius: radius.lg, borderWidth: 1,
-                    borderColor: selected ? colors.action.primary : colors.border.default,
-                    backgroundColor: selected ? colors.action.primary : pressed ? colors.state.pressedSurface : colors.surface.default,
-                    alignItems: 'center', justifyContent: 'center', gap: spacing.xs,
-                  })}>
-                  <MGText variant="bodySmall" style={{ color: selected ? colors.onAction.primary : colors.text.secondary }}>{bookingDateLabel(day, { weekday: 'short' }).replace('.', '')}</MGText>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
-                    <MGText variant="heading3" style={{ color: selected ? colors.onAction.primary : colors.text.primary }}>{bookingDateLabel(day, { day: '2-digit' })}</MGText>
-                    {selected ? <Check size={12} color={colors.onAction.primary} /> : null}
-                  </View>
-                </Pressable>
-              )
-            })}
+            {days.map(day => (
+              <DayChoice
+                key={day}
+                day={day}
+                selected={day === date}
+                onPress={() => changeDate(day)}
+              />
+            ))}
           </View>
           <MGText variant="caption" color="secondary">Horários de Brasília</MGText>
         </View>
@@ -211,3 +203,107 @@ export default function BookServiceScreen({ navigation, route }: Props) {
     </KeyboardAvoidingView>
   )
 }
+
+function DayChoice({ day, selected, onPress }: { day: string, selected: boolean, onPress: () => void }) {
+  const { colors, spacing, radius, fonts, textStyles } = useMGTheme()
+  const reduceMotion = useReduceMotion()
+  const progress = useSelectionProgress(selected)
+  const [pressed, setPressed] = useState(false)
+  const cover = useRef(new Animated.Value(0)).current
+  const first = useRef(true)
+
+  useEffect(() => {
+    if (first.current) {
+      first.current = false
+      return
+    }
+    if (reduceMotion) {
+      cover.setValue(0)
+      return
+    }
+    cover.setValue(1)
+    const animation = Animated.timing(cover, {
+      toValue: 0,
+      duration: motion.selection,
+      easing: motionEasing.enter,
+      useNativeDriver: true,
+    })
+    animation.start()
+    return () => animation.stop()
+  }, [cover, reduceMotion, selected])
+
+  const borderColor = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [colors.border.default, colors.action.primary],
+  })
+  const weekdayColor = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [colors.text.secondary, colors.onAction.primary],
+  })
+  const dayColor = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [colors.text.primary, colors.onAction.primary],
+  })
+  const showPressed = pressed && !selected
+
+  return (
+    <AnimatedPressable
+      accessibilityRole="radio"
+      accessibilityLabel={bookingDateLabel(day, { weekday: 'long', day: 'numeric', month: 'long' })}
+      accessibilityState={{ selected }}
+      aria-selected={selected}
+      onPress={onPress}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
+      style={{
+        flex: 1,
+        minHeight: 80,
+        padding: spacing.sm,
+        borderRadius: radius.lg,
+        borderWidth: 1,
+        borderColor,
+        backgroundColor: showPressed ? colors.state.pressedSurface : selected ? colors.action.primary : colors.surface.default,
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: spacing.xs,
+        overflow: 'hidden',
+      }}
+    >
+      {reduceMotion || showPressed ? null : (
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            backgroundColor: selected ? colors.surface.default : colors.action.primary,
+            opacity: cover,
+          }}
+        />
+      )}
+      <Animated.Text style={{
+        color: weekdayColor,
+        fontFamily: fonts.regular,
+        fontSize: textStyles.bodySmall.fontSize,
+        lineHeight: textStyles.bodySmall.lineHeight,
+      }}>
+        {bookingDateLabel(day, { weekday: 'short' }).replace('.', '')}
+      </Animated.Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+        <Animated.Text style={{
+          color: dayColor,
+          fontFamily: fonts.semibold,
+          fontSize: textStyles.heading3.fontSize,
+          lineHeight: textStyles.heading3.lineHeight,
+        }}>
+          {bookingDateLabel(day, { day: '2-digit' })}
+        </Animated.Text>
+        {selected ? <Check size={12} color={colors.onAction.primary} /> : null}
+      </View>
+    </AnimatedPressable>
+  )
+}
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable)

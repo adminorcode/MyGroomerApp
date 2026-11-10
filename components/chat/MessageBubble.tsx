@@ -1,6 +1,9 @@
+import { useRef } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { CheckCheck, Check } from 'lucide-react-native'
+import MGEnter from '../../design-system/components/MGEnter'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
+import { motion } from '../../design-system/tokens'
 
 type Props = {
     content: string
@@ -11,6 +14,8 @@ type Props = {
     isSeen?: boolean
     isEdited?: boolean
     isPending?: boolean
+    /** Só o balão que acabou de entrar anima. Mensagens já vistas montam paradas. */
+    entering?: boolean
 }
 
 function formatBubbleTime(value?: string) {
@@ -20,15 +25,16 @@ function formatBubbleTime(value?: string) {
     return date.toLocaleTimeString('pt-BR', { hour: 'numeric', minute: '2-digit' })
 }
 
-export default function MessageBubble({ content, timestamp, isOwn, ownRole = 'customer', isSeen, isEdited, isPending }: Props) {
+export default function MessageBubble({ content, timestamp, isOwn, ownRole = 'customer', isSeen, isEdited, isPending, entering = false }: Props) {
     const { colors, spacing, radius, fonts, textStyles } = useMGTheme()
+    const enterOnMount = useRef(entering).current
 
     const ownIsTeal = ownRole === 'provider'
     const bubbleColor = isOwn ? (ownIsTeal ? colors.brand.teal : colors.action.primary) : colors.surface.default
     const textColor = isOwn ? colors.onAction.primary : colors.text.primary
     const metaColor = isOwn ? colors.onAction.primary : colors.text.secondary
 
-    return (
+    const bubble = (
         <View style={[styles.row, isOwn ? styles.rowOwn : styles.rowOther]}>
             <View
                 style={[
@@ -66,6 +72,13 @@ export default function MessageBubble({ content, timestamp, isOwn, ownRole = 'cu
                 </View>
             </View>
         </View>
+    )
+
+    if (!enterOnMount) return bubble
+    return (
+        <MGEnter duration={motion.selection} offset={motion.bubbleOffset}>
+            {bubble}
+        </MGEnter>
     )
 }
 

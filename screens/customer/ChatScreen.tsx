@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useFocusEffect } from '@react-navigation/native'
 import {
   ActivityIndicator,
@@ -54,6 +54,22 @@ function buildListItems(messages: Message[]): ListItem[] {
   }
 
   return items.reverse()
+}
+
+function messageIds(items: ListItem[]) {
+  return items.flatMap(item => item.type === 'message' ? [item.message.id] : [])
+}
+
+function resolveEnteringId(
+  seenRef: { current: { conversationId: string, ids: Set<string> } | null },
+  conversationId: string,
+  items: ListItem[],
+) {
+  const seen = seenRef.current
+  if (!seen || seen.conversationId !== conversationId) return null
+  const newest = items.find(item => item.type === 'message')
+  if (!newest || newest.type !== 'message') return null
+  return seen.ids.has(newest.message.id) ? null : newest.message.id
 }
 
 const ChatScreen = ({ navigation, route }: Props) => {
@@ -124,6 +140,18 @@ const ChatScreen = ({ navigation, route }: Props) => {
   }
 
   const listItems = useMemo(()=> buildListItems(messages), [messages])
+  const seenRef = useRef<{ conversationId: string, ids: Set<string> } | null>(null)
+  const enteringId = resolveEnteringId(seenRef, conversationId, listItems)
+
+  useEffect(() => {
+    if (isLoading) return
+    const ids = messageIds(listItems)
+    if (!seenRef.current || seenRef.current.conversationId !== conversationId) {
+      seenRef.current = { conversationId, ids: new Set(ids) }
+      return
+    }
+    for (const id of ids) seenRef.current.ids.add(id)
+  }, [conversationId, isLoading, listItems])
 
   const renderItem = ({ item }: { item: ListItem }) => {
     if (item.type === 'date') {
@@ -138,6 +166,7 @@ const ChatScreen = ({ navigation, route }: Props) => {
         ownRole={currentRole}
         isSeen={item.message.is_seen}
         isEdited={item.message.is_edited}
+        entering={item.message.id === enteringId}
       />
     )
   }
