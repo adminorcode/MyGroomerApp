@@ -1,5 +1,5 @@
 import { fonts, lightColors, textStyles } from '../../constants/theme'
-import { elevation, palette, radius, spacing } from '../tokens'
+import { elevation, motion, palette, radius, spacing } from '../tokens'
 
 /**
  * Semantic tokens for MG components.
@@ -52,6 +52,7 @@ export function useMGTheme() {
     textStyles,
     fonts,
     elevation,
+    motion,
   }
 }
 

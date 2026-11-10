@@ -20,6 +20,10 @@ export type { MGBadgeTone } from './MGBadge'
 
 export { default as MGChip } from './MGChip'
 
+export { default as MGDisclosure, MGDisclosureChevron } from './MGDisclosure'
+export { default as MGEnter } from './MGEnter'
+export { default as MGSheetScrim } from './MGSheetScrim'
+
 export { default as MGScreen } from './MGScreen'
 
 export { default as MGEmptyState } from './MGEmptyState'

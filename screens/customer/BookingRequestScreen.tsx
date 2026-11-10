@@ -11,8 +11,9 @@ import { usePets } from '../../hooks/usePets'
 import { createBooking, getBookingSlots, BookingSlots } from '../../services/booking.service'
 import { Booking, BookingStatus, CreateBookingResponse } from '../../types/booking.types'
 import { BookingStatusBadge, BookingSummary, BookingSummaryRow } from '../../design-system/patterns'
-import { MGButton, MGCard, MGErrorState, MGIconButton, MGScreen, MGText } from '../../design-system/components'
+import { MGButton, MGCard, MGEnter, MGErrorState, MGIconButton, MGScreen, MGText } from '../../design-system/components'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
+import { motion } from '../../design-system/tokens'
 import { formatMoney } from '../../utils/formatMoney'
 import { getErrorMessage } from '../../utils/error'
 import { bookingClock, bookingDateKey, bookingDateLabel } from './bookingSlotsModel'
@@ -163,6 +164,7 @@ export default function BookingRequestScreen({ navigation, route }: Props) {
           </View>
         )}>
         {header}
+        <MGEnter duration={motion.success}>
         <View style={{ gap: spacing.lg }}>
           <View style={{ gap: spacing.sm }}>
             <MGText variant="heading3">Solicitação enviada</MGText>
@@ -189,6 +191,7 @@ export default function BookingRequestScreen({ navigation, route }: Props) {
             booking.customer_location,
           )} totalLabel="Valor estimado" totalValue={formatMoney(booking.price)} footnote={paymentFootnote} />
         </View>
+        </MGEnter>
       </MGScreen>
     )
   }

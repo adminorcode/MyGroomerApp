@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native'
-import { MGButton, MGCard, MGChip, MGIcon, MGText } from '../../design-system/components'
+import { MGButton, MGCard, MGChip, MGIcon, MGSheetScrim, MGText } from '../../design-system/components'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { useRescheduleBooking, useRescheduleBookingSlots } from '../../hooks/useBooking'
@@ -111,9 +111,11 @@ export default function RescheduleBookingSheet({
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <Pressable style={[styles.backdrop, { backgroundColor: colors.overlay.scrim }]} onPress={onClose}>
+      <View style={styles.backdrop}>
+        <MGSheetScrim visible={visible} />
+        <Pressable style={[StyleSheet.absoluteFill, { zIndex: 0 }]} onPress={onClose} />
         <Pressable
-          style={[styles.sheet, { backgroundColor: colors.surface.canvas, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl }]}
+          style={[styles.sheet, { zIndex: 1, backgroundColor: colors.surface.canvas, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl }]}
           onPress={event => event.stopPropagation()}
         >
           {/* CMP-05 / Q1: cabeçalho teal da folha, com texto inverso (branco) sobre a faixa. */}
@@ -185,7 +187,7 @@ export default function RescheduleBookingSheet({
             </View>
           </View>
         </Pressable>
-      </Pressable>
+      </View>
     </Modal>
   )
 }

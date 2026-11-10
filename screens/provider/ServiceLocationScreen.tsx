@@ -3,9 +3,10 @@ import ProviderSetupIntro from './ProviderSetupIntro'
 import { Pressable, ScrollView, StyleSheet, View, ActivityIndicator } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
-import { MGButton, MGChip, MGScreen, MGText, MGTextField } from '../../design-system/components'
+import { MGButton, MGChip, MGEnter, MGScreen, MGText, MGTextField } from '../../design-system/components'
 import { AddressMapPlaceholder, AddressPlaceCard, OnboardingStepper } from '../../design-system/patterns'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
+import { motion } from '../../design-system/tokens'
 import { useGetServiceLocation, usePreviewServiceLocation, useSaveServiceLocation } from '../../hooks/useProviders'
 import { AddressSuggestion, autocompleteServiceLocation, getMapTiles, lookupServicePostalCode, reverseServiceLocation } from '../../services/provider.service'
 import CurrentLocationActions from '../../components/customer/CurrentLocationActions'
@@ -491,7 +492,9 @@ export default function ServiceLocationScreen({ navigation, route }: Props) {
           <MGText variant="bodySmall" color="error" accessibilityRole="alert">{saveError}</MGText>
         ) : null}
         {savedNotice ? (
-          <MGText variant="body" color="success" accessibilityRole="alert">Local de atendimento salvo.</MGText>
+          <MGEnter duration={motion.success}>
+            <MGText variant="body" color="success" accessibilityRole="alert">Local de atendimento salvo.</MGText>
+          </MGEnter>
         ) : null}
       </View>
     </MGScreen>

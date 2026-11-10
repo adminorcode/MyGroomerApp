@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 import { StyleSheet, View } from 'react-native'
 import MGButton from './MGButton'
+import MGEnter from './MGEnter'
 import MGText from './MGText'
 import { useMGTheme } from '../theme/useMGTheme'
 
@@ -22,6 +23,7 @@ export default function MGEmptyState({
   const { spacing } = useMGTheme()
 
   return (
+    <MGEnter>
     <View style={[styles.wrap, { gap: spacing.md, padding: spacing.base }]}>
       {illustration}
       <MGText variant="heading3" style={styles.center}>
@@ -36,6 +38,7 @@ export default function MGEmptyState({
         <MGButton label={actionLabel} onPress={onAction} fullWidth={false} style={{ alignSelf: 'center', paddingHorizontal: spacing.xl }} />
       ) : null}
     </View>
+    </MGEnter>
   )
 }
 

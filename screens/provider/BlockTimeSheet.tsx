@@ -1,9 +1,8 @@
 import { Modal, Platform, KeyboardAvoidingView, Pressable, ScrollView, View } from 'react-native'
 import { useEffect, useState } from 'react'
-import { MGButton, MGCard, MGIcon, MGText, MGTextField } from '../../design-system/components'
+import { MGButton, MGCard, MGIcon, MGSheetScrim, MGText, MGTextField } from '../../design-system/components'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
-import { palette } from '../../design-system/tokens'
 import { blockInstants, blockRangeError } from './agendaPeriod'
 
 // Data da folha: exibida e digitada como DD/MM/AAAA; a API recebe AAAA-MM-DD (conversão só na borda).
@@ -59,8 +58,9 @@ export default function BlockTimeSheet({ visible, initialDate, submitting, onClo
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center', backgroundColor: palette.overlay.scrim }}
+        style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center' }}
       >
+        <MGSheetScrim visible={visible} />
         <View
           style={{
             height: '78%',

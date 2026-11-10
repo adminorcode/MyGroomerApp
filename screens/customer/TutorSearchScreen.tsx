@@ -1,5 +1,5 @@
-import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
-import { AccessibilityInfo, ActivityIndicator, Animated, Easing, NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { ActivityIndicator, NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native'
 import { ChevronLeft } from 'lucide-react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
@@ -16,7 +16,7 @@ import { addFavoriteProvider, removeFavoriteProvider } from '../../services/favo
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { MGIconName } from '../../design-system/components/MGIcon'
 import { spacing } from '../../design-system/tokens'
-import { MGButton, MGChip, MGEmptyState, MGErrorState, MGIcon, MGScreen, MGText, MGTextField } from '../../design-system/components'
+import { MGButton, MGChip, MGDisclosure, MGDisclosureChevron, MGEmptyState, MGErrorState, MGIcon, MGScreen, MGText, MGTextField } from '../../design-system/components'
 import { GroomerSearchCard } from '../../design-system/patterns'
 import { formatMoney } from '../../utils/formatMoney'
 import { formatRating } from '../../utils/formatRating'
@@ -89,6 +89,9 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
     const [chosen, setChosen] = useState<ChosenAddress | null>(null)
     const [changing, setChanging] = useState(false)
     const [panel, setPanel] = useState<SearchPanel | null>(null)
+    const retainedPanel = useRef<SearchPanel | null>(null)
+    if (panel) retainedPanel.current = panel
+    const renderedPanel = panel ?? retainedPanel.current
     const [onlyToday, setOnlyToday] = useState(false)
     const [sortKey, setSortKey] = useState<SearchSort>('relevance')
     const [minPrice, setMinPrice] = useState<number | null>(null)
@@ -388,21 +391,21 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
                     </View>
 
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll} contentContainerStyle={styles.pills}>
-                        <Pill label={filterLabel} icon="sliders-horizontal" selected={panel === 'filtros'} onPress={() => togglePanel('filtros')} />
+                        <Pill label={filterLabel} icon="sliders-horizontal" caret selected={panel === 'filtros'} onPress={() => togglePanel('filtros')} />
                         <Pill label="Ordenar" icon="arrow-up-down" caret active={sortKey !== 'relevance'} selected={panel === 'ordenar'} onPress={() => togglePanel('ordenar')} />
                         <Pill label="Preço" caret active={minPrice != null || maxPrice != null} selected={panel === 'preco'} onPress={() => togglePanel('preco')} />
                         <Pill label="Avaliação" icon="star" caret active={minRating != null || onlyReviewed} selected={panel === 'avaliacao'} onPress={() => togglePanel('avaliacao')} />
                         <Pill label="Raio" icon="map-pin" caret active={maxKm != null} selected={panel === 'raio'} onPress={() => togglePanel('raio')} />
                     </ScrollView>
 
-                    {panel ? (
-                        <SlideDown open>
-                            <SearchFilterPanel key={panel} panel={panel} value={filterValues}
+                    <MGDisclosure open={panel !== null} nativeID="search-filter-panel">
+                        {renderedPanel ? (
+                            <SearchFilterPanel key={renderedPanel} panel={renderedPanel} value={filterValues}
                                 categories={categoryOptions} categoriesLoading={categories.isLoading} categoriesError={categories.isError}
                                 onRetryCategories={() => { void categories.refetch() }} address={chosen?.address}
                                 onApply={applyPanel} onCancel={() => setPanel(null)} />
-                        </SlideDown>
-                    ) : null}
+                        ) : null}
+                    </MGDisclosure>
 
                     <View style={styles.results}>
                         {search.data && search.isFetching ? <View style={styles.refreshing} accessibilityLiveRegion="polite"><ActivityIndicator size="small" color={theme.colors.action.primary} /><MGText variant="caption" color="secondary">Atualizando resultados…</MGText></View> : null}
@@ -536,6 +539,8 @@ function Pill({ label, icon, caret = false, selected, active = false, onPress }:
             accessibilityLabel={label}
             accessibilityHint={active ? 'Seleção aplicada. Abra para revisar ou alterar.' : 'Abre as opções. Confirme as mudanças em Aplicar.'}
             accessibilityState={{ expanded: selected }}
+            aria-expanded={selected}
+            aria-controls={selected ? 'search-filter-panel' : undefined}
             onPress={onPress}
             style={({ pressed }) => [
                 styles.pill,
@@ -549,7 +554,7 @@ function Pill({ label, icon, caret = false, selected, active = false, onPress }:
         >
             {icon ? <MGIcon name={icon} size={16} color={colors.text.primary} /> : null}
             <MGText variant="caption" style={{ color: colors.text.primary }}>{visible}</MGText>
-            {caret ? <MGIcon name={selected ? "chevron-up" : "chevron-down"} size={14} color={colors.action.primaryText} /> : null}
+            {caret ? <MGDisclosureChevron expanded={selected} size={14} color={colors.action.primaryText} /> : null}
         </Pressable>
     )
 }
@@ -568,39 +573,6 @@ function TabButton({ label, accessibilityLabel, selected, onPress }: { label: st
         >
             <MGText variant="label" style={{ color: selected ? colors.action.primaryText : colors.text.secondary }}>{label}</MGText>
         </Pressable>
-    )
-}
-
-function SlideDown({ open, children }: { open: boolean, children: ReactNode }) {
-    const [mounted, setMounted] = useState(open)
-    const [reduceMotion, setReduceMotion] = useState(false)
-    const progress = useRef(new Animated.Value(open ? 1 : 0)).current
-    const translateY = useRef(progress.interpolate({ inputRange: [0, 1], outputRange: [-12, 0] })).current
-
-    useEffect(() => {
-        let active = true
-        AccessibilityInfo.isReduceMotionEnabled().then(value => { if (active) setReduceMotion(value) })
-        const subscription = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduceMotion)
-        return () => { active = false; subscription.remove() }
-    }, [])
-
-    useEffect(() => {
-        if (open) setMounted(true)
-        const animation = Animated.timing(progress, {
-            toValue: open ? 1 : 0,
-            duration: reduceMotion ? 0 : 180,
-            easing: Easing.out(Easing.cubic),
-            useNativeDriver: false,
-        })
-        animation.start(({ finished }) => { if (finished && !open) setMounted(false) })
-        return () => animation.stop()
-    }, [open, progress, reduceMotion])
-
-    if (!mounted) return null
-    return (
-        <Animated.View accessibilityElementsHidden={!open} importantForAccessibility={open ? 'auto' : 'no-hide-descendants'} style={{ transform: [{ translateY }] }}>
-            {children}
-        </Animated.View>
     )
 }
 

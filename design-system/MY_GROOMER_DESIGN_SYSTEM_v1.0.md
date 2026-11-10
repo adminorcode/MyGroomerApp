@@ -729,6 +729,8 @@ Referência principal: WCAG 2.2 nível AA, adaptada às particularidades do mobi
 | Modal/bottom sheet | Padrão nativo da biblioteca |
 | Feedback de sucesso | 200–300 ms, sem bloquear navegação |
 
+Durações adotadas no plano 029, dentro destas faixas: seleção, vazio, erro e balão novo em 150 ms; painel em 180 ms com deslocamento de 12 px; confirmação e véu em 200 ms. O balão novo sobe 8 px. Com Reduzir movimento a duração vai a 0 e não há deslocamento. Pressed continua imediato, sem escala.
+
 - Respeitar redução de movimento.
 - Não usar animação como único feedback.
 - Evitar loaders animados por longos períodos; usar skeleton e estados persistentes.
