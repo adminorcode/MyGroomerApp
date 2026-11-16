@@ -337,7 +337,7 @@ export default function ProviderRequestProfileScreen({ navigation, route }: Prop
                 </View>
                 <MGText variant="body">{item.service_name}</MGText>
                 <MGText variant="bodySmall" color="secondary">{item.provider_name}</MGText>
-                {item.own && item.price != null ? <MGText variant="body">{formatMoney(item.price)}</MGText> : null}
+                {item.own && item.price != null ? <MGText variant="body" color="money">{formatMoney(item.price)}</MGText> : null}
               </View>
             ))}
           </View>

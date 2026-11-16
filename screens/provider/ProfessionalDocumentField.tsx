@@ -17,7 +17,6 @@ export default function ProfessionalDocumentField({ value, onChange, onBlur, edi
     <MGTextField
       required
       label="CPF / CNPJ"
-      placeholder="Digite seu CPF ou CNPJ"
       value={formatDocument(value)}
       maxLength={18}
       keyboardType="number-pad"

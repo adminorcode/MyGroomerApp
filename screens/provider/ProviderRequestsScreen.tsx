@@ -56,7 +56,7 @@ export default function ProviderRequestsScreen({ navigation }: Props) {
   return (
     <MGScreen
       header="teal"
-      headerSlot={<MGText variant="heading2" color="inverse" accessibilityRole="header">Solicitações recebidas</MGText>}
+      headerSlot={<MGText variant="heading2" accessibilityRole="header">Solicitações recebidas</MGText>}
     >
       <View style={{ flex: 1, width: '100%', maxWidth: 720, paddingTop: spacing.md }}>
         <View style={{ marginBottom: spacing.md }}>

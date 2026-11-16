@@ -1,54 +1,59 @@
-// My Groomer Design System v1.0 — seção 3.
-// Revisão 06/11/2026: ação próxima da marca, com contraste AA para texto branco.
+// Tema claro gerado em design-exploration/ux-skill (marca #D95786, papel fill).
+// O nome `teal` permanece na API dos componentes e agora aponta para o rosa profundo.
+
 const pink = '#D95786'
-const pinkText = '#C62669'
+const pinkText = '#8F2650'
 
 export const palette = {
   brand: {
     pink,
-    pinkLight: '#F6B5CB',
-    teal: '#167D83',
-    background: '#F9F8F6',
-    ink: '#253D42',
+    pinkLight: '#FFD3DF',
+    teal: pinkText,
+    background: '#F8F6F7',
+    ink: '#221D1F',
   },
   surface: {
     default: '#FFFFFF',
-    canvas: '#F9F8F6',
-    pinkSubtle: '#FCE5ED',
-    tealSubtle: '#E9F3F2',
+    canvas: '#F8F6F7',
+    pinkSubtle: '#FFD3DF',
+    tealSubtle: '#F4E9EC',
   },
   text: {
-    primary: '#253D42',
-    secondary: '#60767A',
+    primary: '#221D1F',
+    secondary: '#60595B',
     inverse: '#FFFFFF',
+    // Valor em dinheiro. O teal da marca (#167D83): 4,89:1 no branco e 4,54:1 no canvas.
+    // O token brand.teal ficou rosa e faz o preço parecer débito.
+    money: '#167D83',
   },
   border: {
-    default: '#D9E0E1',
-    strong: '#60767A',
+    default: '#C3BEBF',
+    strong: '#776F71',
   },
   action: {
-    primary: '#C64878',
-    primaryPressed: '#B9406C',
+    primary: '#C84878',
+    primaryPressed: '#A6265B',
     primaryText: pinkText,
     primaryOutline: pinkText,
-    secondary: '#167D83',
-    focus: '#167D83',
+    secondary: pinkText,
+    focus: '#460020',
   },
   onAction: {
     primary: '#FFFFFF',
   },
   feedback: {
-    success: '#176B54',
-    successSurface: '#E5F5EF',
-    warning: '#A53B20',
-    warningSurface: '#FFF1E7',
-    error: '#B3261E',
-    errorSurface: '#FCE8E6',
-    info: '#167D83',
+    success: '#2A5817',
+    successSurface: '#D4E1CF',
+    warning: '#6E3D00',
+    warningSurface: '#EBD9C9',
+    error: '#7B2E29',
+    errorSurface: '#F0D6D3',
+    info: '#004F7C',
+    infoSurface: '#CDDFEF',
   },
   state: {
-    disabledSurface: '#E4E8E8',
-    disabledText: '#60767A',
+    disabledSurface: '#C3BEBF',
+    disabledText: '#8F888A',
   },
-  overlay: { scrim: 'rgba(37,61,66,0.48)' },
+  overlay: { scrim: 'rgba(16,12,13,0.48)' },
 } as const

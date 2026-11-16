@@ -249,11 +249,11 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
                 onPress={() => navigation.goBack()}
                 style={({ pressed }) => [styles.backButton, { opacity: pressed ? 0.6 : 1 }]}
             >
-                <ChevronLeft size={24} color={theme.colors.text.inverse} />
+                <ChevronLeft size={24} color={theme.colors.text.primary} />
             </Pressable>
             <View style={styles.headerText}>
-                <MGText variant="heading2" color="inverse" accessibilityRole="header">Quem atende</MGText>
-                <MGText variant="bodySmall" color="inverse">Profissionais que atendem no seu endereço</MGText>
+                <MGText variant="heading2" accessibilityRole="header">Quem atende</MGText>
+                <MGText variant="bodySmall" color="secondary">Profissionais que atendem no seu endereço</MGText>
             </View>
         </View>
     )
@@ -456,7 +456,7 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
                                         <View style={{ flex: 1, gap: theme.spacing.xs }}>
                                             <MGText variant="title">{group.name}</MGText>
                                             <MGText variant="bodySmall" color="secondary">{countLabel(group.providers.length)}</MGText>
-                                            <MGText variant="bodySmall" color="teal" style={{ fontFamily: theme.fonts.bold }}>{`A partir de ${formatMoney(group.minPrice)}`}</MGText>
+                                            <MGText variant="bodySmall" color="money" style={{ fontFamily: theme.fonts.bold }}>{`A partir de ${formatMoney(group.minPrice)}`}</MGText>
                                         </View>
                                         <MGIcon name="chevron-right" size={20} color={theme.colors.text.secondary} />
                                     </Pressable>
@@ -507,7 +507,7 @@ function ProviderCard({ item, favorite, onFavorite, onPress }: { item: CoverageP
 }
 
 function CategoryTile({ name, icon, selected, onPress }: { name: string, icon: MGIconName, selected: boolean, onPress: () => void }) {
-    const { colors, radius, spacing: gap } = useMGTheme()
+    const { colors, radius } = useMGTheme()
     return (
         <Pressable
             accessibilityRole="button"
@@ -517,14 +517,14 @@ function CategoryTile({ name, icon, selected, onPress }: { name: string, icon: M
             style={({ pressed }) => [
                 styles.category,
                 {
-                    borderRadius: radius.lg,
-                    backgroundColor: selected ? colors.brand.pinkLight : colors.surface.pinkSubtle,
-                    opacity: pressed ? 0.92 : 1,
-                    padding: gap.sm,
+                    borderRadius: radius.control,
+                    backgroundColor: pressed ? colors.surface.canvas : colors.surface.default,
+                    borderWidth: selected ? 2 : 1,
+                    borderColor: selected ? colors.action.primary : colors.border.default,
                 },
             ]}
         >
-            <MGIcon name={icon} size={26} color={colors.action.primaryText} />
+            <MGIcon name={icon} size={26} color={selected ? colors.action.primary : colors.text.primary} />
             <MGText variant="bodySmall" numberOfLines={2} style={{ color: colors.text.primary, textAlign: 'center' }}>{name}</MGText>
         </Pressable>
     )
@@ -545,7 +545,7 @@ function Pill({ label, icon, caret = false, selected, active = false, onPress }:
             style={({ pressed }) => [
                 styles.pill,
                 {
-                    borderRadius: radius.pill,
+                    borderRadius: radius.control,
                     borderColor: selected || active ? colors.action.primaryOutline : colors.border.default,
                     backgroundColor: selected || active ? colors.surface.pinkSubtle : colors.surface.default,
                     opacity: pressed ? 0.92 : 1,

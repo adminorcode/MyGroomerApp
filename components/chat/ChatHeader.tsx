@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native'
-import { ChevronLeft, Phone, Video } from 'lucide-react-native'
+import { ChevronLeft, Phone, Video as VideoIcon } from 'lucide-react-native'
 import { useTheme } from '../../context/ThemeContext'
 import { fonts, spacing, typography } from '../../constants/theme'
 import { MGAvatar } from '../../design-system/components'
@@ -38,7 +38,7 @@ export default function ChatHeader({ name, avatarUri, status, onBack, onCall, on
 
             <View style={styles.actions}>
                 {onVideoCall ? <Pressable accessibilityRole="button" accessibilityLabel="Chamada de vídeo" onPress={onVideoCall} hitSlop={spacing.sm}>
-                    <Video size={22} color={colors.primary} />
+                    <VideoIcon size={22} color={colors.primary} />
                 </Pressable> : null}
                 {onCall ? <Pressable accessibilityRole="button" accessibilityLabel="Ligar" onPress={onCall} hitSlop={spacing.sm}>
                     <Phone size={20} color={colors.primary} />

@@ -2,7 +2,7 @@
 
 export const spacing = {
   none: 0,
-  xxs: 2,
+  xxs: 4,
   xs: 4,
   sm: 8,
   md: 12,

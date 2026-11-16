@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native'
+import { ActivityIndicator, StyleSheet, View } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
 import axios from 'axios'
@@ -15,7 +15,7 @@ import { petFormSchema, PetFormInput, PetFormValues } from '../../validators/pet
 import { PET_SIZES, PET_SPECIES, PetSize, PetSpecies } from '../../types/pet.types'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
-import { MGButton, MGChip, MGErrorState, MGIcon, MGText, MGTextField } from '../../design-system/components'
+import { MGButton, MGChip, MGErrorState, MGText, MGTextField } from '../../design-system/components'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { spacing } from '../../constants/theme'
 import { getErrorMessage } from '../../utils/error'
@@ -147,7 +147,7 @@ export default function PetFormScreen({ navigation, route }: Props) {
                     showBackButton
                     onBack={() => navigation.goBack()}
                 />
-                <View style={[styles.photo, { backgroundColor: colors.surface.pinkSubtle }]}>
+                <View style={[styles.photo, { backgroundColor: colors.surface.default, borderColor: colors.border.default }]}>
                     <MGArtwork name="pet-placeholder" width={52} height={52} />
                 </View>
                 <MGText variant="bodySmall" color="secondary" style={styles.photoNote}>
@@ -297,7 +297,6 @@ function HealthSection({
                                     label={option.label}
                                     accessibilityLabel={option.label}
                                     selected={value === option.value}
-                                    minHeight={52}
                                     onPress={() => onChange(option.value)}
                                 />
                             ))}
@@ -324,7 +323,6 @@ function ChoiceField({
     control: ReturnType<typeof useForm<PetFormInput, unknown, PetFormValues>>['control']
     name: 'species' | 'size'
 }) {
-    const { colors, radius } = useMGTheme()
     return (
         <Controller
             control={control}
@@ -333,31 +331,18 @@ function ChoiceField({
                 <View style={styles.choiceGroup}>
                     <MGText variant="label" style={styles.choiceLabel}>{label}</MGText>
                     <View style={styles.choices}>
-                        {options.map((option) => {
-                            const selected = value === option.value
-                            // CMP-06 / R1: selecionado = action.primary com texto branco; não selecionado = contorno rosa.
-                            return (
-                                <Pressable
-                                    key={option.value}
+                        {options.map((option) => (
+                            <View key={option.value} style={styles.choiceSlot}>
+                                <MGChip
+                                    fill
                                     accessibilityRole="radio"
-                                    accessibilityState={{ selected, checked: selected }}
-                                    aria-checked={selected}
+                                    label={option.label}
                                     accessibilityLabel={option.label}
+                                    selected={value === option.value}
                                     onPress={() => onChange(option.value)}
-                                    style={[
-                                        styles.choice,
-                                        {
-                                            borderRadius: radius.pill,
-                                            backgroundColor: selected ? colors.action.primary : colors.surface.default,
-                                            borderColor: error ? colors.feedback.error : colors.action.primaryOutline,
-                                        },
-                                    ]}
-                                >
-                                    {selected && <MGIcon name="check" size={14} color={colors.onAction.primary} />}
-                                    <MGText variant="label" color={selected ? 'inverse' : 'primary'}>{option.label}</MGText>
-                                </Pressable>
-                            )
-                        })}
+                                />
+                            </View>
+                        ))}
                     </View>
                     {!!error && <MGText variant="caption" color="error" style={styles.choiceError}>{error}</MGText>}
                 </View>
@@ -383,6 +368,7 @@ const styles = StyleSheet.create({
         width: PHOTO_SIZE,
         height: PHOTO_SIZE,
         borderRadius: PHOTO_SIZE / 2,
+        borderWidth: 1,
         alignItems: 'center',
         justifyContent: 'center',
         alignSelf: 'center',
@@ -403,15 +389,9 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         gap: spacing.sm,
     },
-    choice: {
+    choiceSlot: {
         flexGrow: 1,
-        justifyContent: 'center',
-        minHeight: 52,
-        borderWidth: 1,
-        paddingHorizontal: spacing.md,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.xs,
+        flexBasis: 0,
     },
     choiceError: {
         marginTop: spacing.xs,

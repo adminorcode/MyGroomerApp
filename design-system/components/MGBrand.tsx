@@ -9,7 +9,7 @@ export default function MGBrand({ compact = false }: { compact?: boolean }) {
   const size = compact ? 48 : 64
   return (
     <View style={{ alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.base }}>
-      <View style={{ width: size, height: size, borderRadius: radius.lg, backgroundColor: colors.brand.pink, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ width: size, height: size, borderRadius: radius.control, backgroundColor: colors.brand.pink, alignItems: 'center', justifyContent: 'center' }}>
         <MGArtwork name="brand-symbol" width={size} />
       </View>
       <MGText variant={compact ? 'heading3' : 'logotype'} style={{ textAlign: 'center' }}>{APP_NAME}</MGText>

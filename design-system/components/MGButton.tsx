@@ -8,6 +8,7 @@ import {
   ViewStyle,
 } from 'react-native'
 import MGText from './MGText'
+import { MG_FIELD_HEIGHT } from './MGTextField'
 import { useMGTheme } from '../theme/useMGTheme'
 
 export type MGButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'teal' | 'destructive'
@@ -34,6 +35,13 @@ export default function MGButton({
 }: MGButtonProps) {
   const { colors, spacing, radius, elevation } = useMGTheme()
   const blocked = disabled || loading
+  const flat = typeof style === 'function' ? undefined : StyleSheet.flatten(style)
+  const askedHeight = typeof flat?.height === 'number'
+    ? flat.height
+    : typeof flat?.minHeight === 'number'
+      ? flat.minHeight
+      : undefined
+  const box = askedHeight ?? MG_FIELD_HEIGHT
   // CMP-03: só o primário em repouso recebe a sombra tingida; pressed e bloqueado ficam sem sombra.
   const shadowStyle: ViewStyle | null = variant === 'primary' && !blocked ? elevation.actionPrimary : null
 
@@ -98,8 +106,7 @@ export default function MGButton({
       style={({ pressed }) => [
         styles.base,
         {
-          minHeight: 40,
-          borderRadius: radius.lg,
+          borderRadius: radius.control,
           paddingHorizontal: spacing.base,
           columnGap: spacing.sm,
         },
@@ -107,6 +114,11 @@ export default function MGButton({
         variantStyle(pressed),
         !pressed && shadowStyle,
         style as ViewStyle,
+        {
+          height: box,
+          minHeight: box,
+          maxHeight: box,
+        },
       ]}
       {...props}
     >

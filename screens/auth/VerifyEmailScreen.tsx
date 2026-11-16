@@ -55,8 +55,8 @@ export default function VerifyEmailScreen({ navigation }: Props) {
                 <MGBrand compact />
                 <View style={styles.status} accessibilityLiveRegion="polite">
                     {isPending ? <>
-                        <View testID="verify-email-status" style={[styles.iconBlock, { backgroundColor: colors.surface.pinkSubtle }]}>
-                            <ActivityIndicator accessibilityLabel="Verificando e-mail" color={colors.action.primary} size="large" />
+                        <View testID="verify-email-status" style={[styles.iconBlock, { backgroundColor: colors.surface.default, borderColor: colors.border.default }]}>
+                            <ActivityIndicator accessibilityLabel="Verificando e-mail" color={colors.text.primary} size="large" />
                         </View>
                         <MGText color="secondary" style={styles.message}>Verificando seu e-mail...</MGText>
                     </> : isError ? <MGErrorState
@@ -64,10 +64,10 @@ export default function VerifyEmailScreen({ navigation }: Props) {
                         onRetry={() => navigation.navigate('Login')}
                         retryLabel="Voltar ao login"
                     /> : <>
-                        <View testID="verify-email-status" style={[styles.iconBlock, { backgroundColor: colors.surface.pinkSubtle }]}>
+                        <View testID="verify-email-status" style={[styles.iconBlock, { backgroundColor: colors.surface.default, borderColor: colors.border.default }]}>
                             {isSuccess
                                 ? <MailCheck size={spacing.xxxl} color={colors.feedback.success} />
-                                : <Mail size={spacing.xxxl} color={colors.action.primary} />}
+                                : <Mail size={spacing.xxxl} color={colors.text.primary} />}
                         </View>
                         <MGText variant="heading1" accessibilityRole="header" style={styles.message}>{isSuccess ? 'E-mail verificado!' : 'Confira seu e-mail'}</MGText>
                         <MGText color="secondary" style={styles.message}>{isSuccess ? 'Sua conta está pronta. Você já pode entrar.' : 'Enviamos um link de verificação para o seu e-mail. Toque nele para confirmar a conta.'}</MGText>
@@ -93,6 +93,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: radius.xl,
+        borderWidth: 1,
     },
     message: {
         textAlign: 'center',

@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { StyleSheet, Text, TextInput, TextInputProps, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TextInputProps, TouchableOpacity, View } from "react-native";
 import { borderRadius, fonts, spacing, textStyles } from "../../constants/theme";
 import {Eye, EyeClosed} from 'lucide-react-native'
 import PhoneInput, { PhoneInputProps } from "react-native-phone-number-input";
 import { useTheme } from "../../context/ThemeContext";
-import MGTextField from "../../design-system/components/MGTextField";
+import MGTextField, { MG_FIELD_HEIGHT } from "../../design-system/components/MGTextField";
 
 export type InputProps = TextInputProps & {
     label: string
@@ -60,34 +60,29 @@ export default function BoameInput({ label, error, style, ...props }: InputProps
 
 export function ToggleInput({label, error, style, value, ...props}: InputProps) {
     const [showPassword, setShowPassword] = useState(false);
-    const [focused, setFocused] = useState(false);
     const { colors } = useTheme();
     return (
-        <View style={styles.fieldGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
-            <View style={[styles.passwordRow, { borderColor: fieldBorder(colors, error, focused), backgroundColor: colors.surface }]}>
-                <TextInput
-                    {...props}
-                    value={value ?? ''}
-                    placeholderTextColor={colors.textSecondary}
-                    onFocus={(event) => { setFocused(true); props.onFocus?.(event) }}
-                    onBlur={(event) => { setFocused(false); props.onBlur?.(event) }}
-                    style={[styles.passwordInput, style, { color: colors.text, backgroundColor: colors.surface }]}
-                    secureTextEntry={!showPassword}
-                />
+        <MGTextField
+            {...props}
+            label={label}
+            error={error}
+            style={style}
+            value={value}
+            secureTextEntry={!showPassword}
+            trailing={(
                 <TouchableOpacity
                     style={styles.togglePassword}
                     onPress={() => setShowPassword(prev => !prev)}
                     accessibilityRole="button"
+                    accessibilityLabel={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                 >
-                    {showPassword 
-                        ? <EyeClosed color={colors.primary} size={20} /> 
+                    {showPassword
+                        ? <EyeClosed color={colors.primary} size={20} />
                         : <Eye color={colors.primary} size={20} />
                     }
                 </TouchableOpacity>
-            </View>
-            {error && <Text style={[styles.error, { color: colors.error }]}>{error}</Text>}
-        </View>
+            )}
+        />
     )
 }
 
@@ -104,30 +99,10 @@ const styles = StyleSheet.create({
         fontFamily: fonts.semibold,
         marginBottom: spacing.sm,
     },
-    input: {
-        borderWidth: 2,
-        borderRadius: borderRadius.md,
-        paddingHorizontal: spacing.md,
-        minHeight: 40,
-        fontSize: textStyles.body.fontSize,
-        fontFamily: fonts.regular,
-    },
-    passwordRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderWidth: 2,
-        borderRadius: borderRadius.md,
-        paddingHorizontal: spacing.md,
-        minHeight: 40,
-    },
-    passwordInput: {
-        flex: 1,
-        fontFamily: fonts.regular,
-        paddingHorizontal: 0,
-        paddingVertical: 0,
-    },
     togglePassword: {
-        marginLeft: spacing.sm
+        height: MG_FIELD_HEIGHT,
+        justifyContent: 'center',
+        paddingLeft: spacing.sm,
     },
     error: {
         fontSize: textStyles.caption.fontSize,
@@ -139,16 +114,22 @@ const styles = StyleSheet.create({
         width: '100%',
         borderWidth: 2,
         borderRadius: borderRadius.md,
-        minHeight: 40,
+        height: MG_FIELD_HEIGHT,
+        minHeight: MG_FIELD_HEIGHT,
+        maxHeight: MG_FIELD_HEIGHT,
     },
     phoneTextContainer: {
         borderRadius: borderRadius.md,
         paddingVertical: 0,
+        height: MG_FIELD_HEIGHT,
     },
     phoneTextInput: {
         fontFamily: fonts.regular,
         fontSize: textStyles.body.fontSize,
-        minHeight: 48,
+        height: MG_FIELD_HEIGHT,
+        minHeight: MG_FIELD_HEIGHT,
+        maxHeight: MG_FIELD_HEIGHT,
+        paddingVertical: 0,
     },
     phoneCodeText: {
         fontFamily: fonts.regular,

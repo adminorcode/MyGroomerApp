@@ -151,7 +151,7 @@ export default function AgendaAppointmentCard({
           {partyLine}
         </MGText>
         {price != null ? (
-          <MGText variant="bodySmall" style={{ fontFamily: fonts.bold }}>
+          <MGText variant="bodySmall" color="money" style={{ fontFamily: fonts.bold }}>
             {formatMoney(price)}
           </MGText>
         ) : null}

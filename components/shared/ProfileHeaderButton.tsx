@@ -9,7 +9,7 @@ type Props = {
     size?: number
     style?: StyleProp<ViewStyle>
     onPress: () => void
-    /** Barra colorida: disco branco para a inicial rosa ou verde continuar legível. */
+    /** Disco branco quando o botão fica sobre uma faixa colorida. */
     onColor?: boolean
 }
 
@@ -20,13 +20,12 @@ export default function ProfileHeaderButton({ avatarUri, size = 44, style, onPre
     const initial = user?.name?.charAt(0).toUpperCase() ?? '?'
     const dimensions = { width: size, height: size, borderRadius: size / 2 }
     const provider = user?.role === 'provider'
-    const initialColor = provider ? palette.brand.teal : palette.action.primaryText
     const backgroundColor = onColor
         ? palette.surface.default
-        : provider ? palette.brand.teal : colors.selectionSoft
+        : provider ? palette.action.primary : palette.border.default
     const textColor = onColor
-        ? initialColor
-        : provider ? palette.onAction.primary : colors.primaryText
+        ? palette.text.primary
+        : provider ? palette.onAction.primary : palette.text.primary
 
     return (
         <Pressable

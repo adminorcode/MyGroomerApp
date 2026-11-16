@@ -40,7 +40,6 @@ export default function TimeSlotPicker({
             <View key={slot.id} style={{ width: '30%', flexGrow: 1, maxWidth: '33%' }}>
             <MGChip
               label={slot.label}
-              minHeight={48}
               density="compact"
               selected={selectedSlotId === slot.id}
               disabled={slot.disabled}

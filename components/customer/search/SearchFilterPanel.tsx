@@ -1,7 +1,7 @@
 import { ReactNode, useState } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
 import { Circle, Info } from 'lucide-react-native'
-import { MGButton, MGErrorState, MGIcon, MGText, MGTextField } from '../../../design-system/components'
+import { MGButton, MGChip, MGErrorState, MGIcon, MGText, MGTextField } from '../../../design-system/components'
 import { useMGTheme } from '../../../design-system/theme/useMGTheme'
 import { spacing } from '../../../design-system/tokens'
 import { useGetAllServices } from '../../../hooks/useServices'
@@ -82,8 +82,8 @@ export default function SearchFilterPanel({ panel, value, categories, categories
           onUpperValueChange={number => setMaximum(number === 300 ? '' : String(number))} />
         <View style={styles.between}><MGText variant="caption" color="secondary">R$ 0</MGText><MGText variant="caption" color="secondary">R$ 300+</MGText></View>
         <View style={styles.fields}>
-          <View style={styles.flex}><MGTextField compact label="Mín." accessibilityLabel="Preço mínimo" placeholder="Sem mínimo" keyboardType="decimal-pad" value={minimum} onChangeText={setMinimum} maxLength={15} style={styles.field} /></View>
-          <View style={styles.flex}><MGTextField compact label="Máx." accessibilityLabel="Preço máximo" placeholder="Sem máximo" keyboardType="decimal-pad" value={maximum} onChangeText={setMaximum} maxLength={15} style={styles.field} /></View>
+          <View style={styles.flex}><MGTextField compact label="Mín." accessibilityLabel="Preço mínimo" placeholder="Sem mínimo" keyboardType="decimal-pad" value={minimum} onChangeText={setMinimum} maxLength={15} /></View>
+          <View style={styles.flex}><MGTextField compact label="Máx." accessibilityLabel="Preço máximo" placeholder="Sem máximo" keyboardType="decimal-pad" value={maximum} onChangeText={setMaximum} maxLength={15} /></View>
         </View>
         {priceError ? <MGText variant="bodySmall" color="error" accessibilityRole="alert">{priceError}</MGText> : null}
         <Hint>Escolha uma faixa de preço para encontrar serviços compatíveis.</Hint>
@@ -127,7 +127,7 @@ export default function SearchFilterPanel({ panel, value, categories, categories
         <MGButton label={panel === 'ordenar' ? 'Cancelar' : 'Limpar'} variant="secondary" fullWidth={false} style={styles.action} onPress={panel === 'ordenar' ? onCancel : clear} />
         <MGButton label="Aplicar" fullWidth={false} style={styles.action} disabled={panel === 'preco' && Boolean(priceError)} onPress={apply} />
       </View>
-      {panel !== 'ordenar' ? <MGButton label="Cancelar" variant="tertiary" style={{ minHeight: 48 }} onPress={onCancel} /> : null}
+      {panel !== 'ordenar' ? <MGButton label="Cancelar" variant="tertiary" onPress={onCancel} /> : null}
     </View>
   )
 }
@@ -138,12 +138,15 @@ function Hint({ children }: { children: ReactNode }) {
 }
 
 function Choice({ label, selected, onPress }: { label: string, selected: boolean, onPress: () => void }) {
-  const { colors, radius } = useMGTheme()
-  return <Pressable accessibilityRole="radio" accessibilityState={{ checked: selected, selected }} aria-checked={selected} accessibilityLabel={selected ? `${label}, selecionado` : label} onPress={onPress}
-    style={({ pressed }) => [styles.choice, { borderRadius: radius.pill, borderColor: colors.action.primaryOutline, backgroundColor: selected ? pressed ? colors.action.primaryPressed : colors.action.primary : pressed ? colors.surface.pinkSubtle : colors.surface.default }]}>
-    {selected ? <MGIcon name="check" size={14} color={colors.onAction.primary} /> : null}
-    <MGText variant="label" style={{ color: selected ? colors.onAction.primary : colors.text.primary, flexShrink: 1 }}>{label}</MGText>
-  </Pressable>
+  return (
+    <MGChip
+      accessibilityRole="radio"
+      label={label}
+      accessibilityLabel={selected ? `${label}, selecionado` : label}
+      selected={selected}
+      onPress={onPress}
+    />
+  )
 }
 
 function RadioRow({ label, description, selected, onPress, leading }: { label: string, description?: string, selected: boolean, onPress: () => void, leading?: ReactNode }) {
@@ -159,9 +162,7 @@ const styles = StyleSheet.create({
   panel: { borderWidth: 1, padding: spacing.md, gap: spacing.md, marginBottom: spacing.md },
   flex: { flex: 1, minWidth: 0 },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  choice: { minHeight: 48, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, flexDirection: 'row', alignItems: 'center', gap: spacing.xs, borderWidth: 1, flexShrink: 1 },
   fields: { flexDirection: 'row', gap: spacing.md },
-  field: { minHeight: 48 },
   between: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.xs },
   hint: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
   stack: { gap: spacing.xs },
@@ -171,5 +172,5 @@ const styles = StyleSheet.create({
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.md, borderTopWidth: 1, borderBottomWidth: 1 },
   radiusSummary: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.md, borderWidth: 1 },
   actions: { flexDirection: 'row', gap: spacing.sm, borderTopWidth: 1, paddingTop: spacing.md },
-  action: { flex: 1, minHeight: 48 },
+  action: { flex: 1 },
 })

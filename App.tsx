@@ -35,10 +35,12 @@ function SessionApp() {
 
 export default function App() {
   const [fontsLoaded, fontError] = useFonts({
-    [fonts.regular]: require('./assets/fonts/Inter-Regular.ttf'),
-    [fonts.medium]: require('./assets/fonts/Inter-Medium.ttf'),
-    [fonts.semibold]: require('./assets/fonts/Inter-SemiBold.ttf'),
-    [fonts.bold]: require('./assets/fonts/Inter-Bold.ttf'),
+    [fonts.regular]: require('./assets/fonts/NunitoSans-Regular.ttf'),
+    [fonts.medium]: require('./assets/fonts/NunitoSans-Medium.ttf'),
+    [fonts.semibold]: require('./assets/fonts/NunitoSans-SemiBold.ttf'),
+    [fonts.bold]: require('./assets/fonts/NunitoSans-Bold.ttf'),
+    [fonts.display]: require('./assets/fonts/Outfit-Medium.ttf'),
+    [fonts.displayStrong]: require('./assets/fonts/Outfit-SemiBold.ttf'),
   })
   useEffect(() => { if (fontsLoaded || fontError) void SplashScreen.hideAsync() }, [fontsLoaded, fontError])
   if (!fontsLoaded && !fontError) return null

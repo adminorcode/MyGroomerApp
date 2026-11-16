@@ -12,7 +12,7 @@ type Props = {
   safeArea?: boolean
   background?: 'canvas' | 'default'
   /**
-   * CMP-05 / R4: `teal` mostra a faixa de cabeçalho teal com `headerSlot` (saudação, busca…).
+   * `teal` reserva a faixa do hub (busca, título). O fundo é o canvas; o rosa não pinta a faixa.
    * Só nos hubs (Início, Busca, Agenda, Solicitações, Conversas). Formulários e transações ficam em `plain`.
    */
   header?: 'plain' | 'teal'
@@ -56,7 +56,7 @@ export default function MGScreen({
   ) : scrollable ? (
     <ScrollView
       ref={scrollRef}
-      style={{ flex: 1 }}
+      style={styles.scroll}
       contentContainerStyle={[
         { paddingHorizontal: spacing.base, paddingBottom: footer ? spacing.xl + spacing.lg : spacing.xl, flexGrow: 1, width: '100%', maxWidth: layout.contentMaxWidth, alignSelf: 'center' },
         contentStyle,
@@ -73,7 +73,13 @@ export default function MGScreen({
     <View
       style={[
         styles.tealBand,
-        { backgroundColor: colors.brand.teal, paddingHorizontal: spacing.base, paddingBottom: spacing.lg, paddingTop: spacing.base },
+        {
+          backgroundColor: colors.surface.canvas,
+          borderBottomColor: colors.border.default,
+          paddingHorizontal: spacing.base,
+          paddingBottom: spacing.lg,
+          paddingTop: spacing.base,
+        },
       ]}
     >
       <View style={{ width: '100%', maxWidth: layout.contentMaxWidth, alignSelf: 'center' }}>{headerSlot}</View>
@@ -103,8 +109,9 @@ export default function MGScreen({
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
-  tealBand: {},
+  root: { flex: 1, minHeight: 0 },
+  scroll: { flex: 1, minHeight: 0 },
+  tealBand: { borderBottomWidth: StyleSheet.hairlineWidth },
   centered: {
     flex: 1,
     alignItems: 'center',

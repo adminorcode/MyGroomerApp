@@ -1,6 +1,7 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native'
 import Svg, { Path } from 'react-native-svg'
 import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
+import { MG_FIELD_HEIGHT } from '../../design-system/components/MGTextField'
 import { useTheme } from '../../context/ThemeContext'
 
 type Props = {
@@ -12,7 +13,7 @@ type Props = {
 
 function GoogleIcon() {
     return (
-        <Svg width={20} height={20} viewBox="0 0 24 24">
+        <Svg width={20} height={20} viewBox="0 0 24 24" aria-hidden="true">
             <Path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                 fill="#4285F4"
@@ -74,9 +75,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         borderRadius: borderRadius.lg,
         borderWidth: 1,
-        paddingVertical: spacing.sm + 4,
         paddingHorizontal: spacing.md,
-        minHeight: 48,
+        height: MG_FIELD_HEIGHT,
+        minHeight: MG_FIELD_HEIGHT,
+        maxHeight: MG_FIELD_HEIGHT,
     },
     content: {
         flexDirection: 'row',

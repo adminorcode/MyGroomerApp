@@ -29,7 +29,7 @@ export default function Earnings() {
   const renderSummary = () => (
     <MGCard shape="hero" style={styles.summary}>
       <MGText variant="label" color="secondary">Total recebido</MGText>
-      <MGText variant="numeric" color="teal">
+      <MGText variant="numeric" color="money">
         {formatMoney(data?.totalEarned ?? 0)}
       </MGText>
       {/* R6: pendente é status de alerta com texto, não saldo disponível para saque. */}
@@ -48,7 +48,7 @@ export default function Earnings() {
   const renderTransaction = ({ item }: { item: ProviderTransaction }) => (
     <MGCard style={styles.transaction}>
       <View style={styles.transactionRow}>
-        <View style={[styles.txIcon, { backgroundColor: colors.surface.tealSubtle, borderRadius: radius.pill }]}>
+        <View style={[styles.txIcon, { backgroundColor: colors.surface.tealSubtle, borderRadius: radius.lg }]}>
           <ArrowDownLeft size={20} color={colors.brand.teal} />
         </View>
 
@@ -57,7 +57,7 @@ export default function Earnings() {
             <MGText variant="title" color="primary" numberOfLines={2} style={styles.txTitle}>
               {item.service_name ?? 'Repasse'}
             </MGText>
-            <MGText variant="title" color="teal" numberOfLines={1}>
+            <MGText variant="title" color="money" numberOfLines={1}>
               {formatMoney(item.amount)}
             </MGText>
           </View>

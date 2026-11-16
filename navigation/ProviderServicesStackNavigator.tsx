@@ -12,7 +12,7 @@ const Stack = createStackNavigator<ProviderServicesStackParamList>()
 export default function ProviderServicesStackNavigator() {
   return (
     <ServiceMenuDraftProvider>
-      <Stack.Navigator initialRouteName="ServiceMenu" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="ServiceMenu" screenOptions={{ headerShown: false, cardStyle: { flex: 1, height: '100%', overflow: 'hidden' } }}>
         <Stack.Screen name="ProfessionalRegistration" component={ProfessionalRegistrationStepScreen} />
         <Stack.Screen name="ServiceMenu" component={ServiceMenuScreen} />
         <Stack.Screen name="ServiceLocation" component={ServiceLocationScreen} />

@@ -92,7 +92,6 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
                     render={({ field: { onChange, onBlur, value } }) => (
                         <MGTextField
                             label="E-mail"
-                            placeholder="Digite seu e-mail"
                             onChangeText={onChange}
                             onBlur={onBlur}
                             value={value}

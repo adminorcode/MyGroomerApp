@@ -38,7 +38,7 @@ export default function RequestGroupTabs({ value, onChange }: Props) {
             style={({ pressed }) => [
               styles.tab,
               {
-                borderRadius: radius.pill,
+                borderRadius: radius.control,
                 backgroundColor: selected ? colors.action.primary : 'transparent',
                 opacity: pressed && !selected ? 0.8 : 1,
               },

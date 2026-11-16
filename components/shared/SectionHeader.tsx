@@ -7,7 +7,7 @@ type Props = {
     title: string
     onPress?: () => void
     actionLabel?: string
-    /** CMP-09: `eyebrow` = rótulo em caixa-alta, teal, sobre canvas (R5). */
+    /** Rótulo em caixa-alta, em tinta secundária, sobre o canvas. */
     variant?: 'default' | 'eyebrow'
 }
 export default function SectionHeader({ title, onPress, actionLabel, variant = 'default' }: Props) {
@@ -19,7 +19,7 @@ export default function SectionHeader({ title, onPress, actionLabel, variant = '
         accessibilityRole="header"
         style={[
             eyebrow ? styles.eyebrow : styles.title,
-            { color: eyebrow ? palette.brand.teal : colors.text },
+            { color: eyebrow ? palette.text.secondary : colors.text },
         ]}
       >
         {title}

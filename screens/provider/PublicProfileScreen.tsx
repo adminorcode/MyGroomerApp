@@ -301,7 +301,7 @@ export default function PublicProfileScreen({ navigation }: Props) {
                   <View key={service.id} style={{ gap: spacing.xxs, padding: spacing.md, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border.default, backgroundColor: colors.surface.default }}>
                     <MGText variant="title">{service.name}</MGText>
                     {/* R3: preço do atendimento em teal, sobre branco (R5). */}
-                    <MGText variant="body" color="teal" style={{ fontFamily: fonts.bold }}>
+                    <MGText variant="body" color="money" style={{ fontFamily: fonts.bold }}>
                       A partir de {formatMoney(service.price)}
                     </MGText>
                   </View>

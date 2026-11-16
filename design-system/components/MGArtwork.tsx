@@ -41,7 +41,7 @@ export default function MGArtwork({ name, width = 128, height = width, style, de
       pointerEvents="none"
       style={[{ width, height, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }, style]}
     >
-      {xml ? <SvgXml xml={xml} width="100%" height="100%" />
+      {xml ? <SvgXml xml={xml} width="100%" height="100%" aria-hidden="true" />
         : failedSource === name ? <MGIcon name="paw-print" size={Math.min(width, height) / 2} color={colors.brand.pink} />
           : <Image source={illustrations[name as keyof typeof illustrations]} resizeMode="contain" style={{ width: '100%', height: '100%' }} onError={() => setFailedSource(name)} accessible={false} />}
     </View>

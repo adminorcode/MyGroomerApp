@@ -62,7 +62,6 @@ export default function LoginScreen({navigation}: Props) {
                         <MGTextField
                             label="E-mail"
                             style={styles.input}
-                            placeholder="Digite seu e-mail"
                             onChangeText={onChange}
                             onBlur={onBlur}
                             value={value}
@@ -82,7 +81,6 @@ export default function LoginScreen({navigation}: Props) {
                         <ToggleInput
                             label="Senha"
                             style={styles.input}
-                            placeholder="Digite sua senha"
                             onChangeText={onChange}
                             onBlur={onBlur}
                             value={value}
