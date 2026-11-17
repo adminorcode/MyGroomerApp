@@ -1,42 +1,41 @@
-// Tema claro gerado em design-exploration/ux-skill (marca #D95786, papel fill).
-// O nome `teal` permanece na API dos componentes e agora aponta para o rosa profundo.
+// Ação e logotipo #C83359. Link, ícone e progresso #BB003E. Texto #492F35.
+// O nome `teal` na API aponta para o link, não para o dinheiro.
 
-const pink = '#D95786'
-const pinkText = '#8F2650'
+const action = '#C83359'
+const link = '#BB003E'
 
 export const palette = {
   brand: {
-    pink,
-    pinkLight: '#FFD3DF',
-    teal: pinkText,
-    background: '#F8F6F7',
-    ink: '#221D1F',
+    pink: action,
+    pinkLight: '#FFFAFB',
+    teal: link,
+    background: '#F3F4F6',
+    ink: '#492F35',
   },
   surface: {
     default: '#FFFFFF',
-    canvas: '#F8F6F7',
-    pinkSubtle: '#FFD3DF',
-    tealSubtle: '#F4E9EC',
+    canvas: '#F3F4F6',
+    pinkSubtle: '#FFFAFB',
+    tealSubtle: '#FFFAFB',
   },
   text: {
-    primary: '#221D1F',
+    primary: '#492F35',
     secondary: '#60595B',
     inverse: '#FFFFFF',
-    // Valor em dinheiro. O teal da marca (#167D83): 4,89:1 no branco e 4,54:1 no canvas.
-    // O token brand.teal ficou rosa e faz o preço parecer débito.
-    money: '#167D83',
+    // Dinheiro. 5,2:1 no branco e 4,7:1 no fundo #F3F4F6.
+    money: '#007A77',
   },
   border: {
     default: '#C3BEBF',
     strong: '#776F71',
   },
   action: {
-    primary: '#C84878',
-    primaryPressed: '#A6265B',
-    primaryText: pinkText,
-    primaryOutline: pinkText,
-    secondary: pinkText,
-    focus: '#460020',
+    primary: action,
+    primaryPressed: '#A32947',
+    primaryText: link,
+    primaryOutline: link,
+    secondary: link,
+    focus: '#6E1830',
   },
   onAction: {
     primary: '#FFFFFF',
@@ -46,8 +45,8 @@ export const palette = {
     successSurface: '#D4E1CF',
     warning: '#6E3D00',
     warningSurface: '#EBD9C9',
-    error: '#7B2E29',
-    errorSurface: '#F0D6D3',
+    error: '#8C3A22',
+    errorSurface: '#F4E8E4',
     info: '#004F7C',
     infoSurface: '#CDDFEF',
   },
