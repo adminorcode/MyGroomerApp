@@ -108,7 +108,6 @@ export default function WeeklyAvailabilityEditor({ value, onChange, issues, focu
               <MGChip
                 label={item.label}
                 density="compact"
-                minHeight={48}
                 selected={enabled}
                 accessibilityLabel={`${item.name}, ${enabled ? 'ligado' : 'desligado'}`}
                 onPress={() => {
@@ -121,12 +120,12 @@ export default function WeeklyAvailabilityEditor({ value, onChange, issues, focu
         })}
       </View>
 
-      <View style={[styles.focusCard, { backgroundColor: colors.surface.pinkSubtle, borderRadius: radius.lg, padding: spacing.md, gap: spacing.xl, overflow: 'hidden' }]}>
+      <View style={[styles.focusCard, { backgroundColor: colors.surface.default, borderWidth: 1, borderColor: colors.border.default, borderRadius: radius.lg, padding: spacing.md, gap: spacing.xl, overflow: 'hidden' }]}>
         <View style={[styles.focusHead, { gap: spacing.xs }]}>
           <Pressable accessibilityRole="button" accessibilityLabel="Dia anterior" onPress={() => shift(-1)} style={styles.iconHit}>
             <MGIcon name="chevron-left" size={20} color={colors.text.primary} />
           </Pressable>
-          <MGIcon name="calendar-days" size={18} color={colors.action.primary} />
+          <MGIcon name="calendar-days" size={18} color={colors.text.primary} />
           <MGText variant="bodySmall" style={styles.dayTitle}>{day.title}</MGText>
           <Pressable accessibilityRole="button" accessibilityLabel="Próximo dia" onPress={() => shift(1)} style={styles.iconHit}>
             <MGIcon name="chevron-right" size={20} color={colors.text.primary} />
@@ -144,7 +143,7 @@ export default function WeeklyAvailabilityEditor({ value, onChange, issues, focu
 
         {current.enabled ? (
           <View style={{ gap: spacing.md }}>
-            <View ref={anchorRef} collapsable={false} style={[styles.schedule, { backgroundColor: colors.surface.tealSubtle, borderRadius: radius.lg, padding: spacing.md }]}>
+            <View ref={anchorRef} collapsable={false} style={[styles.schedule, { backgroundColor: colors.surface.canvas, borderRadius: radius.lg, padding: spacing.md }]}>
             <View style={{ gap: spacing.sm }}>
               <View style={[styles.sectionTitle, { gap: spacing.sm }]}>
                 <MGIcon name="clock-3" size={18} color={colors.text.secondary} />
@@ -245,7 +244,7 @@ export default function WeeklyAvailabilityEditor({ value, onChange, issues, focu
         <View style={{ gap: spacing.sm }}>
           <View style={[styles.sectionHead, { gap: spacing.sm }]}>
             <View style={[styles.sectionTitle, { gap: spacing.sm }]}>
-              <MGIcon name="calendar-days" size={20} color={colors.action.primary} />
+              <MGIcon name="calendar-days" size={20} color={colors.text.primary} />
               <MGText variant="heading3">Outros dias ativos</MGText>
             </View>
             <Pressable accessibilityRole="button" accessibilityLabel="Gerenciar todos os dias" onPress={() => onFocus('mon')} style={styles.manage}>
@@ -263,9 +262,9 @@ export default function WeeklyAvailabilityEditor({ value, onChange, issues, focu
               const entry = value[item.key]
               const range = entry.start && entry.end ? `${entry.start} às ${entry.end}` : 'Horário incompleto'
               return (
-                <View key={item.key} style={[styles.otherCard, { backgroundColor: colors.surface.tealSubtle, borderColor: colors.surface.tealSubtle, borderRadius: radius.lg, padding: spacing.md, gap: spacing.xs }]}>
+                <View key={item.key} style={[styles.otherCard, { backgroundColor: colors.surface.default, borderColor: colors.border.default, borderRadius: radius.lg, padding: spacing.md, gap: spacing.xs }]}>
                   <View style={[styles.otherTop, { gap: spacing.sm }]}>
-                    <MGIcon name="clock-3" size={16} color={colors.action.secondary} />
+                    <MGIcon name="clock-3" size={16} color={colors.text.secondary} />
                     <MGText variant="label" style={styles.applyLabel}>{item.title}</MGText>
                     <Pressable
                       accessibilityRole="button"

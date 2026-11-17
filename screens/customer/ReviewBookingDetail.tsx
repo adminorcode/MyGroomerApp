@@ -67,7 +67,7 @@ const ReviewBookingDetail = ({ navigation, route }: Props) => {
               {/* R3: avatar do profissional em teal. Sem nome da rota, a seção segue sem avatar. */}
               {providerName ? <MGAvatar name={providerName} tone='teal' size={48} /> : null}
               <StarRating rating={data.rating} size={36} readOnly />
-              <Text style={[styles.ratingValue, { color: colors.text.primary, backgroundColor: colors.surface.tealSubtle, borderRadius: radius.pill }]}>
+              <Text style={[styles.ratingValue, { color: colors.text.primary, backgroundColor: colors.surface.tealSubtle, borderRadius: radius.control }]}>
                 {data.rating} de 5
               </Text>
             </View>

@@ -46,8 +46,8 @@ export default function AddressesScreen({ navigation }: Props) {
                                     accessibilityLabel={`${addressLabelName(item.label)}. ${item.address}${item.is_default ? '. Padrão' : ''}`}
                                     style={{ minHeight: 72, flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
                                 >
-                                    <View style={{ width: 40, height: 40, borderRadius: radius.md, backgroundColor: colors.surface.pinkSubtle, alignItems: 'center', justifyContent: 'center' }}>
-                                        <MGIcon name={item.label === 'work' ? 'building-2' : 'map-pin'} color={colors.action.primary} />
+                                    <View style={{ width: 40, height: 40, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border.default, backgroundColor: colors.surface.default, alignItems: 'center', justifyContent: 'center' }}>
+                                        <MGIcon name={item.label === 'work' ? 'building-2' : 'map-pin'} color={colors.text.primary} />
                                     </View>
                                     <View style={{ flex: 1, gap: spacing.xs }}>
                                         <MGText variant="label">{addressLabelName(item.label)}</MGText>

@@ -65,7 +65,7 @@ function DateOption({ label, selected, isToday, onPress }: { label: string; sele
           minHeight: 44,
           paddingHorizontal: spacing.md,
           paddingVertical: spacing.sm,
-          borderRadius: radius.pill,
+          borderRadius: radius.control,
           borderWidth: 1,
           borderColor: selected ? colors.action.primary : colors.action.primaryOutline,
           backgroundColor: pressed && !selected ? colors.surface.pinkSubtle : background,
@@ -169,7 +169,6 @@ export default function RescheduleBookingSheet({
                           key={item}
                           label={slotLabel(item)}
                           selected={slot === item}
-                          minHeight={44}
                           onPress={() => setSlot(item)}
                         />
                       ))}

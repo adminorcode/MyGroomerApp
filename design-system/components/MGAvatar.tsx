@@ -5,7 +5,7 @@ import MGArtwork from './MGArtwork'
 import { useMGTheme } from '../theme/useMGTheme'
 
 export type MGAvatarKind = 'person' | 'pet'
-/** R2/R3/R8: pet e tutor são rosa; profissional, operação e interlocutor profissional são teal. */
+/** Profissional usa o rosa da ação. Tutor e pet ficam em cinza com a inicial em tinta. */
 export type MGAvatarTone = 'pink' | 'teal'
 
 type Props = {
@@ -25,7 +25,7 @@ export default function MGAvatar({ uri, name, kind = 'person', size = 48, tone =
   useEffect(() => setFailed(false), [uri])
   const showImage = Boolean(uri) && !failed
   const initial = name.trim().charAt(0).toUpperCase() || '?'
-  const teal = tone === 'teal' && kind === 'person'
+  const professional = tone === 'teal' && kind === 'person'
 
   return (
     <View
@@ -36,7 +36,9 @@ export default function MGAvatar({ uri, name, kind = 'person', size = 48, tone =
           width: size,
           height,
           borderRadius: corner,
-          backgroundColor: teal ? colors.brand.teal : colors.surface.pinkSubtle,
+          backgroundColor: professional ? colors.action.primary : colors.border.default,
+          borderWidth: professional ? 0 : 1,
+          borderColor: colors.border.strong,
         },
       ]}
     >
@@ -50,7 +52,7 @@ export default function MGAvatar({ uri, name, kind = 'person', size = 48, tone =
       ) : kind === 'pet' ? (
         <MGArtwork name="pet-placeholder" width={size * 0.85} />
       ) : (
-        <MGText variant="title" color={teal ? 'inverse' : 'brand'}>
+        <MGText variant="title" color={professional ? 'inverse' : 'primary'}>
           {initial}
         </MGText>
       )}

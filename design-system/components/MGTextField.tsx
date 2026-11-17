@@ -8,6 +8,11 @@ import MGIcon, { MGIconName } from './MGIcon'
 import MGText from './MGText'
 import { useMGTheme } from '../theme/useMGTheme'
 
+/** Campo de uma linha. Igual ao telefone. */
+export const MG_FIELD_HEIGHT = 40
+/** Chip e outros controles que não são o campo de texto. */
+export const MG_CONTROL_HEIGHT = 48
+
 export type MGTextFieldProps = TextInputProps & {
   label: string
   error?: string
@@ -38,6 +43,9 @@ export default function MGTextField({
   value,
   defaultValue: _defaultValue,
   accessibilityState,
+  multiline = false,
+  numberOfLines,
+  textAlignVertical,
   ...props
 }: MGTextFieldProps) {
   const { colors, spacing, radius, textStyles, fonts } = useMGTheme()
@@ -51,6 +59,19 @@ export default function MGTextField({
     : focused
       ? colors.action.focus
       : colors.border.default
+
+  // Campo comum: uma linha, texto e placeholder no centro. Área alta só quando a tela pede.
+  const flat = StyleSheet.flatten(style)
+  const askedHeight = typeof flat?.minHeight === 'number'
+    ? flat.minHeight
+    : typeof flat?.height === 'number'
+      ? flat.height
+      : undefined
+  // Área de texto fica fora da altura padrão. Outro tamanho de linha só entra se a tela pedir height ou minHeight.
+  const tall = multiline || textAlignVertical === 'top' || (numberOfLines ?? 1) > 1 || (askedHeight ?? 0) >= 80
+  const box = !tall && askedHeight ? askedHeight : MG_FIELD_HEIGHT
+  const lineHeight = textStyles.body.lineHeight
+  const verticalPad = Math.max(0, Math.round((box - 4 - lineHeight) / 2))
 
   return (
     <View style={[styles.fieldGroup, { marginBottom: compact ? 0 : spacing.base, zIndex: menu ? 2 : 0 }]}>
@@ -70,6 +91,8 @@ export default function MGTextField({
         ) : null}
         <TextInput
           {...props}
+          multiline={multiline}
+          numberOfLines={tall ? numberOfLines : multiline ? 1 : undefined}
           value={controlledValue}
           editable={editable}
           accessibilityLabel={accessibilityLabelProp ?? label}
@@ -92,14 +115,25 @@ export default function MGTextField({
               paddingHorizontal: spacing.md,
               paddingLeft: hideLabel && icon ? spacing.xl + spacing.md : spacing.md,
               paddingRight: trailing ? spacing.xl + spacing.sm : spacing.md,
-              minHeight: 40,
               fontSize: textStyles.body.fontSize,
+              lineHeight: tall ? undefined : lineHeight,
               fontFamily: fonts.regular,
+              fontWeight: '400',
+              textAlignVertical: tall ? 'top' : 'center',
+              includeFontPadding: false,
               borderColor,
               backgroundColor: disabled ? colors.state.disabledSurface : colors.surface.default,
               color: colors.text.primary,
             },
             style,
+            tall ? null : {
+              paddingTop: verticalPad,
+              paddingBottom: verticalPad,
+              minHeight: box,
+              maxHeight: box,
+              height: box,
+              flexGrow: 0,
+            },
           ]}
         />
         {trailing ? <View style={styles.trailing} pointerEvents="box-none">{trailing}</View> : null}
@@ -128,14 +162,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 12,
     top: 0,
-    height: 40,
+    height: MG_FIELD_HEIGHT,
     justifyContent: 'center',
   },
   leading: {
     position: 'absolute',
     left: 14,
     top: 0,
-    height: 40,
+    height: MG_FIELD_HEIGHT,
     justifyContent: 'center',
     zIndex: 1,
   },

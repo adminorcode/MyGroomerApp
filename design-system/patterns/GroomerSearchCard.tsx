@@ -109,7 +109,7 @@ export default function GroomerSearchCard({
             {priceLabel ? (
               <View style={{ alignItems: 'flex-end', justifyContent: 'flex-end' }}>
                 <MGText variant="caption" color="secondary">A partir de</MGText>
-                <MGText variant="heading3" style={{ color: colors.brand.teal, fontFamily: fonts.bold }}>{priceLabel}</MGText>
+                <MGText variant="heading3" color="money" style={{ fontFamily: fonts.bold }}>{priceLabel}</MGText>
               </View>
             ) : null}
           </View>
@@ -126,7 +126,7 @@ export default function GroomerSearchCard({
               accessibilityLabel={`Ver perfil de ${name}`}
               fullWidth={false}
               onPress={onPress}
-              style={{ minHeight: 48, paddingHorizontal: spacing.base, borderRadius: radius.pill }}
+              style={{ paddingHorizontal: spacing.base }}
             />
           ) : null}
         </View>
@@ -172,7 +172,7 @@ export default function GroomerSearchCard({
           </MGText>
         ) : null}
         {priceLabel ? (
-          <MGText variant="bodySmall" color="teal" numberOfLines={1} style={{ marginTop: spacing.xs, fontFamily: fonts.bold }}>
+          <MGText variant="bodySmall" color="money" numberOfLines={1} style={{ marginTop: spacing.xs, fontFamily: fonts.bold }}>
             {priceLabel}
           </MGText>
         ) : null}
@@ -194,7 +194,7 @@ function Badge({ label, icon, tone }: { label: string, icon: 'calendar-days' | '
   return (
     <View style={[styles.badge, {
       backgroundColor: availability ? colors.feedback.successSurface : colors.surface.canvas,
-      borderRadius: radius.pill,
+      borderRadius: radius.control,
       paddingHorizontal: spacing.sm,
       paddingVertical: spacing.xs,
       gap: spacing.xs,

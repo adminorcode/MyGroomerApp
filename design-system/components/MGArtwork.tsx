@@ -27,7 +27,7 @@ export default function MGArtwork({ name, width = 128, height = width, style, de
   const { colors } = useMGTheme()
   const [failedSource, setFailedSource] = useState<Name | null>(null)
   const xml = name === 'pet-placeholder' ? motif05.replaceAll('#D95786', colors.brand.pink)
-    : name === 'paw-decoration' ? motif06.replaceAll('#F6B5CB', colors.brand.pinkLight)
+    : name === 'paw-decoration' ? motif06.replaceAll('#F6B5CB', colors.brand.pink)
       : name === 'brand-symbol' ? motif17 : null
   return (
     <View
@@ -41,7 +41,7 @@ export default function MGArtwork({ name, width = 128, height = width, style, de
       pointerEvents="none"
       style={[{ width, height, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }, style]}
     >
-      {xml ? <SvgXml xml={xml} width="100%" height="100%" />
+      {xml ? <SvgXml xml={xml} width="100%" height="100%" aria-hidden="true" />
         : failedSource === name ? <MGIcon name="paw-print" size={Math.min(width, height) / 2} color={colors.brand.pink} />
           : <Image source={illustrations[name as keyof typeof illustrations]} resizeMode="contain" style={{ width: '100%', height: '100%' }} onError={() => setFailedSource(name)} accessible={false} />}
     </View>

@@ -23,7 +23,7 @@ export default function ChatInputBar({ value, onChangeText, onSend, disabled }: 
 
                 <TextInput
                     accessibilityLabel="Mensagem"
-                    style={[styles.input, { color: colors.text, outline: 'none' } as TextStyle]}
+                    style={[styles.input, { color: colors.text, outlineStyle: 'none' } as TextStyle]}
                     placeholder="Mensagem"
                     placeholderTextColor={colors.textSecondary}
                     value={value}
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     sendBtn: {
         width: 48,
         height: 48,
-        borderRadius: 9999,
+        borderRadius: borderRadius.control,
         alignItems: 'center',
         justifyContent: 'center',
     },

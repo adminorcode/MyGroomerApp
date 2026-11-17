@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Animated, Pressable, StyleSheet, View } from 'react-native'
 import MGIcon from './MGIcon'
+import { MG_CONTROL_HEIGHT } from './MGTextField'
 import { motion, motionEasing } from '../tokens'
 import { useMGTheme } from '../theme/useMGTheme'
 import { useReduceMotion } from '../theme/useReduceMotion'
@@ -17,6 +18,9 @@ type Props = {
   variant?: 'filter' | 'choice'
   minHeight?: number
   density?: 'regular' | 'compact'
+  /** Ocupa a largura do pai. Usado quando os chips dividem a linha. */
+  fill?: boolean
+  accessibilityRole?: 'button' | 'radio'
 }
 
 /**
@@ -30,8 +34,10 @@ export default function MGChip({
   selected = false,
   disabled = false,
   onPress,
-  minHeight = 36,
+  minHeight = MG_CONTROL_HEIGHT,
   density = 'regular',
+  fill = false,
+  accessibilityRole = 'button',
 }: Props) {
   const { colors, spacing, radius, fonts, textStyles } = useMGTheme()
   const reduceMotion = useReduceMotion()
@@ -65,7 +71,7 @@ export default function MGChip({
     inputRange: [0, 1],
     outputRange: [colors.action.primaryOutline, colors.action.primary],
   })
-  const fill = disabled
+  const fillColor = disabled
     ? colors.state.disabledSurface
     : showPressed
       ? selected ? colors.action.primaryPressed : colors.surface.pinkSubtle
@@ -85,24 +91,33 @@ export default function MGChip({
       ? selected ? colors.onAction.primary : colors.text.primary
       : textColor
 
+  const height = Math.min(minHeight, MG_CONTROL_HEIGHT)
+
   return (
     <AnimatedPressable
-      accessibilityRole="button"
+      accessibilityRole={accessibilityRole}
       accessibilityLabel={accessibilityLabel ?? label}
-      accessibilityState={{ selected, disabled }}
+      accessibilityState={{
+        selected,
+        disabled,
+        ...(accessibilityRole === 'radio' ? { checked: selected } : {}),
+      }}
       aria-selected={selected}
+      aria-checked={accessibilityRole === 'radio' ? selected : undefined}
       disabled={disabled || !onPress}
       onPress={onPress}
       onPressIn={() => setPressed(true)}
       onPressOut={() => setPressed(false)}
-      style={[styles.chip, {
-        minHeight,
-        width: density === 'compact' ? '100%' : undefined,
+      style={[styles.chip, fill && styles.fill, {
+        height,
+        minHeight: height,
+        maxHeight: height,
+        width: density === 'compact' || fill ? '100%' : undefined,
         paddingHorizontal: density === 'compact' ? spacing.sm : spacing.md,
-        paddingVertical: spacing.sm,
-        borderRadius: radius.pill,
+        paddingVertical: 0,
+        borderRadius: radius.control,
         borderWidth: 1,
-        backgroundColor: fill,
+        backgroundColor: fillColor,
         borderColor: edge,
         overflow: 'hidden',
       }]}
@@ -113,12 +128,16 @@ export default function MGChip({
           style={[StyleSheet.absoluteFill, {
             backgroundColor: selected ? colors.surface.default : colors.action.primary,
             opacity: cover,
-            borderRadius: radius.pill,
+            borderRadius: radius.control,
           }]}
         />
       )}
       <View style={[styles.labelRow, { gap: spacing.xs }]}>
-        {selected && !disabled ? <MGIcon name="check" size={14} color={colors.onAction.primary} /> : null}
+        {selected && !disabled ? (
+          <View style={styles.check}>
+            <MGIcon name="check" size={14} color={colors.onAction.primary} />
+          </View>
+        ) : null}
         <Animated.Text
           numberOfLines={1}
           style={{
@@ -140,6 +159,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'flex-start',
+  },
+  fill: {
+    alignSelf: 'stretch',
+  },
+  check: {
+    width: 14,
+    height: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   labelRow: {
     flexDirection: 'row',

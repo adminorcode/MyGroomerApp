@@ -1,8 +1,7 @@
 import { createContext, ReactNode, useContext } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import api from '../services/api'
-import { useTheme } from './ThemeContext'
+import MGScreen from '../design-system/components/MGScreen'
 
 type RuntimeCapabilities = {
   localTest: boolean
@@ -19,7 +18,6 @@ const RuntimeContext = createContext<RuntimeCapabilities>({
 export const useRuntime = () => useContext(RuntimeContext)
 
 export function RuntimeProvider({ children }: { children: ReactNode }) {
-  const { colors } = useTheme()
   const runtime = useQuery({
     queryKey: ['runtime'],
     queryFn: async () => (await api.get<{ data: RuntimeCapabilities }>('/runtime')).data.data,
@@ -28,17 +26,15 @@ export function RuntimeProvider({ children }: { children: ReactNode }) {
   })
 
   if (runtime.isPending) {
-    return <View style={{ flex: 1, justifyContent: 'center' }}><ActivityIndicator accessibilityLabel="Connecting to API" /></View>
+    return <MGScreen loading />
   }
 
   if (runtime.isError || !runtime.data) {
     return (
-      <View style={{ flex: 1, padding: 24, justifyContent: 'center', gap: 16 }}>
-        <Text style={{ color: colors.error }}>API indisponível. Verifique se o servidor local está iniciado.</Text>
-        <Pressable accessibilityRole="button" onPress={() => runtime.refetch()}>
-          <Text style={{ color: colors.primaryText }}>Tentar novamente</Text>
-        </Pressable>
-      </View>
+      <MGScreen
+        error="API indisponível. Verifique se o servidor local está iniciado."
+        onRetry={() => { void runtime.refetch() }}
+      />
     )
   }
 

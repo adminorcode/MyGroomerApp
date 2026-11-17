@@ -96,7 +96,6 @@ export default function ResetPasswordScreen({ navigation, route }: Props) {
                         render={({ field: { onChange, onBlur, value } }) => (
                             <MGTextField
                                 label="Nova senha"
-                                placeholder="Crie uma senha"
                                 onChangeText={onChange}
                                 onBlur={onBlur}
                                 value={value}

@@ -1,5 +1,6 @@
 import { createElement, useState } from 'react'
 import { useTheme } from '../../context/ThemeContext'
+import { MG_FIELD_HEIGHT } from '../../design-system/components/MGTextField'
 
 type Props = {
   value: Date
@@ -30,7 +31,11 @@ export default function ServiceDateTimePicker({ value, minimumDate, onChange }: 
       if (!Number.isNaN(selected.getTime())) onChange?.({ type: 'set' }, selected)
     },
     style: {
-      padding: 12,
+      boxSizing: 'border-box',
+      height: MG_FIELD_HEIGHT,
+      minHeight: MG_FIELD_HEIGHT,
+      maxHeight: MG_FIELD_HEIGHT,
+      padding: '0 12px',
       borderRadius: 8,
       border: `2px solid ${borderColor}`,
       backgroundColor: colors.surface,

@@ -88,10 +88,10 @@ export default function ConversationsScreen({ navigation }: Props) {
       header="teal"
       headerSlot={
         <View style={styles.headerSlot}>
-          <MGText variant="heading2" color="inverse" accessibilityRole="header">
+          <MGText variant="heading2" accessibilityRole="header">
             Mensagens
           </MGText>
-          <MGText variant="bodySmall" color="inverse">
+          <MGText variant="bodySmall" color="secondary">
             {description}
           </MGText>
         </View>
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
   unread: {
     minWidth: 24,
     height: 24,
-    borderRadius: radius.pill,
+    borderRadius: radius.control,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.sm,

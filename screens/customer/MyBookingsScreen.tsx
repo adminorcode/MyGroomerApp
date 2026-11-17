@@ -68,7 +68,7 @@ export default function MyBookingsScreen({navigation}: Props) {
                                 </MGText>
                             </View>
                             {item.price != null ? (
-                                <MGText variant="bodySmall" color="teal" style={{ fontFamily: fonts.bold }}>
+                                <MGText variant="bodySmall" color="money" style={{ fontFamily: fonts.bold }}>
                                     {formatMoney(item.price)}
                                 </MGText>
                             ) : null}

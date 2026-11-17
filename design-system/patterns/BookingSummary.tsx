@@ -56,8 +56,7 @@ export default function BookingSummary({
   const totalBlock = totalLabel && totalValue ? (
     <View style={styles.row} accessibilityLabel={`${totalLabel}: ${totalValue}`}>
       <MGText variant="title">{totalLabel}</MGText>
-      {/* No bilhete o total vira o destaque de preço (priceLarge, teal sobre branco: R5). */}
-      <MGText variant={ticket ? 'priceLarge' : 'title'} color="teal" style={ticket ? undefined : { fontFamily: fonts.bold }}>
+      <MGText variant={ticket ? 'priceLarge' : 'title'} color="money" style={ticket ? undefined : { fontFamily: fonts.bold }}>
         {totalValue}
       </MGText>
     </View>

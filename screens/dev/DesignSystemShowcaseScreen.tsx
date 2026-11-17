@@ -89,10 +89,9 @@ export default function DesignSystemShowcaseScreen({ navigation }: Props) {
         <MGText variant="heading2">Heading 2</MGText>
         <MGText variant="body">Corpo de texto padrão</MGText>
         <MGText variant="label">Rótulo</MGText>
-        <MGText variant="numeric">R$ 120</MGText>
-        {/* CMP-01: eyebrow (caixa-alta, teal sobre canvas) e preço em destaque (priceLarge, teal sobre canvas). */}
+        <MGText variant="numeric" color="money">R$ 120</MGText>
         <MGText variant="eyebrow" color="teal">Exemplo</MGText>
-        <MGText variant="priceLarge" color="teal">R$ 89</MGText>
+        <MGText variant="priceLarge" color="money">R$ 89</MGText>
         <MGText variant="caption" color="secondary">
           Caption secundário
         </MGText>

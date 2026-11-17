@@ -1,5 +1,6 @@
-import { useRef, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { ReactNode, useRef, useState } from "react";
+import { Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
+import { ArrowLeft, LockKeyhole, Mail, Phone, UserRound } from 'lucide-react-native';
 import { StackNavigationProp } from "@react-navigation/stack";
 import { AuthStackParamList } from "../../navigation/types";
 import { BoamePhoneInput } from "../../components/shared/Input";
@@ -18,8 +19,8 @@ import AuthDivider from "../../components/shared/AuthDivider";
 import { Role } from "../../types/auth.types";
 import { useRuntime } from "../../context/RuntimeContext";
 import { getErrorMessage } from "../../utils/error";
-import { ArrowLeft } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import MGArtwork from '../../design-system/components/MGArtwork';
 
 type TutorRegisterNavigationProp = StackNavigationProp<AuthStackParamList, "TutorRegister">;
 
@@ -28,6 +29,16 @@ type Props = {
 };
 
 type TutorFormValues = z.infer<typeof tutorRegisterSchema>;
+
+function FieldRow({ icon, children }: { icon: ReactNode; children: ReactNode }) {
+    const { spacing } = useMGTheme();
+    return (
+        <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' }}>
+            <View style={{ paddingTop: spacing.xxs }}>{icon}</View>
+            <View style={{ flex: 1, minWidth: 0 }}>{children}</View>
+        </View>
+    );
+}
 
 export default function TutorRegisterScreen({ navigation }: Props) {
     const { control, handleSubmit, formState: { errors } } = useForm<TutorFormValues>({
@@ -43,7 +54,10 @@ export default function TutorRegisterScreen({ navigation }: Props) {
     const { mutate, isPending, error } = useRegisterMutation();
     const runtime = useRuntime();
     const { mutate: signInWithGoogle, isPending: isGooglePending, error: googleError } = useGoogleSignInMutation();
-    const { colors } = useMGTheme();
+    const { colors, radius, elevation } = useMGTheme();
+    const { width } = useWindowDimensions();
+    const compact = width < 600;
+    const fieldIcon = { size: spacing.xl, color: colors.text.primary, strokeWidth: 1.8 };
     const [showPassword, setShowPassword] = useState(false);
     const scrollRef = useRef<KeyboardAwareScrollView>(null);
     // Posições do formulário e da caixa de consentimento dentro do conteúdo rolável (onLayout).
@@ -61,9 +75,10 @@ export default function TutorRegisterScreen({ navigation }: Props) {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: colors.surface.canvas }} edges={['top', 'left', 'right']}>
+        <SafeAreaView style={{ flex: 1, minHeight: 0, backgroundColor: colors.surface.canvas }} edges={['top', 'left', 'right']}>
         <KeyboardAwareScrollView
             ref={scrollRef}
+            style={{ flex: 1, minHeight: 0 }}
             contentContainerStyle={[styles.container, { backgroundColor: colors.surface.canvas }]}
             keyboardShouldPersistTaps="handled"
             extraScrollHeight={20}
@@ -71,88 +86,103 @@ export default function TutorRegisterScreen({ navigation }: Props) {
         >
             <View style={styles.content}>
             <View style={styles.heading}>
-                <MGIconButton accessibilityLabel="Voltar" icon={<ArrowLeft size={spacing.xl} color={colors.action.primary} />} onPress={() => navigation.goBack()} />
-                <MGText variant="heading1" accessibilityRole="header" style={{ flex: 1 }}>Criar minha conta</MGText>
+                <MGIconButton accessibilityLabel="Voltar" icon={<ArrowLeft size={spacing.xl} color={colors.text.primary} />} onPress={() => navigation.goBack()} style={{ minWidth: spacing.huge, minHeight: spacing.huge }} />
+                <MGText variant={compact ? 'heading3' : 'heading1'} accessibilityRole="header" style={{ flex: 1 }}>Criar minha conta</MGText>
             </View>
-            <View style={[styles.intro, { backgroundColor: colors.surface.pinkSubtle }]}>
-                <MGText>Encontre profissionais para cuidar do seu melhor amigo.</MGText>
+            <View style={styles.hero}>
+                <View style={styles.heroText}>
+                    <MGText variant={compact ? 'heading2' : 'display'}>Vamos cuidar do seu melhor amigo</MGText>
+                    <MGText color="secondary" variant={compact ? 'bodySmall' : 'body'}>Encontre profissionais para cuidar dele, perto de você.</MGText>
+                </View>
+                <View style={[styles.art, { borderColor: colors.border.default, backgroundColor: colors.surface.default, borderRadius: radius.lg }]}>
+                    <MGArtwork name="professional" width={compact ? 92 : 144} height={compact ? 120 : 160} />
+                </View>
             </View>
-            <View style={styles.form} onLayout={(event) => { layoutRef.current.form = event.nativeEvent.layout.y }}>
+            <View
+                style={[styles.form, { backgroundColor: colors.surface.default, borderColor: colors.border.default, borderRadius: radius.lg, ...elevation.low }]}
+                onLayout={(event) => { layoutRef.current.form = event.nativeEvent.layout.y }}
+            >
                 <Controller
                     control={control}
                     name="name"
                     render={({ field: { onChange, onBlur, value } }) => (
-                        <MGTextField
-                            label="Nome completo"
-                            placeholder="Digite seu nome"
-                            onChangeText={onChange}
-                            onBlur={onBlur}
-                            value={value}
-                            autoCapitalize="words"
-                            autoCorrect={false}
-                            textContentType="name"
-                            error={errors.name?.message}
-                        />
+                        <FieldRow icon={<UserRound {...fieldIcon} />}>
+                            <MGTextField
+                                label="Nome completo"
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                value={value}
+                                autoCapitalize="words"
+                                autoCorrect={false}
+                                textContentType="name"
+                                error={errors.name?.message}
+                            />
+                        </FieldRow>
                     )}
                 />
                 <Controller
                     control={control}
                     name="email"
                     render={({ field: { onChange, onBlur, value } }) => (
-                        <MGTextField
-                            label="E-mail"
-                            placeholder="Digite seu e-mail"
-                            onChangeText={onChange}
-                            onBlur={onBlur}
-                            value={value}
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                            autoCorrect={false}
-                            textContentType="emailAddress"
-                            error={errors.email?.message}
-                        />
+                        <FieldRow icon={<Mail {...fieldIcon} />}>
+                            <MGTextField
+                                label="E-mail"
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                value={value}
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                                autoCorrect={false}
+                                textContentType="emailAddress"
+                                error={errors.email?.message}
+                            />
+                        </FieldRow>
                     )}
                 />
                 <Controller
                     control={control}
                     name="phone_number"
                     render={({ field: { onChange, value } }) => (
-                        <BoamePhoneInput
-                            label="Telefone"
-                            onChangeFormattedText={onChange}
-                            value={value}
-                            error={errors.phone_number?.message}
-                        />
+                        <FieldRow icon={<Phone {...fieldIcon} />}>
+                            <BoamePhoneInput
+                                label="Telefone"
+                                onChangeFormattedText={onChange}
+                                value={value}
+                                error={errors.phone_number?.message}
+                            />
+                        </FieldRow>
                     )}
                 />
                 <Controller
                     control={control}
                     name="password"
                     render={({ field: { onChange, onBlur, value } }) => (
-                        <View>
-                            <MGTextField
-                                label="Senha"
-                                placeholder="Crie uma senha"
-                                onChangeText={onChange}
-                                onBlur={onBlur}
-                                value={value}
-                                autoCapitalize="none"
-                                autoCorrect={false}
-                                textContentType="newPassword"
-                                secureTextEntry={!showPassword}
-                                error={errors.password?.message}
-                            />
-                            <MGButton
-                                label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                                variant="tertiary"
-                                fullWidth={false}
-                                disabled={isPending}
-                                onPress={() => setShowPassword(previous => !previous)}
-                                style={styles.passwordToggle}
-                            />
-                        </View>
+                        <FieldRow icon={<LockKeyhole {...fieldIcon} />}>
+                            <View>
+                                <MGTextField
+                                    label="Senha"
+                                    onChangeText={onChange}
+                                    onBlur={onBlur}
+                                    value={value}
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                    textContentType="newPassword"
+                                    secureTextEntry={!showPassword}
+                                    error={errors.password?.message}
+                                />
+                                <MGButton
+                                    label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                                    variant="tertiary"
+                                    fullWidth={false}
+                                    disabled={isPending}
+                                    onPress={() => setShowPassword(previous => !previous)}
+                                    style={styles.passwordToggle}
+                                />
+                            </View>
+                        </FieldRow>
                     )}
                 />
+            </View>
                 <Controller
                     control={control}
                     name="accepted_terms"
@@ -209,7 +239,6 @@ export default function TutorRegisterScreen({ navigation }: Props) {
                         {googleError.message}
                     </MGText>
                 )}
-            </View>
             <MGButton label="Já tem uma conta? Entrar" variant="tertiary" disabled={isPending || isGooglePending} style={styles.loginLink} onPress={() => navigation.navigate('Login')} />
             </View>
         </KeyboardAwareScrollView>
@@ -229,11 +258,16 @@ const styles = StyleSheet.create({
         width: "100%",
         maxWidth: 448,
     },
-    heading: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.lg },
-    intro: { padding: spacing.base, borderRadius: radius.lg, marginBottom: spacing.lg },
+    heading: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.xl },
+    hero: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.xl },
+    heroText: { flex: 1, gap: spacing.sm },
+    art: { padding: spacing.sm, borderWidth: 1 },
     form: {
         width: "100%",
         gap: spacing.sm,
+        borderWidth: 1,
+        padding: spacing.base,
+        marginBottom: spacing.lg,
     },
     passwordToggle: {
         alignSelf: 'flex-end',

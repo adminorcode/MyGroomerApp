@@ -80,7 +80,7 @@ export default function ServiceEditorCard({
         <View style={[styles.prices, { columnGap: spacing.md, rowGap: spacing.xs, marginTop: spacing.xs }]}>
           {/* R3: preço por porte em teal, sobre superfície branca. */}
           {priceEntries.map(entry => (
-            <MGText key={entry} variant="label" color="teal">
+            <MGText key={entry} variant="label" color="money">
               {entry}
             </MGText>
           ))}

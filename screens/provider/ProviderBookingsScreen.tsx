@@ -102,7 +102,7 @@ export default function ProviderBookingsScreen({ navigation }: Props) {
   return (
     <MGScreen
       header="teal"
-      headerSlot={<MGText variant="heading2" color="inverse" accessibilityRole="header">Agenda do groomer</MGText>}
+      headerSlot={<MGText variant="heading2" accessibilityRole="header">Agenda do groomer</MGText>}
     >
       <View style={{ flex: 1, width: '100%', maxWidth: 720, paddingTop: spacing.md }}>
         <View style={{ flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md }}>
@@ -112,7 +112,6 @@ export default function ProviderBookingsScreen({ navigation }: Props) {
                 label={item.label}
                 density="compact"
                 selected={view === item.id}
-                minHeight={44}
                 onPress={() => setView(item.id)}
               />
             </View>
@@ -162,7 +161,6 @@ export default function ProviderBookingsScreen({ navigation }: Props) {
                 key={item.id}
                 label={item.label}
                 selected={filter === item.id}
-                minHeight={44}
                 onPress={() => setFilter(item.id)}
               />
             ))}

@@ -18,7 +18,7 @@ export type MGTextVariant =
   | 'priceLarge'
   | 'logotype'
 
-export type MGTextColor = 'primary' | 'secondary' | 'inverse' | 'brand' | 'teal' | 'error' | 'success' | 'warning' | 'info'
+export type MGTextColor = 'primary' | 'secondary' | 'inverse' | 'brand' | 'teal' | 'money' | 'error' | 'success' | 'warning' | 'info'
 
 type Props = Omit<TextProps, 'children'> & {
   children: ReactNode
@@ -42,6 +42,7 @@ export default function MGText({
     inverse: colors.text.inverse,
     brand: colors.action.primaryText,
     teal: colors.brand.teal,
+    money: colors.text.money,
     error: colors.feedback.error,
     success: colors.feedback.success,
     warning: colors.feedback.warning,
@@ -49,11 +50,15 @@ export default function MGText({
   }
 
   const family =
-    type.fontWeight === '700'
-      ? fonts.bold
-      : type.fontWeight === '600'
-        ? fonts.semibold
-        : fonts.regular
+    type.face === 'display'
+      ? type.fontWeight === '700'
+        ? fonts.displayStrong
+        : fonts.display
+      : type.fontWeight === '700'
+        ? fonts.bold
+        : type.fontWeight === '600'
+          ? fonts.semibold
+          : fonts.regular
 
   return (
     <Text
@@ -64,6 +69,8 @@ export default function MGText({
           fontSize: type.fontSize,
           lineHeight: type.lineHeight,
           fontFamily: family,
+          // O arquivo já é o peso certo. font-weight numérico faria o navegador engrossar de novo.
+          fontWeight: 'normal',
           color: colorMap[color],
           ...(type.letterSpacing !== undefined ? { letterSpacing: type.letterSpacing } : null),
           ...(type.textTransform ? { textTransform: type.textTransform } : null),

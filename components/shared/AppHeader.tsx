@@ -4,24 +4,21 @@ import { layout } from '../../constants/theme'
 import MGArtwork from '../../design-system/components/MGArtwork'
 import MGText from '../../design-system/components/MGText'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
-import { HeaderTone } from '../../navigation/headerTone'
 import ProfileHeaderButton from './ProfileHeaderButton'
 
 type Props = {
     onProfilePress: () => void
-    tone: HeaderTone
 }
 
 /**
  * Topo autenticado (plano 028): marca à esquerda e conta à direita.
  * Uma instância por tela, acima das faixas contextuais de cada fluxo.
  */
-export default function AppHeader({ onProfilePress, tone }: Props) {
+export default function AppHeader({ onProfilePress }: Props) {
     const { colors, spacing, radius } = useMGTheme()
-    const backgroundColor = tone === 'pink' ? colors.action.primary : colors.brand.teal
 
     return (
-        <View style={[styles.bar, { backgroundColor, paddingHorizontal: spacing.base, paddingVertical: spacing.sm }]}>
+        <View style={[styles.bar, { backgroundColor: colors.surface.canvas, borderBottomColor: colors.border.default, paddingHorizontal: spacing.base, paddingVertical: spacing.sm }]}>
             <View style={[styles.row, { maxWidth: layout.contentMaxWidth, gap: spacing.sm }]}>
                 <View style={[styles.brand, { gap: spacing.sm }]}>
                     <View style={[styles.markRing, { borderRadius: radius.md, backgroundColor: colors.surface.default }]}>
@@ -29,16 +26,16 @@ export default function AppHeader({ onProfilePress, tone }: Props) {
                             <MGArtwork name="brand-symbol" width={32} height={32} />
                         </View>
                     </View>
-                    <MGText variant="heading3" color="inverse" numberOfLines={1} style={styles.name}>{APP_NAME}</MGText>
+                    <MGText variant="heading3" numberOfLines={1} style={styles.name}>{APP_NAME}</MGText>
                 </View>
-                <ProfileHeaderButton size={48} onColor onPress={onProfilePress} />
+                <ProfileHeaderButton size={48} onPress={onProfilePress} />
             </View>
         </View>
     )
 }
 
 const styles = StyleSheet.create({
-    bar: {},
+    bar: { borderBottomWidth: StyleSheet.hairlineWidth },
     row: {
         width: '100%',
         alignSelf: 'center',

@@ -17,8 +17,8 @@ export default function CategoryTile({ name, onPress }: Props) {
             onPress={onPress}
             style={({ pressed }) => [styles.tile, { backgroundColor: pressed ? colors.selectionSoft : colors.surface, borderColor: colors.border }]}
         >
-           <View style={[styles.iconCircle, { backgroundColor: colors.selectionSoft }]}>
-                <MGIcon name={/banho/i.test(name) ? 'bath' : /tosa/i.test(name) ? 'scissors' : 'paw-print'} color={colors.primary} size={24} />
+           <View style={[styles.iconCircle, { backgroundColor: colors.background }]}>
+                <MGIcon name={/banho/i.test(name) ? 'bath' : /tosa/i.test(name) ? 'scissors' : 'paw-print'} color={colors.text} size={24} />
             </View>
             <Text style={[styles.name, { color: colors.text }]}>{name}</Text>
         </Pressable>

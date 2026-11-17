@@ -21,7 +21,7 @@ export default function WelcomeScreen({ navigation }: Props) {
           <View style={styles.content}>
             <MGBrand />
             <MGText style={styles.centered}>O cuidado que seu pet merece, pertinho de você.</MGText>
-            <View style={[styles.illustration, { backgroundColor: colors.surface.pinkSubtle, borderRadius: radius.xl }]}>
+            <View style={[styles.illustration, { backgroundColor: colors.surface.default, borderColor: colors.border.default, borderRadius: radius.xl }]}>
                 <MGArtwork name="welcome" width={160} height={160} />
             </View>
             <MGText variant="heading3" accessibilityRole="header" style={styles.centered}>Como você deseja começar?</MGText>
@@ -53,5 +53,5 @@ const styles = StyleSheet.create({
         gap: spacing.lg,
     },
     centered: { textAlign: 'center' },
-    illustration: { minHeight: 180, padding: spacing.md, alignItems: 'center', justifyContent: 'center' },
+    illustration: { minHeight: 180, padding: spacing.md, alignItems: 'center', justifyContent: 'center', borderWidth: 1 },
 });

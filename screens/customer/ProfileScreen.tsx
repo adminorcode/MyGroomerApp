@@ -30,8 +30,8 @@ function MenuItem({ label, description, icon: Icon, iconBackground, iconColor, o
     <MGCard onPress={onPress} accessibilityLabel={label} style={styles.menuCard}>
       <View style={styles.menuRow}>
         {Icon ? (
-          <View style={[styles.menuIcon, { backgroundColor: iconBackground }]}>
-            <Icon size={20} color={iconColor} />
+          <View style={[styles.menuIcon, { backgroundColor: iconBackground ?? colors.surface.default, borderColor: colors.border.default }]}>
+            <Icon size={20} color={iconColor ?? colors.text.primary} />
           </View>
         ) : null}
         <View style={styles.menuText}>
@@ -55,9 +55,6 @@ export default function ProfileScreen({ navigation }: Props) {
   // R8 + R2/R3: o papel autenticado define a cor do avatar, da etiqueta e dos ícones do menu.
   const isProvider = user?.role === 'provider'
   const roleTone = isProvider ? 'teal' : 'pink'
-  const roleSurface = isProvider ? colors.surface.tealSubtle : colors.surface.pinkSubtle
-  const roleIconBackground = isProvider ? colors.surface.tealSubtle : colors.surface.pinkSubtle
-  const roleIconColor = isProvider ? colors.brand.teal : colors.action.primaryText
 
   const handleLogout = () => {
     AppAlert.alert(
@@ -92,7 +89,7 @@ export default function ProfileScreen({ navigation }: Props) {
         </MGText>
 
         {user?.role && (
-          <View style={[styles.rolePill, { backgroundColor: roleSurface }]}>
+          <View style={[styles.rolePill, { backgroundColor: colors.surface.default, borderColor: colors.border.default }]}>
             <MGText variant="label" style={styles.centerText}>
               {user.role === 'provider' ? 'Profissional' : user.role === 'customer' ? 'Tutor' : 'Administrador'}
             </MGText>
@@ -105,8 +102,6 @@ export default function ProfileScreen({ navigation }: Props) {
           label="Perfil público"
           description="Veja e edite o que o tutor encontra na busca"
           icon={IdCard}
-          iconBackground={roleIconBackground}
-          iconColor={roleIconColor}
           onPress={() => navigation.navigate('PublicProfile')}
         />
       )}
@@ -116,8 +111,6 @@ export default function ProfileScreen({ navigation }: Props) {
           label="Meus pets"
           description="Cadastre e reutilize os pets nos agendamentos"
           icon={PawPrint}
-          iconBackground={roleIconBackground}
-          iconColor={roleIconColor}
           onPress={() => navigation.navigate('Pets')}
         />
       )}
@@ -127,8 +120,6 @@ export default function ProfileScreen({ navigation }: Props) {
           label="Endereços"
           description="Casa, trabalho e outros locais de atendimento"
           icon={MapPin}
-          iconBackground={roleIconBackground}
-          iconColor={roleIconColor}
           onPress={() => navigation.navigate('Addresses')}
         />
       )}
@@ -138,8 +129,6 @@ export default function ProfileScreen({ navigation }: Props) {
           label="Quero ser groomer"
           description="Ofereça seus serviços e acompanhe os rendimentos"
           icon={Store}
-          iconBackground={colors.surface.pinkSubtle}
-          iconColor={colors.action.primaryText}
           onPress={() => navigation.navigate('BecomeAProvider')}
         />
       )}
@@ -191,7 +180,8 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
-    borderRadius: radius.pill,
+    borderRadius: radius.control,
+    borderWidth: 1,
   },
   menuCard: {
     marginTop: spacing.md,
@@ -204,7 +194,8 @@ const styles = StyleSheet.create({
   menuIcon: {
     width: 40,
     height: 40,
-    borderRadius: radius.pill,
+    borderRadius: radius.lg,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },

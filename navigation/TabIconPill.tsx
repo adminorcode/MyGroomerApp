@@ -27,7 +27,7 @@ export default function TabIconPill({ focused, children }: { focused: boolean; c
       style={{
         width: 56,
         height: 32,
-        borderRadius: radius.pill,
+        borderRadius: radius.control,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor,

@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { StyleSheet, Text, TextInput, TextInputProps, TouchableOpacity, View } from 'react-native'
+import { StyleSheet, TextInputProps, TouchableOpacity } from 'react-native'
 import type { PhoneInputProps } from 'react-native-phone-number-input'
 import { Eye, EyeClosed } from 'lucide-react-native'
-import { borderRadius, fonts, spacing, textStyles } from '../../constants/theme'
+import { spacing } from '../../constants/theme'
 import { useTheme } from '../../context/ThemeContext'
+import MGTextField, { MG_FIELD_HEIGHT } from '../../design-system/components/MGTextField'
 
 export type InputProps = TextInputProps & { label: string; error?: string }
 export type BoamePhoneInputProps = PhoneInputProps & { label: string; error?: string; onChangeFormattedText: (text: string) => void }
@@ -25,77 +26,38 @@ export function BoamePhoneInput({ label, error, value, defaultValue, onChangeFor
 }
 
 export default function BoameInput({ label, error, style, value, ...props }: InputProps) {
-  const { colors } = useTheme()
-  const [focused, setFocused] = useState(false)
-  const borderColor = error ? colors.error : focused ? colors.focus : colors.border
-  return (
-    <View style={styles.field}>
-      <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
-      <TextInput
-        accessibilityLabel={label}
-        {...props}
-        value={value ?? ''}
-        placeholderTextColor={colors.textSecondary}
-        onFocus={(event) => { setFocused(true); props.onFocus?.(event) }}
-        onBlur={(event) => { setFocused(false); props.onBlur?.(event) }}
-        style={[styles.input, { borderColor, backgroundColor: colors.surface, color: colors.text }, style]}
-      />
-      {error && <Text style={{ color: colors.error }}>{error}</Text>}
-    </View>
-  )
+  return <MGTextField label={label} error={error} style={style} value={value} {...props} />
 }
 
 export function ToggleInput({ label, error, style, value, ...props }: InputProps) {
   const [visible, setVisible] = useState(false)
-  const [focused, setFocused] = useState(false)
   const { colors } = useTheme()
-  const borderColor = error ? colors.error : focused ? colors.focus : colors.border
   return (
-    <View style={styles.field}>
-      <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
-      <View style={[styles.passwordRow, { borderColor, backgroundColor: colors.surface }]}>
-        <TextInput
-          accessibilityLabel={label}
-          {...props}
-          value={value ?? ''}
-          placeholderTextColor={colors.textSecondary}
-          onFocus={(event) => { setFocused(true); props.onFocus?.(event) }}
-          onBlur={(event) => { setFocused(false); props.onBlur?.(event) }}
-          secureTextEntry={!visible}
-          style={[styles.passwordInput, { color: colors.text, backgroundColor: colors.surface }, style]}
-        />
-        <TouchableOpacity accessibilityRole="button" accessibilityLabel={visible ? 'Ocultar senha' : 'Mostrar senha'} onPress={() => setVisible(!visible)} style={{ padding: spacing.md }}>
-          {visible ? <EyeClosed color={colors.primary} /> : <Eye color={colors.primary} />}
+    <MGTextField
+      {...props}
+      label={label}
+      error={error}
+      style={style}
+      value={value}
+      secureTextEntry={!visible}
+      trailing={(
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel={visible ? 'Ocultar senha' : 'Mostrar senha'}
+          onPress={() => setVisible(current => !current)}
+          style={styles.eye}
+        >
+          {visible ? <EyeClosed color={colors.primary} size={20} /> : <Eye color={colors.primary} size={20} />}
         </TouchableOpacity>
-      </View>
-      {error && <Text style={{ color: colors.error }}>{error}</Text>}
-    </View>
+      )}
+    />
   )
 }
 
 const styles = StyleSheet.create({
-  field: { marginBottom: spacing.base },
-  label: {
-    fontSize: textStyles.label.fontSize,
-    lineHeight: textStyles.label.lineHeight,
-    fontFamily: fonts.semibold,
-    marginBottom: spacing.sm,
+  eye: {
+    height: MG_FIELD_HEIGHT,
+    justifyContent: 'center',
+    paddingLeft: spacing.sm,
   },
-  input: {
-    borderWidth: 2,
-    borderRadius: borderRadius.md,
-    paddingHorizontal: spacing.md,
-    minHeight: 40,
-    fontSize: textStyles.body.fontSize,
-    fontFamily: fonts.regular,
-  },
-  passwordRow: {
-    borderWidth: 2,
-    borderRadius: borderRadius.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    overflow: 'hidden',
-    minHeight: 40,
-  },
-  passwordInput: { flex: 1, minWidth: 0, padding: spacing.md, fontFamily: fonts.regular, fontSize: textStyles.body.fontSize },
 })

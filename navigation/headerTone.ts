@@ -1,6 +1,6 @@
 export type HeaderTone = 'teal' | 'pink'
 
-/** Telas do tutor e do pet. O restante autenticado segue o verde da operação. */
+/** Telas do tutor e do pet. O restante autenticado fica na classificação teal, sem pintar a barra. */
 const PINK_ROUTES = new Set([
     'Pets',
     'PetForm',
@@ -13,8 +13,8 @@ const PINK_ROUTES = new Set([
 ])
 
 /**
- * A barra usa a cor da tela: rosa no território do tutor/pet e verde nos hubs
- * e na operação do profissional. Perfil, chat e vitrine seguem o papel.
+ * Classifica a rota. A barra autenticada não usa mais essa cor: o topo é canvas
+ * e o rosa fica no logo, no botão e no avatar do profissional.
  */
 export function headerToneFor(route: string | undefined, role: string | undefined): HeaderTone {
     const provider = role === 'provider'

@@ -35,7 +35,7 @@ L.tileLayer(tilePath, {
   maxZoom: 20,
   attribution: '&copy; <a href="https://www.geoapify.com/">Geoapify</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
-const pinSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36"><path fill="' + pin + '" d="M14 1C7 1 1.5 6.4 1.5 13.2 1.5 22.2 14 35 14 35s12.5-12.8 12.5-21.8C26.5 6.4 21 1 14 1z"/><circle cx="14" cy="13" r="4.5" fill="' + halo + '"/></svg>';
+const pinSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36" aria-hidden="true" focusable="false"><path fill="' + pin + '" d="M14 1C7 1 1.5 6.4 1.5 13.2 1.5 22.2 14 35 14 35s12.5-12.8 12.5-21.8C26.5 6.4 21 1 14 1z"/><circle cx="14" cy="13" r="4.5" fill="' + halo + '"/></svg>';
 L.marker([latitude, longitude], {
   interactive: false,
   icon: L.divIcon({ className: 'mg-pin', html: pinSvg, iconSize: [28, 36], iconAnchor: [14, 34] })

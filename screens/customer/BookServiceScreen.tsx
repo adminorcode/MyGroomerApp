@@ -196,7 +196,7 @@ export default function BookServiceScreen({ navigation, route }: Props) {
             <MGText variant="body">{carriedLocation}</MGText>
           </View>
         ) : (
-          <MGTextField label="Local" value={location} onChangeText={setLocation} placeholder="Digite seu endereço" autoCapitalize="words" />
+          <MGTextField label="Local" value={location} onChangeText={setLocation} autoCapitalize="words" />
         )}
         </View>
       </MGScreen>

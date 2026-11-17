@@ -12,6 +12,7 @@ import { MomoProvider, PayoutMethod } from '../../types/provider.types'
 import { useRegisterAsProvider } from '../../hooks/useProviders'
 import { BoamePhoneInput } from '../../components/shared/Input'
 import { MGButton, MGCard, MGText, MGTextField } from '../../design-system/components'
+import { MG_FIELD_HEIGHT } from '../../design-system/components/MGTextField'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { layout } from '../../constants/theme'
 import { spacing } from '../../design-system/tokens'
@@ -285,11 +286,12 @@ const styles = StyleSheet.create({
         gap: spacing.sm,
     },
     option: {
-        minHeight: 52,
+        height: MG_FIELD_HEIGHT,
+        minHeight: MG_FIELD_HEIGHT,
+        maxHeight: MG_FIELD_HEIGHT,
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: spacing.sm,
         paddingHorizontal: spacing.md,
         borderWidth: 1,
     },

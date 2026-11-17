@@ -17,7 +17,7 @@ type Props = {
 
 export default function HomeScreen({navigation}: Props) {
   const {data, isLoading, isError, refetch} = useFetchCategories()
-  const { colors, spacing, radius } = useMGTheme()
+  const { colors, spacing, radius, fonts } = useMGTheme()
 
   // CMP-05 / R4: faixa teal de cabeçalho (hub). A saudação já fica no AppHeader global acima, não é repetida aqui.
   const searchSlot = (
@@ -44,7 +44,6 @@ export default function HomeScreen({navigation}: Props) {
 
   return (
     <MGScreen scrollable header="teal" headerSlot={searchSlot} contentStyle={{ paddingTop: spacing.base }}>
-      {/* CMP-04 / R2 / CMP-01: destaque rosa de 20 pt, eyebrow rosa-texto, título 22/28, ilustração em bloco. */}
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Explorar profissionais"
@@ -52,7 +51,8 @@ export default function HomeScreen({navigation}: Props) {
         style={({ pressed }) => [
           styles.hero,
           {
-            backgroundColor: colors.surface.pinkSubtle,
+            backgroundColor: colors.surface.default,
+            borderColor: colors.border.default,
             borderRadius: radius.xl,
             padding: spacing.lg,
             marginTop: spacing.sm,
@@ -63,15 +63,15 @@ export default function HomeScreen({navigation}: Props) {
       >
         <View style={[styles.heroRow, { gap: spacing.md }]}>
           <View style={[styles.heroCopy, { gap: spacing.sm }]}>
-            <MGText variant="eyebrow" color="brand">Atendimento em domicílio</MGText>
+            <MGText variant="eyebrow" color="secondary">Atendimento em domicílio</MGText>
             {/* &nbsp; evita a linha com só "pet" (viúva); o texto e o check exato permanecem iguais. */}
-            <MGText variant="heading2" style={styles.heroTitle}>Um cuidado especial para seu&nbsp;pet</MGText>
+            <MGText variant="heading2" style={[styles.heroTitle, { fontFamily: fonts.displayStrong }]}>Um cuidado especial para seu&nbsp;pet</MGText>
             <View style={[styles.heroAction, { gap: spacing.xs, marginTop: spacing.xs }]}>
               <MGText variant="label" color="brand">Explorar profissionais</MGText>
               <ArrowRight size={18} color={colors.action.primaryText} />
             </View>
           </View>
-          <View style={[styles.artBlock, { backgroundColor: colors.surface.default, borderRadius: radius.lg, padding: spacing.sm }]}>
+          <View style={styles.artBlock}>
             <MGArtwork name="poodle" width={72} height={88} />
           </View>
         </View>
@@ -112,6 +112,7 @@ const styles = StyleSheet.create({
   },
   hero: {
     flexDirection: 'column',
+    borderWidth: 1,
   },
   heroRow: {
     flexDirection: 'row',

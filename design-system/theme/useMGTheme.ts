@@ -29,7 +29,7 @@ export function useMGTheme() {
       error: palette.feedback.error,
       errorSurface: palette.feedback.errorSurface,
       info: palette.feedback.info,
-      infoSurface: palette.surface.tealSubtle,
+      infoSurface: palette.feedback.infoSurface,
     },
     state: {
       disabledSurface: palette.state.disabledSurface,

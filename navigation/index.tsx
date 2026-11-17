@@ -1,6 +1,5 @@
 import { createStackNavigator } from '@react-navigation/stack'
 import { createNavigationContainerRef, DefaultTheme, NavigationContainer, LinkingOptions, StackActions } from '@react-navigation/native'
-import { useState } from 'react'
 import { View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAuthStore } from '../store/authStore'
@@ -17,7 +16,6 @@ import { useMGTheme } from '../design-system/theme/useMGTheme'
 import { RootParamList } from './types'
 import { APP_SCHEME } from '../constants/brand'
 import { AuthenticatedChromeContext } from './authenticatedChrome'
-import { headerToneFor } from './headerTone'
 
 export const navigationRef = createNavigationContainerRef<RootParamList>()
 
@@ -76,10 +74,6 @@ export default function RootNavigator() {
     const { token, user } = useAuthStore()
     const { colors } = useTheme()
     const theme = useMGTheme()
-    const [routeName, setRouteName] = useState<string | undefined>()
-    const tone = headerToneFor(routeName, user?.role)
-    const headerColor = tone === 'pink' ? theme.colors.action.primary : theme.colors.brand.teal
-    const syncRoute = () => setRouteName(navigationRef.getCurrentRoute()?.name)
     const navigationTheme = {
         ...DefaultTheme,
         colors: {
@@ -108,7 +102,7 @@ export default function RootNavigator() {
     )
 
     return (
-        <NavigationContainer ref={navigationRef} linking={linking} theme={navigationTheme} onReady={syncRoute} onStateChange={syncRoute}>
+        <NavigationContainer ref={navigationRef} linking={linking} theme={navigationTheme}>
             {!token ? (
                 <Stack.Navigator screenOptions={{ headerShown: false }}>
                     <Stack.Screen name="Auth" component={AuthNavigator} />
@@ -116,8 +110,8 @@ export default function RootNavigator() {
             ) : (
                 <AuthenticatedChromeContext.Provider value={true}>
                     <View style={{ flex: 1, backgroundColor: theme.colors.surface.canvas }}>
-                        <SafeAreaView edges={['top']} style={{ backgroundColor: headerColor }}>
-                            <AppHeader tone={tone} onProfilePress={openAccount} />
+                        <SafeAreaView edges={['top']} style={{ backgroundColor: theme.colors.surface.canvas }}>
+                            <AppHeader onProfilePress={openAccount} />
                         </SafeAreaView>
                         <View style={{ flex: 1 }}>{sessions}</View>
                     </View>

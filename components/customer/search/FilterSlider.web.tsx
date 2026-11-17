@@ -61,9 +61,7 @@ function SliderTrack({
           border: 0; border-radius: ${radius.pill}px;
           background: ${thumbBackground}; cursor: grab;
         }
-        .mg-filter-slider-${id}:focus-visible { outline: none; }
-        .mg-filter-slider-${id}:focus-visible::-webkit-slider-thumb { outline: 3px solid ${colors.action.focus}; outline-offset: 3px; }
-        .mg-filter-slider-${id}:focus-visible::-moz-range-thumb { outline: 3px solid ${colors.action.focus}; outline-offset: 3px; }
+        .mg-filter-slider-${id}:focus-visible { outline: 3px solid ${colors.action.focus}; outline-offset: 3px; }
         .mg-filter-slider-${id}:active::-webkit-slider-thumb { cursor: grabbing; }
         .mg-filter-slider-${id}:active::-moz-range-thumb { cursor: grabbing; }
       `}</style>

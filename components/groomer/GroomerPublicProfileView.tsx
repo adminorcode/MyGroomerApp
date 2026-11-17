@@ -103,7 +103,7 @@ export default function GroomerPublicProfileView({ profile, mode, selectedServic
               >
                 <MGText variant="title" style={{ flex: 1 }}>{service.name}</MGText>
                 {/* R3: valor do atendimento em teal, sobre branco (R5). */}
-                <MGText variant="body" color="teal" style={{ fontWeight: '700' }}>
+                <MGText variant="body" color="money" style={{ fontWeight: '700' }}>
                   A partir de {formatMoney(service.price)}
                 </MGText>
               </View>
@@ -203,12 +203,12 @@ function ServiceOption({ service, selected, onSelect }: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        minHeight: 52,
+        minHeight: 40,
         paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm,
+        paddingVertical: 0,
         marginBottom: spacing.sm,
         borderRadius: radius.lg,
-        borderWidth: selected ? 2 : 1,
+        borderWidth: 1,
         borderColor: selected ? colors.action.primary : colors.border.default,
         // R1: seleção é ação rosa, com texto branco (mesma regra do chip selecionado, CMP-06).
         backgroundColor: selected ? colors.action.primary : colors.surface.default,

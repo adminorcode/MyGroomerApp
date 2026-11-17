@@ -12,7 +12,15 @@ const Stack = createStackNavigator<AuthStackParamList>()
 
 export default function AuthNavigator() {
     return (
-        <Stack.Navigator screenOptions={{headerShown: false}} initialRouteName="Login">
+        <Stack.Navigator
+            initialRouteName="Login"
+            screenOptions={{
+                headerShown: false,
+                // O card em tela cheia usa minHeight 100% e cresce com o formulário.
+                // A altura do pai trava a coluna para o ScrollView voltar a rolar.
+                cardStyle: { flex: 1, height: '100%', overflow: 'hidden' },
+            }}
+        >
             <Stack.Screen name="Welcome" component={WelcomeScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="TutorRegister" component={TutorRegisterScreen} />

@@ -149,7 +149,7 @@ export default function ServiceOfferEditorScreen({ navigation, route }: Props) {
                 <View key={size} style={{ backgroundColor: colors.surface.default, borderRadius: radius.md, padding: spacing.md, gap: spacing.xs }}>
                   <MGText variant="label">{SIZE_LABELS[size]}</MGText>
                   {price.ok && price.value != null ? (
-                    <MGText variant="numeric" color="teal">{formatMoney(price.value)}</MGText>
+                    <MGText variant="numeric" color="money">{formatMoney(price.value)}</MGText>
                   ) : (
                     <MGText variant="bodySmall">Preço não informado</MGText>
                   )}
