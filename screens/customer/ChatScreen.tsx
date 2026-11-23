@@ -22,7 +22,7 @@ import ChatHeader from '../../components/chat/ChatHeader'
 import ChatInputBar from '../../components/chat/ChatInputBar'
 import MessageBubble from '../../components/chat/MessageBubble'
 import ChatDateSeparator, { formatDateLabel } from '../../components/chat/ChatDateSeparator'
-import { MGErrorState, MGText } from '../../design-system/components'
+import { MGEmptyState, MGErrorState, MGScreen, MGText } from '../../design-system/components'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { useAuthenticatedChrome } from '../../navigation/authenticatedChrome'
 import { spacing } from '../../design-system/tokens'
@@ -173,55 +173,58 @@ const ChatScreen = ({ navigation, route }: Props) => {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.surface.canvas }]} edges={chrome ? ['bottom'] : ['top', 'bottom']}>
-      <View style={styles.headerWrapper}>
-        <MGText variant="heading2" accessibilityRole="header" style={styles.title}>
-          Conversa
-        </MGText>
-        <ChatHeader
-          name={otherName ?? 'Conversa'}
-          avatarTone={currentRole === 'provider' ? 'pink' : 'teal'}
-          onBack={() => navigation.goBack()}
-        />
-      </View>
-
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior='padding'
+        behavior="padding"
         keyboardVerticalOffset={Platform.OS === 'ios' ? spacing.sm : 0}
       >
-        {isLoading ? (
-          <View style={styles.centered}>
-            <ActivityIndicator accessibilityLabel="Carregando conversa" size="large" color={colors.action.primary} />
-          </View>
-        ) : isError ? (
-          <View style={styles.centered}>
-            <MGErrorState message="Não foi possível carregar esta conversa." onRetry={() => refetch()} />
-          </View>
-        ) : (
-          <FlatList
-            inverted
-            data={listItems}
-            onEndReached={() => { if (hasNextPage) fetchNextPage() }}
-            onEndReachedThreshold={0.5}
-            style={styles.list}
-            contentContainerStyle={styles.listContent}
-            keyExtractor={(item) => item.type === 'date' ? item.id : item.message.id}
-            renderItem={renderItem}
-            showsVerticalScrollIndicator={false}
-            ListEmptyComponent={
-              <View style={styles.centered}>
-                <MGText variant="body" color="secondary" style={styles.message}>
-                  Nenhuma mensagem ainda. Diga olá!
-                </MGText>
-              </View>
-            }
+        <MGScreen
+          safeArea={false}
+          contentStyle={styles.screenBody}
+          footer={(
+            <View style={styles.inputStack}>
+              {!isConnected ? <MGText variant="bodySmall" color="secondary">Conectando ao chat...</MGText> : null}
+              <ChatInputBar value={draft} onChangeText={setDraft} onSend={handleSend} disabled={!isConnected} />
+            </View>
+          )}
+        >
+          <MGText variant="heading2" accessibilityRole="header">Conversa</MGText>
+          <ChatHeader
+            name={otherName ?? 'Conversa'}
+            avatarTone={currentRole === 'provider' ? 'pink' : 'teal'}
+            onBack={() => navigation.goBack()}
           />
-        )}
-
-        <View style={styles.inputWrapper}>
-          {!isConnected && <MGText variant="bodySmall" color="secondary">Conectando ao chat...</MGText>}
-          <ChatInputBar value={draft} onChangeText={setDraft} onSend={handleSend} disabled={!isConnected} />
-        </View>
+          {isLoading ? (
+            <View style={styles.centered}>
+              <ActivityIndicator accessibilityLabel="Carregando conversa" size="large" color={colors.action.primary} />
+              <MGText>Carregando conversa</MGText>
+            </View>
+          ) : isError ? (
+            <View style={styles.centered}>
+              <MGErrorState message="Não foi possível carregar esta conversa." onRetry={() => refetch()} />
+            </View>
+          ) : (
+            <FlatList
+              inverted
+              data={listItems}
+              onEndReached={() => { if (hasNextPage) fetchNextPage() }}
+              onEndReachedThreshold={0.5}
+              style={styles.list}
+              contentContainerStyle={styles.listContent}
+              keyExtractor={(item) => item.type === 'date' ? item.id : item.message.id}
+              renderItem={renderItem}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={
+                <View style={styles.emptyFlip}>
+                  <MGEmptyState
+                    title="Nenhuma mensagem ainda"
+                    description="Diga olá!"
+                  />
+                </View>
+              }
+            />
+          )}
+        </MGScreen>
       </KeyboardAvoidingView>
     </SafeAreaView>
   )
@@ -237,11 +240,9 @@ const styles = StyleSheet.create({
   flex: {
     flex: 1,
   },
-  headerWrapper: {
-    paddingHorizontal: layout.screenPadding,
-  },
-  title: {
-    marginVertical: spacing.lg,
+  screenBody: {
+    paddingTop: spacing.md,
+    gap: spacing.sm,
   },
   list: {
     flex: 1,
@@ -251,17 +252,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.screenPadding - spacing.xs,
     paddingVertical: spacing.md,
   },
-  inputWrapper: {
-    paddingHorizontal: layout.screenPadding,
+  inputStack: {
+    gap: spacing.xs,
+  },
+  emptyFlip: {
+    transform: [{ scaleY: -1 }],
   },
   centered: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
-  },
-  message: {
-    textAlign: 'center',
+    gap: spacing.sm,
   },
 })
 

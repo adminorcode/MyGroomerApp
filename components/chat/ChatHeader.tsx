@@ -1,8 +1,8 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 import { ChevronLeft, Phone, Video as VideoIcon } from 'lucide-react-native'
-import { useTheme } from '../../context/ThemeContext'
-import { fonts, spacing, typography } from '../../constants/theme'
-import { MGAvatar } from '../../design-system/components'
+import { spacing } from '../../constants/theme'
+import { MGAvatar, MGText } from '../../design-system/components'
+import { useMGTheme } from '../../design-system/theme/useMGTheme'
 
 type Props = {
     name: string
@@ -15,33 +15,29 @@ type Props = {
 
 /** R8: avatar do interlocutor é teal quando é profissional, rosa quando é tutor. */
 export default function ChatHeader({ name, avatarUri, status, onBack, onCall, onVideoCall, avatarTone = 'pink' }: Props & { avatarTone?: 'pink' | 'teal' }) {
-    const { colors } = useTheme()
+    const { colors, radius } = useMGTheme()
 
     return (
-        <View style={[styles.container, { borderColor: colors.border, backgroundColor: colors.surface }]}>
+        <View style={[styles.container, { borderColor: colors.border.default, backgroundColor: colors.surface.default, borderRadius: radius.lg }]}>
             <Pressable accessibilityRole="button" accessibilityLabel="Voltar" onPress={onBack} hitSlop={spacing.sm} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]}>
-                <ChevronLeft size={26} color={colors.text} />
+                <ChevronLeft size={26} color={colors.text.primary} />
             </Pressable>
 
             <MGAvatar name={name} uri={avatarUri} size={40} tone={avatarTone} />
 
             <View style={styles.info}>
-                <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
-                    {name}
-                </Text>
+                <MGText variant="title" numberOfLines={1}>{name}</MGText>
                 {!!status && (
-                    <Text style={[styles.status, { color: colors.textSecondary }]} numberOfLines={1}>
-                        {status}
-                    </Text>
+                    <MGText variant="caption" color="secondary" numberOfLines={1}>{status}</MGText>
                 )}
             </View>
 
             <View style={styles.actions}>
                 {onVideoCall ? <Pressable accessibilityRole="button" accessibilityLabel="Chamada de vídeo" onPress={onVideoCall} hitSlop={spacing.sm}>
-                    <VideoIcon size={22} color={colors.primary} />
+                    <VideoIcon size={22} color={colors.action.primary} />
                 </Pressable> : null}
                 {onCall ? <Pressable accessibilityRole="button" accessibilityLabel="Ligar" onPress={onCall} hitSlop={spacing.sm}>
-                    <Phone size={20} color={colors.primary} />
+                    <Phone size={20} color={colors.action.primary} />
                 </Pressable> : null}
             </View>
         </View>
@@ -55,7 +51,6 @@ const styles = StyleSheet.create({
         paddingVertical: spacing.sm,
         gap: spacing.sm,
         borderWidth: 1,
-        borderRadius: spacing.base,
         marginBottom: spacing.sm,
         paddingHorizontal: spacing.sm,
     },
@@ -65,30 +60,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    avatar: {
-        width: 40,
-        height: 40,
-        borderRadius: 9999,
-    },
-    avatarFallback: {
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    avatarInitial: {
-        fontSize: typography.sizes.md,
-        fontFamily: fonts.semibold,
-    },
     info: {
         flex: 1,
-    },
-    name: {
-        fontSize: typography.sizes.md,
-        fontFamily: fonts.semibold,
-    },
-    status: {
-        fontSize: typography.sizes.xs,
-        fontFamily: fonts.regular,
-        marginTop: 1,
     },
     actions: {
         flexDirection: 'row',

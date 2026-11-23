@@ -1,6 +1,7 @@
 import { AppAlert } from '../../utils/alert'
 import { ReactNode } from 'react'
 import { ActivityIndicator, Pressable, ScrollView, StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
+import ScreenHeader from '../../components/shared/ScreenHeader'
 import {
   Bone,
   Cake,
@@ -135,11 +136,8 @@ export default function ProviderBookingDetailScreen({ navigation, route }: Props
   const [actionError, setActionError] = useState<string | null>(null)
 
     const screenHeader = (
-        <View style={[styles.header, { paddingHorizontal: spacing.base, paddingTop: spacing.md, paddingBottom: spacing.sm, gap: spacing.sm }]}>
-            <Pressable accessibilityRole="button" accessibilityLabel="Voltar" onPress={() => navigation.goBack()} hitSlop={8} style={{ minWidth: 48, minHeight: 48, alignItems: 'center', justifyContent: 'center' }}>
-                <MGIcon name="arrow-left" size={24} color={colors.action.primary} />
-            </Pressable>
-            <MGText variant="heading2" accessibilityRole="header" style={{ flex: 1 }}>Detalhes do agendamento</MGText>
+        <View style={{ paddingHorizontal: spacing.base }}>
+            <ScreenHeader title="Detalhes do agendamento" showBackButton onBack={() => navigation.goBack()} />
         </View>
     )
 
@@ -175,13 +173,16 @@ export default function ProviderBookingDetailScreen({ navigation, route }: Props
   const canReschedule = data.booking_status === BookingStatus.PENDING_CONFIRMATION
     || data.booking_status === BookingStatus.CONFIRMED
   const showProgressAction = data.booking_status === BookingStatus.CONFIRMED
+    || data.booking_status === BookingStatus.EN_ROUTE
     || data.booking_status === BookingStatus.IN_PROGRESS
 
   const progressAction = data.booking_status === BookingStatus.CONFIRMED
-    ? { label: 'Iniciar atendimento', next: BookingStatus.IN_PROGRESS }
-    : data.booking_status === BookingStatus.IN_PROGRESS
-      ? { label: 'Concluir atendimento', next: BookingStatus.COMPLETED }
-      : null
+    ? { label: 'Estou a caminho', next: BookingStatus.EN_ROUTE }
+    : data.booking_status === BookingStatus.EN_ROUTE
+      ? { label: 'Iniciar atendimento', next: BookingStatus.IN_PROGRESS }
+      : data.booking_status === BookingStatus.IN_PROGRESS
+        ? { label: 'Concluir atendimento', next: BookingStatus.COMPLETED }
+        : null
 
   const runStatus = async (next: BookingStatus) => {
     setActionError(null)
@@ -363,7 +364,6 @@ export default function ProviderBookingDetailScreen({ navigation, route }: Props
 
 const styles = StyleSheet.create({
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  header: { flexDirection: 'row', alignItems: 'center' },
   hero: { flexDirection: 'row', alignItems: 'flex-start' },
   heroTitle: { alignItems: 'flex-start', gap: 8 },
   line: { flexDirection: 'row', alignItems: 'flex-start' },

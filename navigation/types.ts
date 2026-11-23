@@ -57,7 +57,6 @@ export type ProfileStackParamList = ProviderEditionStackParamList & {
     Profile: undefined
     PublicProfile: undefined
     PublicProfilePreview: undefined
-    BecomeAProvider: undefined
     Pets: undefined
     PetForm: { petId?: string, providerServiceId?: string } & ChosenServiceAddress
     Addresses: undefined
@@ -98,4 +97,5 @@ export type ProviderRequestsStackParamList = {
 
 export type ProviderServicesStackParamList = ProviderEditionStackParamList & {
     ProfessionalRegistration: undefined
+    SetupReview: undefined
 }

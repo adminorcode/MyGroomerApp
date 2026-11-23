@@ -11,16 +11,19 @@ export type SearchFilterValues = {
   onlyReviewed: boolean
   maxKm: number | null
   sortKey: SearchSort
+  professionalTypeId: string
 }
 
-export function filterSearchProviders(providers: CoverageProvider[], filters: SearchFilterValues, onlyToday: boolean) {
+export function filterSearchProviders(providers: CoverageProvider[], filters: SearchFilterValues, onlyToday: boolean, typeName?: string) {
   const hasPrice = filters.minPrice != null || filters.maxPrice != null
+  const type = typeName?.trim().toLocaleLowerCase('pt-BR')
   const matching: CoverageProvider[] = []
   for (const provider of providers) {
     if (onlyToday && !provider.available_today) continue
     if ((filters.onlyReviewed || filters.minRating != null) && provider.review_count <= 0) continue
     if (filters.minRating != null && Number(provider.average_rating) < filters.minRating) continue
     if (filters.maxKm != null && provider.distance_km > filters.maxKm) continue
+    if (type && !provider.professional_types.some(name => name.toLocaleLowerCase('pt-BR') === type)) continue
     if (!hasPrice) {
       matching.push(provider)
       continue

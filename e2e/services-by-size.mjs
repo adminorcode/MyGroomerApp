@@ -219,7 +219,7 @@ async function run() {
     await fillServiceAddress(tutor, 'Avenida Paulista, São Paulo')
     await openCoverageFilters(tutor)
     await tutor.getByRole('radio', { name: 'Banho', exact: true }).click()
-    await tutor.getByText('Nenhum groomer atende este endereço.').waitFor({ timeout: 15000 })
+    await tutor.getByText('Nenhum profissional atende este endereço.').waitFor({ timeout: 15000 })
     check('AC-01 serviço desativado some para o tutor', !(await tutor.locator('body').innerText()).includes('Groomer de Teste'))
     await tutor.context().close()
 

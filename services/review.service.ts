@@ -5,8 +5,8 @@ export const createReview = async (input:{booking_id:string, rating:number, comm
     return result.data
 }
 
-export const getReviews = async ()=>{
-    const result = await api.get('/reviews')
+export const getReviews = async (providerId?: string)=>{
+    const result = await api.get('/reviews', { params: providerId ? { providerId, limit: 20 } : undefined })
     return result.data
 }
 

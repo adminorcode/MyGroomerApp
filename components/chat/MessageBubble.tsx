@@ -1,7 +1,8 @@
 import { useRef } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { CheckCheck, Check } from 'lucide-react-native'
 import MGEnter from '../../design-system/components/MGEnter'
+import MGText from '../../design-system/components/MGText'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { motion } from '../../design-system/tokens'
 
@@ -26,12 +27,11 @@ function formatBubbleTime(value?: string) {
 }
 
 export default function MessageBubble({ content, timestamp, isOwn, ownRole = 'customer', isSeen, isEdited, isPending, entering = false }: Props) {
-    const { colors, spacing, radius, fonts, textStyles } = useMGTheme()
+    const { colors, spacing, radius } = useMGTheme()
     const enterOnMount = useRef(entering).current
 
     const ownIsTeal = ownRole === 'provider'
     const bubbleColor = isOwn ? (ownIsTeal ? colors.brand.teal : colors.action.primary) : colors.surface.default
-    const textColor = isOwn ? colors.onAction.primary : colors.text.primary
     const metaColor = isOwn ? colors.onAction.primary : colors.text.secondary
 
     const bubble = (
@@ -53,15 +53,15 @@ export default function MessageBubble({ content, timestamp, isOwn, ownRole = 'cu
                         : { borderBottomLeftRadius: radius.sm },
                 ]}
             >
-                <Text style={[styles.content, { color: textColor, fontFamily: fonts.regular, fontSize: textStyles.body.fontSize, lineHeight: 21 }]}>{content}</Text>
+                <MGText variant="body" color={isOwn ? 'inverse' : 'primary'}>{content}</MGText>
 
                 <View style={styles.metaRow}>
                     {isEdited && (
-                        <Text style={[styles.meta, { color: metaColor, fontFamily: fonts.regular }]}>editada</Text>
+                        <MGText variant="caption" color={isOwn ? 'inverse' : 'secondary'}>editada</MGText>
                     )}
-                    <Text style={[styles.meta, { color: metaColor, fontFamily: fonts.regular }]}>
+                    <MGText variant="caption" color={isOwn ? 'inverse' : 'secondary'}>
                         {formatBubbleTime(timestamp)}
-                    </Text>
+                    </MGText>
                     {isOwn && (
                         isPending ? (
                             <Check size={14} color={metaColor} />
@@ -97,16 +97,11 @@ const styles = StyleSheet.create({
     bubble: {
         maxWidth: '80%',
     },
-    content: {},
     metaRow: {
         flexDirection: 'row',
         alignItems: 'center',
         alignSelf: 'flex-end',
         gap: 4,
         marginTop: 2,
-    },
-    meta: {
-        // Revisão UI (027): horário e status em caption (12 pt), não em 10 pt.
-        fontSize: 12,
     },
 })

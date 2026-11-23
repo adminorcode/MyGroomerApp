@@ -225,7 +225,7 @@ async function execute() {
   await tutorPage.close()
 
   const page = await openPage(browser)
-  await loginAccount(page, emails.professional, 'Agenda do groomer')
+  await loginAccount(page, emails.professional, 'Agenda do profissional')
   await openRequests(page)
   await page.getByRole('tab', { name: 'Aceitas', exact: true }).click()
   await page.getByRole('tab', { name: 'Pendentes', exact: true }).click()
@@ -383,7 +383,7 @@ async function execute() {
   await page.close()
 
   const states = await openPage(browser)
-  await loginAccount(states, emails.professional, 'Agenda do groomer')
+  await loginAccount(states, emails.professional, 'Agenda do profissional')
   const gate = { fail: false, delayMs: 2500 }
   await gateRoute(states, `**/api/v1/providers/requests/${ids.bare}/profile`, gate)
   await openRequests(states)
@@ -402,7 +402,7 @@ async function execute() {
   await states.close()
 
   const neighbor = await openPage(browser)
-  await loginAccount(neighbor, emails.other, 'Agenda do groomer')
+  await loginAccount(neighbor, emails.other, 'Agenda do profissional')
   await openRequests(neighbor)
   await openFicha(neighbor, 'Luna').click()
   await neighbor.getByRole('heading', { name: 'Ficha do atendimento' }).waitFor()

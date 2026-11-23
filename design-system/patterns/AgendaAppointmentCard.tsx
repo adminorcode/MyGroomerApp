@@ -121,7 +121,7 @@ export default function AgendaAppointmentCard({
   const partyLine =
     perspective === 'provider'
       ? `para ${customer_name ?? 'tutor'}`
-      : `por ${provider_name ?? 'groomer'}`
+      : `por ${provider_name ?? 'profissional'}`
 
   return (
     <Pressable

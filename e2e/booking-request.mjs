@@ -184,7 +184,8 @@ async function happyPath(page, slot) {
   check('AC-02 resumo não tem taxa', await page.getByLabel(/^Taxa:/).count() === 0 && await page.getByText('Taxa', { exact: true }).count() === 0)
   check('AC-04 resumo não oferece pagamento', await page.getByRole('button', { name: /Pagar|Pix|Cartão/i }).count() === 0)
   check('AC-01 resumo no formato do wireframe T08', await page.getByText(detailsTitle, { exact: true }).count() === 1
-    && await page.getByText('Pagamento', { exact: true }).count() === 1
+    && await page.getByText('Valor estimado', { exact: true }).count() >= 1
+    && await page.getByText('Pagamento', { exact: true }).count() === 0
     && await page.getByText('Valor estimado', { exact: true }).count() === 1)
   await capture(page, 'resumo-390', page.getByText(detailsTitle, { exact: true }))
 

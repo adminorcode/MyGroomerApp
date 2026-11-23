@@ -27,12 +27,7 @@ import {
   feeInput,
   formatCep,
 } from './serviceLocationModel'
-
-const steps = [
-  { id: 'registration', label: 'Cadastro' },
-  { id: 'services', label: 'Serviços' },
-  { id: 'location', label: 'Local' },
-]
+import { providerOnboardingSteps } from './providerOnboardingSteps'
 
 type Props = {
   navigation: StackNavigationProp<ProviderServicesStackParamList, 'ServiceLocation'>
@@ -254,8 +249,12 @@ export default function ServiceLocationScreen({ navigation, route }: Props) {
         travel_fee_mode: travelFeeMode,
         travel_fee_per_km: feeAmount(travelFeeMode, travelFeePerKm),
       })
-      setSavedNotice(true)
-      if (fromProfile) navigation.goBack()
+      if (fromProfile) {
+        setSavedNotice(true)
+        navigation.goBack()
+        return
+      }
+      navigation.navigate('WeeklyAvailability')
     } catch (error) {
       setSaveError(getErrorMessage(error))
     }
@@ -285,18 +284,11 @@ export default function ServiceLocationScreen({ navigation, route }: Props) {
       )}
     >
       <View style={{ gap: spacing.lg, paddingTop: spacing.md, width: '100%', maxWidth: 720, alignSelf: 'center' }}>
-        {fromProfile ? null : <OnboardingStepper steps={steps} currentStepId="location" />}
+        {fromProfile ? null : <OnboardingStepper steps={providerOnboardingSteps} currentStepId="location" />}
         <ProviderSetupIntro
           title={fromProfile ? 'Área de atendimento' : 'Local de atendimento'}
           description="Defina onde você atende. Informe seu endereço-base, o raio de atendimento e como cobra o deslocamento."
         />
-        {fromProfile ? null : (
-          <MGButton
-            label="Disponibilidade semanal"
-            variant="secondary"
-            onPress={() => navigation.navigate('WeeklyAvailability')}
-          />
-        )}
         <AddressPlaceCard>
         <MGTextField
           compact

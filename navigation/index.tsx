@@ -53,6 +53,7 @@ const linking: LinkingOptions<RootParamList> = {
                     Login: 'login',
                     Register: 'register',
                     VerifyEmail: 'verify-email',
+                    ResetPassword: 'reset-password',
                 },
             },
             Provider: {

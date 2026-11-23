@@ -133,7 +133,7 @@ try {
   // --- Hoje (visão padrão) ---
   const page = await openPage(browser)
   await loginProfessional(page)
-  const title = page.getByText('Agenda do groomer', { exact: true })
+  const title = page.getByText('Agenda do profissional', { exact: true })
   await title.waitFor({ timeout: 20000 })
   await page.getByText(/^atendimentos?$/).first().waitFor({ timeout: 20000 })
 

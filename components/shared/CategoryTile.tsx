@@ -1,53 +1,61 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native'
-import { useTheme } from '../../context/ThemeContext'
-import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
-import { MGIcon } from '../../design-system/components'
+import { Pressable, StyleSheet } from 'react-native'
+import { MGIcon, MGIconName, MGText } from '../../design-system/components'
+import { useMGTheme } from '../../design-system/theme/useMGTheme'
 
 type Props = {
     name: string
     onPress: () => void
+    selected?: boolean
+    size?: 'home' | 'compact'
+    icon?: MGIconName
 }
 
-export default function CategoryTile({ name, onPress }: Props) {
-    const { colors } = useTheme()
+function iconFor(name: string): MGIconName {
+    if (/banho/i.test(name)) return 'bath'
+    if (/tosa/i.test(name)) return 'scissors'
+    if (/todos/i.test(name)) return 'grid'
+    return 'paw-print'
+}
+
+export default function CategoryTile({ name, onPress, selected = false, size = 'home', icon }: Props) {
+    const { colors, radius, spacing } = useMGTheme()
+    const compact = size === 'compact'
     return (
         <Pressable
             accessibilityRole="button"
-            accessibilityLabel={name}
+            accessibilityLabel={selected ? `${name}, selecionado` : name}
+            accessibilityState={{ selected }}
             onPress={onPress}
-            style={({ pressed }) => [styles.tile, { backgroundColor: pressed ? colors.selectionSoft : colors.surface, borderColor: colors.border }]}
+            style={({ pressed }) => [
+                compact ? styles.compact : styles.home,
+                {
+                    borderRadius: compact ? radius.control : radius.lg,
+                    backgroundColor: pressed ? colors.surface.canvas : colors.surface.default,
+                    borderWidth: selected ? 2 : 1,
+                    borderColor: selected ? colors.action.primary : colors.border.default,
+                    gap: spacing.xs,
+                    paddingHorizontal: spacing.sm,
+                    paddingVertical: compact ? spacing.sm : spacing.md,
+                },
+            ]}
         >
-           <View style={[styles.iconCircle, { backgroundColor: colors.background }]}>
-                <MGIcon name={/banho/i.test(name) ? 'bath' : /tosa/i.test(name) ? 'scissors' : 'paw-print'} color={colors.text} size={24} />
-            </View>
-            <Text style={[styles.name, { color: colors.text }]}>{name}</Text>
+            <MGIcon name={icon ?? iconFor(name)} size={compact ? 26 : 24} color={selected ? colors.action.primary : colors.text.primary} />
+            <MGText variant="bodySmall" numberOfLines={2} style={{ color: colors.text.primary, textAlign: 'center' }}>{name}</MGText>
         </Pressable>
     )
 }
 
-
 const styles = StyleSheet.create({
-    tile: {
+    home: {
         width: 132,
         minHeight: 112,
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: spacing.md,
-        paddingHorizontal: spacing.sm,
-        borderRadius: borderRadius.lg,
-        borderWidth: 1,
     },
-    iconCircle: {
-        width: 44,
-        height: 44,
-        borderRadius: borderRadius.full,
+    compact: {
+        width: 76,
+        minHeight: 80,
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: spacing.sm,
-    },
-    name: {
-        fontSize: typography.sizes.sm,
-        fontFamily: fonts.medium,
-        textAlign: 'center',
     },
 })

@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { getPublicProfessionalTypes } from '../../services/professionalRegistration.service'
 import { ActivityIndicator, NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native'
 import { ChevronLeft } from 'lucide-react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
@@ -21,6 +23,7 @@ import { GroomerSearchCard } from '../../design-system/patterns'
 import { formatMoney } from '../../utils/formatMoney'
 import { formatRating } from '../../utils/formatRating'
 import { getErrorMessage } from '../../utils/error'
+import CategoryTile from '../../components/shared/CategoryTile'
 import SearchFilterPanel from '../../components/customer/search/SearchFilterPanel'
 import { filterSearchProviders, SearchFilterValues, SearchPanel, SearchSort } from '../../components/customer/search/searchFilters'
 
@@ -31,7 +34,7 @@ type Props = {
 
 type Option = { id: string, name: string }
 type ChosenAddress = { id?: string, address: string, latitude: number, longitude: number }
-type Tab = 'groomers' | 'servicos'
+type Tab = 'profissionais' | 'servicos'
 type ServiceGroup = { id: string, name: string, providers: CoverageProvider[], minPrice: number }
 const PAGE_SIZE = 15
 
@@ -40,7 +43,7 @@ function fromSaved(item: CustomerAddress): ChosenAddress {
 }
 
 function countLabel(count: number) {
-    return count === 1 ? '1 groomer' : `${count} groomers`
+    return count === 1 ? '1 profissional' : `${count} profissionais`
 }
 
 function categoryIcon(name: string): MGIconName {
@@ -85,7 +88,7 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
     const [categoryId, setCategoryId] = useState(route.params?.categoryId ?? '')
     const [serviceId, setServiceId] = useState(route.params?.serviceId ?? '')
     const [text, setText] = useState('')
-    const [tab, setTab] = useState<Tab>('groomers')
+    const [tab, setTab] = useState<Tab>('profissionais')
     const [chosen, setChosen] = useState<ChosenAddress | null>(null)
     const [changing, setChanging] = useState(false)
     const [panel, setPanel] = useState<SearchPanel | null>(null)
@@ -98,6 +101,7 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
     const [maxPrice, setMaxPrice] = useState<number | null>(null)
     const [onlyReviewed, setOnlyReviewed] = useState(false)
     const [minRating, setMinRating] = useState<number | null>(null)
+    const [professionalTypeId, setProfessionalTypeId] = useState('')
     const [maxKm, setMaxKm] = useState<number | null>(null)
     const [query, setQuery] = useState<CoverageSearchParams | null>(null)
     const [openServiceId, setOpenServiceId] = useState<string | null>(null)
@@ -108,6 +112,7 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
     const scrollReady = useRef(false)
 
     const catalog = useGetAllServices()
+    const professionalTypes = useQuery({ queryKey: ['professional-types-public'], queryFn: getPublicProfessionalTypes, retry: false })
     const search = useCoverageSearch(query)
     const savedAddresses = useCustomerAddresses()
     const place = useCurrentPlace()
@@ -159,8 +164,9 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
     }
 
     const providers = search.data?.providers ?? []
-    const filterValues: SearchFilterValues = { categoryId, serviceId, minPrice, maxPrice, minRating, onlyReviewed, maxKm, sortKey }
-    const filtered = useMemo(() => filterSearchProviders(providers, { categoryId, serviceId, minPrice, maxPrice, minRating, onlyReviewed, maxKm, sortKey }, onlyToday), [providers, categoryId, serviceId, onlyToday, minPrice, maxPrice, minRating, onlyReviewed, maxKm, sortKey])
+    const filterValues: SearchFilterValues = { categoryId, serviceId, minPrice, maxPrice, minRating, onlyReviewed, maxKm, sortKey, professionalTypeId }
+    const selectedTypeName = professionalTypes.data?.find(type => type.id === professionalTypeId)?.name
+    const filtered = useMemo(() => filterSearchProviders(providers, filterValues, onlyToday, selectedTypeName), [providers, filterValues, onlyToday, selectedTypeName])
 
     const groups = useMemo<ServiceGroup[]>(() => {
         const byId = new Map<string, ServiceGroup>()
@@ -185,12 +191,12 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
     const categoryNames = new Set(categoryOptions.map(item => item.name.toLocaleLowerCase('pt-BR')))
     const serviceShortcuts = ((catalog.data ?? []) as Option[]).filter(item => !categoryNames.has(item.name.toLocaleLowerCase('pt-BR')))
     const savedList = savedAddresses.data ?? []
-    const filterCount = [Boolean(categoryId), Boolean(serviceId), minPrice != null || maxPrice != null, minRating != null || onlyReviewed, maxKm != null, onlyToday].filter(Boolean).length
+    const filterCount = [Boolean(categoryId), Boolean(serviceId), Boolean(professionalTypeId), minPrice != null || maxPrice != null, minRating != null || onlyReviewed, maxKm != null, onlyToday].filter(Boolean).length
     const filterLabel = filterCount === 0 ? 'Filtros' : filterCount === 1 ? 'Filtros, 1 aplicado' : `Filtros, ${filterCount} aplicados`
     const viewing = openServiceId ? groups.find(group => group.id === openServiceId) ?? null : null
     const groomerItems = viewing ? viewing.providers : filtered
     const listItems = tab === 'servicos' && !viewing ? groups : groomerItems
-    const resultKey = `${tab}|${viewing?.id ?? ''}|${onlyToday}|${sortKey}|${minPrice ?? ''}|${maxPrice ?? ''}|${minRating ?? ''}|${onlyReviewed}|${maxKm ?? ''}|${query?.address ?? ''}|${query?.category_id ?? ''}|${query?.service_id ?? ''}|${query?.q ?? ''}|${filtered.length}|${groups.length}`
+    const resultKey = `${tab}|${viewing?.id ?? ''}|${onlyToday}|${sortKey}|${minPrice ?? ''}|${maxPrice ?? ''}|${minRating ?? ''}|${onlyReviewed}|${maxKm ?? ''}|${professionalTypeId}|${query?.address ?? ''}|${query?.category_id ?? ''}|${query?.service_id ?? ''}|${query?.q ?? ''}|${filtered.length}|${groups.length}`
     totalRef.current = listItems.length
 
     useEffect(() => {
@@ -226,7 +232,7 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
         if (panel === 'avaliacao') { setMinRating(value.minRating); setOnlyReviewed(value.onlyReviewed) }
         if (panel === 'raio') setMaxKm(value.maxKm)
         if (panel === 'ordenar') setSortKey(value.sortKey)
-        if (panel === 'filtros') { setCategoryId(value.categoryId); setServiceId(value.serviceId) }
+        if (panel === 'filtros') { setCategoryId(value.categoryId); setServiceId(value.serviceId); setProfessionalTypeId(value.professionalTypeId) }
         setOpenServiceId(null)
         setPanel(null)
     }
@@ -358,10 +364,11 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
                     />
 
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categories}>
-                        <CategoryTile name="Todos" icon="grid" selected={!categoryId && !serviceId} onPress={() => chooseCategory('')} />
+                        <CategoryTile size="compact" name="Todos" icon="grid" selected={!categoryId && !serviceId} onPress={() => chooseCategory('')} />
                         {categoryOptions.map(option => (
                             <CategoryTile
                                 key={option.id}
+                                size="compact"
                                 name={option.name}
                                 icon={categoryIcon(option.name)}
                                 selected={categoryId === option.id && !serviceId}
@@ -369,7 +376,7 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
                             />
                         ))}
                         {serviceShortcuts.map(option => (
-                            <CategoryTile key={`service-${option.id}`} name={option.name} icon={categoryIcon(option.name)} selected={serviceId === option.id} onPress={() => { setCategoryId(''); setServiceId(option.id) }} />
+                            <CategoryTile key={`service-${option.id}`} size="compact" name={option.name} icon={categoryIcon(option.name)} selected={serviceId === option.id} onPress={() => { setCategoryId(''); setServiceId(option.id) }} />
                         ))}
                     </ScrollView>
 
@@ -386,7 +393,7 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
                     </View>
 
                     <View role="tablist" accessibilityLabel="Como explorar" style={[styles.tabs, { borderBottomColor: theme.colors.border.default }]}>
-                        <TabButton label={`Groomers (${filtered.length})`} accessibilityLabel="Groomers" selected={tab === 'groomers'} onPress={() => { setTab('groomers'); setOpenServiceId(null) }} />
+                        <TabButton label={`Profissionais (${filtered.length})`} accessibilityLabel="Profissionais" selected={tab === 'profissionais'} onPress={() => { setTab('profissionais'); setOpenServiceId(null) }} />
                         <TabButton label="Serviços" selected={tab === 'servicos'} onPress={() => setTab('servicos')} />
                     </View>
 
@@ -402,6 +409,7 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
                         {renderedPanel ? (
                             <SearchFilterPanel key={renderedPanel} panel={renderedPanel} value={filterValues}
                                 categories={categoryOptions} categoriesLoading={categories.isLoading} categoriesError={categories.isError}
+                                professionalTypes={professionalTypes.data ?? []}
                                 onRetryCategories={() => { void categories.refetch() }} address={chosen?.address}
                                 onApply={applyPanel} onCancel={() => setPanel(null)} />
                         ) : null}
@@ -412,14 +420,14 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
                         {query === null ? null : !search.data && search.isPaused && !search.isFetching ? (
                             <MGErrorState message="Não foi possível conectar. Verifique sua internet e tente novamente." onRetry={() => search.refetch()} />
                         ) : !search.data && (search.isFetching || !search.isError) ? (
-                            <View style={styles.status} accessibilityLabel="Buscando groomers">
-                                <MGText variant="body" style={styles.message}>Buscando groomers</MGText>
+                            <View style={styles.status} accessibilityLabel="Buscando profissionais">
+                                <MGText variant="body" style={styles.message}>Buscando profissionais</MGText>
                             </View>
                         ) : search.isError && !search.data ? (
                             <MGErrorState message={getErrorMessage(search.error)} onRetry={() => search.refetch()} />
                         ) : filtered.length === 0 ? (
-                            <MGEmptyState title="Nenhum groomer encontrado" description="Nenhum groomer atende este endereço." />
-                        ) : tab === 'groomers' || viewing ? (
+                            <MGEmptyState title="Nenhum profissional encontrado" description="Nenhum profissional atende este endereço." />
+                        ) : tab === 'profissionais' || viewing ? (
                             <>
                                 {viewing ? (
                                     <>
@@ -456,13 +464,13 @@ export default function TutorSearchScreen({ navigation, route }: Props) {
                                         <View style={{ flex: 1, gap: theme.spacing.xs }}>
                                             <MGText variant="title">{group.name}</MGText>
                                             <MGText variant="bodySmall" color="secondary">{countLabel(group.providers.length)}</MGText>
-                                            <MGText variant="bodySmall" color="money" style={{ fontFamily: theme.fonts.bold }}>{`A partir de ${formatMoney(group.minPrice)}`}</MGText>
+                                            <MGText variant="numeric" color="money">{`A partir de ${formatMoney(group.minPrice)}`}</MGText>
                                         </View>
                                         <MGIcon name="chevron-right" size={20} color={theme.colors.text.secondary} />
                                     </Pressable>
                                 ))}
                                 <MGText variant="caption" color="secondary" style={{ marginTop: theme.spacing.sm }}>
-                                    Serviços sem groomer no seu raio não aparecem aqui.
+                                    Serviços sem profissional no seu raio não aparecem aqui.
                                 </MGText>
                             </>
                         )}
@@ -503,30 +511,6 @@ function ProviderCard({ item, favorite, onFavorite, onPress }: { item: CoverageP
             onFavorite={onFavorite}
             onPress={onPress}
         />
-    )
-}
-
-function CategoryTile({ name, icon, selected, onPress }: { name: string, icon: MGIconName, selected: boolean, onPress: () => void }) {
-    const { colors, radius } = useMGTheme()
-    return (
-        <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={selected ? `${name}, selecionado` : name}
-            accessibilityState={{ selected }}
-            onPress={onPress}
-            style={({ pressed }) => [
-                styles.category,
-                {
-                    borderRadius: radius.control,
-                    backgroundColor: pressed ? colors.surface.canvas : colors.surface.default,
-                    borderWidth: selected ? 2 : 1,
-                    borderColor: selected ? colors.action.primary : colors.border.default,
-                },
-            ]}
-        >
-            <MGIcon name={icon} size={26} color={selected ? colors.action.primary : colors.text.primary} />
-            <MGText variant="bodySmall" numberOfLines={2} style={{ color: colors.text.primary, textAlign: 'center' }}>{name}</MGText>
-        </Pressable>
     )
 }
 
@@ -588,7 +572,6 @@ const styles = StyleSheet.create({
     changeLink: { flexDirection: 'row', alignItems: 'center', minHeight: 48 },
     wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
     categories: { gap: spacing.sm, paddingVertical: spacing.md },
-    category: { width: 76, minHeight: 80, alignItems: 'center', justifyContent: 'center', gap: spacing.xs },
     todayRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 48 },
     tabs: { flexDirection: 'row', borderBottomWidth: 1, marginBottom: spacing.md },
     tab: { flex: 1, minHeight: 48, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 3 },

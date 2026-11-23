@@ -1,8 +1,7 @@
-import { useState } from 'react'
-import { Pressable, StyleSheet, TextInput, TextStyle, View } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 import { SendHorizontal } from 'lucide-react-native'
-import { useTheme } from '../../context/ThemeContext'
-import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
+import { MGTextField } from '../../design-system/components'
+import { useMGTheme } from '../../design-system/theme/useMGTheme'
 
 type Props = {
     value: string
@@ -12,47 +11,45 @@ type Props = {
 }
 
 export default function ChatInputBar({ value, onChangeText, onSend, disabled }: Props) {
-    const { colors } = useTheme()
+    const { colors, radius } = useMGTheme()
     const hasText = value.trim().length > 0
-    const [focused, setFocused] = useState(false)
+    const inactive = Boolean(disabled || !hasText)
 
     return (
         <View style={styles.container}>
-            {/* Revisão UI (027): foco no contorno do campo (2 pt, action.focus, como MGTextField), sem o contorno nativo do navegador. */}
-            <View style={[styles.inputWrapper, { backgroundColor: colors.surface, borderColor: focused ? colors.focus : colors.border, borderWidth: focused ? 2 : 1 }]}>
-
-                <TextInput
-                    accessibilityLabel="Mensagem"
-                    style={[styles.input, { color: colors.text, outlineStyle: 'none' } as TextStyle]}
+            <View style={styles.field}>
+                <MGTextField
+                    label="Mensagem"
+                    hideLabel
+                    compact
                     placeholder="Mensagem"
-                    placeholderTextColor={colors.textSecondary}
                     value={value}
                     onChangeText={onChangeText}
-                    onFocus={() => setFocused(true)}
-                    onBlur={() => setFocused(false)}
+                    editable={!disabled}
                     multiline
+                    style={styles.input}
                 />
-
             </View>
 
             <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Enviar mensagem"
                 onPress={hasText ? onSend : undefined}
-                disabled={disabled || !hasText}
-                accessibilityState={{ disabled: Boolean(disabled || !hasText) }}
+                disabled={inactive}
+                accessibilityState={{ disabled: inactive }}
                 style={({ pressed }) => [
                     styles.sendBtn,
                     {
-                        backgroundColor: disabled || !hasText
-                            ? colors.disabled
+                        borderRadius: radius.control,
+                        backgroundColor: inactive
+                            ? colors.state.disabledSurface
                             : pressed
-                              ? colors.primaryPressed
-                              : colors.primary,
+                              ? colors.action.primaryPressed
+                              : colors.action.primary,
                     },
                 ]}
             >
-                <SendHorizontal size={22} color={disabled || !hasText ? colors.onDisabled : colors.onPrimary} />
+                <SendHorizontal size={22} color={inactive ? colors.state.disabledText : colors.onAction.primary} />
             </Pressable>
         </View>
     )
@@ -62,30 +59,17 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         alignItems: 'flex-end',
-        gap: spacing.sm,
-        paddingVertical: spacing.sm,
+        gap: 8,
     },
-    inputWrapper: {
+    field: {
         flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.xs + 2,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
     },
     input: {
-        flex: 1,
-        fontSize: typography.sizes.md,
-        fontFamily: fonts.regular,
         maxHeight: 120,
-        paddingVertical: spacing.xs,
     },
     sendBtn: {
         width: 48,
         height: 48,
-        borderRadius: borderRadius.control,
         alignItems: 'center',
         justifyContent: 'center',
     },

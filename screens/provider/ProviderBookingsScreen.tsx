@@ -102,7 +102,7 @@ export default function ProviderBookingsScreen({ navigation }: Props) {
   return (
     <MGScreen
       header="teal"
-      headerSlot={<MGText variant="heading2" accessibilityRole="header">Agenda do groomer</MGText>}
+      headerSlot={<MGText variant="heading2" accessibilityRole="header">Agenda do profissional</MGText>}
     >
       <View style={{ flex: 1, width: '100%', maxWidth: 720, paddingTop: spacing.md }}>
         <View style={{ flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md }}>

@@ -165,12 +165,12 @@ async function flow(browser) {
   await openCoverageFilters(page)
   await page.getByRole('radio', { name: 'Tosa', exact: true }).click()
   await page.getByRole('button', { name: 'Aplicar', exact: true }).click()
-  await page.getByText('Buscando groomers', { exact: true }).waitFor({ timeout: 5000 })
-  check('AC-08 carregando mostra indicador com texto', await page.getByText('Buscando groomers', { exact: true }).isVisible())
-  await page.getByText('Buscando groomers', { exact: true }).scrollIntoViewIfNeeded()
+  await page.getByText('Buscando profissionais', { exact: true }).waitFor({ timeout: 5000 })
+  check('AC-08 carregando mostra indicador com texto', await page.getByText('Buscando profissionais', { exact: true }).isVisible())
+  await page.getByText('Buscando profissionais', { exact: true }).scrollIntoViewIfNeeded()
   await shot(page, 'mix-09-carregando')
   gate.delayMs = 0
-  await page.getByText('Buscando groomers', { exact: true }).waitFor({ state: 'hidden', timeout: 15000 })
+  await page.getByText('Buscando profissionais', { exact: true }).waitFor({ state: 'hidden', timeout: 15000 })
   await page.getByRole('button', { name: /Groomer de Teste/ }).waitFor({ timeout: 15000 })
 
   // --- Erro de rede: mensagem em texto e ação de nova tentativa ---

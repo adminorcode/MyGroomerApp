@@ -76,8 +76,8 @@ try {
   const alfaText = await alfa.evaluate(node => { let parent = node.parentElement; while (parent && getComputedStyle(parent).borderTopWidth !== '1px') parent = parent.parentElement; return parent?.innerText })
   check('FV2-02 card recalcula oferta e preço exibido', alfaText.includes('140,00') && alfaText.includes('Tosa') && !alfaText.includes('Banho'))
   await page.getByRole('tab', { name: 'Serviços', exact: true }).click()
-  check('FV2-02 grupos de serviços refletem ofertas filtradas', await page.getByRole('button', { name: /Tosa, 1 groomer, a partir de R\$\s*140,00/ }).count() === 1)
-  await page.getByRole('tab', { name: 'Groomers', exact: true }).click()
+  check('FV2-02 grupos de serviços refletem ofertas filtradas', await page.getByRole('button', { name: /Tosa, 1 profissional, a partir de R\$\s*140,00/ }).count() === 1)
+  await page.getByRole('tab', { name: 'Profissionais', exact: true }).click()
   await clearPanel(page, 'Preço')
 
   await open(page, 'Preço')

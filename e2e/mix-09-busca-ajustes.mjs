@@ -182,7 +182,7 @@ try {
 
   // Sem resultado.
   await queryField(page).fill('zzzz sem resultado')
-  await page.getByText('Nenhum groomer encontrado', { exact: true }).waitFor({ timeout: 20000 })
+  await page.getByText('Nenhum profissional encontrado', { exact: true }).waitFor({ timeout: 20000 })
   check('AC-C busca sem resultado mostra estado vazio com texto', true)
   await shot(page, 'ref-vazio')
 
@@ -190,7 +190,7 @@ try {
   await queryField(page).fill('Banho')
   await page.getByRole('button', { name: /Groomer de Teste/ }).first().waitFor({ timeout: 20000 })
   await page.getByRole('tab', { name: 'Serviços', exact: true }).click()
-  const serviceCard = page.getByRole('button', { name: /^Banho, 1 groomer|^Banho, 2 groomers|^Banho, \d+ groomers/ }).first()
+  const serviceCard = page.getByRole('button', { name: /^Banho, 1 profissional|^Banho, \d+ profissionais/ }).first()
   await serviceCard.waitFor({ timeout: 15000 })
   check('AC-F aba Serviços lista o serviço com contagem de groomers', await serviceCard.count() > 0)
   check('AC-F o serviço mostra o preço a partir de', /a partir de/.test(await serviceCard.getAttribute('aria-label') ?? ''))

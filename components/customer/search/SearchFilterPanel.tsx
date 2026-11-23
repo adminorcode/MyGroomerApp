@@ -15,6 +15,7 @@ type Props = {
   categories: Option[]
   categoriesLoading: boolean
   categoriesError: boolean
+  professionalTypes: Option[]
   onRetryCategories: () => void
   address?: string
   onApply: (value: SearchFilterValues) => void
@@ -23,13 +24,13 @@ type Props = {
 
 const SORTS: { id: SearchSort, name: string, description: string }[] = [
   { id: 'relevance', name: 'Relevância', description: 'Usa a ordem padrão da busca.' },
-  { id: 'price', name: 'Menor preço', description: 'Exibe primeiro os groomers com menor preço.' },
-  { id: 'rating', name: 'Melhor avaliação', description: 'Exibe primeiro os groomers com as melhores notas.' },
-  { id: 'distance', name: 'Mais próximos', description: 'Exibe primeiro os groomers mais perto do endereço informado.' },
-  { id: 'today', name: 'Disponíveis hoje', description: 'Prioriza groomers com horários hoje, mantendo os demais na lista.' },
+  { id: 'price', name: 'Menor preço', description: 'Exibe primeiro os profissionais com menor preço.' },
+  { id: 'rating', name: 'Melhor avaliação', description: 'Exibe primeiro os profissionais com as melhores notas.' },
+  { id: 'distance', name: 'Mais próximos', description: 'Exibe primeiro os profissionais mais perto do endereço informado.' },
+  { id: 'today', name: 'Disponíveis hoje', description: 'Prioriza profissionais com horários hoje, mantendo os demais na lista.' },
 ]
 
-export default function SearchFilterPanel({ panel, value, categories, categoriesLoading, categoriesError, onRetryCategories, address, onApply, onCancel }: Props) {
+export default function SearchFilterPanel({ panel, value, categories, categoriesLoading, categoriesError, professionalTypes, onRetryCategories, address, onApply, onCancel }: Props) {
   const theme = useMGTheme()
   const [draft, setDraft] = useState({ ...value })
   const [minimum, setMinimum] = useState(value.minPrice?.toLocaleString('pt-BR', { useGrouping: false }) ?? '')
@@ -49,7 +50,7 @@ export default function SearchFilterPanel({ panel, value, categories, categories
     if (panel === 'preco') setPrice(null, null)
     if (panel === 'avaliacao') setDraft({ ...draft, minRating: null, onlyReviewed: false })
     if (panel === 'raio') setDraft({ ...draft, maxKm: null })
-    if (panel === 'filtros') setDraft({ ...draft, categoryId: '', serviceId: '' })
+    if (panel === 'filtros') setDraft({ ...draft, categoryId: '', serviceId: '', professionalTypeId: '' })
   }
   const lower = typeof parsedMin === 'number' ? Math.min(parsedMin, 300) : 0
   const upper = typeof parsedMax === 'number' ? Math.min(parsedMax, 300) : 300
@@ -67,7 +68,7 @@ export default function SearchFilterPanel({ panel, value, categories, categories
     <View accessibilityLabel={titles[panel]} style={[styles.panel, theme.elevation.low, { backgroundColor: theme.colors.surface.default, borderRadius: theme.radius.lg, borderColor: theme.colors.border.default }]}>
       <MGText variant="heading3" accessibilityRole="header">{titles[panel]}</MGText>
       {panel === 'ordenar' ? <>
-        <MGText variant="bodySmall" color="secondary">Escolha como exibir os groomers na lista.</MGText>
+        <MGText variant="bodySmall" color="secondary">Escolha como exibir os profissionais na lista.</MGText>
         <View accessibilityRole="radiogroup" accessibilityLabel="Ordenar resultados" style={styles.stack}>
           {SORTS.map(option => <RadioRow key={option.id} label={option.name} description={option.description} selected={draft.sortKey === option.id} onPress={() => setDraft({ ...draft, sortKey: option.id })} />)}
         </View>
@@ -100,7 +101,7 @@ export default function SearchFilterPanel({ panel, value, categories, categories
           <MGText variant="label" style={styles.flex}>Somente profissionais com avaliações</MGText>
           <View pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants" aria-hidden style={{ width: 48, height: 28, padding: theme.spacing.xxs, borderRadius: theme.radius.pill, backgroundColor: draft.onlyReviewed ? theme.colors.action.primary : theme.colors.border.strong, alignItems: draft.onlyReviewed ? 'flex-end' : 'flex-start', justifyContent: 'center' }}><View style={{ width: 24, height: 24, borderRadius: theme.radius.pill, backgroundColor: theme.colors.surface.default }} /></View>
         </Pressable>
-        <Hint>Filtre os groomers pela avaliação recebida de outros tutores.</Hint>
+        <Hint>Filtre os profissionais pela avaliação recebida de outros tutores.</Hint>
       </> : null}
       {panel === 'raio' ? <>
         <View style={styles.wrap} accessibilityRole="radiogroup" accessibilityLabel="Limite de distância">
@@ -109,9 +110,13 @@ export default function SearchFilterPanel({ panel, value, categories, categories
         <FilterSlider label="Raio em quilômetros" value={draft.maxKm ?? 20} minimumValue={0} maximumValue={20} step={1} onValueChange={maxKm => setDraft({ ...draft, maxKm })} />
         <View style={styles.between}>{[0, 20].map(km => <MGText key={km} variant="caption" color="secondary">{km} km</MGText>)}</View>
         <View style={[styles.radiusSummary, { backgroundColor: theme.colors.surface.canvas, borderColor: theme.colors.border.default, borderRadius: theme.radius.md }]}><MGIcon name="map-pin" size={20} /><MGText variant="bodySmall">Raio selecionado: <MGText variant="label">{draft.maxKm == null ? 'Sem limite' : `${draft.maxKm} km`}</MGText></MGText></View>
-        <Hint>Distância até o endereço do atendimento{address ? ` (${address})` : ''}. O groomer precisa atender esse endereço dentro do próprio raio.</Hint>
+        <Hint>Distância até o endereço do atendimento{address ? ` (${address})` : ''}. O profissional precisa atender esse endereço dentro do próprio raio.</Hint>
       </> : null}
       {panel === 'filtros' ? <>
+        <MGText variant="label" color="teal">Tipo de profissional</MGText>
+        <View style={styles.wrap} accessibilityRole="radiogroup" accessibilityLabel="Tipo de profissional">
+          {professionalTypes.map(option => <Choice key={option.id} label={option.name} selected={draft.professionalTypeId === option.id} onPress={() => setDraft({ ...draft, professionalTypeId: draft.professionalTypeId === option.id ? '' : option.id })} />)}
+        </View>
         <MGText variant="label" color="teal">Modalidade</MGText>
         <View style={styles.wrap} accessibilityRole="radiogroup" accessibilityLabel="Modalidade">
           {categories.map(option => <Choice key={option.id} label={option.name} selected={draft.categoryId === option.id} onPress={() => setDraft({ ...draft, categoryId: draft.categoryId === option.id ? '' : option.id, serviceId: '' })} />)}

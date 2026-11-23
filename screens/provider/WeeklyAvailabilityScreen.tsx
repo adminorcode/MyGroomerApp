@@ -118,7 +118,7 @@ export default function WeeklyAvailabilityScreen({ navigation, route }: Props) {
         navigation.goBack()
         return
       }
-      setSavedNotice(true)
+      navigation.navigate('SetupReview')
     } catch (error) {
       setSaveError(getErrorMessage(error))
     }

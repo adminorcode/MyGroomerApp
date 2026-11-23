@@ -101,7 +101,7 @@ try {
   check('AC-07 detalhes em cartão de raio 16 com borda 1 pt', details?.borderWidth === '1px' && details?.radius === '16px', JSON.stringify(details))
 
   // CMP-08 / R7 / AC-06: bloco de valor em bilhete, com recorte tracejado entre os dois blocos.
-  check('AC-06 bloco de valor do detalhe aparece como bilhete com título Pagamento', await activeText(page, 'Pagamento').isVisible())
+  check('AC-06 bloco de valor do detalhe aparece como bilhete com título Valor estimado', await activeText(page, 'Valor estimado').isVisible())
   const ticket = await page.locator('div').evaluateAll(nodes => {
     const dashed = nodes.find(node => getComputedStyle(node).borderTopStyle === 'dashed' && node.offsetWidth > 0)
     if (!dashed) return null

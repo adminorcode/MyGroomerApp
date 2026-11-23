@@ -47,7 +47,7 @@ try {
   await capture(page, 'discovery-search-error')
   gate.fail = false; gate.delayMs = 1000
   await page.getByRole('button', { name: 'Tentar novamente', exact: true }).click()
-  await page.getByLabel('Buscando groomers', { exact: true }).waitFor()
+  await page.getByLabel('Buscando profissionais', { exact: true }).waitFor()
   check('VIS-07 busca recupera erro sem bloquear o endereço', await page.getByRole('button', { name: 'Trocar endereço', exact: true }).isEnabled())
   const professional = page.getByRole('button', { name: new RegExp(professionalName) })
   await professional.waitFor({ timeout: 15000 })

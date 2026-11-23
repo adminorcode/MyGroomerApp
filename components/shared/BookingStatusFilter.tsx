@@ -13,6 +13,7 @@ export const BOOKING_STATUS_FILTERS: BookingStatusFilterOption[] = [
     { label: 'Pagamento pendente', value: BookingStatus.PENDING_PAYMENT },
     { label: 'Aguardando confirmação', value: BookingStatus.PENDING_CONFIRMATION },
     { label: 'Confirmado', value: BookingStatus.CONFIRMED },
+    { label: 'Em deslocamento', value: BookingStatus.EN_ROUTE },
     { label: 'Em andamento', value: BookingStatus.IN_PROGRESS },
     { label: 'Concluído', value: BookingStatus.COMPLETED },
     { label: 'Cancelado', value: BookingStatus.CANCELLED },

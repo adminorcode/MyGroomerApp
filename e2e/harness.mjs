@@ -102,7 +102,7 @@ export async function loginProfessional(page, account = fixtures.groomer) {
   await page.getByRole('textbox', { name: 'E-mail' }).fill(account.email)
   await page.getByRole('textbox', { name: 'Senha' }).fill(account.password)
   await page.getByRole('button', { name: 'Entrar' }).click()
-  await page.getByText('Agenda do groomer').waitFor({ timeout: 20000 })
+  await page.getByText('Agenda do profissional').waitFor({ timeout: 20000 })
 }
 
 const apiBase = `${apiUrl}/api/v1`

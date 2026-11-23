@@ -164,7 +164,7 @@ try {
   await loginTutor(empty)
   await openMessages(empty)
   await openConversation(empty, 'Conversa com Groomer de Teste')
-  const emptyText = await firstVisible(empty.getByText('Nenhuma mensagem ainda. Diga olá!', { exact: true }))
+  const emptyText = await firstVisible(empty.getByText('Nenhuma mensagem ainda', { exact: true }))
   await emptyText.waitFor({ timeout: 15000 }).catch(() => {})
   check('AC-08 conversa vazia orienta o primeiro envio com texto', await emptyText.isVisible())
   await shot(empty, 'chat-vazio')

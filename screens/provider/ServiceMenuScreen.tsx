@@ -6,7 +6,7 @@ import { RouteProp } from '@react-navigation/core'
 import { MGButton, MGEmptyState, MGScreen, MGText } from '../../design-system/components'
 import { OnboardingStepper, ServiceEditorCard } from '../../design-system/patterns'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
-import { useGetProviderMenu, useSaveProviderMenu } from '../../hooks/useProviders'
+import { useGetProviderMenu, useGetServiceLocation, useGetWeeklyAvailability, useSaveProviderMenu } from '../../hooks/useProviders'
 import { ProviderServicesStackParamList } from '../../navigation/types'
 import { formatMoney } from '../../utils/formatMoney'
 import { getErrorMessage } from '../../utils/error'
@@ -22,11 +22,7 @@ import {
   toMenuPayload,
 } from './serviceMenuModel'
 
-const steps = [
-  { id: 'registration', label: 'Cadastro' },
-  { id: 'services', label: 'Serviços' },
-  { id: 'location', label: 'Local' },
-]
+import { providerOnboardingSteps } from './providerOnboardingSteps'
 
 type Props = {
   navigation: StackNavigationProp<ProviderServicesStackParamList, 'ServiceMenu'>
@@ -54,15 +50,22 @@ export default function ServiceMenuScreen({ navigation, route }: Props) {
   const { spacing } = useMGTheme()
   const draft = useServiceMenuDraft()
   const menu = useGetProviderMenu()
+  const location = useGetServiceLocation()
+  const routine = useGetWeeklyAvailability()
   const save = useSaveProviderMenu()
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [savedNotice, setSavedNotice] = useState(false)
   const fromProfile = route.params?.origin === 'profile'
+  const setupReady = Boolean(location.data?.address?.trim())
+    && Boolean(routine.data && Object.values(routine.data.days).some(day => day.enabled))
+  const editing = fromProfile || setupReady
 
   useEffect(() => {
     if (menu.data && !draft.state) draft.load(menu.data)
   }, [menu.data, draft.state, draft.load])
 
-  const waiting = menu.isLoading || (menu.isFetching && !menu.data) || (!!menu.data && !draft.state && !menu.isError)
+  const deciding = !fromProfile && (location.isLoading || routine.isLoading)
+  const waiting = deciding || menu.isLoading || (menu.isFetching && !menu.data) || (!!menu.data && !draft.state && !menu.isError)
   const issue = draft.state
     ? menuIssue(draft.state.offers, new Set(draft.state.types.map(type => type.id)))
     : null
@@ -73,11 +76,16 @@ export default function ServiceMenuScreen({ navigation, route }: Props) {
   const publish = async () => {
     if (!draft.state || empty || issue) return
     setSaveError(null)
+    setSavedNotice(false)
     try {
       const result = await save.mutateAsync(toMenuPayload(draft.state.offers))
       draft.load(result.data)
       if (fromProfile) {
         navigation.goBack()
+        return
+      }
+      if (editing) {
+        setSavedNotice(true)
         return
       }
       navigation.navigate('ServiceLocation')
@@ -95,16 +103,18 @@ export default function ServiceMenuScreen({ navigation, route }: Props) {
       onRetry={() => { void menu.refetch() }}
       footer={(
         <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+          {editing && !fromProfile ? null : (
+            <View style={{ flex: 1 }}>
+              <MGButton
+                label="Voltar"
+                variant="secondary"
+                onPress={() => (fromProfile ? navigation.goBack() : navigation.navigate('ProfessionalRegistration'))}
+              />
+            </View>
+          )}
           <View style={{ flex: 1 }}>
             <MGButton
-              label="Voltar"
-              variant="secondary"
-              onPress={() => (fromProfile ? navigation.goBack() : navigation.navigate('ProfessionalRegistration'))}
-            />
-          </View>
-          <View style={{ flex: 1 }}>
-            <MGButton
-              label={fromProfile ? 'Salvar' : 'Continuar'}
+              label={editing ? 'Salvar' : 'Continuar'}
               onPress={() => { void publish() }}
               disabled={!!issue || empty || save.isPending}
               loading={save.isPending}
@@ -114,9 +124,9 @@ export default function ServiceMenuScreen({ navigation, route }: Props) {
       )}
     >
       <View style={{ gap: spacing.lg, paddingTop: spacing.md, width: '100%', maxWidth: 720, alignSelf: 'center' }}>
-        {fromProfile ? null : <OnboardingStepper steps={steps} currentStepId="services" />}
+        {editing ? null : <OnboardingStepper steps={providerOnboardingSteps} currentStepId="services" />}
         <ProviderSetupIntro
-          title={fromProfile ? 'Serviços e preços' : 'Dados do serviço'}
+          title={editing ? 'Serviços e preços' : 'Dados do serviço'}
           description="Monte seu cardápio: defina os serviços, preços e duração por porte. Essas informações aparecem para o tutor ao agendar."
         />
         <MGButton
@@ -129,6 +139,9 @@ export default function ServiceMenuScreen({ navigation, route }: Props) {
           <MGText variant="bodySmall" color="error" accessibilityRole="alert">
             {issue}
           </MGText>
+        ) : null}
+        {savedNotice ? (
+          <MGText variant="bodySmall" color="success" accessibilityRole="alert">Cardápio salvo.</MGText>
         ) : null}
         {saveError ? (
           <MGText variant="bodySmall" color="error" accessibilityRole="alert">

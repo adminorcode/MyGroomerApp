@@ -113,7 +113,13 @@ async function openAvailability(page) {
   await page.getByText('Dados do serviço', { exact: true }).waitFor({ timeout: 20000 })
   await waitEnabled(page)
   await button(page, 'Continuar').click()
-  await button(page, 'Disponibilidade semanal').click()
+  await page.getByRole('heading', { name: 'Local de atendimento', exact: true }).waitFor({ timeout: 20000 })
+  await waitEnabled(page)
+  await button(page, 'Continuar').click()
+  await page.getByRole('heading', { name: 'Disponibilidade', exact: true })
+    .or(page.getByText('Não foi possível conectar. Verifique sua internet e tente novamente.'))
+    .first()
+    .waitFor({ timeout: 20000 })
 }
 
 async function boxOf(locator) {
@@ -191,20 +197,25 @@ async function runMainFlow(browser) {
   await shot(page, 'disponibilidade-editor')
 
   // Passos: concluídos em teal e atual em rosa-texto (CMP-19).
-  const stepper = page.getByLabel('Passo 4 de 4: Horários')
+  const stepper = page.getByLabel('Passo 4 de 5: Horários')
   check('CMP-19 passo atual Horários usa rosa-texto', await textColorOf(stepper, 'Horários') === TEXT_PINK)
   check('CMP-19 passos concluídos usam teal', await textColorOf(stepper, 'Local') === TEAL, await textColorOf(stepper, 'Local'))
 
   // Salvar: aviso de rotina salva com semântica de sucesso e texto.
   await button(page, 'Ir para revisão').click()
+  await page.getByRole('heading', { name: 'Revisão', exact: true }).waitFor({ timeout: 15000 })
   const saved = page.getByText('Rotina salva.', { exact: true })
   await saved.waitFor({ timeout: 15000 })
   check('R6 aviso de rotina salva usa semântica de sucesso com texto', await saved.evaluate(el => getComputedStyle(el).color) === SUCCESS)
 
-  // Encaixe ligado e rotina persistida: Incluir atendimento vira CTA em action.primary.
+  // Encaixe ligado e rotina persistida: voltar deixa Incluir atendimento habilitado.
+  await button(page, 'Voltar').click()
+  await page.getByRole('heading', { name: 'Disponibilidade', exact: true }).waitFor({ timeout: 15000 })
   await page.getByRole('switch', { name: 'Encaixe manual' }).click()
   await button(page, 'Ir para revisão').click()
-  await page.getByText('Rotina salva.', { exact: true }).waitFor({ timeout: 15000 })
+  await page.getByRole('heading', { name: 'Revisão', exact: true }).waitFor({ timeout: 15000 })
+  await button(page, 'Voltar').click()
+  await page.getByRole('heading', { name: 'Disponibilidade', exact: true }).waitFor({ timeout: 15000 })
   const enabledInclude = button(page, 'Incluir atendimento')
   await enabledInclude.waitFor()
   const enabledBox = await boxOf(enabledInclude)

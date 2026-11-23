@@ -46,7 +46,7 @@ export default function GroomerSearchCard({
   favorite = false,
   onFavorite,
 }: GroomerSearchCardProps) {
-  const { colors, spacing, radius, fonts, elevation } = useMGTheme()
+  const { colors, spacing, radius, elevation } = useMGTheme()
   if (variant === 'discovery') {
     const ratingText = ratingLabel
       ? `${ratingLabel}${reviewCount > 0 ? ` (${reviewCount} ${reviewCount === 1 ? 'avaliação' : 'avaliações'})` : ''}`
@@ -109,7 +109,7 @@ export default function GroomerSearchCard({
             {priceLabel ? (
               <View style={{ alignItems: 'flex-end', justifyContent: 'flex-end' }}>
                 <MGText variant="caption" color="secondary">A partir de</MGText>
-                <MGText variant="heading3" color="money" style={{ fontFamily: fonts.bold }}>{priceLabel}</MGText>
+                <MGText variant="numeric" color="money">{priceLabel}</MGText>
               </View>
             ) : null}
           </View>
@@ -172,7 +172,7 @@ export default function GroomerSearchCard({
           </MGText>
         ) : null}
         {priceLabel ? (
-          <MGText variant="bodySmall" color="money" numberOfLines={1} style={{ marginTop: spacing.xs, fontFamily: fonts.bold }}>
+          <MGText variant="numeric" color="money" numberOfLines={1} style={{ marginTop: spacing.xs }}>
             {priceLabel}
           </MGText>
         ) : null}

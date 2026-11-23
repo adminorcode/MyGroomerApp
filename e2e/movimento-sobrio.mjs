@@ -92,7 +92,7 @@ try {
     body: JSON.stringify({ data: { address: 'Rua Augusta', latitude: -23.55, longitude: -46.66, providers: [] } }),
   }))
   await retry.click()
-  const empty = page.getByText('Nenhum groomer encontrado', { exact: true })
+  const empty = page.getByText('Nenhum profissional encontrado', { exact: true })
   await empty.waitFor({ timeout: 15000 })
   check('AC-07', await empty.isVisible())
   await shot(page, 'busca-vazio-390')

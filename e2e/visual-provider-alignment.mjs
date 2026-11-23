@@ -67,7 +67,7 @@ try {
   browser = await launchBrowser()
   const page = await openPage(browser)
   await loginProfessional(page)
-  await sizes(page, 'agenda', text(page, 'Agenda do groomer'))
+  await sizes(page, 'agenda', text(page, 'Agenda do profissional'))
   await page.getByRole('button', { name: 'Bloquear horário', exact: true }).click()
   const confirmBlock = page.getByRole('button', { name: 'Confirmar bloqueio', exact: true })
   await confirmBlock.waitFor()

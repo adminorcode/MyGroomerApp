@@ -72,11 +72,13 @@ const BookingDetail = ({ navigation, route }: Props) => {
     const canCancel = cancellableStatuses.includes(data.booking_status)
     const canReview = data.booking_status === BookingStatus.COMPLETED && !data.review_id
     const hasReview = data.booking_status === BookingStatus.COMPLETED && !!data.review_id
+    const canMessageDuringVisit = data.booking_status === BookingStatus.IN_PROGRESS
+        || data.booking_status === BookingStatus.EN_ROUTE
 
     const handleCancel = () => {
         AppAlert.alert(
             'Cancelar agendamento?',
-            runtime.localTest ? 'Cancelar esta reserva de teste? Nenhuma cobrança ou reembolso será realizado.' : 'O reembolso pode ter uma taxa de cancelamento, conforme o horário.',
+            'Esta reserva não tem cobrança. Cancelar não gera estorno.',
             [
                 { text: 'Manter agendamento', style: 'cancel' },
                 { text: 'Cancelar agendamento', style: 'destructive', onPress: () => {
@@ -137,7 +139,7 @@ const BookingDetail = ({ navigation, route }: Props) => {
                     {/* CMP-08 / R7 / AC-06: valor do atendimento em bilhete (só no detalhe do agendamento) */}
                     <View style={styles.block}>
                         <BookingSummary
-                            title="Pagamento"
+                            title="Valor estimado"
                             rows={[]}
                             totalLabel="Valor estimado"
                             totalValue={formatMoney(data.price)}
@@ -226,6 +228,16 @@ const BookingDetail = ({ navigation, route }: Props) => {
                                     fullWidth={false}
                                     />
                                 </>
+                            )
+                        }
+                        {
+                            canMessageDuringVisit && (
+                                <MGButton
+                                    label='Mensagem'
+                                    variant='secondary'
+                                    onPress={handleMessage}
+                                    fullWidth={false}
+                                />
                             )
                         }
                         {

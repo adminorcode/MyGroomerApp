@@ -170,9 +170,9 @@ async function runMainFlow(browser) {
 
   // Sucesso: aviso de salvo com semântica de feedback e texto.
   await continueButton.click()
-  const saved = page.getByText('Local de atendimento salvo.', { exact: true })
-  await saved.waitFor({ timeout: 25000 })
-  check('R6 aviso de local salvo usa semântica de sucesso com texto', await saved.evaluate(el => getComputedStyle(el).color) === SUCCESS)
+  const next = page.getByRole('heading', { name: 'Disponibilidade', exact: true })
+  await next.waitFor({ timeout: 25000 })
+  check('R6 Continuar abre a disponibilidade', await next.isVisible())
   await shot(page, 'endereco-base-salvo')
   await page.context().close()
 }

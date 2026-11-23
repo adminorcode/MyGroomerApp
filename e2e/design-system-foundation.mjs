@@ -144,14 +144,14 @@ async function runTutor(browser) {
 
   await page.getByRole('button', { name: 'Buscar um serviço' }).click()
   await fillServiceAddress(page, 'Avenida Paulista, São Paulo')
-  await page.getByText(/A partir de|Nenhum groomer|Profissionais disponíveis/).first().waitFor({ timeout: 20000 })
+  await page.getByText(/A partir de|Nenhum profissional|Profissionais disponíveis/).first().waitFor({ timeout: 20000 })
   body = await textOf(page)
   const hasGroomerCard =
     body.includes('Marina') ||
     body.includes('groomer') ||
     body.includes('Groomer') ||
     /A partir de|R\$/.test(body) ||
-    body.includes('Nenhum groomer') ||
+    body.includes('Nenhum profissional') ||
     body.includes('não encontrou')
   check('AC-12 busca renderiza resultado ou vazio MG', hasGroomerCard, body.slice(0, 280))
 

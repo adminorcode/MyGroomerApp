@@ -21,7 +21,7 @@ type Props = {
 }
 
 export default function MyBookingsScreen({navigation}: Props) {
-    const { colors, fonts } = useMGTheme()
+    const { colors } = useMGTheme()
     const [statusFilter, setStatusFilter] = useState<BookingStatus | undefined>(undefined)
     const {data:bookings, isLoading, isError, refetch} = useGetBookings(statusFilter)
 
@@ -68,7 +68,7 @@ export default function MyBookingsScreen({navigation}: Props) {
                                 </MGText>
                             </View>
                             {item.price != null ? (
-                                <MGText variant="bodySmall" color="money" style={{ fontFamily: fonts.bold }}>
+                                <MGText variant="numeric" color="money">
                                     {formatMoney(item.price)}
                                 </MGText>
                             ) : null}

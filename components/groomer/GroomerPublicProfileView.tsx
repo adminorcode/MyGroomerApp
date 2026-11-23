@@ -8,6 +8,7 @@ import ProfileGallery from './ProfileGallery'
 import { useAuthorizedImage } from '../../hooks/useAuthorizedImage'
 import { formatMoney } from '../../utils/formatMoney'
 import { areaRadiusLabel, profileRatingLabel, scheduleDays, scheduleText, weekdayLabel } from '../../utils/publicProfile'
+import { useProviderReviews } from '../../hooks/useReviews'
 import { PublicProfile, PublicProfileScheduleDay, PublicProfileService } from '../../types/provider.types'
 
 type Props = {
@@ -24,6 +25,7 @@ export default function GroomerPublicProfileView({ profile, mode, selectedServic
   const days = scheduleDays(profile.schedule)
   const description = profile.attendance_rules?.trim() ? profile.attendance_rules : null
   const services = profile.services ?? []
+  const reviews = useProviderReviews(profile.user_id)
 
   return (
     <View style={{ gap: spacing.lg }}>
@@ -40,6 +42,26 @@ export default function GroomerPublicProfileView({ profile, mode, selectedServic
         ratingLabel={profileRatingLabel(profile.average_rating, profile.review_count)}
         specialties={services.map(service => service.name)}
       />
+
+      <Section icon="star" title="Avaliações">
+        {reviews.isLoading ? (
+          <MGText variant="bodySmall" color="secondary">Carregando avaliações</MGText>
+        ) : reviews.isError ? (
+          <MGText variant="bodySmall" color="secondary">Não foi possível carregar as avaliações.</MGText>
+        ) : reviews.data && reviews.data.length > 0 ? (
+          <View style={{ gap: spacing.sm }}>
+            {reviews.data.map(review => (
+              <View key={review.id} style={{ gap: spacing.xxs }}>
+                <MGText variant="label">{review.author_name?.trim() || 'Tutor'}</MGText>
+                <MGText variant="bodySmall" color="secondary">{`Nota ${review.rating} de 5`}</MGText>
+                {review.comment?.trim() ? <MGText variant="body">{review.comment}</MGText> : null}
+              </View>
+            ))}
+          </View>
+        ) : (
+          <MGText variant="body" color="secondary">Nenhuma avaliação publicada.</MGText>
+        )}
+      </Section>
 
       <Section icon="paw-print" title="Regras de atendimento">
         <MGText variant="body" color={description ? 'primary' : 'secondary'}>
@@ -143,7 +165,7 @@ export default function GroomerPublicProfileView({ profile, mode, selectedServic
 }
 
 function Section({ icon, title, children }: {
-  icon: 'paw-print' | 'map-pin' | 'scissors' | 'clock-3' | 'calendar-days' | 'image'
+  icon: 'paw-print' | 'map-pin' | 'scissors' | 'clock-3' | 'calendar-days' | 'image' | 'star'
   title: string
   children: ReactNode
 }) {
@@ -154,7 +176,7 @@ function Section({ icon, title, children }: {
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
         {/* R3: seções de operação e atendimento do profissional em teal. */}
         <MGIcon name={icon} size={20} color={colors.brand.teal} />
-        <MGText variant="heading3" style={{ flex: 1 }}>{title}</MGText>
+        <MGText variant="heading3" accessibilityRole="header" style={{ flex: 1 }}>{title}</MGText>
       </View>
       {children}
     </View>

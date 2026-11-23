@@ -174,14 +174,7 @@ async function happy(page, slot) {
   check('AC-06 bloco de baixo do bilhete em surface.default com Valor estimado', ticket?.bottomSurface === WHITE && ticket.valueInsideBottom === true, JSON.stringify(ticket))
   check('AC-07 bilhete (destaque) com raio 20 e borda 1 pt', ticket?.radius === '20px' && ticket?.border === '1px', JSON.stringify(ticket))
 
-  // CMP-01: rótulo Pagamento em caixa-alta teal 12 pt, acima do bilhete, sobre o canvas (R5).
-  const payment = activeText(page, 'Pagamento')
-  const paymentStyle = await payment.evaluate(el => {
-    const cs = getComputedStyle(el)
-    return { transform: cs.textTransform, color: cs.color, size: cs.fontSize, surface: (() => { let node = el; while (node && getComputedStyle(node).backgroundColor === 'rgba(0, 0, 0, 0)') node = node.parentElement; return node ? getComputedStyle(node).backgroundColor : '' })() }
-  })
-  check('CMP-01 rótulo Pagamento em caixa-alta teal 12 pt', paymentStyle.transform === 'uppercase' && paymentStyle.color === TEAL && paymentStyle.size === '12px', JSON.stringify(paymentStyle))
-  check('R5 rótulo teal só sobre branco ou canvas', [WHITE, CANVAS].includes(paymentStyle.surface), paymentStyle.surface)
+  check('CMP-01 a solicitação mostra Valor estimado e não rotula Pagamento', await activeText(page, 'Valor estimado').isVisible() && await page.getByText('Pagamento', { exact: true }).count() === 0)
 
   // AC-05 / CMP-01 / AC-04: valor estimado com rótulo visível e priceLarge teal, dentro do bilhete sobre branco.
   check('AC-05 rótulo Valor estimado visível', await activeText(page, 'Valor estimado').count() === 1)

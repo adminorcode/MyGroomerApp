@@ -129,9 +129,9 @@ async function run() {
   check('AC-04 data de rendimento em pt-BR', dateOk(body) || body.includes('Nenhum repasse ainda'))
 
   await page.getByText('Agenda', { exact: true }).click()
-  await page.getByText('Agenda do groomer', { exact: true }).waitFor({ timeout: 15000 })
+  await page.getByText('Agenda do profissional', { exact: true }).waitFor({ timeout: 15000 })
   body = await textOf(page)
-  check('AC-01 painel do groomer', body.includes('Agenda do groomer') && body.includes('Hoje') && body.includes('Bloquear horário'))
+  check('AC-01 painel do groomer', body.includes('Agenda do profissional') && body.includes('Hoje') && body.includes('Bloquear horário'))
   check('AC-02 card do groomer em real', !/\bGHS\b/.test(body) && (moneyOk(body) || body.includes('atendimento') || body.includes('Não há atendimentos')))
 
   await page.context().close()

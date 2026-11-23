@@ -51,12 +51,7 @@ const detailsRows = (
   ]
 }
 
-const paymentFootnote = 'Sujeito ao porte do pet e ao serviço escolhido.'
-
-// AC-05 / CMP-01: rótulo Pagamento em caixa-alta teal. O valor estimado (priceLarge teal) fica no bloco inferior do bilhete.
-function PaymentLabel() {
-  return <MGText variant="eyebrow" color="teal">Pagamento</MGText>
-}
+const paymentFootnote = 'Sujeito ao porte do pet e ao serviço escolhido. Nenhuma cobrança é feita nesta solicitação.'
 
 function AvailabilityNote() {
   const { colors, spacing } = useMGTheme()
@@ -182,7 +177,6 @@ export default function BookingRequestScreen({ navigation, route }: Props) {
               <MGText variant="body">{nextStepMessage}</MGText>
             </View>
           </View>
-          <PaymentLabel />
           <BookingSummary ticket title="Detalhes do serviço" rows={detailsRows(
             booking.provider_name,
             booking.pet_name ?? '',
@@ -243,7 +237,6 @@ export default function BookingRequestScreen({ navigation, route }: Props) {
       )}>
       {header}
       <View style={{ gap: spacing.base }}>
-        {shownPrice != null ? <PaymentLabel /> : null}
         <BookingSummary ticket={shownPrice != null} title="Detalhes do serviço" rows={detailsRows(
           service.data.provider_name,
           pet?.name ?? '',

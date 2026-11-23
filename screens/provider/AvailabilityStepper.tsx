@@ -3,16 +3,13 @@ import MGIcon from '../../design-system/components/MGIcon'
 import MGText from '../../design-system/components/MGText'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 
-const steps = [
-  { id: 'registration', label: 'Cadastro' },
-  { id: 'services', label: 'Serviços' },
-  { id: 'location', label: 'Local' },
-  { id: 'availability', label: 'Horários' },
-]
+import { providerOnboardingSteps } from './providerOnboardingSteps'
+
+const steps = providerOnboardingSteps
 
 export default function AvailabilityStepper() {
   const { colors, spacing } = useMGTheme()
-  const currentIndex = steps.length - 1
+  const currentIndex = Math.max(0, steps.findIndex(step => step.id === 'availability'))
 
   return (
     <View

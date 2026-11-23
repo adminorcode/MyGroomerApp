@@ -193,7 +193,7 @@ async function execute() {
   await page.getByText('Detalhes do agendamento', { exact: true }).waitFor()
   check('AC-05 detalhe', await page.getByRole('button', { name: 'Voltar', exact: true }).isVisible())
   await page.getByRole('button', { name: 'Voltar', exact: true }).click()
-  await page.getByText('Agenda do groomer', { exact: true }).waitFor()
+  await page.getByText('Agenda do profissional', { exact: true }).waitFor()
   // O bloqueio da tela é de hoje, para a linha aparecer na visão Hoje a qualquer hora.
   const free = partsOf(at('13:20'))
   const range = cover(free.time)

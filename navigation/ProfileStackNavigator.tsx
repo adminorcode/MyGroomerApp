@@ -1,6 +1,5 @@
 import { createStackNavigator } from "@react-navigation/stack";
 import ProfileScreen from "../screens/customer/ProfileScreen";
-import BecomeAProvider from "../screens/customer/BecomeAProvider";
 import PetsScreen from "../screens/customer/PetsScreen";
 import PetFormScreen from "../screens/customer/PetFormScreen";
 import AddressesScreen from "../screens/customer/AddressesScreen";
@@ -29,7 +28,6 @@ export function ProfileStackNavigator (){
                 <Stack.Screen name="ServiceOfferEditor" component={ServiceOfferEditorScreen} />
                 <Stack.Screen name="ServiceLocation" component={ServiceLocationScreen} />
                 <Stack.Screen name="WeeklyAvailability" component={WeeklyAvailabilityScreen} />
-                <Stack.Screen name="BecomeAProvider" component={BecomeAProvider} />
                 <Stack.Screen name="Pets" component={PetsScreen} />
                 <Stack.Screen name="PetForm" component={PetFormScreen} />
                 <Stack.Screen name="Addresses" component={AddressesScreen} />

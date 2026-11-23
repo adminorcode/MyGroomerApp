@@ -327,7 +327,7 @@ async function execute() {
   const navTab = label => page.getByRole('tab', { name: label, exact: true })
   const leaveAndReturn = async () => {
     await navTab('Agenda').click()
-    await page.getByText('Agenda do groomer', { exact: true }).waitFor({ timeout: 15000 })
+    await page.getByText('Agenda do profissional', { exact: true }).waitFor({ timeout: 15000 })
     await navTab('Solicitações').click()
     await page.getByText('Solicitações recebidas', { exact: true }).waitFor({ timeout: 15000 })
   }

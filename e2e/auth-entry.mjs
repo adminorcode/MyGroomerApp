@@ -91,7 +91,7 @@ try {
 
   const professional = await openPage(browser)
   await loginProfessional(professional)
-  check('AE-05 profissional entra diretamente no login comum', await professional.getByText('Agenda do groomer', { exact: true }).isVisible())
+  check('AE-05 profissional entra diretamente no login comum', await professional.getByText('Agenda do profissional', { exact: true }).isVisible())
 
   const desktop = await openPage(browser, { viewport: 'desktop' })
   await openLogin(desktop)

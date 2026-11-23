@@ -1,6 +1,6 @@
 import { AppAlert } from '../../utils/alert'
 import { Pressable, StyleSheet, View } from 'react-native'
-import { ChevronRight, IdCard, LogOut, LucideIcon, MapPin, PawPrint, Store } from 'lucide-react-native'
+import { ChevronRight, IdCard, LogOut, LucideIcon, MapPin, PawPrint } from 'lucide-react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { ProfileStackParamList } from '../../navigation/types'
 import { useAuthStore } from '../../store/authStore'
@@ -121,15 +121,6 @@ export default function ProfileScreen({ navigation }: Props) {
           description="Casa, trabalho e outros locais de atendimento"
           icon={MapPin}
           onPress={() => navigation.navigate('Addresses')}
-        />
-      )}
-
-      {user?.role !== 'provider' && (
-        <MenuItem
-          label="Quero ser groomer"
-          description="Ofereça seus serviços e acompanhe os rendimentos"
-          icon={Store}
-          onPress={() => navigation.navigate('BecomeAProvider')}
         />
       )}
 

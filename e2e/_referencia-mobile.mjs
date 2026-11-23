@@ -52,9 +52,9 @@ try {
   openedSearch = true
 }
 if (openedSearch) {
-  await page.getByText('Buscando groomers', { exact: true }).waitFor({ state: 'hidden', timeout: 20000 }).catch(() => {})
+  await page.getByText('Buscando profissionais', { exact: true }).waitFor({ state: 'hidden', timeout: 20000 }).catch(() => {})
   await page.getByRole('button', { name: /^Ver perfil de / }).first()
-    .or(page.getByText('Nenhum groomer encontrado', { exact: true }))
+    .or(page.getByText('Nenhum profissional encontrado', { exact: true }))
     .waitFor({ timeout: 20000 })
   await shot(page, '03-quem-atende.png', 'Quem atende')
 }
@@ -88,7 +88,7 @@ const groomerContext = await browser.newContext({
   locale: 'pt-BR',
 })
 const groomer = await groomerContext.newPage()
-await login(groomer, fixtures.groomer, groomer.getByText('Agenda do groomer', { exact: true }))
+await login(groomer, fixtures.groomer, groomer.getByText('Agenda do profissional', { exact: true }))
 await shot(groomer, '08-agenda.png', 'Agenda')
 await groomer.getByRole('tab', { name: 'Solicitações', exact: true }).click()
 await groomer.getByRole('tab', { name: 'Pendentes', exact: true }).waitFor({ timeout: 20000 })

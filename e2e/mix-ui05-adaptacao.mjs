@@ -133,7 +133,7 @@ try {
   const groomer = await openPage(browser, { viewport: 'mobile' })
   await loginProfessional(groomer)
   await resize(groomer, 320, 760)
-  await groomer.getByText('Agenda do groomer', { exact: true }).waitFor()
+  await groomer.getByText('Agenda do profissional', { exact: true }).waitFor()
   await fits(groomer, 'UI-05 agenda em 320')
   await resize(groomer, 1440, 900)
   await fits(groomer, 'UI-05 agenda em 1440')

@@ -115,7 +115,7 @@ export default function DesignSystemShowcaseScreen({ navigation }: Props) {
           value={field}
           onChangeText={setField}
           placeholder="Ex.: Luna"
-          helperText="Use o nome pelo qual o groomer deve chamar o pet"
+          helperText="Use o nome pelo qual o profissional deve chamar o pet"
         />
         <MGTextField label="Com erro" value="" error="Informe um valor válido" onChangeText={() => undefined} />
 
@@ -177,7 +177,7 @@ export default function DesignSystemShowcaseScreen({ navigation }: Props) {
           title="Nenhum agendamento"
           illustration={<MGArtwork name="professional" width={96} />}
           description="Quando houver pedidos, eles aparecem aqui."
-          actionLabel="Buscar groomer"
+          actionLabel="Buscar profissional"
           onAction={() => undefined}
         />
         <MGErrorState message="Não foi possível carregar os dados." onRetry={() => undefined} />
