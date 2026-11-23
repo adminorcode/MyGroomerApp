@@ -6,20 +6,20 @@ Esta revisão define regras e contratos a implementar; **não afirma que os comp
 
 ## Direção visual
 
-Interface de serviços pet para tutor/profissional, acolhedora, clara e compacta, com Pink & Teal, Inter, superfícies claras e ações evidentes. Manter a hierarquia e os comportamentos úteis da busca, com geometria centralizada em componentes. Compactar o visual não reduz a área de toque adotada pelo projeto: pelo menos 48×48 pt para ações/acionadores; textos e controles podem crescer com conteúdo e escala de fonte.
+Interface de serviços pet para tutor/profissional, acolhedora, clara e compacta, com a paleta e o tipo atuais do guia, superfícies claras e ações evidentes. Manter a hierarquia e os comportamentos úteis da busca, com geometria centralizada em componentes. Botão e campo de uma linha têm 40 pt e `radius.control`. O alvo de 48×48 pt fica no controle que só tem ícone. Textos e controles podem crescer com conteúdo e escala de fonte.
 
 ## Elementos a reutilizar
 
 | Elemento | Base existente | Contrato desejado / alcance | Estado |
 | --- | --- | --- | --- |
-| Ação explícita de card | `MGButton`; Ver perfil em `GroomerSearchCard` | Tamanho/forma nomeados: altura mínima48, cápsula, padding horizontal16, tipografia button, largura intrínseca quando couber. Variantes mantêm a semântica. | Estender MGButton; tamanho/forma ainda não são props implementadas. |
+| Ação explícita de card | `MGButton`; Ver perfil em `GroomerSearchCard` | Altura 40, `radius.control`, padding horizontal `spacing.base`, tipografia button, largura intrínseca quando couber. Variantes mantêm a semântica. | A receita mora no `MGButton`. |
 | Área de ações do card | Rodapés de GroomerSearchCard, RequestCard, ServiceEditorCard | Uma ação alinhada ao final; duas com hierarquia; reflow/empilhamento em largura curta; espaço estável no loading. | Extrair pattern de composição; nome sugerido `CardActions`. |
 | Pílula que abre opções | `Pill` local em TutorSearchScreen | Label compacto, ícone opcional, contador, caret, aberto e aplicado separados. Papel de botão de expansão. | Extrair primitiva; nome sugerido `MGFilterTrigger`. MGChip não oferece esse contrato hoje. |
 | Painel de filtros | Shell/rodapé de SearchFilterPanel | Superfície, título, conteúdo, ações e comportamento de confirmação comuns; campos/regras de domínio ficam na feature. | Extrair shell/pattern; nome sugerido `FilterPanel`. |
 | Escolha em formato chip | MGChip e `Choice` local | Consolidar seleção simples/múltipla, check, estado, disabled e rótulo longo; papel acessível conforme seleção. | Evoluir MGChip; `variant` declarada hoje não é aplicada pelo componente. |
 | Linha de seleção | `RadioRow` local, seleção de serviços no perfil | Ícone/rádio, título, descrição, pressed e checked; grupo identifica seleção única. | Compor primitiva de grupo/linha; nome sugerido `MGRadioGroup`. Não presumir implementação só porque consta no guia. |
 | Linha com interruptor | SearchFilterPanel, AddressFormScreen, WeeklyAvailabilityScreen/Editor | Label e ajuda, alvo inteiro quando apropriado, uma única parada de foco, checked/disabled e acionamento consistente. | Extrair `MGSwitchRow`; escolher implementação por plataforma sem replicar tracks por tela. |
-| Badge com ícone | MGBadge e `Badge` local em GroomerSearchCard | Mesmos tons/ícones, forma cápsula e texto que pode quebrar. Badge informativo não é botão. | Estender MGBadge; não criar outra biblioteca de badges. |
+| Badge com ícone | MGBadge e `Badge` local em GroomerSearchCard | Mesmos tons/ícones, raio do token do badge e texto que pode quebrar. Badge informativo não é botão. | Estender MGBadge; não criar outra biblioteca de badges. |
 | Favorito/ação só com ícone | MGIconButton, favorito local | Alvo48, estados ativo/inativo/pending/disabled, feedback e nome acessível. | Evoluir MGIconButton; domínio/persistência de favorito ficam na feature. |
 | Retrato e fallback | MGAvatar | Reusar circle/rounded já existentes; retrato na descoberta, círculo onde fizer sentido para conta/pet. | Já compartilhado; faltam presets nomeados caso medidas se repitam. |
 | Categorias de serviço | CategoryTile da Home e CategoryTile local da busca | Mesmo mapa semântico de ícones e família visual; variantes de atalho de navegação e seleção compacta. | Unificar pattern, preservando o comportamento de cada contexto. |
@@ -35,7 +35,7 @@ A matriz é de reuso, não um pedido de migração geral imediata. Implementar p
 
 **RUV-02 — Centralizar identidade.** Cor, tipografia, altura, padding, raio e sombra repetidos pertencem a tokens/receitas do componente. Telas podem ajustar disposição, largura e margens do contexto; não devem recriar a aparência do botão, chip ou badge com `style`. Não adicionar props sem efeito só para satisfazer o guia.
 
-**RUV-03 — Ações de cards.** O padrão de ação explícita usa a geometria de Ver perfil. A principal é rosa com texto branco; alternativas usam secondary/tertiary; exclusão/recusa/cancelamento destrutivo mantém a variante semântica e a confirmação pertinente. Uma decisão tem uma ação principal. Não tornar todas as ações rosas nem adicionar um botão em cards cuja única interação já é navegação pela área inteira. Não aninhar ações independentes em um card inteiro clicável.
+**RUV-03 — Ações de cards.** O padrão de ação explícita é o `MGButton` de 40 pt com `radius.control`. A principal usa `action.primary` com texto branco; alternativas usam secondary/tertiary; exclusão/recusa/cancelamento destrutivo mantém a variante semântica e a confirmação pertinente. Uma decisão tem uma ação principal. Não tornar todas as ações da cor primária nem adicionar um botão em cards cuja única interação já é navegação pela área inteira. Não aninhar ações independentes em um card inteiro clicável.
 
 **RUV-04 — Reflow das ações.** Uma ação curta pode ter largura intrínseca. Com duas ações ou rótulos longos, empilhar ou ocupar a largura disponível quando não couberem. Aumentar altura para texto ampliado. Loading não altera largura de forma abrupta, não perde o nome acessível e bloqueia acionamento repetido; pending de uma decisão bloqueia ações concorrentes incompatíveis.
 
@@ -64,7 +64,7 @@ Continuam obrigatórias as skills ui-e2e e ui-review, com harness, um spec por v
 | RV-01 | Componente disponível, props com efeito e export/catalog coerentes | leitura do contrato real + showcase de suas variantes; props previstas não contam como implementadas |
 | RV-02 | Identidade única para a mesma variante; sem override de cor/forma por consumidor | revisão dos consumidores e comparação renderizada no showcase e telas |
 | RV-03 | Default, pressed/focus, selected/expanded/active, loading e disabled conforme aplicabilidade | interação real, não só screenshot default; explicar cada estado não aplicável |
-| RV-04 | Alvo efetivo48 e controles adjacentes sem sobreposição; visual compacto preservado | bounding boxes após estabilizar transições + toque nas bordas; hitSlop isolado não é prova |
+| RV-04 | Botão e campo de uma linha medem 40; controle só de ícone mede 48; vizinhos não se sobrepõem | bounding boxes após estabilizar transições + toque nas bordas; hitSlop isolado não é prova |
 | RV-05 | Nome, papel, checked/pressed/selected/expanded e relação com conteúdo realmente expostos | asserts no DOM/árvore acessível; não apenas busca textual ou inspeção do JSX |
 | RV-06 | Enter/Space acionam; Tab é lógico; tabs de conteúdo têm navegação por setas; Escape/foco obedecem ao modo de apresentação | execução por teclado; foco retorna ao acionador quando uma ação remove o painel e não há novo destino lógico |
 | RV-07 | Rascunho/aplicar/limpar/cancelar e abertura de outro painel | conjunto aplicado e campos observados antes/depois; não inferir efeito por fechamento visual |

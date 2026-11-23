@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Animated, Pressable, StyleSheet, View } from 'react-native'
 import MGIcon from './MGIcon'
-import { MG_CONTROL_HEIGHT } from './MGTextField'
+import { MG_CONTROL_HEIGHT, MG_FIELD_HEIGHT } from './MGTextField'
 import { motion, motionEasing } from '../tokens'
 import { useMGTheme } from '../theme/useMGTheme'
 import { useReduceMotion } from '../theme/useReduceMotion'
@@ -91,7 +91,8 @@ export default function MGChip({
       ? selected ? colors.onAction.primary : colors.text.primary
       : textColor
 
-  const height = Math.min(minHeight, MG_CONTROL_HEIGHT)
+  // Linha de escolha no formulário acompanha o campo. O chip solto mantém o alvo de 48.
+  const height = Math.min(fill ? MG_FIELD_HEIGHT : minHeight, MG_CONTROL_HEIGHT)
 
   return (
     <AnimatedPressable
