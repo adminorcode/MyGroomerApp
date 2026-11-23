@@ -4,9 +4,9 @@
 > **Produto:** My Groomer — marketplace de cuidados pet, inicialmente focado em agendamento de groomers  
 > **Plataformas:** aplicativo móvel iOS/Android em React Native; preparado para compartilhamento futuro de tokens com web/admin  
 > **Idioma da interface:** português do Brasil (`pt-BR`)  
-> **Identidade:** Pink & Teal  
+> **Identidade:** ação `#C83359`, link `#BB003E`, texto `#492F35`  
 > **Status:** especificação v1.0; fases 1–3 do backlog (fundação MG, patterns de domínio e integração das telas existentes) no plano 021 — fase 4 (hardening) pendente  
-> **Versão:** 1.0 — 29/10/2026
+> **Versão:** 1.0 — 29/10/2026. Fundações visuais revistas em 22/11/2026: paleta, tipo, altura de controle e raios.
 
 ---
 
@@ -17,7 +17,7 @@ Este arquivo é a **fonte de verdade para a camada visual e de experiência** do
 **Objetivos obrigatórios:**
 
 1. Implementar interfaces consistentes, reutilizáveis e acessíveis, sem criar um estilo novo a cada tela.
-2. Preservar a identidade **Pink & Teal**, a estrutura visual dos protótipos aprovados e os fluxos funcionais do produto.
+2. Preservar a identidade atual (ação, link e texto da seção 3), a estrutura visual dos protótipos aprovados e os fluxos funcionais do produto.
 3. Separar **tokens → componentes compartilhados → padrões compostos → telas**.
 4. Reutilizar o framework de navegação, formulários, iconografia, bibliotecas e arquitetura **já existentes no repositório** antes de introduzir novas dependências.
 5. Desenvolver em **React Native + TypeScript**, respeitando a stack real do projeto. Não presumir Expo, React Navigation, NativeWind, React Native Paper, Zustand, Redux ou qualquer biblioteca até verificar o `package.json`.
@@ -93,87 +93,91 @@ Guias externos úteis:
 
 ### 3.1. Paleta oficial **confirmada**
 
+Decisão de 22/11/2026. O nome `brand.teal` permanece na API e aponta para o link, não para o verde de dinheiro.
+
 | Token base | HEX | Papel |
 |---|---|---|
-| `brand.pink` | `#D95786` | Cor identitária principal; destaques, acentos, ilustrações, ícones |
-| `brand.pinkLight` | `#F6B5CB` | Acentos suaves e backgrounds decorativos |
-| `brand.teal` | `#167D83` | Confiança, informações e elementos profissionais |
-| `brand.background` | `#F9F8F6` | Background geral, tom off-white acolhedor |
-| `brand.ink` | `#253D42` | Texto principal e títulos |
+| `brand.pink` | `#C83359` | Preenchimento de ação e quadrado da marca |
+| `brand.pinkLight` | `#FFFAFB` | Lavagem suave de seleção e faixas |
+| `brand.teal` | `#BB003E` | Link, ícone, progresso e contorno de ação |
+| `brand.background` | `#F3F4F6` | Fundo geral da tela |
+| `brand.ink` | `#492F35` | Texto principal, títulos e o nome "Tio de Pet" |
 
-Estas **cinco cores** são a escolha de marca aprovada. Preservá-las sem substituição estética arbitrária.
-
-### 3.2. Cores de suporte **propostas para implementação**
-
-> Estes valores são uma formalização técnica inicial, não cores previamente votadas. Podem ser ajustados após review visual e testes de contraste.
+### 3.2. Cores de suporte
 
 | Token | HEX | Uso |
 |---|---|---|
 | `surface.default` | `#FFFFFF` | Cards, folhas, campos, modais |
-| `surface.canvas` | `#F9F8F6` | Fundo de tela |
-| `surface.pinkSubtle` | `#FCE5ED` | Chips, cartões de destaque rosa, avisos suaves |
-| `surface.tealSubtle` | `#E9F3F2` | Cards de informação, área do profissional |
-| `text.primary` | `#253D42` | Corpo e títulos |
-| `text.secondary` | `#60767A` | Texto secundário legível; preferir ao cinza muito claro |
-| `text.inverse` | `#FFFFFF` | Texto sobre fundos escuros aprovados |
-| `border.default` | `#D9E0E1` | Separadores e contornos não críticos |
-| `border.strong` | `#60767A` | Contornos que precisam de maior percepção |
-| `action.primary` | `#C64878` | Fundo rosa próximo da marca, aprovado para botões/seleção com texto branco |
-| `action.primaryPressed` | `#B9406C` | Estado pressionado do botão primário |
-| `action.primaryText` | `#C62669` | Links, rótulos e texto rosa com contraste em superfícies claras |
-| `onAction.primary` | `#FFFFFF` | Texto/ícone branco sobre a ação rosa padrão e pressed |
-| `action.primaryOutline` | `#C62669` | Botão secundário com texto/contorno rosa legível |
-| `action.secondary` | `#167D83` | Botões teal, texto branco, destaques operacionais |
-| `action.focus` | `#167D83` | Destaque de foco e edição |
-| `feedback.success` | `#176B54` | Texto/ícone de sucesso |
-| `feedback.successSurface` | `#E5F5EF` | Fundo de sucesso |
-| `feedback.warning` | `#A53B20` | Texto de alerta |
-| `feedback.warningSurface` | `#FFF1E7` | Fundo de alerta |
-| `feedback.error` | `#B3261E` | Texto de erro |
-| `feedback.errorSurface` | `#FCE8E6` | Fundo de erro |
-| `feedback.info` | `#167D83` | Informação |
-| `overlay.scrim` | `rgba(37,61,66,0.48)` | Fundo de modais |
-| `state.disabledSurface` | `#E4E8E8` | Background de controles desabilitados |
-| `state.disabledText` | `#60767A` | Rótulo em controle desabilitado (visual + estado semântico) |
+| `surface.canvas` | `#F3F4F6` | Fundo de tela |
+| `surface.pinkSubtle` | `#FFFAFB` | Seleção e cartão de destaque |
+| `surface.tealSubtle` | `#FFFAFB` | Mesma lavagem do destaque; o nome antigo permanece |
+| `text.primary` | `#492F35` | Corpo e títulos |
+| `text.secondary` | `#60595B` | Texto secundário |
+| `text.inverse` | `#FFFFFF` | Texto sobre a ação |
+| `text.money` | `#007A77` | Preço e valor. Não usar `brand.teal` para dinheiro |
+| `border.default` | `#C3BEBF` | Separadores e contornos |
+| `border.strong` | `#776F71` | Contorno mais forte |
+| `action.primary` | `#C83359` | Botão e seleção, com texto branco |
+| `action.primaryPressed` | `#A32947` | Botão primário pressionado |
+| `action.primaryText` | `#BB003E` | Link e rótulo de ação |
+| `onAction.primary` | `#FFFFFF` | Texto e ícone sobre a ação |
+| `action.primaryOutline` | `#BB003E` | Botão secundário, texto e contorno |
+| `action.secondary` | `#BB003E` | Variante preenchida de link |
+| `action.focus` | `#6E1830` | Anel de foco ao redor do controle |
+| `feedback.success` | `#2A5817` | Texto e ícone de sucesso |
+| `feedback.successSurface` | `#D4E1CF` | Fundo de sucesso |
+| `feedback.warning` | `#6E3D00` | Texto de alerta |
+| `feedback.warningSurface` | `#EBD9C9` | Fundo de alerta |
+| `feedback.error` | `#8C3A22` | Texto de erro |
+| `feedback.errorSurface` | `#F4E8E4` | Fundo de erro |
+| `feedback.info` | `#004F7C` | Informação |
+| `feedback.infoSurface` | `#CDDFEF` | Fundo de informação |
+| `overlay.scrim` | `rgba(16,12,13,0.48)` | Fundo de modais |
+| `state.disabledSurface` | `#C3BEBF` | Fundo de controle desabilitado |
+| `state.disabledText` | `#8F888A` | Rótulo desabilitado |
+
+`lightColors.secondaryPressed` é `#6E1830`. `lightColors.errorPressed` é `#6E2E1C`. Os dois são derivados do tema, fora de `palette`.
 
 ### 3.3. Regra crítica de contraste
 
-**Decisão de cor aceita em 06/11/2026:** botões e seleções usam `action.primary` (`#C64878`) com `onAction.primary` branco (`#FFFFFF`), contraste 4,57:1. O estado pressed é `#B9406C` (5,23:1 com branco). A marca/decoração mantém `#D95786`; branco pequeno sobre essa cor original tem apenas 3,71:1. Links, texto rosa e outlines continuam `#C62669`. Fundos suaves e teal permanecem preservados. Esta decisão substitui o foreground escuro usado na Consolidated v2.
-
-Outras combinações aprovadas para texto comum:
+**Decisão de cor aceita em 22/11/2026.** O botão usa `#C83359` com texto branco (5,16:1). Pressed `#A32947` com branco fica em 7,08:1. Link, ícone e contorno usam `#BB003E` (6,60:1 no branco e 6,00:1 no canvas). O quadrado da marca usa a cor da ação. O nome "Tio de Pet" permanece em `#492F35`. Dinheiro é `#007A77` (5,18:1 no branco e 4,71:1 no canvas). Erro é `#8C3A22` (7,65:1 no branco e 7,11:1 no canvas). Sucesso permanece reservado a status, não a preço.
 
 | Par de cores | Contraste aprox. | Orientação |
 |---|---:|---|
-| `#253D42` sobre `#F9F8F6` | 10,84:1 | Títulos e corpo |
-| `#60767A` sobre `#FFFFFF` | 4,81:1 | Texto secundário |
-| `#167D83` sobre `#FFFFFF` | 4,89:1 | Texto teal |
-| `#167D83` sobre `#F9F8F6` | 4,61:1 | Texto teal no canvas |
-| `#FFFFFF` sobre `#C64878` | 4,57:1 | Texto de CTA rosa |
-| `#C62669` sobre `#FCE5ED` | 4,53:1 | Texto rosa em chips claros |
-| `#167D83` sobre `#E9F3F2` | 4,32:1 | **Evitar para texto comum**; usar `text.primary` nesse fundo |
+| `#492F35` sobre `#FFFFFF` | 12,06:1 | Títulos e corpo |
+| `#492F35` sobre `#F3F4F6` | 10,96:1 | Títulos e corpo no canvas |
+| `#FFFFFF` sobre `#C83359` | 5,16:1 | Texto do botão |
+| `#FFFFFF` sobre `#A32947` | 7,08:1 | Texto do botão pressionado |
+| `#BB003E` sobre `#FFFFFF` | 6,60:1 | Link e ícone |
+| `#BB003E` sobre `#F3F4F6` | 6,00:1 | Link no canvas |
+| `#007A77` sobre `#FFFFFF` | 5,18:1 | Preço |
+| `#007A77` sobre `#F3F4F6` | 4,71:1 | Preço no canvas |
+| `#8C3A22` sobre `#FFFFFF` | 7,65:1 | Erro |
 
-Os índices são aproximados e precisam ser revalidados nas combinações reais, com opacidade e imagens de fundo.
+Os índices vêm da luminância relativa dessas duplas e precisam ser revalidados quando houver opacidade ou imagem de fundo.
 
 **Decisões:**
 
-- Rosa = identidade e ação principal; teal = apoio, confiança, localização e operação. **Não codificar semântica de sucesso/erro só pela paleta de marca.**
-- Não usar `brand.pinkLight` para texto em superfícies claras.
-- Para botões desabilitados, reduzir ênfase e adicionar `disabled` programático; cor sozinha não basta.
-- Área profissional usa mais superfícies teal; não inverter o significado dos botões em telas distintas.
+- Ação e quadrado da marca compartilham `#C83359`. Link, ícone e progresso compartilham `#BB003E`.
+- Preço usa `text.money` / `MGText color="money"`. `color="teal"` desenha o link.
+- Sucesso, alerta e erro não se codificam com a cor da ação.
+- `brand.pinkLight` é lavagem, não texto.
+- Botão desabilitado reduz a ênfase e recebe `disabled` programático.
+- O anel de foco `#6E1830` contorna o controle. Ele não precisa contrastar com o preenchimento do botão como se fosse texto sobre o botão.
 
 ### 3.4. Papéis semânticos obrigatórios
 
-Uso preferencial em código: `colors.text.primary`, `colors.action.primary`, `colors.surface.canvas`, etc. Componentes de tela não devem referenciar HEX diretamente.
+Uso preferencial em código: `colors.text.primary`, `colors.action.primary`, `colors.surface.canvas`, `colors.text.money`. Componentes de tela não devem referenciar HEX diretamente.
 
 **Interações:**
 
-- Primário padrão: `action.primary` (rosa próximo da marca + `onAction.primary` branco).
+- Primário padrão: `action.primary` com `onAction.primary` branco.
 - Primário pressed: `action.primaryPressed`.
-- Secundário outline: fundo transparente/branco, texto e borda `action.primaryOutline`.
+- Secundário outline: fundo transparente, texto e borda `action.primaryOutline`.
 - Terciário/ghost: texto `action.primaryOutline`, sem borda.
-- Teal filled: `action.secondary`, texto branco.
-- Foco: borda `action.focus` com espessura visível; não depender só de sombra.
-- Erro: borda/ícone `feedback.error`, legenda de erro e `accessibilityState` apropriado quando suportado.
+- Variante `teal`: preenchimento `action.secondary`, texto branco. A cor é a do link.
+- Foco: anel `action.focus` ao redor do controle.
+- Erro: borda e ícone `feedback.error`, legenda de erro e `accessibilityState` quando suportado.
 
 ---
 
@@ -181,36 +185,37 @@ Uso preferencial em código: `colors.text.primary`, `colors.action.primary`, `co
 
 ### 4.1. Família tipográfica
 
-A família oficial da interface é **Inter** (SIL Open Font License 1.1). Os arquivos estáticos ficam em `React App/assets/fonts/` (`Inter-Regular`, `Inter-Medium`, `Inter-SemiBold`, `Inter-Bold`) e a licença em `Inter-OFL.txt`. O logotipo usa **Inter Bold 700**, como o restante da interface.
+O texto da interface usa **Nunito Sans** (`NunitoSans-Regular`, `NunitoSans-Medium`, `NunitoSans-SemiBold`, `NunitoSans-Bold`). Display, preço grande e o logotipo usam **Outfit** (`Outfit-Medium` no peso 600, `Outfit-SemiBold` no peso 700). Os arquivos estáticos ficam em `React App/assets/fonts/`. O nome "Tio de Pet" usa a cor `text.primary`; o quadrado da marca usa `brand.pink`.
 
-| Papel | Estilos | Peso |
+| Papel | Estilos | Família |
 |---|---|---|
-| Títulos principais | `display`, `heading1` | Bold 700 |
-| Títulos de seção | `heading2` em Bold 700; `heading3` e `title` em SemiBold 600 | 600 ou 700 |
-| Textos e descrições | `body`, `bodySmall`, `caption` | Regular 400 |
-| Labels de formulário | `label` | SemiBold 600 |
-| Botões | `button` | SemiBold 600 |
-| Preços e métricas | `numeric` e o valor de preço na tela | Bold 700 |
+| Títulos de abertura | `display`, `heading1` | Outfit Medium |
+| Logotipo e preço grande | `logotype`, `priceLarge` | Outfit SemiBold |
+| Títulos de seção | `heading2`, `heading3`, `title` | Nunito Sans SemiBold |
+| Textos e descrições | `body`, `bodySmall`, `caption` | Nunito Sans Regular |
+| Labels, botões e sobrancelha | `label`, `button`, `eyebrow` | Nunito Sans SemiBold |
+| Métricas | `numeric` | Outfit Medium |
 
-O token `fonts.medium` usa Inter Medium 500 onde a interface já pedia um peso intermediário (navegação, filtros, opções). Os papéis da tabela acima usam 400, 600 e 700. No React Native o peso vem do arquivo da família (`Inter-Bold`, `Inter-SemiBold`, `Inter-Regular`), porque a plataforma não sintetiza o peso com segurança.
-
-Evitar misturar outras famílias no corpo das telas. Não há fonte ilustrativa no projeto: a família é só Inter.
+`MGText` aplica `fontWeight: 'normal'` depois de `fontFamily`. O arquivo já é o peso certo; um peso numérico faria o navegador engrossar de novo.
 
 ### 4.2. Escala tipográfica proposta (React Native, pontos lógicos)
 
 | Estilo | Font size | Line height | Weight | Uso |
 |---|---:|---:|---|---|
-| `display` | 32 | 40 | 700 | Mensagem principal de onboarding |
-| `heading1` | 26 | 34 | 700 | Título de página |
-| `heading2` | 22 | 29 | 700 | Seção em destaque |
-| `heading3` | 18 | 26 | 600 | Título de card/seção |
+| `display` | 36 | 40 | 600 | Mensagem principal de abertura |
+| `heading1` | 34 | 38 | 600 | Título de página |
+| `heading2` | 24 | 29 | 600 | Seção em destaque |
+| `heading3` | 20 | 26 | 600 | Título de card/seção |
 | `title` | 16 | 24 | 600 | Item de lista e campo destacado |
-| `body` | 16 | 24 | 400 | Texto e formulários |
-| `bodySmall` | 14 | 21 | 400 | Subtítulo, detalhes auxiliares |
-| `label` | 14 | 20 | 600 | Etiquetas e botões compactos |
-| `caption` | 12 | 18 | 400 | Metadado não crítico |
-| `button` | 16 | 22 | 600 | CTA principal |
-| `numeric` | 24 | 30 | 700 | KPIs, valor total e métricas |
+| `body` | 16 | 25 | 400 | Texto e formulários |
+| `bodySmall` | 14 | 22 | 400 | Subtítulo, detalhes auxiliares |
+| `label` | 14 | 20 | 600 | Etiquetas |
+| `caption` | 12 | 16 | 400 | Metadado não crítico |
+| `eyebrow` | 12 | 16 | 600 | Rótulo curto em caixa-alta |
+| `button` | 16 | 22 | 600 | CTA |
+| `numeric` | 28 | 32 | 600 | KPIs e métricas |
+| `priceLarge` | 44 | 48 | 700 | Preço de destaque |
+| `logotype` | 30 | 36 | 700 | Nome da marca |
 
 **Regras:**
 
@@ -231,7 +236,7 @@ Evitar misturar outras famílias no corpo das telas. Não há fonte ilustrativa 
 ```ts
 export const spacing = {
   none: 0,
-  xxs: 2,
+  xxs: 4,
   xs: 4,
   sm: 8,
   md: 12,
@@ -255,10 +260,10 @@ export const spacing = {
 | Gap entre label e campo | 8 pt |
 | Distância entre campos | 16 pt |
 | Barra de ação inferior | 16 pt horizontal; respeitar safe area |
-| Altura visual de botão principal | 40 pt |
-| Altura visual de input | mínimo 40 pt |
+| Altura do botão padrão | 40 pt; outro tamanho só com `height` ou `minHeight` numérico |
+| Altura do campo de uma linha e do select fechado | 40 pt; área de texto mantém a altura pedida |
+| Alvo de botão só com ícone | 48 × 48 pt |
 | Ícone padrão | 20–24 pt |
-| Área tocável de `IconButton` | mínimo 48 × 48 pt |
 | Avatar de lista | 56–72 pt |
 | Avatar de destaque | 88–104 pt |
 | Tab bar | tamanho conforme biblioteca/plataforma, com safe-area garantida |
@@ -278,24 +283,27 @@ export const spacing = {
 ```ts
 export const radius = {
   none: 0,
-  xs: 6,
-  sm: 10,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  xxl: 24,
+  xs: 4,
+  sm: 4,
+  md: 4,
+  lg: 8,
+  xl: 12,
+  xxl: 12,
   pill: 999,
-} as const;
+  control: 4,
+} as const
 ```
 
-| Uso | Token |
-|---|---|
-| Campo e chip | `radius.md` ou `radius.pill` (chips) |
-| Botão geral | `radius.lg`; ação explícita de card segue cápsula de 7.6 |
-| Cards padrão | `radius.lg` |
-| Cards hero / info | `radius.xl` |
-| Modal | `radius.xxl` |
-| Avatar circular | `radius.pill` |
+Os únicos valores são 0, 4, 8, 12 e 999. `xs`, `sm`, `md` e `control` são o mesmo passo de 4. `xxl` é o mesmo passo de `xl`. `pill` só fecha círculo: avatar e interruptor.
+
+| Uso | Token | Valor |
+|---|---|---:|
+| Botão, campo de uma linha, select fechado e chip | `radius.control` | 4 |
+| Card padrão | `radius.lg` | 8 |
+| Card de destaque e modal | `radius.xl` | 12 |
+| Avatar e interruptor | `radius.pill` | 999 |
+
+Tela e componente leem o token. Um número escrito direto no `borderRadius` sai da escala.
 
 ### 5.4. Bordas e sombras
 
@@ -386,14 +394,14 @@ Cada componente compartilhado deve expor **variantes semânticas**, estado acess
 
 ### 7.2. Botões
 
-Para ações explícitas em cards, aplicar também o contrato de reuso de 7.6: geometria de Ver perfil em Quem atende, mantendo a variante semântica apropriada. Não copiar overrides locais para cada consumidor.
+Ação explícita de card usa o mesmo `MGButton`: altura 40, `radius.control` e a variante semântica da decisão. Não copiar overrides locais para cada consumidor.
 
 | Variante | Aparência | Uso |
 |---|---|---|
 | `primary` | `action.primary` / `onAction.primary` | Continuar, solicitar, confirmar, aceitar |
 | `secondary` | Outline `action.primaryOutline` | Voltar, reagendar, ação alternativa |
 | `tertiary` | Ghost, texto `action.primaryOutline` | Editar, ver mais, navegar |
-| `teal` | `action.secondary` / branco | Contato, suporte, ação operacional secundária |
+| `teal` | `action.secondary` / branco | Ação preenchida na cor do link |
 | `destructive` | Tratamento semântico de erro; confirmação quando necessário | Recusar, excluir, cancelar |
 
 Regras de implementação:
@@ -420,9 +428,9 @@ Regras de implementação:
 
 ### 7.4. Cards
 
-**Card padrão:** branco, radius 16, padding 16, borda leve ou sombra sutil.
+**Card padrão:** branco, `radius.lg` (8), padding `spacing.base` (16), borda leve ou sombra sutil.
 
-**Card de destaque:** superfície `pinkSubtle` ou `tealSubtle`, radius 20, texto `text.primary`.
+**Card de destaque:** superfície `pinkSubtle` ou `tealSubtle`, `radius.xl` (12), texto `text.primary`.
 
 **Card interativo:** feedback de toque, área touch completa e affordance (ícone `chevron-right`, pressed state) quando há navegação.
 
@@ -450,7 +458,7 @@ Regras de implementação:
 
 Decisão de 08/11/2026: Quem atende é a referência de estética/UX para as pílulas de filtros, ações explícitas de cards e os elementos reaproveitáveis identificados em [REUSE_AND_VALIDATION.md](REUSE_AND_VALIDATION.md). Esse documento integra este guia e define RUV-01..12 e RV-01..12.
 
-- Ações explícitas de cards seguem a geometria de Ver perfil: cápsula, altura mínima48 e padding horizontal16, com texto/cores/sombra pelos tokens. Primary/secondary/tertiary/destructive preservam a hierarquia, não se tornam todos primários.
+- Ações explícitas de cards usam `MGButton`: altura 40, `radius.control` e padding horizontal `spacing.base`. Primary, secondary, tertiary e destructive preservam a hierarquia. O alvo de 48 pt fica no botão que só tem ícone.
 - Pílulas compactas de filtros diferenciam aberto de aplicado e se ligam a um painel com comportamento definido. Compactar a aparência não diminui o alvo efetivo de toque do projeto.
 - Estender os componentes existentes; separar primitivas, composição e regras do domínio. Primeiro implementar/testar o contrato compartilhado, depois migrar os consumidores; não presumir que os nomes/props propostos já existem.
 - As tabelas deste guia incluem contratos planejados. Conferir sempre o código e os exports: por exemplo, MGButton ainda não expõe tamanho/forma e a variante declarada de MGChip ainda não altera sua implementação nesta revisão.
@@ -802,86 +810,86 @@ src/
 
 ```ts
 // src/design-system/tokens/colors.ts
+const action = '#C83359'
+const link = '#BB003E'
+
 export const palette = {
   brand: {
-    pink: '#D95786',
-    pinkLight: '#F6B5CB',
-    teal: '#167D83',
-    background: '#F9F8F6',
-    ink: '#253D42',
+    pink: action,
+    pinkLight: '#FFFAFB',
+    teal: link,
+    background: '#F3F4F6',
+    ink: '#492F35',
   },
   surface: {
     default: '#FFFFFF',
-    canvas: '#F9F8F6',
-    pinkSubtle: '#FCE5ED',
-    tealSubtle: '#E9F3F2',
+    canvas: '#F3F4F6',
+    pinkSubtle: '#FFFAFB',
+    tealSubtle: '#FFFAFB',
   },
   text: {
-    primary: '#253D42',
-    secondary: '#60767A',
+    primary: '#492F35',
+    secondary: '#60595B',
     inverse: '#FFFFFF',
+    money: '#007A77',
   },
   border: {
-    default: '#D9E0E1',
-    strong: '#60767A',
+    default: '#C3BEBF',
+    strong: '#776F71',
   },
   action: {
-    primary: '#C64878',
-    primaryPressed: '#B9406C',
-    primaryText: '#C62669',
-    primaryOutline: '#C62669',
-    secondary: '#167D83',
-    focus: '#167D83',
+    primary: action,
+    primaryPressed: '#A32947',
+    primaryText: link,
+    primaryOutline: link,
+    secondary: link,
+    focus: '#6E1830',
   },
   onAction: { primary: '#FFFFFF' },
   feedback: {
-    success: '#176B54',
-    successSurface: '#E5F5EF',
-    warning: '#A53B20',
-    warningSurface: '#FFF1E7',
-    error: '#B3261E',
-    errorSurface: '#FCE8E6',
-    info: '#167D83',
+    success: '#2A5817',
+    successSurface: '#D4E1CF',
+    warning: '#6E3D00',
+    warningSurface: '#EBD9C9',
+    error: '#8C3A22',
+    errorSurface: '#F4E8E4',
+    info: '#004F7C',
+    infoSurface: '#CDDFEF',
   },
   state: {
-    disabledSurface: '#E4E8E8',
-    disabledText: '#60767A',
+    disabledSurface: '#C3BEBF',
+    disabledText: '#8F888A',
   },
-  overlay: { scrim: 'rgba(37,61,66,0.48)' },
-} as const;
+  overlay: { scrim: 'rgba(16,12,13,0.48)' },
+} as const
 
 // src/design-system/tokens/spacing.ts
 export const spacing = {
-  none: 0, xxs: 2, xs: 4, sm: 8, md: 12, base: 16,
+  none: 0, xxs: 4, xs: 4, sm: 8, md: 12, base: 16,
   lg: 20, xl: 24, xxl: 32, xxxl: 40, huge: 48,
-} as const;
+} as const
 
 // src/design-system/tokens/radius.ts
 export const radius = {
-  none: 0, xs: 6, sm: 10, md: 12, lg: 16,
-  xl: 20, xxl: 24, pill: 999,
-} as const;
+  none: 0, xs: 4, sm: 4, md: 4, lg: 8,
+  xl: 12, xxl: 12, pill: 999, control: 4,
+} as const
 
 // src/design-system/tokens/typography.ts
-export const typography = {
-  display: { fontSize: 32, lineHeight: 40, fontWeight: '700' },
-  heading1: { fontSize: 26, lineHeight: 34, fontWeight: '700' },
-  heading2: { fontSize: 22, lineHeight: 29, fontWeight: '700' },
-  heading3: { fontSize: 18, lineHeight: 26, fontWeight: '600' },
-  title: { fontSize: 16, lineHeight: 24, fontWeight: '600' },
-  body: { fontSize: 16, lineHeight: 24, fontWeight: '400' },
-  bodySmall: { fontSize: 14, lineHeight: 21, fontWeight: '400' },
-  label: { fontSize: 14, lineHeight: 20, fontWeight: '600' },
-  caption: { fontSize: 12, lineHeight: 18, fontWeight: '400' },
+// A escala viva está em `textStyles`. Outfit nos papéis display; Nunito Sans no texto.
+export const textStyles = {
+  display: { fontSize: 36, lineHeight: 40, fontWeight: '600', face: 'display' },
+  heading1: { fontSize: 34, lineHeight: 38, fontWeight: '600', face: 'display' },
+  body: { fontSize: 16, lineHeight: 25, fontWeight: '400' },
   button: { fontSize: 16, lineHeight: 22, fontWeight: '600' },
-  numeric: { fontSize: 24, lineHeight: 30, fontWeight: '700' },
-} as const;
+  logotype: { fontSize: 30, lineHeight: 36, fontWeight: '700', face: 'display' },
+} as const
 
 // src/design-system/tokens/index.ts
 export { palette } from './colors';
 export { spacing } from './spacing';
 export { radius } from './radius';
-export { typography } from './typography';
+export { textStyles } from './typography';
 ```
 
 **TypeScript:** `fontWeight` inferido como `string` pode não satisfazer `TextStyle`. Use `as const`, tipos `TextStyle` ou helper tipado conforme a stack. A criação de `ThemeProvider` é opcional se o projeto já possuir provider equivalente.
@@ -891,7 +899,7 @@ export { typography } from './typography';
 ```tsx
 import React from 'react';
 import { ActivityIndicator, Pressable, Text, StyleSheet } from 'react-native';
-import { palette, radius, spacing, typography } from '../tokens';
+import { palette, radius, spacing, textStyles } from '../tokens';
 
 type Props = {
   label: string;
@@ -924,7 +932,7 @@ export function MGPrimaryButton({ label, onPress, disabled = false, loading = fa
 const styles = StyleSheet.create({
   button: {
     minHeight: 40,
-    borderRadius: radius.lg,
+    borderRadius: radius.control,
     paddingHorizontal: spacing.base,
     justifyContent: 'center',
     alignItems: 'center',
@@ -935,8 +943,8 @@ const styles = StyleSheet.create({
   pressed: { backgroundColor: palette.action.primaryPressed },
   disabled: { backgroundColor: palette.state.disabledSurface },
   label: {
-    fontSize: typography.button.fontSize,
-    lineHeight: typography.button.lineHeight,
+    fontSize: textStyles.button.fontSize,
+    lineHeight: textStyles.button.lineHeight,
     fontWeight: '600',
     color: palette.onAction.primary,
   },
@@ -1078,8 +1086,8 @@ Um ticket de tela só está pronto quando:
 
 **Não fazer:**
 
-- Criar outra paleta rosa/vinho ou substituir teal por verde genérico.
-- Copiar o rosa vivo `#D95786` diretamente como fundo de CTA com texto branco pequeno.
+- Inventar outro vermelho de ação ou pintar preço com `brand.teal`. Preço usa `text.money`.
+- Escrever `borderRadius` com número solto. Os raios saem de `radius.control`, `radius.lg`, `radius.xl` ou `radius.pill`.
 - Usar screenshots PNG como telas do app.
 - Duplicar botões/campos/cards com CSS-in-JS diferente por screen.
 - Exibir “Profissional verificado” sem aprovação real.

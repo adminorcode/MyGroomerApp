@@ -102,7 +102,7 @@ export default function DesignSystemShowcaseScreen({ navigation }: Props) {
         <MGButton label="Primário" onPress={() => undefined} />
         <MGButton label="Secundário" variant="secondary" onPress={() => undefined} />
         <MGButton label="Terciário" variant="tertiary" onPress={() => undefined} />
-        <MGButton label="Teal" variant="teal" onPress={() => undefined} />
+        <MGButton label="Link" variant="teal" onPress={() => undefined} />
         <MGButton label="Destrutivo" variant="destructive" onPress={() => undefined} />
         <MGButton label="Carregando" loading onPress={() => undefined} />
         <MGButton label="Desabilitado" disabled onPress={() => undefined} />
@@ -186,7 +186,7 @@ export default function DesignSystemShowcaseScreen({ navigation }: Props) {
         <View style={styles.row}>
           {[
             { name: 'Rosa', color: colors.brand.pink },
-            { name: 'Teal', color: colors.brand.teal },
+            { name: 'Link', color: colors.brand.teal },
             { name: 'Ação', color: colors.action.primary },
             { name: 'Fundo', color: colors.surface.canvas },
           ].map(({ name, color }) => <View key={name} style={{ gap: spacing.xs }}><View style={{ width: 56, height: 40, backgroundColor: color, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border.default }} /><MGText variant="caption">{name}</MGText></View>)}

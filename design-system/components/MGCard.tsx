@@ -8,7 +8,7 @@ type Props = {
   children: ReactNode
   variant?: MGCardVariant
   padding?: number
-  /** `card` = 16 pt; `hero` = 20 pt (destaque). Sem prop, segue a tonalidade (default 16, pink/teal 20). */
+  /** `card` = radius.lg (8); `hero` = radius.xl (12). Sem prop, default usa lg e pink/teal usa xl. */
   shape?: 'card' | 'hero'
   onPress?: () => void
   style?: ViewStyle
