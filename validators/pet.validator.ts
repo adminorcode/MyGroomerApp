@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { weightKgError } from '../utils/weight'
 
 const speciesValues = ['dog', 'cat', 'other'] as const
 const sizeValues = ['small', 'medium', 'large'] as const
@@ -31,6 +32,10 @@ export const petFormSchema = z.object({
         if (Number(trimmed) > 40) {
             ctx.addIssue({ code: 'custom', message: 'Informe uma idade de até 40 anos' })
         }
+    }),
+    weight_kg: z.string().superRefine((value, ctx) => {
+        const message = weightKgError(value)
+        if (message) ctx.addIssue({ code: 'custom', message })
     }),
     notes: z.string().trim().max(500, 'As observações devem ter no máximo 500 caracteres'),
     allergies: z.string().trim().max(500, 'A anamnese deve ter no máximo 500 caracteres'),

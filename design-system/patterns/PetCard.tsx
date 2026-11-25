@@ -1,5 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native'
+import { useAuthorizedImage } from '../../hooks/useAuthorizedImage'
 import { Pet, petSizeLabel, petSpeciesLabel } from '../../types/pet.types'
+import { formatWeightLabel } from '../../utils/weight'
 import MGAvatar from '../components/MGAvatar'
 import MGText from '../components/MGText'
 import { useMGTheme } from '../theme/useMGTheme'
@@ -13,14 +15,15 @@ type Props = {
 
 export default function PetCard({ pet, selected = false, onPress, onEdit }: Props) {
   const { colors, spacing, radius, elevation } = useMGTheme()
+  const storedPhoto = useAuthorizedImage(pet.photo_id ? `/pets/${pet.id}/photo?v=${pet.photo_id}` : null)
   const species = petSpeciesLabel(pet.species)
   const size = petSizeLabel(pet.size)
-  const photoLabel = pet.photo_url ? 'Com foto' : 'Sem foto'
-  const details = `${species} · ${size} · ${photoLabel}`
+  const photoLabel = pet.has_photo || pet.photo_url ? 'Com foto' : 'Sem foto'
+  const details = `${species} · ${size} · ${formatWeightLabel(pet.weight_kg)} · ${photoLabel}`
 
   const body = (
     <>
-      <MGAvatar name={pet.name} kind="pet" uri={pet.photo_url} size={64} />
+      <MGAvatar name={pet.name} kind="pet" uri={storedPhoto ?? pet.photo_url} size={64} />
       <View style={styles.content}>
         <MGText variant="title">{pet.name}</MGText>
         <MGText variant="bodySmall" color="secondary" style={{ marginTop: spacing.xs }}>

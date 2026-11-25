@@ -4,6 +4,7 @@ import PetCard from './PetCard'
 import { useTheme } from '../../context/ThemeContext'
 import { fonts, spacing, typography } from '../../constants/theme'
 import { Pet } from '../../types/pet.types'
+import { petUseBlock } from '../../utils/petReadiness'
 
 type Props = {
     pets?: Pet[]
@@ -13,6 +14,8 @@ type Props = {
     error?: string
     onSelect: (petId: string) => void
     onCreate: () => void
+    onEdit?: (petId: string) => void
+    photoRequired?: boolean
     onRetry: () => void
 }
 
@@ -24,7 +27,9 @@ export default function PetPicker({
     error,
     onSelect,
     onCreate,
+    onEdit,
     onRetry,
+    photoRequired = false,
 }: Props) {
     const { colors } = useTheme()
 
@@ -45,14 +50,21 @@ export default function PetPicker({
                 </View>
             ) : (
                 <View>
-                    {pets.map((pet) => (
-                        <PetCard
-                            key={pet.id}
-                            pet={pet}
-                            selected={pet.id === selectedPetId}
-                            onPress={() => onSelect(pet.id)}
-                        />
-                    ))}
+                    {pets.map((pet) => {
+                        const block = petUseBlock(pet, photoRequired)
+                        return (
+                            <View key={pet.id}>
+                                <PetCard
+                                    pet={pet}
+                                    selected={pet.id === selectedPetId && !block}
+                                    onPress={() => block ? onEdit?.(pet.id) : onSelect(pet.id)}
+                                />
+                                {block ? (
+                                    <Text style={[styles.error, { color: colors.error }]}>{block}</Text>
+                                ) : null}
+                            </View>
+                        )
+                    })}
                     <BoameBtn title="Cadastrar outro pet" variant="outline" onPress={onCreate} />
                 </View>
             )}

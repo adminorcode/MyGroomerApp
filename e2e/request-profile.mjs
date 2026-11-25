@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { attachPetPhoto, fillPetWeight } from './pet-form.mjs'
 import {
   evidenceFile,
   gateRoute,
@@ -9,6 +10,7 @@ import {
   loginProfessional,
   openLogin,
   openPage,
+  saveScreenshot,
   startRun,
 } from './harness.mjs'
 
@@ -19,7 +21,7 @@ const { Pool } = require(path.join(apiRoot, 'node_modules/pg'))
 const { hash } = require(path.join(apiRoot, 'node_modules/bcrypt'))
 
 const run = startRun({
-  command: 'node e2e/request-profile.mjs',
+  command: 'node --import ./e2e/preload.mjs e2e/request-profile.mjs',
   evidence: evidenceFile('026-pet-tutor-profile', 'request-profile.log'),
 })
 const { check, fail, finish } = run
@@ -126,10 +128,10 @@ async function setup() {
     [ids.offer, ids.provider, serviceId, ids.otherOffer, ids.otherProvider],
   )
   await pool.query(
-    `INSERT INTO pets(id, owner_id, name, species, breed, size, age_years, notes) VALUES
-     ($1,$2,'Luna','dog','SRD','small',3,'Gosta de carinho'),
-     ($3,$2,'Thor','dog','Poodle','medium',1,NULL),
-     ($4,$2,'Nina','cat','SRD','small',2,NULL)`,
+    `INSERT INTO pets(id, owner_id, name, species, breed, size, age_years, notes, weight_kg, photo_url) VALUES
+     ($1,$2,'Luna','dog','SRD','small',3,'Gosta de carinho',8.5,'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'),
+     ($3,$2,'Thor','dog','Poodle','medium',1,NULL,11,'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'),
+     ($4,$2,'Nina','cat','SRD','small',2,NULL,4.5,'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7')`,
     [ids.pet, ids.tutor, ids.barePet, ids.sparePet],
   )
   const location = 'Rua das Flores, 123'
@@ -216,6 +218,8 @@ async function execute() {
   await tutorPage.getByRole('textbox', { name: 'Raça' }).fill('SRD')
   await tutorPage.getByRole('radio', { name: 'Pequeno', exact: true }).click()
   await tutorPage.getByRole('textbox', { name: 'Idade (anos)' }).fill('2')
+  await fillPetWeight(tutorPage, '6,5')
+  await attachPetPhoto(tutorPage)
   await tutorPage.getByRole('textbox', { name: 'Alergias' }).fill('Frango')
   await tutorPage.getByRole('button', { name: 'Salvar e continuar', exact: true }).click()
   await tutorPage.getByText('Cadastre os pets para reutilizar nos agendamentos', { exact: true }).waitFor({ timeout: 15000 })
@@ -229,8 +233,13 @@ async function execute() {
   await openRequests(page)
   await page.getByRole('tab', { name: 'Aceitas', exact: true }).click()
   await page.getByRole('tab', { name: 'Pendentes', exact: true }).click()
+  check('AC-peso a lista mostra o peso gravado', await page.getByText('Peso: 8,5 kg', { exact: true }).first().isVisible())
+  await saveScreenshot(page, evidenceFile('026-pet-tutor-profile', 'ui-review/solicitacoes-peso.png'))
   await openFicha(page, 'Luna').click()
   await page.getByRole('heading', { name: 'Ficha do atendimento' }).waitFor({ timeout: 15000 })
+  await page.getByText('8,5 kg', { exact: true }).waitFor({ timeout: 15000 })
+  check('peso gravado aparece na ficha', await page.getByText('8,5 kg', { exact: true }).isVisible())
+  await saveScreenshot(page, evidenceFile('026-pet-tutor-profile', 'ui-review/ficha-peso.png'))
   const tutorText = await page.getByRole('group', { name: 'Dados do tutor' }).innerText()
   check('AC-02 tutor, telefone, endereço e atendimentos anteriores',
     await page.getByText('Tutor: Ana Souza', { exact: true }).last().isVisible()

@@ -20,6 +20,9 @@ export type RequestProfile = {
     age_years: number
     notes: string | null
     photo_url: string | null
+    photo_id: string | null
+    has_stored_photo: boolean
+    weight_kg: number | null
   } | null
   anamnesis: {
     allergies: string | null

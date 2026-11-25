@@ -22,7 +22,7 @@ async function loadAuthorizedImage(path: string, token: string): Promise<LoadedI
   }
 
   const { File, Paths } = await import('expo-file-system')
-  const suffix = path.split('/').pop() ?? 'photo'
+  const suffix = (path.split('?')[0]?.split('/').pop() ?? 'photo').replace(/[^\w.-]/g, '') || 'photo'
   const target = new File(Paths.cache, `mg-${suffix}-${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`)
   const download = await File.downloadFileAsync(`${API_BASE_URL}${path}`, target, {
     headers: { Authorization: `Bearer ${token}` },

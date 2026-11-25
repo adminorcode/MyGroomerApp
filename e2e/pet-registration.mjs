@@ -1,4 +1,5 @@
 import { evidenceFile, fillServiceAddress, launchBrowser, openCoverageFilters, openPage, openLogin, openRegistrationWelcome, startRun } from './harness.mjs'
+import { attachPetPhoto, fillPetWeight } from './pet-form.mjs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -15,7 +16,7 @@ let localDatabase = false
 const password = 'LocalTest#2026'
 const petName = `Nina ${Date.now()}`
 const session = startRun({
-  command: 'node e2e/pet-registration.mjs',
+  command: 'node --import ./e2e/preload.mjs e2e/pet-registration.mjs',
   evidence: evidenceFile('004-pet-registration', 'pet-registration.log'),
 })
 const { check } = session
@@ -94,7 +95,7 @@ async function run() {
   check('AC-04 lista vazia', true)
 
   await page.getByRole('button', { name: 'Cadastrar pet', exact: true }).click()
-  await page.getByText('A foto é opcional. O pet pode ser salvo sem ela.').waitFor()
+  await page.getByText('A foto é obrigatória. Selecione um JPG ou PNG.').waitFor()
   await page.getByRole('button', { name: 'Salvar e continuar' }).click()
   await page.getByText('Informe o nome do pet').waitFor()
   let body = await textOf(page)
@@ -105,7 +106,8 @@ async function run() {
       body.includes('Informe a raça') &&
       body.includes('Informe o porte') &&
       body.includes('Informe a idade em anos') &&
-      body.includes('A foto é opcional. O pet pode ser salvo sem ela.'),
+      body.includes('Informe o peso em kg') &&
+      body.includes('Informe a foto do pet'),
   )
 
   await page.getByRole('textbox', { name: 'Nome' }).fill(petName)
@@ -123,6 +125,38 @@ async function run() {
   check('AC-03 idade acima do limite', true)
 
   await page.getByRole('textbox', { name: 'Idade (anos)' }).fill('4')
+  await fillPetWeight(page, 'abc')
+  check('AC-peso mascara recusa texto', await page.getByRole('textbox', { name: 'Peso (kg)', exact: true }).inputValue() === '')
+  await fillPetWeight(page, '0')
+  await page.getByRole('button', { name: 'Salvar e continuar' }).click()
+  await page.getByText('O peso precisa ser maior que zero').waitFor()
+  check('AC-peso zero recusado', true)
+  await fillPetWeight(page, '8.5')
+  const weight = page.getByRole('textbox', { name: 'Peso (kg)', exact: true })
+  check('AC-peso mascara decimal', await weight.inputValue() === '8,5')
+  await fillPetWeight(page, '12,5')
+  await weight.evaluate((el) => { el.focus(); el.setSelectionRange(3, 3); el.dispatchEvent(new Event('select', { bubbles: true })) })
+  await weight.press('Backspace')
+  await page.waitForFunction(() => document.querySelector('input[aria-label="Peso (kg)"]')?.value === '1,5')
+  check('AC-peso Backspace na vírgula apaga o dígito', await weight.inputValue() === '1,5')
+  check('AC-peso cursor permanece no dígito', await weight.evaluate(el => el.selectionStart) === 1)
+  await fillPetWeight(page, '12,5')
+  await weight.evaluate((el) => { el.focus(); el.setSelectionRange(2, 2); el.dispatchEvent(new Event('select', { bubbles: true })) })
+  await weight.press('Delete')
+  await page.waitForFunction(() => document.querySelector('input[aria-label="Peso (kg)"]')?.value === '12')
+  check('AC-peso Delete na vírgula apaga o dígito seguinte', await weight.inputValue() === '12')
+  await fillPetWeight(page, '0,5')
+  await weight.evaluate((el) => { el.focus(); el.setSelectionRange(1, 1); el.dispatchEvent(new Event('select', { bubbles: true })) })
+  await weight.press('Backspace')
+  await page.waitForFunction(() => document.querySelector('input[aria-label="Peso (kg)"]')?.value === '')
+  check('AC-peso Backspace no zero antes da vírgula limpa o campo', await weight.inputValue() === '')
+  await fillPetWeight(page, '8')
+  await weight.evaluate((el) => { el.focus(); el.setSelectionRange(0, 0); el.dispatchEvent(new Event('select', { bubbles: true })) })
+  await weight.press('0')
+  await page.waitForFunction(() => document.querySelector('input[aria-label="Peso (kg)"]')?.value === '8')
+  check('AC-peso zero à esquerda permanece no início', await weight.inputValue() === '8' && await weight.evaluate(el => el.selectionStart) === 0)
+  await fillPetWeight(page, '8,5')
+  await attachPetPhoto(page)
   await page.getByRole('textbox', { name: 'Observações' }).fill('Medo de secador')
   const save = page.getByRole('button', { name: 'Salvar e continuar' })
   const busyWait = page.getByRole('button', { name: 'Salvar e continuar', disabled: true }).waitFor({ timeout: 8000 }).then(() => true).catch(() => false)
@@ -131,7 +165,7 @@ async function run() {
   check('AC-01 carregamento ao salvar', sawBusy)
   await page.getByText(petName, { exact: true }).waitFor({ timeout: 15000 })
   body = await textOf(page)
-  check('AC-01 e AC-02 pet salvo sem foto', body.includes(petName) && body.includes('Cão') && body.includes('Médio') && body.includes('Sem foto') && !body.includes('Salvar e continuar'))
+  check('AC-01 e AC-02 pet salvo com peso e foto', body.includes(petName) && body.includes('Cão') && body.includes('Médio') && body.includes('8,5 kg') && body.includes('Com foto') && !body.includes('Salvar e continuar'))
 
   await page.getByRole('button', { name: `Editar ${petName}` }).click()
   await page.getByRole('textbox', { name: 'Observações' }).waitFor()
@@ -143,7 +177,7 @@ async function run() {
   await page.getByText('Início', { exact: true }).click()
   await page.getByText('Banho e Tosa', { exact: true }).click()
   await openCoverageFilters(page)
-  await page.getByText('Banho', { exact: true }).click()
+  await page.getByRole('radiogroup', { name: 'Serviço' }).getByRole('radio', { name: 'Banho', exact: true }).click()
   await page.getByText('Escolha um endereço para ver quem atende.').first().waitFor()
   await fillServiceAddress(page, 'Avenida Paulista, São Paulo')
   await page.getByRole('button', { name: /Groomer de Teste/ }).click()
@@ -156,6 +190,23 @@ async function run() {
     'AC-04 pet salvo selecionado sem novo cadastro',
     await page.getByLabel(`Pet: ${petName}`, { exact: true }).count() === 1 && await page.getByRole('button', { name: 'Trocar pet', exact: true }).count() === 1 && !body.includes('Salvar e continuar'),
   )
+  await page.route('**/api/v1/pets', async (route) => {
+    if (route.request().method() !== 'GET') return route.continue()
+    const response = await route.fetch()
+    const json = await response.json()
+    if (Array.isArray(json.data)) for (const pet of json.data) pet.weight_kg = null
+    await route.fulfill({ response, json })
+  })
+  await page.getByRole('button', { name: 'Voltar', exact: true }).click()
+  await page.getByRole('button', { name: 'Agendar serviço' }).click()
+  await page.getByText('Escolha um horário', { exact: true }).waitFor({ timeout: 15000 })
+  await page.getByRole('radio', { name: new RegExp(petName) }).click()
+  await page.getByRole('textbox', { name: 'Peso (kg)', exact: true }).waitFor()
+  await page.getByRole('button', { name: 'Salvar', exact: true }).click()
+  await page.getByText('Complete o pet', { exact: true }).waitFor({ timeout: 15000 })
+  body = await textOf(page)
+  check('AC-peso pet desatualizado pede o peso em vez de agenda vazia', body.includes('Informe o peso para usar este pet.') && !body.includes('Nenhum horário disponível'))
+  await page.unroute('**/api/v1/pets')
   await page.context().close()
 
   const wide = await openPage(browser, { viewport: 'desktop' })

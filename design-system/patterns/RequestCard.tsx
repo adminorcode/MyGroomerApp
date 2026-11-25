@@ -9,6 +9,8 @@ import MGDivider from '../components/MGDivider'
 import MGIcon from '../components/MGIcon'
 import MGText from '../components/MGText'
 import { useMGTheme } from '../theme/useMGTheme'
+import { useAuthorizedImage } from '../../hooks/useAuthorizedImage'
+import { formatWeightLabel } from '../../utils/weight'
 
 const STATUS: Record<RequestGroup, { label: string, tone: MGBadgeTone }> = {
   pending: { label: 'Pendente', tone: 'pending' },
@@ -19,6 +21,8 @@ const STATUS: Record<RequestGroup, { label: string, tone: MGBadgeTone }> = {
 export type RequestCardProps = {
   petName?: string | null
   petPhotoUrl?: string | null
+  petPhotoPath?: string | null
+  petWeightKg?: number | null
   customerName?: string | null
   serviceName?: string | null
   scheduledAtLabel: string
@@ -37,6 +41,8 @@ export type RequestCardProps = {
 export default function RequestCard({
   petName,
   petPhotoUrl,
+  petPhotoPath,
+  petWeightKg,
   customerName,
   serviceName,
   scheduledAtLabel,
@@ -50,6 +56,8 @@ export default function RequestCard({
   onOpen,
 }: RequestCardProps) {
   const { colors, spacing } = useMGTheme()
+  const storedPhoto = useAuthorizedImage(petPhotoPath)
+  const photoUri = storedPhoto ?? petPhotoUrl
   const pet = petName?.trim() || 'Pet não informado'
   const tutor = customerName?.trim() || 'Tutor não informado'
   const service = serviceName?.trim() || 'Serviço'
@@ -59,7 +67,7 @@ export default function RequestCard({
 
   const summary = (
         <View style={[styles.top, { gap: spacing.md }]}>
-          <MGAvatar uri={petPhotoUrl} name={pet} kind="pet" size={64} />
+          <MGAvatar uri={photoUri} name={pet} kind="pet" size={64} />
           <View style={[styles.details, { gap: spacing.xs }]}>
             <View style={[styles.titleRow, { gap: spacing.sm }]}>
               <MGText variant="title" numberOfLines={2} style={{ flex: 1 }}>{pet}</MGText>
@@ -67,6 +75,7 @@ export default function RequestCard({
               {onOpen ? <MGIcon name="chevron-right" size={20} color={colors.text.secondary} /> : null}
             </View>
             <MGText variant="bodySmall" color="secondary" numberOfLines={1}>Tutor: {tutor}</MGText>
+            <MGText variant="bodySmall" color="secondary" numberOfLines={1}>Peso: {formatWeightLabel(petWeightKg)}</MGText>
             <View style={[styles.line, { gap: spacing.sm }]}>
               <MGIcon name="scissors" size={16} color={colors.action.primary} />
               <MGText variant="bodySmall" style={styles.lineText}>{service}</MGText>

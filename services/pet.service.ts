@@ -1,6 +1,14 @@
 import { Pet } from '../types/pet.types'
 import { PetFormValues } from '../validators/pet.validator'
+import { parseWeightKg } from '../utils/weight'
 import api from './api'
+
+export type PetPhotoBody = {
+    name: string
+    mime_type: 'image/jpeg' | 'image/png'
+    size: number
+    base64: string
+}
 
 export type SavePetBody = {
     name: string
@@ -8,6 +16,8 @@ export type SavePetBody = {
     breed: string
     size: Pet['size']
     age_years: number
+    weight_kg: number
+    photo?: PetPhotoBody
     notes: string | null
     allergies: string | null
     medications: string | null
@@ -17,12 +27,14 @@ export type SavePetBody = {
     special_care: string | null
 }
 
-export const toPetBody = (values: PetFormValues): SavePetBody => ({
+export const toPetBody = (values: PetFormValues, photo?: PetPhotoBody | null): SavePetBody => ({
     name: values.name.trim(),
     species: values.species,
     breed: values.breed.trim(),
     size: values.size,
     age_years: Number(values.age_years),
+    weight_kg: parseWeightKg(values.weight_kg) ?? 0,
+    ...(photo ? { photo } : {}),
     notes: values.notes.trim() || null,
     allergies: values.allergies.trim() || null,
     medications: values.medications.trim() || null,

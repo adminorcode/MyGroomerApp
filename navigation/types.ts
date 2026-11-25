@@ -32,7 +32,7 @@ export type HomeStackParamList = {
     Home: undefined
     TutorSearch: { serviceId?: string, categoryId?: string } | undefined
     GroomerProfile: { providerServiceId: string } & ChosenServiceAddress
-    BookService: { providerServiceId: string, petId?: string } & ChosenServiceAddress
+    BookService: { providerServiceId: string, petId?: string, petStamp?: number } & ChosenServiceAddress
     BookingRequest: { providerServiceId: string, petId: string, scheduledAt: string } & ChosenServiceAddress
     PetForm: { petId?: string, providerServiceId?: string } & ChosenServiceAddress
 }
