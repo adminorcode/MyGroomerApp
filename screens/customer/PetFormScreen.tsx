@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
-import { ActivityIndicator, StyleSheet, View } from 'react-native'
+import { useEffect, useRef, useState } from 'react'
+import { ActivityIndicator, Image, StyleSheet, View } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
 import axios from 'axios'
@@ -10,7 +10,11 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { AppAlert } from '../../utils/alert'
 import { HomeStackParamList, ProfileStackParamList } from '../../navigation/types'
 import { useCreatePet, usePet, useUpdatePet } from '../../hooks/usePets'
-import { toPetBody } from '../../services/pet.service'
+import { PetPhotoBody, toPetBody } from '../../services/pet.service'
+import { pickPublicPhoto } from '../provider/publicProfilePhoto'
+import { useRuntime } from '../../context/RuntimeContext'
+import { useAuthorizedImage } from '../../hooks/useAuthorizedImage'
+import { editWeightKg, formatWeightKg } from '../../utils/weight'
 import { petFormSchema, PetFormInput, PetFormValues } from '../../validators/pet.validator'
 import { PET_SIZES, PET_SPECIES, PetSize, PetSpecies } from '../../types/pet.types'
 import ScreenContainer from '../../components/shared/ScreenContainer'
@@ -39,6 +43,7 @@ const emptyValues: PetFormInput = {
     breed: '',
     size: '',
     age_years: '',
+    weight_kg: '',
     notes: '',
     allergies: '',
     medications: '',
@@ -51,12 +56,17 @@ const emptyValues: PetFormInput = {
 export default function PetFormScreen({ navigation, route }: Props) {
     const params = (route.params ?? {}) as PetFormParams
     const petId = params.petId
+    const runtime = useRuntime()
+    const photoRequired = runtime.petPhotoRequired
     const providerServiceId = params.providerServiceId
     const { colors } = useMGTheme()
     const existing = usePet(petId)
     const { mutateAsync: createPet, isPending: isCreating } = useCreatePet()
     const { mutateAsync: updatePet, isPending: isUpdating } = useUpdatePet()
     const isPending = isCreating || isUpdating
+    const [photo, setPhoto] = useState<PetPhotoBody | null>(null)
+    const [photoError, setPhotoError] = useState<string | null>(null)
+    const storedPhoto = useAuthorizedImage(existing.data?.photo_id ? `/pets/${existing.data.id}/photo?v=${existing.data.photo_id}` : null)
     const { control, handleSubmit, reset, setError, formState: { errors } } = useForm<PetFormInput, unknown, PetFormValues>({
         resolver: zodResolver(petFormSchema),
         defaultValues: emptyValues,
@@ -70,6 +80,7 @@ export default function PetFormScreen({ navigation, route }: Props) {
             breed: existing.data.breed,
             size: existing.data.size,
             age_years: String(existing.data.age_years),
+            weight_kg: formatWeightKg(existing.data.weight_kg),
             notes: existing.data.notes ?? '',
             allergies: existing.data.allergies ?? '',
             medications: existing.data.medications ?? '',
@@ -84,9 +95,25 @@ export default function PetFormScreen({ navigation, route }: Props) {
         })
     }, [existing.data, reset])
 
-    const onSubmit = async (values: PetFormValues) => {
+    const pickPhoto = async () => {
         try {
-            const body = toPetBody(values)
+            const picked = await pickPublicPhoto()
+            if (!picked) return
+            setPhoto(picked)
+            setPhotoError(null)
+        } catch (error) {
+            setPhotoError(getErrorMessage(error))
+        }
+    }
+
+    const onSubmit = async (values: PetFormValues) => {
+        const keptPhoto = Boolean(photo || existing.data?.has_photo || existing.data?.photo_url)
+        if (photoRequired && !keptPhoto) {
+            setPhotoError('Informe a foto do pet')
+            return
+        }
+        try {
+            const body = toPetBody(values, photo)
             const saved = petId
                 ? await updatePet({ petId, pet: body })
                 : await createPet(body)
@@ -95,6 +122,7 @@ export default function PetFormScreen({ navigation, route }: Props) {
                 ;(navigation as StackNavigationProp<HomeStackParamList, 'PetForm'>).navigate('BookService', {
                     providerServiceId,
                     petId: savedId,
+                    petStamp: Date.now(),
                     customerLocation: params.customerLocation,
                     customerLatitude: params.customerLatitude,
                     customerLongitude: params.customerLongitude,
@@ -105,6 +133,10 @@ export default function PetFormScreen({ navigation, route }: Props) {
         } catch (error) {
             if (axios.isAxiosError(error) && Array.isArray(error.response?.data?.errors)) {
                 for (const issue of error.response.data.errors) {
+                    if (issue.field === 'photo' || String(issue.field).startsWith('photo.')) {
+                        setPhotoError(issue.message)
+                        continue
+                    }
                     if (issue.field) setError(issue.field as keyof PetFormValues, { message: issue.message })
                 }
                 return
@@ -147,12 +179,29 @@ export default function PetFormScreen({ navigation, route }: Props) {
                     showBackButton
                     onBack={() => navigation.goBack()}
                 />
-                <View style={[styles.photo, { backgroundColor: colors.surface.default, borderColor: colors.border.default }]}>
-                    <MGArtwork name="pet-placeholder" width={52} height={52} />
+                <View style={[styles.photo, { backgroundColor: colors.surface.pinkSubtle, borderColor: photoError ? colors.feedback.error : colors.border.default }]}>
+                    {photo ? (
+                        <Image accessibilityLabel="Foto selecionada" source={{ uri: `data:${photo.mime_type};base64,${photo.base64}` }} style={styles.photoImage} />
+                    ) : storedPhoto || existing.data?.photo_url ? (
+                        <Image accessibilityLabel="Foto atual" source={{ uri: storedPhoto ?? existing.data?.photo_url ?? undefined }} style={styles.photoImage} />
+                    ) : (
+                        <MGArtwork name="pet-placeholder" width={52} height={52} />
+                    )}
                 </View>
                 <MGText variant="bodySmall" color="secondary" style={styles.photoNote}>
-                    A foto é opcional. O pet pode ser salvo sem ela.
+                    {photoRequired
+                        ? 'A foto é obrigatória. Selecione um JPG ou PNG.'
+                        : 'A foto é opcional neste ambiente de desenvolvimento.'}
                 </MGText>
+                {photo ? <MGText variant="caption" style={styles.photoNote}>{photo.name}</MGText> : null}
+                <MGButton
+                    label={photo || storedPhoto || existing.data?.photo_url ? 'Trocar foto' : 'Adicionar foto'}
+                    variant="secondary"
+                    onPress={() => { void pickPhoto() }}
+                />
+                {photoError ? (
+                    <MGText variant="caption" color="error" accessibilityRole="alert" style={styles.photoNote}>{photoError}</MGText>
+                ) : null}
                 <Controller
                     control={control}
                     name="name"
@@ -216,6 +265,13 @@ export default function PetFormScreen({ navigation, route }: Props) {
                 />
                 <Controller
                     control={control}
+                    name="weight_kg"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                        <WeightField value={value} onChange={onChange} onBlur={onBlur} error={errors.weight_kg?.message} />
+                    )}
+                />
+                <Controller
+                    control={control}
                     name="notes"
                     render={({ field: { onChange, onBlur, value } }) => (
                         <MGTextField
@@ -234,7 +290,11 @@ export default function PetFormScreen({ navigation, route }: Props) {
                 <MGButton
                     label={petId ? 'Salvar' : 'Salvar e continuar'}
                     loading={isPending}
-                    onPress={handleSubmit(onSubmit)}
+                    onPress={() => {
+                        const keptPhoto = Boolean(photo || existing.data?.has_photo || existing.data?.photo_url)
+                        if (photoRequired && !keptPhoto) setPhotoError('Informe a foto do pet')
+                        void handleSubmit(onSubmit)()
+                    }}
                 />
             </KeyboardAwareScrollView>
         </ScreenContainer>
@@ -254,6 +314,32 @@ const VACCINATION = [
     { value: 'no', label: 'Não está em dia' },
     { value: 'unknown', label: 'Não informado' },
 ] as const
+
+function WeightField({ value, onChange, onBlur, error }: { value: string, onChange: (value: string) => void, onBlur: () => void, error?: string }) {
+    const [selection, setSelection] = useState<{ start: number, end: number }>()
+    const lastKey = useRef('')
+    return (
+        <MGTextField
+            label="Peso (kg)"
+            accessibilityLabel="Peso (kg)"
+            placeholder="0,0"
+            value={value}
+            keyboardType="decimal-pad"
+            autoCorrect={false}
+            selection={selection}
+            onKeyPress={event => { lastKey.current = event.nativeEvent.key }}
+            onSelectionChange={event => setSelection(event.nativeEvent.selection)}
+            onChangeText={next => {
+                const edited = editWeightKg(value ?? '', next, lastKey.current === 'Delete')
+                lastKey.current = ''
+                onChange(edited.value)
+                setSelection({ start: edited.caret, end: edited.caret })
+            }}
+            onBlur={onBlur}
+            error={error}
+        />
+    )
+}
 
 function HealthSection({
     control,
@@ -339,6 +425,7 @@ function ChoiceField({
                                     label={option.label}
                                     accessibilityLabel={option.label}
                                     selected={value === option.value}
+                                    invalid={Boolean(error)}
                                     onPress={() => onChange(option.value)}
                                 />
                             </View>
@@ -372,6 +459,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         alignSelf: 'center',
+        overflow: 'hidden',
+    },
+    photoImage: {
+        width: PHOTO_SIZE,
+        height: PHOTO_SIZE,
     },
     photoNote: {
         textAlign: 'center',

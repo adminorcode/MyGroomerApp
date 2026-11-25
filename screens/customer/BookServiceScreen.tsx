@@ -17,6 +17,8 @@ import { motion, motionEasing } from '../../design-system/tokens'
 import { getBookingSlots } from '../../services/booking.service'
 import { formatMoney } from '../../utils/formatMoney'
 import { getErrorMessage } from '../../utils/error'
+import { useRuntime } from '../../context/RuntimeContext'
+import { petUseBlock } from '../../utils/petReadiness'
 import { addBookingDays, bookingClock, bookingDateLabel, bookingToday } from './bookingSlotsModel'
 
 type Props = {
@@ -26,7 +28,9 @@ type Props = {
 
 export default function BookServiceScreen({ navigation, route }: Props) {
   const { colors, spacing, radius } = useMGTheme()
-  const { providerServiceId, petId: requestedPetId } = route.params
+  const runtime = useRuntime()
+  const { providerServiceId, petId: requestedPetId, petStamp } = route.params
+  const appliedPetKey = useRef('')
   const carriedLocation = route.params.customerLocation?.trim() ?? ''
   const carriedLatitude = route.params.customerLatitude
   const carriedLongitude = route.params.customerLongitude
@@ -39,26 +43,35 @@ export default function BookServiceScreen({ navigation, route }: Props) {
   const [firstDate, setFirstDate] = useState(bookingToday)
   const [selection, setSelection] = useState<{ key: string, iso: string } | null>(null)
   const selectedPet = pets.data?.find(pet => pet.id === selectedPetId)
+  const selectedBlock = selectedPet ? petUseBlock(selectedPet, runtime.petPhotoRequired) : null
   const key = `${providerServiceId}:${selectedPet?.id ?? ''}:${date}`
   const slots = useQuery({
     queryKey: ['booking-slots', providerServiceId, selectedPet?.id, date],
     queryFn: ({ signal }) => getBookingSlots(providerServiceId, selectedPet!.id, date, signal),
-    enabled: !!selectedPet && !!service.data && !pets.isError,
+    enabled: !!selectedPet && !selectedBlock && !!service.data && !pets.isError,
     retry: false, staleTime: 0, refetchOnMount: 'always',
   })
   const selectedSlot = selection?.key === key && !slots.isFetching && !slots.isError
     && slots.data?.slots.includes(selection.iso) ? selection.iso : undefined
 
   useEffect(() => {
-    if (requestedPetId) { setSelectedPetId(requestedPetId); setSelection(null); setChoosingPet(false) }
-  }, [requestedPetId])
+    if (!requestedPetId) return
+    const key = `${requestedPetId}:${petStamp ?? ''}`
+    if (appliedPetKey.current === key || pets.isFetching) return
+    const pet = pets.data?.find(item => item.id === requestedPetId)
+    if (!pet && pets.isLoading) return
+    appliedPetKey.current = key
+    setSelectedPetId(requestedPetId)
+    setSelection(null)
+    setChoosingPet(Boolean(!pet || petUseBlock(pet, runtime.petPhotoRequired)))
+  }, [requestedPetId, petStamp, pets.data, pets.isFetching, pets.isLoading, runtime.petPhotoRequired])
 
   const changeDate = (next: string) => {
     setDate(next); setSelection(null)
   }
 
   const openRequest = () => {
-    if (!selectedPet || !selectedSlot || !location.trim()) return
+    if (!selectedPet || selectedBlock || !selectedSlot || !location.trim()) return
     navigation.navigate('BookingRequest', {
       providerServiceId,
       petId: selectedPet.id,
@@ -101,7 +114,7 @@ export default function BookServiceScreen({ navigation, route }: Props) {
               {bookingDateLabel(date, { day: '2-digit', month: '2-digit' })} às {bookingClock(selectedSlot)} · {selectedPet?.name}
             </MGText> : null}
             <MGButton label="Revisar solicitação" onPress={openRequest}
-              disabled={!selectedSlot || !location.trim() || pets.isError || !selectedPet} />
+              disabled={!selectedSlot || !location.trim() || pets.isError || !selectedPet || !!selectedBlock} />
           </View>
         )}>
         {header}
@@ -124,7 +137,15 @@ export default function BookServiceScreen({ navigation, route }: Props) {
         </MGCard>
         {choosingPet || !selectedPet || pets.isError ? <View style={{ marginTop: spacing.lg }}>
           <PetPicker pets={pets.data} isLoading={pets.isLoading} isError={pets.isError} selectedPetId={selectedPetId}
+            photoRequired={runtime.petPhotoRequired}
             onSelect={petId => { setSelectedPetId(petId); setChoosingPet(false); setSelection(null) }}
+            onEdit={petId => navigation.navigate('PetForm', {
+              petId,
+              providerServiceId,
+              customerLocation: carriedLocation || undefined,
+              customerLatitude: carriedLatitude,
+              customerLongitude: carriedLongitude,
+            })}
             onCreate={() => navigation.navigate('PetForm', {
               providerServiceId,
               customerLocation: carriedLocation || undefined,
@@ -158,6 +179,22 @@ export default function BookServiceScreen({ navigation, route }: Props) {
         <View style={{ gap: spacing.md, marginBottom: spacing.lg }}>
           {!selectedPet || pets.isError ? (
             <><MGText variant="heading3">Horários disponíveis</MGText><MGText color="secondary">Escolha um pet para consultar os horários para o porte dele.</MGText></>
+          ) : pets.isFetching && selectedBlock ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+              <ActivityIndicator size="small" color={colors.action.primary} accessibilityLabel="Atualizando o pet" /><MGText>Atualizando o pet…</MGText>
+            </View>
+          ) : selectedBlock ? (
+            <>
+              <MGText variant="heading3">Complete o pet</MGText>
+              <MGText color="secondary">{selectedBlock}</MGText>
+              <MGButton label="Editar pet" variant="secondary" fullWidth={false} onPress={() => navigation.navigate('PetForm', {
+                petId: selectedPet.id,
+                providerServiceId,
+                customerLocation: carriedLocation || undefined,
+                customerLatitude: carriedLatitude,
+                customerLongitude: carriedLongitude,
+              })} />
+            </>
           ) : slots.isFetching ? (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
               <ActivityIndicator size="small" color={colors.action.primary} accessibilityLabel="Buscando horários" /><MGText>Buscando horários…</MGText>

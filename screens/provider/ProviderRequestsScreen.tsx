@@ -104,6 +104,9 @@ export default function ProviderRequestsScreen({ navigation }: Props) {
                 key={item.id}
                 group={item.group}
                 petName={item.pet_name}
+                petWeightKg={item.pet_weight_kg}
+                petPhotoUrl={item.pet_photo_url}
+                petPhotoPath={item.pet_photo_id ? `/providers/requests/${item.id}/pet-photo?v=${item.pet_photo_id}` : null}
                 customerName={item.customer_name}
                 serviceName={item.service_name}
                 scheduledAtLabel={requestDateLabel(item.scheduled_at)}

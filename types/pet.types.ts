@@ -23,6 +23,9 @@ export type Pet = {
     age_years: number
     notes: string | null
     photo_url: string | null
+    photo_id: string | null
+    has_photo: boolean
+    weight_kg: number | null
     allergies: string | null
     medications: string | null
     health_conditions: string | null

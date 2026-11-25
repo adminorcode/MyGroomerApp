@@ -7,12 +7,14 @@ type RuntimeCapabilities = {
   localTest: boolean
   googleAuthEnabled: boolean
   paymentsEnabled: boolean
+  petPhotoRequired: boolean
 }
 
 const RuntimeContext = createContext<RuntimeCapabilities>({
   localTest: false,
   googleAuthEnabled: false,
   paymentsEnabled: false,
+  petPhotoRequired: false,
 })
 
 export const useRuntime = () => useContext(RuntimeContext)

@@ -21,6 +21,8 @@ type Props = {
   /** Ocupa a largura do pai. Usado quando os chips dividem a linha. */
   fill?: boolean
   accessibilityRole?: 'button' | 'radio'
+  /** Contorno de erro quando o grupo ainda não tem escolha válida. */
+  invalid?: boolean
 }
 
 /**
@@ -38,6 +40,7 @@ export default function MGChip({
   density = 'regular',
   fill = false,
   accessibilityRole = 'button',
+  invalid = false,
 }: Props) {
   const { colors, spacing, radius, fonts, textStyles } = useMGTheme()
   const reduceMotion = useReduceMotion()
@@ -117,9 +120,9 @@ export default function MGChip({
         paddingHorizontal: density === 'compact' ? spacing.sm : spacing.md,
         paddingVertical: 0,
         borderRadius: radius.control,
-        borderWidth: 1,
+        borderWidth: invalid && !selected ? 2 : 1,
         backgroundColor: fillColor,
-        borderColor: edge,
+        borderColor: invalid && !selected && !disabled ? colors.feedback.error : edge,
         overflow: 'hidden',
       }]}
     >

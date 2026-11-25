@@ -24,9 +24,7 @@ export const useCreatePet = () => {
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: (pet: SavePetBody) => createPet(pet),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['pets'] })
-        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['pets'] }),
     })
 }
 
@@ -34,8 +32,6 @@ export const useUpdatePet = () => {
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: ({ petId, pet }: { petId: string, pet: SavePetBody }) => updatePet(petId, pet),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['pets'] })
-        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['pets'] }),
     })
 }

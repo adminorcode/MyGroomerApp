@@ -1,7 +1,7 @@
 import { ReactNode, useState } from 'react'
 import { ActivityIndicator, Pressable, StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
-import { Bone, Cake, Dog, FileText, LucideIcon, MapPin, Phone } from 'lucide-react-native'
+import { Bone, Cake, Dog, FileText, LucideIcon, MapPin, Phone, Scale } from 'lucide-react-native'
 import { RouteProp } from '@react-navigation/core'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { ProviderRequestsStackParamList } from '../../navigation/types'
@@ -18,12 +18,14 @@ import {
   MGTextField,
 } from '../../design-system/components'
 import MGAvatar from '../../design-system/components/MGAvatar'
+import { useAuthorizedImage } from '../../hooks/useAuthorizedImage'
 import { useRequestProfile, useSaveAnamnesisNote } from '../../hooks/useRequestProfile'
 import { useMGTheme } from '../../design-system/theme/useMGTheme'
 import { motion } from '../../design-system/tokens'
 import { petSizeLabel, petSpeciesLabel } from '../../types/pet.types'
 import { RequestProfile } from '../../types/requestProfile.types'
 import { formatMoney } from '../../utils/formatMoney'
+import { formatWeightLabel } from '../../utils/weight'
 import { formatDisplayPhone } from '../../utils/formatPhone'
 import { getErrorMessage } from '../../utils/error'
 import { requestDateLabel } from './requestsModel'
@@ -112,6 +114,9 @@ export default function ProviderRequestProfileScreen({ navigation, route }: Prop
   const { bookingId } = route.params
   const { colors, spacing } = useMGTheme()
   const profile = useRequestProfile(bookingId)
+  const storedPetPhoto = useAuthorizedImage(
+    profile.data?.pet?.photo_id ? `/providers/requests/${bookingId}/pet-photo?v=${profile.data.pet.photo_id}` : null,
+  )
   const saveNote = useSaveAnamnesisNote(bookingId)
   const [draft, setDraft] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
@@ -194,7 +199,7 @@ export default function ProviderRequestProfileScreen({ navigation, route }: Prop
       <MGCard variant="pink" padding={spacing.md} style={{ marginBottom: spacing.md }}>
         <View style={[styles.hero, { gap: spacing.md }]}>
           <View style={[styles.avatarRing, { backgroundColor: colors.surface.default }]}>
-            <MGAvatar uri={pet?.photo_url} name={petName} kind="pet" size={72} />
+            <MGAvatar uri={storedPetPhoto ?? pet?.photo_url} name={petName} kind="pet" size={72} />
           </View>
           <View style={{ flex: 1, gap: spacing.xs }}>
             <View style={styles.heroTitle}>
@@ -232,6 +237,7 @@ export default function ProviderRequestProfileScreen({ navigation, route }: Prop
             <ProfileFact icon={Dog} label="Porte" value={petSizeLabel(pet.size)} style={styles.factGridItem} />
             <ProfileFact icon={Bone} label="Raça" value={pet.breed.trim() || 'Não informada'} style={styles.factGridItem} />
             <ProfileFact icon={Cake} label="Idade" value={formatAge(pet.age_years)} style={styles.factGridItem} />
+            <ProfileFact icon={Scale} label="Peso" value={formatWeightLabel(pet.weight_kg)} style={styles.factGridItem} />
             <ProfileFact icon={FileText} label="Observações" value={pet.notes?.trim() || 'Nenhuma observação'} style={styles.factWide} />
           </View>
         ) : <MGText variant="body">Pet não informado</MGText>}

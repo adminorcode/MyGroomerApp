@@ -1,4 +1,5 @@
 import { evidenceFile, gateRoute, launchBrowser, loginTutor, openPage, saveScreenshot, startRun } from './harness.mjs'
+import { attachPetPhoto, fillPetWeight } from './pet-form.mjs'
 
 const plan = '027-mistura-acolhedora-editorial'
 const run = startRun({
@@ -8,10 +9,10 @@ const run = startRun({
 const { check } = run
 const shot = (page, name) => saveScreenshot(page, evidenceFile(plan, `ui-review/${name}.png`))
 
-const CTA_PINK = 'rgb(198, 72, 120)' // action.primary (R1, CMP-06)
-const TEXT_PINK = 'rgb(198, 38, 105)' // action.primaryOutline (CMP-06 contorno)
-const PINK_SUBTLE = 'rgb(252, 229, 237)' // surface.pinkSubtle (R2, CMP-12)
-const ERROR = 'rgb(179, 38, 30)' // feedback.error
+const CTA_PINK = 'rgb(200, 51, 89)' // action.primary (R1, CMP-06)
+const TEXT_PINK = 'rgb(187, 0, 62)' // action.primaryOutline (CMP-06 contorno)
+const PINK_SUBTLE = 'rgb(255, 250, 251)' // surface.pinkSubtle (R2, CMP-12)
+const ERROR = 'rgb(140, 58, 34)' // feedback.error
 const WHITE = 'rgb(255, 255, 255)'
 
 // Telas empilhadas permanecem no DOM: só conta o elemento visível.
@@ -59,7 +60,7 @@ try {
 
   // --- Cadastro: estado inicial (tela 14) ---
   await page.getByRole('button', { name: 'Cadastrar pet', exact: true }).click()
-  await page.getByText('A foto é opcional. O pet pode ser salvo sem ela.').waitFor({ timeout: 15000 })
+  await page.getByText('A foto é obrigatória. Selecione um JPG ou PNG.').waitFor({ timeout: 15000 })
   const placeholder = await visibleOf(page.getByTestId('artwork-pet-placeholder'))
   const frame = placeholder ? await placeholder.locator('xpath=..').evaluate(el => ({ background: getComputedStyle(el).backgroundColor, radius: getComputedStyle(el).borderTopLeftRadius, width: getComputedStyle(el).width, height: getComputedStyle(el).height })) : null
   const pawSvg = placeholder ? await placeholder.locator('svg').count() : 0
@@ -101,12 +102,17 @@ try {
   // --- Preenchimento: chips selecionados em rosa (CMP-06, R1) ---
   await page.getByRole('textbox', { name: 'Nome', exact: true }).fill(petName)
   const nameField = await styleOf(page.getByRole('textbox', { name: 'Nome', exact: true }))
-  check('AC-07 campo com raio 12 e altura 40', nameField.radius === '12px' && nameField.minHeight === '40px', `${nameField.radius} ${nameField.minHeight}`)
+  check('AC-07 campo com raio do controle e altura 40', nameField.radius === '4px' && nameField.minHeight === '40px', `${nameField.radius} ${nameField.minHeight}`)
 
   await dog.click()
-  const dogSelected = await styleOf(page.getByRole('radio', { name: 'Cão', exact: true, checked: true }))
-  const dogLabel = await styleOf(page.getByRole('radio', { name: 'Cão', exact: true, checked: true }).getByText('Cão', { exact: true }))
-  check('CMP-06 espécie selecionada em action.primary com texto branco', dogSelected.background === CTA_PINK && dogLabel.color === WHITE, dogSelected.background)
+  const dogChip = page.getByRole('radio', { name: 'Cão', exact: true, checked: true })
+  let dogLabel = await styleOf(dogChip.getByText('Cão', { exact: true }))
+  for (let attempt = 0; attempt < 10 && dogLabel.color !== WHITE; attempt += 1) {
+    await page.waitForTimeout(50)
+    dogLabel = await styleOf(dogChip.getByText('Cão', { exact: true }))
+  }
+  const dogSelected = await styleOf(dogChip)
+  check('CMP-06 espécie selecionada em action.primary com texto branco', dogSelected.background === CTA_PINK && dogLabel.color === WHITE, `${dogSelected.background} ${dogLabel.color}`)
   check('AC-08 espécie selecionada anuncia estado marcado', dogSelected.checked === 'true')
 
   await page.getByRole('radio', { name: 'Médio', exact: true }).click()
@@ -115,6 +121,8 @@ try {
 
   await page.getByRole('textbox', { name: 'Raça', exact: true }).fill('SRD')
   await page.getByRole('textbox', { name: 'Idade (anos)', exact: true }).fill('3')
+  await fillPetWeight(page, '8,5')
+  await attachPetPhoto(page)
   await page.getByRole('button', { name: 'Em dia', exact: true }).click()
   const vaccine = await styleOf(page.getByRole('button', { name: 'Em dia', exact: true }))
   check('CMP-06 vacinação selecionada em action.primary', vaccine.background === CTA_PINK, vaccine.background)
@@ -132,6 +140,8 @@ try {
   await page.getByText('Cadastre os pets para reutilizar nos agendamentos').waitFor({ timeout: 15000 })
   await page.getByRole('button', { name: `Editar ${petName}`, exact: true }).waitFor({ timeout: 15000 })
   check('AC-08 sucesso volta à lista com o pet salvo', true)
+  await page.getByRole('button', { name: `Editar ${petName}`, exact: true }).locator('xpath=..').locator('img').waitFor({ timeout: 15000 })
+  await shot(page, 'lista-com-peso')
 
   // --- Edição (tela 14): carregando e dados preservados ---
   petGate.delayMs = 1500
@@ -161,7 +171,7 @@ try {
   await loginTutor(wide)
   await openPets(wide)
   await wide.getByRole('button', { name: 'Cadastrar pet', exact: true }).click()
-  await wide.getByText('A foto é opcional. O pet pode ser salvo sem ela.').waitFor({ timeout: 15000 })
+  await wide.getByText('A foto é obrigatória. Selecione um JPG ou PNG.').waitFor({ timeout: 15000 })
   const wideSave = await styleOf(wide.getByRole('button', { name: 'Salvar e continuar', exact: true }))
   check('R1 CTA do cadastro em desktop é action.primary', wideSave.background === CTA_PINK, wideSave.background)
   await shot(wide, 'cadastro-1440')

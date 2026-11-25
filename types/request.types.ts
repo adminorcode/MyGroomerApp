@@ -12,6 +12,10 @@ export type IncomingRequest = {
   scheduled_at: string
   customer_location: string | null
   price: number | null
+  pet_weight_kg: number | null
+  pet_photo_url: string | null
+  pet_photo_id: string | null
+  pet_has_stored_photo: boolean
 }
 
 export type IncomingRequestsPayload = {
